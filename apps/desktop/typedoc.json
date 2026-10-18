@@ -1,0 +1,30 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/test-setup.ts",
+    "**/test-utils.tsx",
+    "src/main.tsx",
+    "src/editor/**"
+  ],
+  "tsconfig": "tsconfig.json",
+  "emit": "none",
+  "treatWarningsAsErrors": true,
+  "validation": {
+    "notExported": false,
+    "invalidLink": true,
+    "notDocumented": true
+  },
+  "requiredToBeDocumented": [
+    "Function",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Variable",
+    "Method",
+    "Accessor"
+  ]
+}

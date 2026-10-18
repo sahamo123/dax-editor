@@ -2,6 +2,10 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreBinaries": ["ffmpeg", "ffprobe"],
   "workspaces": {
+    "apps/desktop": {
+      "entry": ["e2e/*.spec.ts"],
+      "project": ["src/**/*.{ts,tsx}", "e2e/**/*.{ts,mts,mjs}"]
+    },
     "packages/core": {
       "project": ["src/**/*.ts"]
     },
