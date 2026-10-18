@@ -2,7 +2,7 @@
 
 import { newId } from "./ids.js";
 import { shiftOverlaysForDelete } from "./overlays.js";
-import type { Asset, Clip, Project, Range, Transcript } from "./schema.js";
+import type { Asset, Clip, Fit, Project, Range, Transcript } from "./schema.js";
 
 /**
  * Pure edit operations. Each takes a project and returns a new one; the input
@@ -29,6 +29,7 @@ export function emptyProject(
       width: opts.width ?? 1920,
       height: opts.height ?? 1080,
       fps: opts.fps ?? 30,
+      fit: "contain",
       tracks: [{ id: MAIN_TRACK, kind: "video", clips: [] }],
       overlays: [],
     },
@@ -287,7 +288,7 @@ export const FORMAT_PRESETS = {
 /** Change the output size and/or frame rate. Sizes must be even numbers (H.264 requires it). */
 export function setFormat(
   p: Project,
-  fmt: { width?: number; height?: number; fps?: number },
+  fmt: { width?: number; height?: number; fps?: number; fit?: Fit },
 ): Project {
   const width = fmt.width ?? p.timeline.width;
   const height = fmt.height ?? p.timeline.height;
@@ -301,5 +302,6 @@ export function setFormat(
   next.timeline.width = width;
   next.timeline.height = height;
   next.timeline.fps = fps;
+  if (fmt.fit) next.timeline.fit = fmt.fit;
   return next;
 }

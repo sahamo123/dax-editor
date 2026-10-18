@@ -6,6 +6,7 @@ import { existsSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { type ZodTypeAny, z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { captionLines, hasCaptionSource, setCaptions } from "./captions.js";
 import { isPathInside } from "./connector.js";
 import {
   analyzeAudio,
@@ -25,7 +26,15 @@ import {
 } from "./overlays.js";
 import { getPreset, OVERLAY_PRESETS, overlayFromPreset } from "./presets.js";
 import { exportProject } from "./render.js";
-import { ANIMATIONS, type Asset, type OverlayStyle, POSITIONS, type Project } from "./schema.js";
+import {
+  ANIMATIONS,
+  type Asset,
+  CAPTION_STYLES,
+  FITS,
+  type OverlayStyle,
+  POSITIONS,
+  type Project,
+} from "./schema.js";
 import type { HistorySource, Session } from "./session.js";
 import {
   addAsset,
@@ -168,6 +177,9 @@ function describeProject(p: Project) {
       fadeIn: c.fadeIn,
       fadeOut: c.fadeOut,
     })),
+    captions: p.timeline.captions
+      ? { ...p.timeline.captions, lines: captionLines(p, p.timeline.captions.maxWords).length }
+      : null,
     overlays: p.timeline.overlays.map((o) => ({
       id: o.id,
       start: Number(o.start.toFixed(3)),
@@ -383,7 +395,7 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "set_format",
     description:
-      "Change the output format: a preset (landscape-1080p, landscape-720p, portrait-1080x1920 for Shorts/Reels/TikTok, square-1080, portrait-4x5 for Instagram) or an explicit width, height and frame rate. Footage that does not match is fitted inside the frame with bars.",
+      "Change the output format: a preset (landscape-1080p, landscape-720p, portrait-1080x1920 for Shorts/Reels/TikTok, square-1080, portrait-4x5 for Instagram) or an explicit width, height and frame rate. `fit` says what to do when the footage is a different shape: contain (bars), cover (crop to fill), blur (blurred copy behind, popular for vertical). Choosing a portrait or square preset without a fit uses blur.",
     schema: z.object({
       preset: z
         .enum(
@@ -396,16 +408,63 @@ export const COMMANDS: readonly CommandDef[] = [
       width: z.number().int().min(16).max(8192).optional(),
       height: z.number().int().min(16).max(8192).optional(),
       fps: z.number().min(1).max(120).optional(),
+      fit: z.enum(FITS).optional(),
     }),
     async run(ctx, a) {
       const fmtArgs = a.preset ? { ...FORMAT_PRESETS[a.preset] } : {};
-      const size: { width?: number; height?: number; fps?: number } = { ...fmtArgs };
+      const size: { width?: number; height?: number; fps?: number; fit?: (typeof FITS)[number] } = {
+        ...fmtArgs,
+      };
+      const tall = a.preset !== undefined && !a.preset.startsWith("landscape");
+      if (a.fit !== undefined) size.fit = a.fit;
+      else if (tall && ctx.session.project.timeline.fit === "contain") size.fit = "blur";
+      else if (a.preset?.startsWith("landscape")) size.fit = "contain";
       if (a.width !== undefined) size.width = a.width;
       if (a.height !== undefined) size.height = a.height;
       if (a.fps !== undefined) size.fps = a.fps;
       await edit(ctx, "Change format", (p) => setFormat(p, size));
       const t = ctx.session.project.timeline;
-      return { summary: `Format is now ${t.width}x${t.height} at ${t.fps} fps.` };
+      return { summary: `Format is now ${t.width}x${t.height} at ${t.fps} fps (fit: ${t.fit}).` };
+    },
+  }),
+
+  define({
+    name: "set_captions",
+    description:
+      "Turn on captions made from the speech transcript (they follow every cut automatically), change their look, or turn them off. Needs a transcript: run transcribe first. Styles: classic (white text on a dark box, bottom), bold-pop (big uppercase words with the spoken word highlighted, centre; popular for Shorts/Reels/TikTok), minimal (plain small text).",
+    schema: z.object({
+      enabled: z.boolean().default(true).describe("false turns captions off"),
+      style: z.enum(CAPTION_STYLES).optional(),
+      maxWords: z.number().int().min(1).max(8).optional().describe("Most words on screen at once"),
+      uppercase: z.boolean().optional(),
+      color: z
+        .string()
+        .regex(/^#[0-9a-fA-F]{6}$/)
+        .optional()
+        .describe("Text colour as #RRGGBB"),
+      highlight: z
+        .string()
+        .regex(/^#[0-9a-fA-F]{6}$/)
+        .optional()
+        .describe("Colour of the spoken word (bold-pop)"),
+      position: z.enum(["bottom", "center", "top"]).optional(),
+    }),
+    async run(ctx, a) {
+      if (!a.enabled) {
+        await edit(ctx, "Turn captions off", (p) => setCaptions(p, null));
+        return { summary: "Captions are off." };
+      }
+      if (!hasCaptionSource(ctx.session.project)) {
+        throw new CommandError(
+          "No transcript on the timeline yet, so there is nothing to caption. Run transcribe first.",
+        );
+      }
+      const { enabled: _enabled, ...patch } = a;
+      const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
+      await edit(ctx, "Set captions", (p) => setCaptions(p, clean));
+      const c = ctx.session.project.timeline.captions;
+      const n = captionLines(ctx.session.project, c?.maxWords ?? 4).length;
+      return { summary: `Captions on (${c?.style}), ${n} line(s).` };
     },
   }),
 

@@ -2,10 +2,11 @@
 
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildAss, captionLines } from "./captions.js";
 import { ffmpegBin, run, runFfmpeg } from "./exec.js";
-import { type FontFiles, overlayFilters, type TextFile } from "./overlay-filters.js";
+import { type FontFiles, filterPath, overlayFilters, type TextFile } from "./overlay-filters.js";
 import type { Clip, Project } from "./schema.js";
 import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
 
@@ -132,11 +133,26 @@ export function buildRenderPlan(
         : "") +
       (joinIn ? `,afade=t=in:st=0:d=${n(JOIN_FADE)}` : "") +
       (joinOut ? `,afade=t=out:st=${n(dur - JOIN_FADE)}:d=${n(JOIN_FADE)}` : "");
-    filters.push(
-      `[${k}:v]trim=start=${n(c.in)}:end=${n(c.out)},setpts=PTS-STARTPTS,` +
-        `scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
-        `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${fps},format=yuv420p${vFade}[v${i}]`,
-    );
+    const head = `[${k}:v]trim=start=${n(c.in)}:end=${n(c.out)},setpts=PTS-STARTPTS`;
+    const tail = `setsar=1,fps=${fps},format=yuv420p${vFade}[v${i}]`;
+    if (project.timeline.fit === "cover") {
+      filters.push(
+        `${head},scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},${tail}`,
+      );
+    } else if (project.timeline.fit === "blur") {
+      // A blurred, enlarged copy fills the frame; the sharp picture sits centred on top of it.
+      filters.push(
+        `${head},split=2[bg${i}][fg${i}]`,
+        `[bg${i}]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=24:3[bb${i}]`,
+        `[fg${i}]scale=${W}:${H}:force_original_aspect_ratio=decrease[ff${i}]`,
+        `[bb${i}][ff${i}]overlay=(W-w)/2:(H-h)/2,${tail}`,
+      );
+    } else {
+      filters.push(
+        `${head},scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
+          `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,${tail}`,
+      );
+    }
     if (asset.hasAudio) {
       filters.push(
         `[${k}:a]atrim=start=${n(c.in)}:end=${n(c.out)},asetpts=PTS-STARTPTS,` +
@@ -152,21 +168,32 @@ export function buildRenderPlan(
 
   filters.push(`${concatPads.join("")}concat=n=${clips.length}:v=1:a=1[outv][outa]`);
 
-  // Overlays are drawn after the join so their times are timeline times.
+  // Overlays and captions are drawn after the join so their times are timeline times.
   const files: TextFile[] = [];
   let videoLabel = "[outv]";
   const overlays = [...project.timeline.overlays].sort(
     (a, b) => a.lane - b.lane || a.start - b.start,
   );
-  if (overlays.length > 0) {
-    if (!ctx.workDir)
-      throw new Error("buildRenderPlan needs ctx.workDir when the project has overlays");
+  const captions = project.timeline.captions;
+  const lines = captions ? captionLines(project, captions.maxWords) : [];
+  if (overlays.length > 0 || lines.length > 0) {
+    if (!ctx.workDir) {
+      throw new Error(
+        "buildRenderPlan needs ctx.workDir when the project has overlays or captions",
+      );
+    }
     const fonts = ctx.fonts ?? bundledFonts();
     const chain: string[] = [];
     for (const o of overlays) {
       const built = overlayFilters(o, W, H, fonts, ctx.workDir);
       chain.push(...built.filters);
       files.push(...built.files);
+    }
+    if (captions && lines.length > 0) {
+      const assPath = `${ctx.workDir.replace(/\\/g, "/")}/captions.ass`;
+      files.push({ path: assPath, content: buildAss(lines, captions, W, H) });
+      const fontsDir = dirname(fonts.regular);
+      chain.push(`subtitles=filename=${filterPath(assPath)}:fontsdir=${filterPath(fontsDir)}`);
     }
     filters.push(`[outv]${chain.join(",")}[final]`);
     videoLabel = "[final]";

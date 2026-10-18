@@ -1,3 +1,4 @@
+export * from "./captions.js";
 export * from "./commands.js";
 export * from "./connector.js";
 export * from "./cuts.js";
