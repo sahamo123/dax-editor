@@ -232,6 +232,75 @@ describe("LocalModelManager", () => {
     expect(s.server.lastError).toMatch(/failed to load model/);
   });
 
+  it("falls back to the CPU runtime when the GPU build fails to start", async () => {
+    // Runtimes are real archives here so the manager has two different builds to choose from.
+    const { makeTarGz, makeZip } = await import("./test-helpers/archives.js");
+    const { runtimeAssetCandidates } = await import("./runtime.js");
+    const tag = "b7";
+    const binary = process.platform === "win32" ? "llama-server.exe" : "llama-server";
+    const asset = (backend: "cpu" | "vulkan") => {
+      const name = runtimeAssetCandidates(tag, {
+        platform: process.platform,
+        arch: process.arch,
+        backend,
+      })[0] as string;
+      const entries = [
+        { path: `${tag}/` },
+        { path: `${tag}/${binary}`, content: backend, mode: 0o755 },
+      ];
+      return [
+        name,
+        name.endsWith(".zip")
+          ? makeZip(entries.slice(1).map((e) => ({ ...e, path: binary })))
+          : makeTarGz(entries),
+      ] as const;
+    };
+    const assets = new Map([asset("cpu"), asset("vulkan")]);
+    for (const [name, data] of assets) files.set(`/dl/${name}`, data);
+    const api = [
+      {
+        tag_name: tag,
+        assets: [...assets].map(([name, data]) => ({
+          name,
+          size: data.length,
+          browser_download_url: `${files.url}/dl/${name}`,
+        })),
+      },
+    ];
+    files.set("/repos/ggml-org/llama.cpp/releases", Buffer.from(JSON.stringify(api)));
+    const gpuMachine = {
+      ...hardware(16),
+      gpus: [{ kind: "nvidia" as const, discrete: true, vramBytes: 12 * 1024 ** 3 }],
+    };
+    const failOnce = join(dir, "fail-once");
+    const used: string[] = [];
+    const m = make({
+      detect: async () => gpuMachine,
+      runtime: { apiBase: files.url, downloadBase: files.url },
+      // The "binary" is a data file; the launcher runs the fake server and we record which build was asked for.
+      server: {
+        launcher: { command: process.execPath, args: [fake] },
+        healthPollMs: 25,
+        env: { FAKE_LOAD_MS: "50", FAKE_FAIL_ONCE_FILE: failOnce },
+      },
+    });
+    m.onEvent((e) => {
+      if (e.type === "server-state" && e.state === "starting") used.push("start");
+    });
+    await m.install("tiny-a");
+    const handle = await m.start();
+    expect(handle.baseUrl).toBeTruthy();
+    expect(used).toHaveLength(2); // first attempt (vulkan) failed, second (cpu) worked
+    const status = await m.status();
+    expect(status.runtime.backend).toBe("vulkan"); // status reports the preferred build
+    expect(existsSync(join(dir, "runtime"))).toBe(true);
+    const { readdirSync } = await import("node:fs");
+    expect(readdirSync(join(dir, "runtime")).sort()).toEqual([
+      `${tag}-${process.platform}-${process.arch}-cpu`,
+      `${tag}-${process.platform}-${process.arch}-vulkan`,
+    ]);
+  });
+
   it("uninstalls one model or everything, stopping the server first", async () => {
     const m = make();
     await m.install("tiny-a");

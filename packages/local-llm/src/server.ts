@@ -63,7 +63,7 @@ export interface LlamaServerOptions {
   extraArgs?: string[];
   /** Extra environment variables for the process. */
   env?: Record<string, string>;
-  /** Maximum time to wait for the model to load, ms. Default 180000. */
+  /** Maximum time to wait for the model to load, ms. Default 300000. */
   healthTimeoutMs?: number;
   /** Time between health checks, ms. Default 200. */
   healthPollMs?: number;
@@ -245,7 +245,6 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
     ];
     if (o.threads !== undefined) args.push("-t", String(o.threads));
     if (o.gpuLayers !== undefined) args.push("-ngl", String(o.gpuLayers));
-    if (this.key !== undefined) args.push("--api-key", this.key);
     args.push(...(o.extraArgs ?? []));
 
     const base = o.launcher
@@ -259,7 +258,12 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
     this.setState("starting");
     this.startedAtMs = Date.now();
 
-    const env: NodeJS.ProcessEnv = { ...process.env, ...o.env };
+    // The key travels in the environment, not on the command line, where any local user could
+    // read it from the process list. llama-server reads LLAMA_API_KEY. A key inherited from our
+    // own environment is dropped so it cannot silently override the one we generated.
+    const { LLAMA_API_KEY: _inherited, ...inheritedEnv } = { ...process.env, ...o.env };
+    const env: NodeJS.ProcessEnv =
+      this.key === undefined ? inheritedEnv : { ...inheritedEnv, LLAMA_API_KEY: this.key };
     // The release archives keep their shared libraries next to the executable.
     const libDir = dirname(o.binaryPath);
     if (process.platform === "linux") {
@@ -354,7 +358,7 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
   private async waitHealthy(child: ChildProcess, signal?: AbortSignal): Promise<void> {
     const o = this.options;
     const doFetch = o.fetch ?? fetch;
-    const deadline = Date.now() + (o.healthTimeoutMs ?? 180_000);
+    const deadline = Date.now() + (o.healthTimeoutMs ?? 300_000);
     const url = `http://127.0.0.1:${this.chosenPort}/health`;
     for (;;) {
       if (signal?.aborted) throw new ServerError("Starting the server was cancelled");
@@ -373,7 +377,7 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
       }
       if (Date.now() > deadline) {
         throw new ServerError(
-          `llama-server was not healthy after ${o.healthTimeoutMs ?? 180_000} ms`,
+          `llama-server was not healthy after ${o.healthTimeoutMs ?? 300_000} ms`,
         );
       }
       await new Promise((r) => setTimeout(r, o.healthPollMs ?? 200));

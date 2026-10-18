@@ -26,6 +26,7 @@ import {
   type EnsureRuntimeOptions,
   ensureRuntime,
   findInstalledRuntime,
+  type RuntimeBackend,
   type RuntimeInfo,
   recommendBackend,
   removeRuntime,
@@ -243,9 +244,10 @@ export class LocalModelManager {
   private async resolveRuntime(
     onProgress?: EnsureRuntimeOptions["onProgress"],
     signal?: AbortSignal,
+    forceBackend?: RuntimeBackend,
   ): Promise<RuntimeInfo> {
     const hardware = await this.hw();
-    const backend = this.o.runtime?.target?.backend ?? recommendBackend(hardware);
+    const backend = forceBackend ?? this.o.runtime?.target?.backend ?? recommendBackend(hardware);
     return await ensureRuntime({
       dataDir: this.o.dataDir,
       ...this.o.runtime,
@@ -392,32 +394,44 @@ export class LocalModelManager {
     const entry = getModel(id, this.catalog);
     const installed = await this.readInstalled(id);
     if (!installed) throw new LocalLlmError(`Model ${id} is not installed; call install() first`);
-    const runtime = await this.resolveRuntime(undefined, options.signal);
-
-    const server = new LlamaServer({
-      contextSize: options.contextSize ?? entry.contextTokens,
-      pidFile: join(this.o.dataDir, "run", "llama-server.pid.json"),
-      ...this.o.server,
-      binaryPath: runtime.binaryPath,
-      modelPath: installed.path,
-    });
-    server.on("state", (state) => this.emit({ type: "server-state", state }));
-    server.on("crash", (info) => {
-      this.lastError = `llama-server exited unexpectedly (code ${info.code}, signal ${info.signal}). Last output:\n${info.logTail.slice(-10).join("\n")}`;
-      this.emit({ type: "server-crashed", error: this.lastError });
-    });
-    this.server = server;
-    this.serverModelId = id;
+    let runtime = await this.resolveRuntime(undefined, options.signal);
     this.lastError = undefined;
-    try {
-      await server.start(options.signal);
-    } catch (error) {
-      this.lastError = error instanceof Error ? error.message : String(error);
-      this.server = undefined;
-      this.serverModelId = undefined;
-      throw error;
+    for (;;) {
+      const server = new LlamaServer({
+        contextSize: options.contextSize ?? entry.contextTokens,
+        pidFile: join(this.o.dataDir, "run", "llama-server.pid.json"),
+        ...this.o.server,
+        binaryPath: runtime.binaryPath,
+        modelPath: installed.path,
+      });
+      server.on("state", (state) => this.emit({ type: "server-state", state }));
+      server.on("crash", (info) => {
+        this.lastError = `llama-server exited unexpectedly (code ${info.code}, signal ${info.signal}). Last output:\n${info.logTail.slice(-10).join("\n")}`;
+        this.emit({ type: "server-crashed", error: this.lastError });
+      });
+      this.server = server;
+      this.serverModelId = id;
+      try {
+        await server.start(options.signal);
+        return this.handle(server, id);
+      } catch (error) {
+        this.lastError = error instanceof Error ? error.message : String(error);
+        this.server = undefined;
+        this.serverModelId = undefined;
+        // A GPU build can fail on machines whose Vulkan driver is missing or broken. The CPU
+        // build always works, so retry once with it instead of leaving the user without a model.
+        if (
+          runtime.backend === "vulkan" &&
+          runtime.source !== "override" &&
+          !options.signal?.aborted
+        ) {
+          runtime = await this.resolveRuntime(undefined, options.signal, "cpu");
+          this.lastError = undefined;
+          continue;
+        }
+        throw error;
+      }
     }
-    return this.handle(server, id);
   }
 
   private handle(server: LlamaServer, modelId: string): ServerHandle {

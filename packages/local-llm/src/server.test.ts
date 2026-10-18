@@ -95,7 +95,9 @@ describe("LlamaServer", () => {
     expect(at("-np")).toBe("1");
     expect(args).toContain("--jinja");
     expect(args).toContain("--no-webui");
-    expect(at("--api-key")).toBe(server.apiKey);
+    // The key must not appear on the command line (visible to other local users).
+    expect(args).not.toContain("--api-key");
+    expect(args.join(" ")).not.toContain(server.apiKey as string);
     expect(server.apiKey).toMatch(/^[0-9a-f]{48}$/);
   });
 

@@ -8,7 +8,7 @@
  *   DAX_LIVE_TESTS=1 DAX_LLAMA_SERVER=/path/to/llama-server \
  *     node dist/scripts/live-bench.js --model gemma-4-e2b-qat-q4_0 --data-dir /tmp/dax-live
  */
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { request as httpRequest } from "node:http";
 import os from "node:os";
 import { parseArgs } from "node:util";
@@ -21,6 +21,7 @@ const { values } = parseArgs({
     "data-dir": { type: "string", default: ".dax-cache/local-llm" },
     runs: { type: "string", default: "5" },
     ctx: { type: "string" },
+    threads: { type: "string" },
     "max-tokens": { type: "string", default: "300" },
     out: { type: "string" },
     "no-install": { type: "boolean", default: false },
@@ -219,6 +220,19 @@ async function chat(baseUrl: string, apiKey: string | undefined, model: string, 
   };
 }
 
+/** CPU seconds (user + system) the process has used so far; Linux only, `undefined` elsewhere. */
+async function cpuSeconds(pid: number | undefined): Promise<number | undefined> {
+  if (pid === undefined || process.platform !== "linux") return undefined;
+  try {
+    const stat = await readFile(`/proc/${pid}/stat`, "utf8");
+    // Fields after the parenthesised command name; utime and stime are fields 14 and 15 (clock ticks).
+    const fields = stat.slice(stat.lastIndexOf(")") + 2).split(" ");
+    return (Number(fields[11]) + Number(fields[12])) / 100;
+  } catch {
+    return undefined;
+  }
+}
+
 function matches(expected: Record<string, unknown>, actual: unknown): boolean {
   if (typeof actual !== "object" || actual === null) return Object.keys(expected).length === 0;
   const a = actual as Record<string, unknown>;
@@ -227,7 +241,10 @@ function matches(expected: Record<string, unknown>, actual: unknown): boolean {
   );
 }
 
-const manager = new LocalModelManager({ dataDir: values["data-dir"] as string });
+const manager = new LocalModelManager({
+  dataDir: values["data-dir"] as string,
+  ...(values.threads ? { server: { threads: Number(values.threads) } } : {}),
+});
 const modelId = values.model as string;
 const entry = getModel(modelId);
 
@@ -258,13 +275,21 @@ const handle = await manager.start({
 const server = manager.serverProcess;
 if (process.env.DAX_LIVE_LOG) server?.on("log", (line) => console.error(`[server] ${line}`));
 const rssAfterLoad = await server?.memoryBytes();
+// The API key travels in the environment (LLAMA_API_KEY); prove the real server enforces it.
+const noKey = await fetch(`${handle.baseUrl}/models`);
+const withKey = await fetch(`${handle.baseUrl}/models`, {
+  headers: handle.apiKey ? { authorization: `Bearer ${handle.apiKey}` } : {},
+});
+const health = await fetch(`${handle.baseUrl.replace(/\/v1$/, "")}/health`);
 
 const results: unknown[] = [];
 let correct = 0;
 let validCalls = 0;
 for (let run = 0; run < Number(values.runs); run++) {
   const c = cases[run % cases.length] as (typeof cases)[number];
+  const cpuBefore = await cpuSeconds(server?.serverPid);
   const { json, wallMs } = await chat(handle.baseUrl, handle.apiKey, handle.modelId, c.prompt);
+  const cpuAfter = await cpuSeconds(server?.serverPid);
   const msg = json.choices?.[0]?.message;
   const call = msg?.tool_calls?.[0];
   let parsed: unknown;
@@ -290,6 +315,12 @@ for (let run = 0; run < Number(values.runs); run++) {
     finishReason: json.choices?.[0]?.finish_reason,
     ok,
     wallMs,
+    // CPU time actually used by the server for this request. On a busy machine wall time is
+    // inflated by other programs; CPU time shows the work done (about wall time x threads when idle).
+    cpuSeconds:
+      cpuBefore !== undefined && cpuAfter !== undefined
+        ? Number((cpuAfter - cpuBefore).toFixed(2))
+        : undefined,
     promptTokens: json.usage?.prompt_tokens,
     completionTokens: json.usage?.completion_tokens,
     promptTokensPerSec: json.timings?.prompt_per_second,
@@ -302,9 +333,11 @@ const summary = {
   model: modelId,
   loadAverageAtEnd: os.loadavg(),
   cpuThreads: os.availableParallelism(),
+  serverThreads: values.threads ? Number(values.threads) : "default (all)",
   sizeBytes: entry.sizeBytes,
   contextSize: values.ctx ? Number(values.ctx) : entry.contextTokens,
   loadTimeMs: handle.loadTimeMs,
+  auth: { withoutKey: noKey.status, withKey: withKey.status, health: health.status },
   rssAfterLoadMB: rssAfterLoad ? Math.round(rssAfterLoad / 1048576) : null,
   rssAfterRequestsMB: rssAfterRequests ? Math.round(rssAfterRequests / 1048576) : null,
   runs: results.length,

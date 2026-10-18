@@ -10,12 +10,22 @@ const flag = (name) => {
   return i >= 0 ? args[i + 1] : undefined;
 };
 const port = Number(flag("--port"));
-const apiKey = flag("--api-key");
+// Like the real server: the key comes from the environment (never from argv).
+const apiKey = flag("--api-key") ?? process.env.LLAMA_API_KEY;
 const loadMs = Number(process.env.FAKE_LOAD_MS ?? 200);
 const startedAt = Date.now();
 
 console.log(`fake-llama-server args: ${JSON.stringify(args)}`);
 
+if (process.env.FAKE_FAIL_ONCE_FILE) {
+  // Fails the first launch only (for example a broken GPU driver), then behaves.
+  const { existsSync, writeFileSync } = await import("node:fs");
+  if (!existsSync(process.env.FAKE_FAIL_ONCE_FILE)) {
+    writeFileSync(process.env.FAKE_FAIL_ONCE_FILE, "x");
+    console.error("error: no usable Vulkan device (fake)");
+    process.exit(1);
+  }
+}
 if (process.env.FAKE_FAIL_STARTUP) {
   console.error("error: failed to load model (fake)");
   process.exit(Number(process.env.FAKE_EXIT_CODE ?? 1));

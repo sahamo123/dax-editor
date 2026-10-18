@@ -126,7 +126,7 @@ export const MODEL_CATALOG: readonly ModelEntry[] = [
     toolCalling: {
       support: "native",
       notes:
-        'Model card: "Qwen3.5 excels in tool calling capabilities." Non-thinking mode is the default for this size; the card warns the 2B model is prone to thinking loops when thinking is enabled, so we keep it off.',
+        'Model card: "Qwen3.5 excels in tool calling capabilities." Non-thinking mode is the default for this size; the card warns the 2B model is prone to thinking loops when thinking is enabled, so we keep it off. Observed here (llama.cpp with --jinja, reasoning off): 5 of 5 simple editing prompts produced the correct tool call with valid JSON arguments.',
     },
     hasThinkingMode: true,
     recommendedFor: "tiny",
@@ -158,7 +158,7 @@ export const MODEL_CATALOG: readonly ModelEntry[] = [
     toolCalling: {
       support: "native",
       notes:
-        'Model card: "Function Calling: Native support for structured tool use, enabling agentic workflows." The card reports a Tau2 agentic score of 24.5% for E2B vs 42.2% for E4B, so expect more invalid calls than the larger sizes; the agent layer must validate and retry.',
+        'Model card: "Function Calling: Native support for structured tool use, enabling agentic workflows." The card reports a Tau2 agentic score of 24.5% for E2B vs 42.2% for E4B, so expect more invalid calls than the larger sizes; the agent layer must validate and retry. Observed here (llama.cpp with --jinja, reasoning off): 10 of 10 simple editing prompts gave the correct tool call with valid JSON arguments; that is a smoke test, not the eval suite.',
     },
     hasThinkingMode: true,
     recommendedFor: "small",
@@ -193,7 +193,7 @@ export const MODEL_CATALOG: readonly ModelEntry[] = [
     toolCalling: {
       support: "native",
       notes:
-        'Same Qwen3.5 tool-calling template as the 2B model ("Qwen3.5 excels in tool calling capabilities"). Used as the non-Gemma fallback for 8 GB and larger machines.',
+        'Same Qwen3.5 tool-calling template as the 2B model ("Qwen3.5 excels in tool calling capabilities"). Used as the non-Gemma fallback for 8 GB and larger machines. Not run in our sandbox.',
     },
     hasThinkingMode: true,
     fallbackId: "gemma-4-e2b-qat-q4_0",
@@ -224,7 +224,7 @@ export const MODEL_CATALOG: readonly ModelEntry[] = [
     toolCalling: {
       support: "native",
       notes:
-        'Model card: "Function Calling: Native support for structured tool use". Card Tau2 score 42.2% (E2B: 24.5%), the best small Gemma for reliable tool calls on a 16 GB laptop.',
+        'Model card: "Function Calling: Native support for structured tool use". Card Tau2 score 42.2% (E2B: 24.5%), the best small Gemma for reliable tool calls on a 16 GB laptop. Observed here (llama.cpp with --jinja, reasoning off): 10 of 10 simple editing prompts gave the correct tool call with valid JSON arguments.',
     },
     hasThinkingMode: true,
     recommendedFor: "medium",
