@@ -38,6 +38,8 @@ export interface ClipBlockProps {
   /** Pixel offset applied while the block is being dragged freely. */
   dragPx: number;
   onBodyDown(e: ReactPointerEvent, id: string): void;
+  /** Keyboard selection (Enter on a focused block). */
+  onSelect(id: string): void;
   onEdgeDown(e: ReactPointerEvent, id: string, edge: "start" | "end"): void;
   onFadeDown(e: ReactPointerEvent, id: string, side: "in" | "out"): void;
   onVolumeDown(e: ReactPointerEvent, id: string): void;
@@ -84,6 +86,9 @@ export const ClipBlock = memo(function ClipBlock(p: ClipBlockProps) {
         zIndex: p.dragging ? 20 : p.selected ? 3 : 2,
       }}
       onPointerDown={(e) => p.onBodyDown(e, p.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") p.onSelect(p.id);
+      }}
     >
       <div className="dx-clip-media" style={{ height: THUMB_H }}>
         {toPx > fromPx ? (

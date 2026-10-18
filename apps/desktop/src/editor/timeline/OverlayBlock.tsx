@@ -23,6 +23,8 @@ export interface OverlayBlockProps {
   selected: boolean;
   dragging: boolean;
   onBodyDown(e: ReactPointerEvent, id: string): void;
+  /** Keyboard selection (Enter on a focused block). */
+  onSelect(id: string): void;
   onEdgeDown(e: ReactPointerEvent, id: string, edge: "start" | "end"): void;
 }
 
@@ -57,6 +59,9 @@ export const OverlayBlock = memo(function OverlayBlock(p: OverlayBlockProps) {
         zIndex: p.dragging ? 20 : p.selected ? 4 : 3,
       }}
       onPointerDown={(e) => p.onBodyDown(e, p.id)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") p.onSelect(p.id);
+      }}
     >
       <span className="dx-ovl-label">
         <span className="dx-ovl-glyph" aria-hidden="true">
