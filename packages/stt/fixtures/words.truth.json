@@ -1,0 +1,120 @@
+{
+  "duration": 17.99525,
+  "words": [
+    {
+      "text": "hello",
+      "start": 1.0,
+      "end": 1.508
+    },
+    {
+      "text": "everyone",
+      "start": 1.688,
+      "end": 2.361
+    },
+    {
+      "text": "and",
+      "start": 2.541,
+      "end": 2.951
+    },
+    {
+      "text": "welcome",
+      "start": 3.131,
+      "end": 3.735
+    },
+    {
+      "text": "back",
+      "start": 3.915,
+      "end": 4.286
+    },
+    {
+      "text": "to",
+      "start": 4.466,
+      "end": 4.789
+    },
+    {
+      "text": "the",
+      "start": 4.969,
+      "end": 5.275
+    },
+    {
+      "text": "channel",
+      "start": 5.455,
+      "end": 5.877
+    },
+    {
+      "text": "um",
+      "start": 6.057,
+      "end": 6.423
+    },
+    {
+      "text": "today",
+      "start": 6.773,
+      "end": 7.304
+    },
+    {
+      "text": "we",
+      "start": 7.484,
+      "end": 7.866
+    },
+    {
+      "text": "are",
+      "start": 8.046,
+      "end": 8.426
+    },
+    {
+      "text": "going",
+      "start": 8.606,
+      "end": 9.047
+    },
+    {
+      "text": "to",
+      "start": 9.227,
+      "end": 9.55
+    },
+    {
+      "text": "talk",
+      "start": 9.73,
+      "end": 10.105
+    },
+    {
+      "text": "about",
+      "start": 10.285,
+      "end": 10.821
+    },
+    {
+      "text": "uh",
+      "start": 11.001,
+      "end": 11.27
+    },
+    {
+      "text": "video",
+      "start": 11.62,
+      "end": 12.14
+    },
+    {
+      "text": "editing",
+      "start": 12.32,
+      "end": 12.885
+    },
+    {
+      "text": "and",
+      "start": 13.065,
+      "end": 13.474
+    },
+    {
+      "text": "why",
+      "start": 16.154,
+      "end": 16.599
+    },
+    {
+      "text": "it",
+      "start": 16.779,
+      "end": 17.059
+    },
+    {
+      "text": "matters",
+      "start": 17.239,
+      "end": 17.815
+    }
+  ]
+}

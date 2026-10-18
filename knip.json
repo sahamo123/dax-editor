@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["ffmpeg", "ffprobe"],
+  "ignoreBinaries": ["ffmpeg", "ffprobe", "espeak-ng", "pgrep"],
   "workspaces": {
     "packages/core": {
       "project": ["src/**/*.ts"]
@@ -10,6 +10,9 @@
       "project": ["src/**/*.ts"]
     },
     "packages/protocol": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/stt": {
       "project": ["src/**/*.ts"]
     }
   }
