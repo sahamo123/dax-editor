@@ -2,7 +2,7 @@
 
 import { newId } from "./ids.js";
 import { shiftOverlaysForDelete } from "./overlays.js";
-import type { Asset, Clip, Project, Range } from "./schema.js";
+import type { Asset, Clip, Project, Range, Transcript } from "./schema.js";
 
 /**
  * Pure edit operations. Each takes a project and returns a new one; the input
@@ -264,4 +264,13 @@ export function setClipFades(
     p,
     clips.map((x) => (x.id === clipId ? { ...x, fadeIn, fadeOut } : x)),
   );
+}
+
+/** Attach (or replace) the speech transcript of an asset. Times are in the asset's own time. */
+export function setAssetTranscript(p: Project, assetId: string, transcript: Transcript): Project {
+  if (!p.assets[assetId]) throw new Error(`Unknown asset "${assetId}"`);
+  const next = structuredClone(p);
+  const asset = next.assets[assetId];
+  if (asset) asset.transcript = transcript;
+  return next;
 }

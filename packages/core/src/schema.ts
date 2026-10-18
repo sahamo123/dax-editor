@@ -2,6 +2,24 @@
 
 import { z } from "zod";
 
+/** One recognised word, timed in the source file's own time (seconds). */
+export const WordSchema = z.object({
+  text: z.string(),
+  start: z.number().nonnegative(),
+  end: z.number().nonnegative(),
+});
+/** A validated {@link WordSchema} value. */
+export type Word = z.infer<typeof WordSchema>;
+
+/** Word-timed transcript of one media file. */
+export const TranscriptSchema = z.object({
+  /** ISO language code such as `en`, when known. */
+  language: z.string().optional(),
+  words: z.array(WordSchema),
+});
+/** A validated {@link TranscriptSchema} value. */
+export type Transcript = z.infer<typeof TranscriptSchema>;
+
 /** A source media file known to the project. `duration` is in seconds; `hasAudio` lets the renderer synthesise silence for clips without an audio stream. */
 export const AssetSchema = z.object({
   id: z.string(),
@@ -12,6 +30,8 @@ export const AssetSchema = z.object({
   height: z.number().int().positive().optional(),
   fps: z.number().positive().optional(),
   hasAudio: z.boolean(),
+  /** Speech transcript, once one has been made. Times are in the asset's own time. */
+  transcript: TranscriptSchema.optional(),
 });
 /** A validated {@link AssetSchema} value. */
 export type Asset = z.infer<typeof AssetSchema>;

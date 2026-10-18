@@ -1,3 +1,4 @@
+export * from "./commands.js";
 export * from "./connector.js";
 export { ffmpegBin, ffprobeBin } from "./exec.js";
 export * from "./ids.js";

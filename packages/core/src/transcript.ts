@@ -1,20 +1,6 @@
 // Word-timed transcripts and helpers that turn them into edit ranges. Speech-to-text engines plug in via Transcriber.
 
-import type { Range } from "./schema.js";
-
-/** One recognised word, timed in the source file's own time. */
-export interface Word {
-  text: string;
-  /** Seconds, in the source file's own time. */
-  start: number;
-  end: number;
-}
-
-/** Word-timed transcript of one media file. */
-export interface Transcript {
-  language?: string;
-  words: Word[];
-}
+import type { Range, Transcript } from "./schema.js";
 
 /** Anything that can turn a media file into a word-timed transcript (whisper.cpp, Parakeet, ...). */
 export interface Transcriber {

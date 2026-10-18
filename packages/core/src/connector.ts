@@ -8,7 +8,7 @@ import { basename, isAbsolute, join, relative, resolve } from "node:path";
  * Uses `relative()` rather than string prefixes so it is correct for both
  * `/` and `\` separators and does not confuse `/a/bc` with `/a/b`.
  */
-function isInside(root: string, child: string): boolean {
+export function isPathInside(root: string, child: string): boolean {
   const rel = relative(root, child);
   return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
 }
@@ -66,7 +66,7 @@ export class LocalConnector implements Connector {
 
   private check(path: string): string {
     const abs = resolve(path);
-    if (this.roots && !this.roots.some((root) => isInside(root, abs))) {
+    if (this.roots && !this.roots.some((root) => isPathInside(root, abs))) {
       throw new Error(`Path is outside the allowed folders: ${abs}`);
     }
     return abs;
