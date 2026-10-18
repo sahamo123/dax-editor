@@ -10,5 +10,6 @@ export * from "./presets.js";
 export * from "./render.js";
 export * from "./schema.js";
 export * from "./session.js";
+export * from "./skills.js";
 export * from "./timeline.js";
 export * from "./transcript.js";
