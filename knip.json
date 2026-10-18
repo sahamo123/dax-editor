@@ -11,6 +11,9 @@
     },
     "packages/protocol": {
       "project": ["src/**/*.ts"]
+    },
+    "packages/server": {
+      "project": ["src/**/*.ts"]
     }
   }
 }
