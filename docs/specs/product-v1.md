@@ -103,6 +103,43 @@ React 18 + TypeScript + Vite. Light dependencies (React, one small state library
 - **Testing:** component tests (Vitest + Testing Library) and Playwright end-to-end tests using the preinstalled Chromium (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; launch with `executablePath: '/opt/pw-browsers/chromium'` if needed) against a **mock server** in `apps/desktop/e2e/` that implements `@dax/protocol` using the real `@dax/core` session and `runCommand` (so behaviour is realistic without waiting for `@dax/server`). Take screenshots and look at them; fix what looks wrong.
 - Accessibility basics: keyboard operable, labelled controls, visible focus.
 
+### UI split: two builders, one interface
+
+The UI is built in parallel by two builders who must agree on this interface exactly.
+
+- **App shell builder** owns `apps/desktop/src/app/**`, `src/api/**`, `src/platform.ts`, `src/main.tsx`, `index.html`, the Vite and test config, and `apps/desktop/e2e/mock-server.mjs`. It builds: top bar, chat panel, settings, media bin, history panel, the API client (REST + WebSocket reconnect), first-run empty state, the platform layer, and it composes the editor module into the layout. It implements `EditorApi` below.
+- **Editor builder** owns `apps/desktop/src/editor/**`. It builds the preview player, timeline, presets panel, inspector and editor toolbar, plus the editor's own state (playhead, selection, zoom, playback). It consumes `EditorApi`.
+
+```ts
+// apps/desktop/src/editor/types.ts (written by the editor builder, imported by the app shell)
+import type { CommandResponse, StateResponse } from "@dax/protocol";
+
+/** What the editor needs from the rest of the app. Implemented by the app shell. */
+export interface EditorApi {
+  /** Latest server state; replaced whenever the server pushes a `state` event. */
+  state: StateResponse;
+  /** Base URL and token, used with `mediaUrl()` from @dax/protocol to build media URLs. */
+  serverUrl: string;
+  token: string;
+  /** Run a registry command via POST /api/command. Never throws: failures come back as { ok: false }. */
+  run(name: string, args?: Record<string, unknown>): Promise<CommandResponse>;
+}
+
+/** Editor-owned UI state, available to the app shell through useEditor(). */
+export interface EditorUi {
+  playhead: number; // seconds on the timeline
+  setPlayhead(seconds: number): void;
+  playing: boolean;
+  setPlaying(playing: boolean): void;
+  selection: { kind: "clip" | "overlay"; id: string } | null;
+  select(selection: { kind: "clip" | "overlay"; id: string } | null): void;
+  zoom: number; // pixels per second
+  setZoom(pixelsPerSecond: number): void;
+}
+```
+
+The editor module's public surface (`apps/desktop/src/editor/index.ts`): `EditorProvider({ api, children })`, `useEditor(): EditorApi & EditorUi`, and the components `PreviewPane`, `Timeline`, `PresetsPanel`, `Inspector`, `EditorToolbar`, plus `useEditorShortcuts()`. The app shell places `PreviewPane` over `Timeline` on the right, `PresetsPanel` / `Inspector` / media bin / history in a side drawer or tabs, and the chat on the left. Each builder writes its own tests with a small fake `EditorApi`/mock server so neither blocks on the other; the lead merges the two and runs the combined end-to-end tests.
+
 ## apps/desktop shell (`apps/desktop/src-tauri`)
 
 Tauri 2. Read `docs/research/tauri-sidecar-packaging.md` (if present). Linux build libraries are installed in the sandbox, `xvfb-run` is available, and crates.io is reachable.
