@@ -1,5 +1,7 @@
 // Timeline edit operations. Pure functions (Project in, Project out) with no filesystem or FFmpeg access.
 
+import { newId } from "./ids.js";
+import { shiftOverlaysForDelete } from "./overlays.js";
 import type { Asset, Clip, Project, Range } from "./schema.js";
 
 /**
@@ -13,13 +15,6 @@ import type { Asset, Clip, Project, Range } from "./schema.js";
 /** Id of the single track that v0.1 edits. */
 export const MAIN_TRACK = "v1";
 const EPS = 1e-6;
-
-let counter = 0;
-/** Generate a short id such as `clip_lx3k2a1`. Unique within a process; not meant to be unguessable. */
-export function newId(prefix: string): string {
-  counter += 1;
-  return `${prefix}_${Date.now().toString(36)}${counter.toString(36)}`;
-}
 
 /** Create a project with no assets and one empty main track. Defaults to 1920x1080 at 30 fps. */
 export function emptyProject(
@@ -35,6 +30,7 @@ export function emptyProject(
       height: opts.height ?? 1080,
       fps: opts.fps ?? 30,
       tracks: [{ id: MAIN_TRACK, kind: "video", clips: [] }],
+      overlays: [],
     },
   };
 }
@@ -108,6 +104,8 @@ export function appendClip(
     in: inPoint,
     out: outPoint,
     volume: 1,
+    fadeIn: 0,
+    fadeOut: 0,
   };
   return withClips(p, [...mainClips(p), clip]);
 }
@@ -119,8 +117,9 @@ export function splitAt(p: Project, t: number): Project {
   const c = clips[idx];
   if (!c) throw new Error(`No clip can be split at ${t}s`);
   const cut = c.in + (t - c.start);
-  const left: Clip = { ...c, out: cut };
-  const right: Clip = { ...c, id: newId("clip"), in: cut };
+  // A fade belongs to the clip's outer edge, so the new inner edges start with none.
+  const left: Clip = { ...c, out: cut, fadeOut: 0 };
+  const right: Clip = { ...c, id: newId("clip"), in: cut, fadeIn: 0 };
   return withClips(p, [...clips.slice(0, idx), left, right, ...clips.slice(idx + 1)]);
 }
 
@@ -135,10 +134,14 @@ export function deleteRange(p: Project, from: number, to: number): Project {
       out.push(c);
       continue;
     }
-    if (s < from - EPS) out.push({ ...c, out: c.in + (from - s) });
-    if (e > to + EPS) out.push({ ...c, id: newId("clip"), in: c.in + (to - s) });
+    // The cut creates new inner edges, which must not inherit the old fades.
+    if (s < from - EPS) out.push({ ...c, out: c.in + (from - s), fadeOut: 0 });
+    if (e > to + EPS) out.push({ ...c, id: newId("clip"), in: c.in + (to - s), fadeIn: 0 });
   }
-  return withClips(p, out);
+  const next = withClips(p, out);
+  // Overlays are placed in timeline time, so they must move with the footage they sit over.
+  next.timeline.overlays = shiftOverlaysForDelete(next.timeline.overlays, from, to);
+  return next;
 }
 
 /** Remove several timeline ranges at once (ranges refer to the *current* timeline). */
@@ -196,14 +199,11 @@ export function removeAssetRanges(p: Project, assetId: string, ranges: Range[]):
   return deleteRanges(p, assetRangesToTimeline(p, assetId, ranges));
 }
 
-/** Remove one clip and close the gap behind it. */
+/** Remove one clip and close the gap behind it. Overlays after it slide left with the footage. */
 export function removeClip(p: Project, clipId: string): Project {
-  const clips = mainClips(p);
-  if (!clips.some((c) => c.id === clipId)) throw new Error(`Unknown clip "${clipId}"`);
-  return withClips(
-    p,
-    clips.filter((c) => c.id !== clipId),
-  );
+  const clip = mainClips(p).find((c) => c.id === clipId);
+  if (!clip) throw new Error(`Unknown clip "${clipId}"`);
+  return deleteRange(p, clip.start, clipEnd(clip));
 }
 
 /** Change a clip's source in/out points. */
@@ -240,5 +240,28 @@ export function setClipVolume(p: Project, clipId: string, volume: number): Proje
   return withClips(
     p,
     clips.map((c) => (c.id === clipId ? { ...c, volume } : c)),
+  );
+}
+
+/**
+ * Set how long a clip fades in from black and out to black (seconds, 0 = none).
+ * The two fades together cannot be longer than the clip.
+ */
+export function setClipFades(
+  p: Project,
+  clipId: string,
+  fades: { fadeIn?: number; fadeOut?: number },
+): Project {
+  const clips = mainClips(p);
+  const c = clips.find((x) => x.id === clipId);
+  if (!c) throw new Error(`Unknown clip "${clipId}"`);
+  const fadeIn = Math.max(0, fades.fadeIn ?? c.fadeIn);
+  const fadeOut = Math.max(0, fades.fadeOut ?? c.fadeOut);
+  if (fadeIn + fadeOut > clipDuration(c) + EPS) {
+    throw new Error(`Fades (${fadeIn + fadeOut}s) are longer than the clip (${clipDuration(c)}s)`);
+  }
+  return withClips(
+    p,
+    clips.map((x) => (x.id === clipId ? { ...x, fadeIn, fadeOut } : x)),
   );
 }

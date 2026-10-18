@@ -2,8 +2,8 @@
 
 import { basename, resolve } from "node:path";
 import { ffmpegBin, ffprobeBin, run } from "./exec.js";
+import { newId } from "./ids.js";
 import type { Asset, Range } from "./schema.js";
-import { newId } from "./timeline.js";
 
 /** Inspect a media file with ffprobe and describe it as an Asset. */
 export async function probe(path: string): Promise<Asset> {

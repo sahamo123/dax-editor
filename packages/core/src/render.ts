@@ -1,6 +1,11 @@
-// Turning a project into a video file: encoder selection and the FFmpeg command for the main track.
+// Turning a project into a video file: encoder selection and the FFmpeg command for the main track and its overlays.
 
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { ffmpegBin, run, runFfmpeg } from "./exec.js";
+import { type FontFiles, overlayFilters, type TextFile } from "./overlay-filters.js";
 import type { Project } from "./schema.js";
 import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
 
@@ -49,14 +54,39 @@ function encoderArgs(encoder: string): string[] {
 
 const n = (x: number) => x.toFixed(6);
 
-/** An FFmpeg argument list plus the expected output length, used to turn progress into a fraction. */
-export interface RenderPlan {
-  args: string[];
-  duration: number;
+/** Where the bundled Inter font files live (OFL-licensed; shipped so text renders identically on every OS). */
+export function bundledFonts(): FontFiles {
+  const dir = fileURLToPath(new URL("../assets/fonts/", import.meta.url));
+  return { regular: join(dir, "Inter-Regular.otf"), bold: join(dir, "Inter-Bold.otf") };
 }
 
-/** Turn the main track into one FFmpeg command: trim each clip, normalise, concat. */
-export function buildRenderPlan(project: Project, outPath: string, encoder: string): RenderPlan {
+/** An FFmpeg argument list, the expected output length, and any text files the filter graph reads. */
+export interface RenderPlan {
+  args: string[];
+  /** Expected length of the output in seconds, used to turn progress into a fraction. */
+  duration: number;
+  /** Files that must exist before FFmpeg runs (overlay text). Empty when there are no overlays. */
+  files: TextFile[];
+}
+
+/** Extra inputs for {@link buildRenderPlan}. */
+export interface RenderContext {
+  /** Directory for overlay text files. Required if the project has overlays. */
+  workDir?: string;
+  /** Fonts for overlays; defaults to the bundled Inter files. */
+  fonts?: FontFiles;
+}
+
+/**
+ * Turn the project into one FFmpeg command: trim each clip (with fades), normalise, concat,
+ * then draw the text overlays on top of the joined video.
+ */
+export function buildRenderPlan(
+  project: Project,
+  outPath: string,
+  encoder: string,
+  ctx: RenderContext = {},
+): RenderPlan {
   const clips = mainClips(project);
   if (clips.length === 0) throw new Error("Timeline is empty");
   const { width: W, height: H, fps } = project.timeline;
@@ -80,19 +110,26 @@ export function buildRenderPlan(project: Project, outPath: string, encoder: stri
       inputIndex.set(asset.id, k);
       inputs.push("-i", asset.path);
     }
+    const dur = clipDuration(c);
+    const vFade =
+      (c.fadeIn > 0 ? `,fade=t=in:st=0:d=${n(c.fadeIn)}` : "") +
+      (c.fadeOut > 0 ? `,fade=t=out:st=${n(Math.max(0, dur - c.fadeOut))}:d=${n(c.fadeOut)}` : "");
+    const aFade =
+      (c.fadeIn > 0 ? `,afade=t=in:st=0:d=${n(c.fadeIn)}` : "") +
+      (c.fadeOut > 0 ? `,afade=t=out:st=${n(Math.max(0, dur - c.fadeOut))}:d=${n(c.fadeOut)}` : "");
     filters.push(
       `[${k}:v]trim=start=${n(c.in)}:end=${n(c.out)},setpts=PTS-STARTPTS,` +
         `scale=${W}:${H}:force_original_aspect_ratio=decrease,` +
-        `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${fps},format=yuv420p[v${i}]`,
+        `pad=${W}:${H}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=${fps},format=yuv420p${vFade}[v${i}]`,
     );
     if (asset.hasAudio) {
       filters.push(
         `[${k}:a]atrim=start=${n(c.in)}:end=${n(c.out)},asetpts=PTS-STARTPTS,` +
-          `aresample=48000,aformat=channel_layouts=stereo,volume=${c.volume}[a${i}]`,
+          `aresample=48000,aformat=channel_layouts=stereo,volume=${c.volume}${aFade}[a${i}]`,
       );
     } else {
       filters.push(
-        `anullsrc=r=48000:cl=stereo,atrim=duration=${n(clipDuration(c))},asetpts=PTS-STARTPTS[a${i}]`,
+        `anullsrc=r=48000:cl=stereo,atrim=duration=${n(dur)},asetpts=PTS-STARTPTS[a${i}]`,
       );
     }
     concatPads.push(`[v${i}][a${i}]`);
@@ -100,13 +137,33 @@ export function buildRenderPlan(project: Project, outPath: string, encoder: stri
 
   filters.push(`${concatPads.join("")}concat=n=${clips.length}:v=1:a=1[outv][outa]`);
 
+  // Overlays are drawn after the join so their times are timeline times.
+  const files: TextFile[] = [];
+  let videoLabel = "[outv]";
+  const overlays = [...project.timeline.overlays].sort(
+    (a, b) => a.lane - b.lane || a.start - b.start,
+  );
+  if (overlays.length > 0) {
+    if (!ctx.workDir)
+      throw new Error("buildRenderPlan needs ctx.workDir when the project has overlays");
+    const fonts = ctx.fonts ?? bundledFonts();
+    const chain: string[] = [];
+    for (const o of overlays) {
+      const built = overlayFilters(o, W, H, fonts, ctx.workDir);
+      chain.push(...built.filters);
+      files.push(...built.files);
+    }
+    filters.push(`[outv]${chain.join(",")}[final]`);
+    videoLabel = "[final]";
+  }
+
   const args = [
     "-y",
     ...inputs,
     "-filter_complex",
     filters.join(";"),
     "-map",
-    "[outv]",
+    videoLabel,
     "-map",
     "[outa]",
     ...encoderArgs(encoder),
@@ -118,7 +175,7 @@ export function buildRenderPlan(project: Project, outPath: string, encoder: stri
     "+faststart",
     outPath,
   ];
-  return { args, duration: timelineDuration(project) };
+  return { args, duration: timelineDuration(project), files };
 }
 
 /** Options for {@link exportProject}. */
@@ -136,8 +193,14 @@ export async function exportProject(
   opts: ExportOptions = {},
 ): Promise<{ encoder: string; duration: number }> {
   const encoder = opts.encoder ?? chooseEncoder(await listEncoders());
-  const plan = buildRenderPlan(project, outPath, encoder);
-  await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)));
-  opts.onProgress?.(1);
-  return { encoder, duration: plan.duration };
+  const workDir = await mkdtemp(join(tmpdir(), "dax-render-"));
+  try {
+    const plan = buildRenderPlan(project, outPath, encoder, { workDir });
+    for (const f of plan.files) await writeFile(f.path, f.content, "utf8");
+    await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)));
+    opts.onProgress?.(1);
+    return { encoder, duration: plan.duration };
+  } finally {
+    await rm(workDir, { recursive: true, force: true });
+  }
 }
