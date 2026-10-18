@@ -277,3 +277,37 @@ describe.skipIf(!hasFfmpeg())("commands on real media (needs ffmpeg)", () => {
     ).rejects.toThrow();
   }, 30_000);
 });
+
+describe("transcribe and set_format", () => {
+  it("transcribes through the injected engine and records it as one edit", async () => {
+    const ctx = ctxWithClip({
+      transcriber: {
+        async transcribe(_path, opts) {
+          return {
+            language: opts?.language ?? "en",
+            words: [{ text: "hello", start: 0.1, end: 0.5 }],
+          };
+        },
+      },
+    });
+    const r = await runCommand(ctx, "transcribe", { language: "en" });
+    expect(r.summary).toMatch(/1 word/);
+    expect(ctx.session.project.assets.a1?.transcript?.words).toHaveLength(1);
+    expect(ctx.session.history().at(-1)?.label).toMatch(/^Transcribe/);
+  });
+
+  it("explains when no speech engine is set up", async () => {
+    await expect(runCommand(ctxWithClip(), "transcribe", {})).rejects.toThrow(/not set up/);
+  });
+
+  it("changes the output format by preset or size, and rejects odd sizes", async () => {
+    const ctx = ctxWithClip();
+    await runCommand(ctx, "set_format", { preset: "portrait-1080x1920" });
+    expect(ctx.session.project.timeline).toMatchObject({ width: 1080, height: 1920 });
+    await runCommand(ctx, "set_format", { fps: 60 });
+    expect(ctx.session.project.timeline).toMatchObject({ width: 1080, height: 1920, fps: 60 });
+    await expect(runCommand(ctx, "set_format", { width: 101, height: 100 })).rejects.toThrow(
+      /even/,
+    );
+  });
+});

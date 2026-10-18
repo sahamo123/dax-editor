@@ -34,17 +34,20 @@ import {
   clipEnd,
   deleteRange,
   deleteRanges,
+  FORMAT_PRESETS,
   keepRanges,
   mainClips,
   moveClip,
   removeClip,
+  setAssetTranscript,
   setClipFades,
   setClipVolume,
+  setFormat,
   splitAt,
   timelineDuration,
   trimClip,
 } from "./timeline.js";
-import { findFillerRanges, formatTranscript } from "./transcript.js";
+import { findFillerRanges, formatTranscript, type Transcriber } from "./transcript.js";
 
 /** What a command needs to run. */
 export interface CommandContext {
@@ -55,6 +58,8 @@ export interface CommandContext {
   source?: HistorySource;
   /** Called with a fraction from 0 to 1 by long-running commands such as export. */
   onProgress?: (fraction: number) => void;
+  /** Speech-to-text engine used by `transcribe`. Absent when none is set up. */
+  transcriber?: Transcriber;
 }
 
 /** What a command returns. `summary` is short plain text meant to be read by a person or a model. */
@@ -338,6 +343,69 @@ export const COMMANDS: readonly CommandDef[] = [
         summary: `${words.length} word(s).`,
         data: { assetId: asset.id, text: formatTranscript({ words }) },
       };
+    },
+  }),
+
+  define({
+    name: "transcribe",
+    description:
+      "Turn the speech in a video into a word-timed transcript (needed for removing filler words, precise cuts at word boundaries, and captions). Takes a while on long videos. Safe to repeat; replaces the old transcript.",
+    schema: z.object({
+      assetId: assetIdArg,
+      language: z
+        .string()
+        .min(2)
+        .max(10)
+        .optional()
+        .describe("ISO language code such as en; omit to auto-detect"),
+    }),
+    async run(ctx, a) {
+      if (!ctx.transcriber) {
+        throw new CommandError(
+          "Speech recognition is not set up yet, so this video cannot be transcribed.",
+        );
+      }
+      const asset = pickAsset(ctx.session.project, a.assetId);
+      const transcript = await ctx.transcriber.transcribe(
+        asset.path,
+        a.language ? { language: a.language } : {},
+      );
+      await edit(ctx, `Transcribe ${basename(asset.path)}`, (p) =>
+        setAssetTranscript(p, asset.id, transcript),
+      );
+      return {
+        summary: `Transcribed ${transcript.words.length} word(s) from ${basename(asset.path)}.`,
+        data: { assetId: asset.id, words: transcript.words.length, language: transcript.language },
+      };
+    },
+  }),
+
+  define({
+    name: "set_format",
+    description:
+      "Change the output format: a preset (landscape-1080p, landscape-720p, portrait-1080x1920 for Shorts/Reels/TikTok, square-1080, portrait-4x5 for Instagram) or an explicit width, height and frame rate. Footage that does not match is fitted inside the frame with bars.",
+    schema: z.object({
+      preset: z
+        .enum(
+          Object.keys(FORMAT_PRESETS) as [
+            keyof typeof FORMAT_PRESETS,
+            ...(keyof typeof FORMAT_PRESETS)[],
+          ],
+        )
+        .optional(),
+      width: z.number().int().min(16).max(8192).optional(),
+      height: z.number().int().min(16).max(8192).optional(),
+      fps: z.number().min(1).max(120).optional(),
+    }),
+    async run(ctx, a) {
+      const fmtArgs = a.preset ? { ...FORMAT_PRESETS[a.preset] } : {};
+      const size: { width?: number; height?: number; fps?: number } = { ...fmtArgs };
+      if (a.width !== undefined) size.width = a.width;
+      if (a.height !== undefined) size.height = a.height;
+      if (a.fps !== undefined) size.fps = a.fps;
+      await edit(ctx, "Change format", (p) => setFormat(p, size));
+      const t = ctx.session.project.timeline;
+      return { summary: `Format is now ${t.width}x${t.height} at ${t.fps} fps.` };
     },
   }),
 

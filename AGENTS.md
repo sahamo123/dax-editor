@@ -65,6 +65,7 @@ The full workflow, including onboarding a new agent in minutes, is in `docs/engi
 ## Licensing and provenance (read this)
 
 - **Do not copy code from AGPL/GPL projects.** OpenChatCut, a closely related project, is AGPL-3.0. You may read it and write down ideas in `docs/research/`, but you must not paste, translate or closely paraphrase its code. Same for any code whose license you have not checked.
+- **Adding open-source tools (plugins, models, templates):** follow the intake policy in `docs/research/open-source-radar.md` (section "Intake policy") and `docs/adr/0009-autonomous-open-source-intake.md`. Passing every hard gate lets an agent add a tool by pull request; anything on the escalation list needs a human.
 - **Dependencies** must be permissive (MIT, Apache-2.0, BSD, ISC) or LGPL used as a separate process or dynamic library. Run GPL tools (e.g. Blender) as separate programs only. No dependency that requires a paid license for our use. **Remotion is excluded** for this reason.
 - **FFmpeg:** builds we ship must be LGPL-safe, so do not rely on `libx264`/`libx265`. Use the encoder selection in `packages/core/src/render.ts`.
 
