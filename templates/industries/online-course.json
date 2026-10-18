@@ -1,0 +1,235 @@
+{
+  "id": "online-course",
+  "version": 1,
+  "kind": "industry",
+  "name": "Online course lesson",
+  "description": "Teach one outcome per video: outcome title up front, instructor lower-third, a next-lesson end card, and pauses trimmed but kept long enough to follow. Captions and chapter cards are listed as not available yet.",
+  "tags": ["education", "course", "lesson", "youtube", "learning"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 1",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Lesson outcome",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "Build your first budget"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Instructor name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Instructor role",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "next_lesson",
+      "label": "Next lesson title",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Lesson 3: Track your spending"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Next lesson",
+      "example": "Next lesson"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 60,
+        "max": 720
+      },
+      "platforms": [
+        {
+          "platform": "learning-platform",
+          "lengthSec": {
+            "min": 60,
+            "max": 300
+          },
+          "note": "Tutorials of 1 to 5 minutes are watched past 50% on average"
+        },
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 360,
+            "max": 720
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "tiktok"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "tutorial"
+  },
+  "beats": [
+    {
+      "id": "outcome",
+      "name": "Outcome hook",
+      "durationSec": {
+        "min": 0,
+        "max": 5
+      },
+      "guidance": "Say what the student will be able to do.",
+      "overlay": "title"
+    },
+    {
+      "id": "context",
+      "name": "Context",
+      "durationSec": {
+        "min": 5,
+        "max": 20
+      },
+      "guidance": "Why this matters, in one breath."
+    },
+    {
+      "id": "concept",
+      "name": "Concept block",
+      "durationSec": {
+        "min": 60,
+        "max": 150
+      },
+      "guidance": "One concept per block; keep 1 to 2 seconds after any on-screen instruction."
+    },
+    {
+      "id": "recap",
+      "name": "Recap",
+      "durationSec": {
+        "min": 10,
+        "max": 15
+      },
+      "guidance": "Repeat the outcome."
+    },
+    {
+      "id": "next",
+      "name": "Next lesson",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Name the next lesson.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 4,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{next_lesson}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.3,
+    "out": 0.6
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Captions for accessibility and muted play.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "chapter-cards",
+      "title": "Chapter title cards",
+      "description": "Full-screen cards at each section.",
+      "requires": ["image-overlays"]
+    },
+    {
+      "id": "intro-bed",
+      "title": "Intro music bed",
+      "description": "An optional bed on the intro only, never under speech.",
+      "requires": ["music-bed"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "advertising",
+      "text": "Claims about results, savings, speed or income need evidence you can show. Avoid guarantees, and say 'results vary' next to any result you show."
+    },
+    {
+      "category": "privacy",
+      "text": "Get consent from every identifiable person in the footage, and blur or crop anyone who has not agreed. Minors need a parent or guardian's consent."
+    },
+    {
+      "category": "ai-disclosure",
+      "text": "If any shot is AI-generated or altered to look real, check whether the platform requires a disclosure label."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "student-release",
+      "ask": "Do you have permission from every student or participant shown?"
+    }
+  ]
+}

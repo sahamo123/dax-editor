@@ -36,6 +36,7 @@ import {
   type Project,
 } from "./schema.js";
 import type { HistorySource, Session } from "./session.js";
+import { TEMPLATE_COMMANDS } from "./template-commands.js";
 import {
   addAsset,
   appendClip,
@@ -956,6 +957,7 @@ export const COMMANDS: readonly CommandDef[] = [
       return { summary: `Exported ${fmt(r.duration)} to ${out}.`, data: { path: out } };
     },
   }),
+  ...TEMPLATE_COMMANDS,
 ];
 
 /** Look up a command by name. */

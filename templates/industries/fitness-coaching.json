@@ -1,0 +1,248 @@
+{
+  "id": "fitness-coaching",
+  "version": 1,
+  "kind": "industry",
+  "name": "Fitness and coaching clip",
+  "description": "Short vertical coaching clip: exercise name hook, a cue callout, coach lower-third and a trial-booking end card. Captions, music and slow motion are listed as not available yet.",
+  "tags": ["fitness", "coaching", "health", "reels", "tiktok", "shorts"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 4",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Exercise or hook",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Fix your squat in 10 seconds"
+    },
+    {
+      "name": "cue",
+      "label": "Coaching cue",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "Chest up, knees out"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Coach name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Coach role",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Book a free trial",
+      "example": "Book a free trial"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 45
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "youtube-shorts"
+        }
+      ]
+    },
+    {
+      "aspect": "4:5",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "instagram-feed"
+        },
+        {
+          "platform": "facebook-feed"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "tight"
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "name": "Movement or contrast",
+      "durationSec": {
+        "min": 0,
+        "max": 3
+      },
+      "guidance": "Open on the movement or the mistake.",
+      "overlay": "hook"
+    },
+    {
+      "id": "drill",
+      "name": "One drill",
+      "durationSec": {
+        "min": 10,
+        "max": 25
+      },
+      "guidance": "Show one drill, repeated or in slow motion."
+    },
+    {
+      "id": "cue",
+      "name": "Cue",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "The one cue that matters.",
+      "overlay": "cue"
+    },
+    {
+      "id": "tip",
+      "name": "Form tip",
+      "durationSec": {
+        "min": 5,
+        "max": 10
+      },
+      "guidance": "What to avoid."
+    },
+    {
+      "id": "cta",
+      "name": "Trial CTA",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Invite a free trial.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "hook",
+      "preset": "title-pop",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.3,
+      "duration": 2.5,
+      "minDuration": 1,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "cue",
+      "preset": "callout-slide-up",
+      "text": "{{cue}}",
+      "when": "cue",
+      "anchor": "start",
+      "offset": 4,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.3,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 7,
+      "duration": 3,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3.5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.3
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Word-level captions so cues land with sound off.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "description": "Energetic music for intense work, calm for mobility, ducked under cues.",
+      "requires": ["music-bed", "audio-ducking"]
+    },
+    {
+      "id": "slowmo",
+      "title": "Slow motion on the drill",
+      "description": "Slow the key movement.",
+      "requires": ["speed-change"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "health",
+      "text": "Do not promise results or give medical advice. Suggest viewers check with a doctor before starting a programme, and show 'results vary' with any result."
+    },
+    {
+      "category": "advertising",
+      "text": "Some ad platforms restrict body before-and-after images and claims about a viewer's weight or health. Check the current policy before running this as an ad."
+    },
+    {
+      "category": "privacy",
+      "text": "Get consent from every identifiable person in the footage, and blur or crop anyone who has not agreed. Minors need a parent or guardian's consent."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "results",
+      "ask": "Does any result shown say 'results vary' and avoid guarantees?"
+    }
+  ]
+}

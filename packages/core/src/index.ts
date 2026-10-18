@@ -12,5 +12,7 @@ export * from "./render.js";
 export * from "./schema.js";
 export * from "./session.js";
 export * from "./skills.js";
+export * from "./template-commands.js";
+export * from "./templates.js";
 export * from "./timeline.js";
 export * from "./transcript.js";
