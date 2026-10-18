@@ -1,0 +1,136 @@
+name: Desktop release
+
+# Builds the Tauri desktop app for macOS (Apple Silicon and Intel), Linux and Windows.
+#   - Push a tag like `desktop-v0.1.0` to build everything and create a DRAFT GitHub release
+#     with the installers attached (a maintainer reviews and publishes it by hand).
+#   - Or run it manually (workflow_dispatch) to build and keep the installers as workflow
+#     artifacts without creating a release.
+# Not run by CI on pull requests. See docs/maintainers/desktop-release.md for the signing
+# secrets, what the unsigned experience is, and the one-time steps a maintainer must do.
+
+on:
+  push:
+    tags: ["desktop-v*"]
+  workflow_dispatch:
+
+# Everything is read-only unless a job below says otherwise.
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: build (${{ matrix.name }})
+    # Needed so tauri-action can create the draft release and upload installers. Only this job.
+    permissions:
+      contents: write
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS Apple Silicon
+            runner: macos-latest
+            triple: aarch64-apple-darwin
+            args: "--target aarch64-apple-darwin --bundles app,dmg"
+          - name: macOS Intel
+            runner: macos-latest
+            triple: x86_64-apple-darwin
+            args: "--target x86_64-apple-darwin --bundles app,dmg"
+          - name: Linux x64
+            runner: ubuntu-22.04
+            triple: x86_64-unknown-linux-gnu
+            args: "--bundles deb,rpm,appimage"
+          - name: Windows x64
+            runner: windows-latest
+            triple: x86_64-pc-windows-msvc
+            args: "--bundles nsis"
+    steps:
+      # Actions are pinned to full commit SHAs (the comment names the release).
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+
+      - name: Enable pnpm (version pinned in package.json)
+        run: corepack enable
+
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+          targets: ${{ matrix.triple }}
+
+      - uses: swatinem/rust-cache@8cbdedb5103daa674dcf46d3590fe06a76645684 # v2.8.0
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+          key: ${{ matrix.triple }}
+
+      - name: Install Linux build libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          # webkit/gtk for the shell; rpm for the .rpm bundle; gstreamer so the AppImage can
+          # bundle the media framework (H.264/AAC playback inside the web view).
+          sudo apt-get install -y --no-install-recommends \
+            build-essential curl wget file patchelf rpm xdg-utils \
+            libwebkit2gtk-4.1-dev libgtk-3-dev libssl-dev libxdo-dev \
+            libayatana-appindicator3-dev librsvg2-dev \
+            libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+            gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+            gstreamer1.0-plugins-bad gstreamer1.0-libav
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build the engine server bundle input
+        # `packages/server` must exist and build; prepare-sidecars fails the job if it does not.
+        run: pnpm --filter "@dax/server..." build
+
+      # ---- macOS: no prebuilt LGPL FFmpeg exists, so build it from the pinned source.
+      - name: Cache LGPL FFmpeg (macOS)
+        if: runner.os == 'macOS'
+        id: ffmpeg-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: apps/desktop/src-tauri/binaries
+          key: ffmpeg-lgpl-${{ matrix.triple }}-${{ hashFiles('apps/desktop/scripts/build-ffmpeg-lgpl.sh') }}
+
+      - name: Build LGPL FFmpeg (macOS)
+        if: runner.os == 'macOS' && steps.ffmpeg-cache.outputs.cache-hit != 'true'
+        run: |
+          brew install nasm pkgconf
+          bash apps/desktop/scripts/build-ffmpeg-lgpl.sh apps/desktop/src-tauri/binaries "${{ matrix.triple }}"
+
+      - name: Prepare sidecars (Node, FFmpeg, server bundle)
+        # Downloads are pinned and SHA-256 verified; FFmpeg is scanned for GPL flags.
+        run: node apps/desktop/scripts/prepare-sidecars.mjs --release --target "${{ matrix.triple }}"
+
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          # macOS signing and notarization. Leave the secrets unset to build an unsigned
+          # (ad-hoc signed) app; see docs/maintainers/desktop-release.md.
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: apps/desktop
+          tauriScript: pnpm exec tauri
+          args: ${{ matrix.args }}
+          # Tag pushes create a draft release named after the tag; manual runs only
+          # produce workflow artifacts.
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          releaseName: ${{ startsWith(github.ref, 'refs/tags/') && format('Dax Editor {0}', github.ref_name) || '' }}
+          releaseBody: "Draft: add the changelog, then publish. Installers are unsigned unless signing secrets were configured; see docs/maintainers/desktop-release.md."
+          releaseDraft: true
+          prerelease: false
+          uploadWorkflowArtifacts: true
