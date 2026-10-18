@@ -55,8 +55,9 @@ Decisions so far:
 ## Phase 1: usable v0.1
 
 - [ ] Engine server: HTTP and WebSocket API on 127.0.0.1 (in progress: `@dax/server`)
-- [ ] CLI (`dax`): probe, silences, remove-silences, transcribe, export, mcp
-- [ ] MCP server: perceive tools (transcript, silences, scenes, frames) and edit tools, with a draft/approve flow for external agents and import-path allowlists
+- [x] CLI (`dax`): list and run any command, project new/show, import, cut, export, mcp, serve (`packages/cli`). Dedicated probe/silences/transcribe verbs are `dax run detect_silence` etc.; transcribe waits for a speech engine
+- [x] MCP server: perceive tools (transcript, silences, scenes, frames) and edit tools, with import-path allowlists (`packages/mcp`)
+- [ ] MCP draft/approve flow for external agents ([ADR 0006](adr/0006-draft-approve-for-external-agents.md))
 - [ ] Agent loop for the built-in chat with the four backends, constrained tool calls, and model recommendation by RAM (in progress: `@dax/agent`, `@dax/local-llm`)
 - [ ] Tauri app: chat panel, preview, timeline, drag-and-drop import (in progress: desktop UI and Tauri shell)
 - [ ] Screen and mic recording

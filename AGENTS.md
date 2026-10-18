@@ -19,11 +19,13 @@ Hard constraints, in priority order:
 |---|---|
 | `packages/core` | The video engine: timeline model, edits, FFmpeg wrappers, connectors. No UI. See its `AGENTS.md`. |
 | `packages/evals` | Harness that scores how well a model edits video. See its `AGENTS.md`. |
+| `packages/cli` | The `dax` command line over the command registry. See its `AGENTS.md`. |
+| `packages/mcp` | The MCP server (`dax-mcp`): every command as a tool, stdio and loopback HTTP. See its `AGENTS.md`. |
 | `docs/` | The knowledge base, an Open Knowledge Format bundle. Start at `docs/index.md`; current state is `docs/STATUS.md`; history is `docs/log.md`. |
 | `.github/` | CI, issue/PR templates, CODEOWNERS. |
 | `scripts/`, `.githooks/` | Bootstrap script and git hooks. |
 
-Planned, not yet present: `packages/cli`, `packages/mcp`, `packages/agent`, `apps/desktop`.
+Planned, not yet present: `packages/agent`, `apps/desktop`.
 
 ## Commands
 

@@ -9,6 +9,9 @@
     "packages/agent": {
       "project": ["src/**/*.ts"]
     },
+    "packages/cli": {
+      "project": ["src/**/*.ts"]
+    },
     "packages/core": {
       "project": ["src/**/*.ts"]
     },
@@ -18,6 +21,9 @@
     },
     "packages/evals": {
       "entry": ["src/cli.ts", "src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/mcp": {
       "project": ["src/**/*.ts"]
     },
     "packages/protocol": {

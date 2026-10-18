@@ -6,14 +6,14 @@ tags: [status, roadmap, handoff]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T20:30:00Z
+  at: 2026-10-18T20:15:00Z
 ---
 
 # Project status
 
 ## Where we are
 
-The engine has a command registry, a cut engine, word-timed captions, text overlays, a session history tree and fit modes, and `pnpm check` passes. There is still no user-facing app: the engine server, agent, CLI, MCP server and desktop app are being built in separate worktrees and are not merged. The plan and its checklists are in [ROADMAP](ROADMAP.md).
+The engine has a command registry, a cut engine, word-timed captions, text overlays, a session history tree and fit modes, and `pnpm check` passes. There is still no user-facing app: the engine server, agent and desktop app are being built in separate worktrees and are not merged. The `dax` CLI and the MCP server are built (see below). The plan and its checklists are in [ROADMAP](ROADMAP.md).
 
 ## Works today
 
@@ -26,6 +26,8 @@ The engine has a command registry, a cut engine, word-timed captions, text overl
 - **Output shape**: fit modes (contain, cover, blur) and format presets via `set_format`: landscape 1080p and 720p, portrait 1080x1920, square 1080, portrait 4:5.
 - **Renderer** (`render.ts`): LGPL-safe encoder choice; main track, overlays and captions in one FFmpeg command.
 - **Core engine basics**: FFmpeg probe, silence detection and scene detection; transcript helpers; `Connector` interface (local).
+- **CLI** (`packages/cli`, `dax`): `commands`, `run <command> --json '{...}'`, `project new|show`, `import`, `cut`, `export`, `mcp`, `serve`. Machine-readable `--json` output and documented exit codes; projects persist as `.dax.json` with their undo history, so `dax run undo` works between invocations.
+- **MCP server** (`packages/mcp`, `dax-mcp`): every core command as a tool (annotations from `readOnly`/`irreversible`), a `preview_frame` image tool, project and history resources, export progress and cancellation. stdio, or loopback Streamable HTTP with a bearer token and Host/Origin checks. See [CLI and MCP server](architecture/cli-and-mcp.md).
 - **Shared contract** (`packages/protocol`, `@dax/protocol`): request, response and event types for the server, desktop UI and agent.
 - **Evals harness** (`packages/evals`): oracle adapter passes 3/3 starter tasks.
 - **Tooling**: `pnpm check` exits 0 on Linux: lint, typecheck, knowledge-base validation, doc coverage, dead-code check and tests (124 core, 5 protocol, 6 evals, 14 script).
@@ -50,8 +52,8 @@ Built in parallel, each in its own git worktree under `.claude/worktrees`. None 
 
 Each item starts after the in-progress builds that it depends on are merged.
 
-1. Engine server and the `dax` CLI, which the desktop app and agent need.
-2. MCP server with the draft/approve flow for external agents ([ADR 0006](adr/0006-draft-approve-for-external-agents.md)).
+1. Engine server merged and wired to the agent, which the desktop app needs.
+2. Draft/approve flow for external MCP agents ([ADR 0006](adr/0006-draft-approve-for-external-agents.md)); today MCP edits the live session, credited as AI and undoable. Also a core `AbortSignal` so `export_video` can really be cancelled.
 3. Agent loop and first real model adapter (OpenAI-compatible endpoint, covers Ollama and llama.cpp), then run the model evaluation study.
 4. Tauri desktop app: chat on the left, preview and timeline on the right.
 5. Top engine gaps from the creator research: music and sound-effect audio layers with ducking; punch-in and zoom keyframes; image, shape and card overlays; a second video layer for B-roll.
