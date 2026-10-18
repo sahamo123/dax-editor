@@ -13,7 +13,12 @@
     "test:e2e": "pnpm build:engine && playwright test",
     "mock-server": "node e2e/mock-server.mjs",
     "docs:check": "typedoc",
-    "build:engine": "pnpm --filter \"@dax/engine...\" build"
+    "build:engine": "pnpm --filter \"@dax/engine...\" build",
+    "editor:dev": "vite --config vite.editor.config.ts",
+    "editor:mock": "node src/editor/dev/mock-server.ts",
+    "editor:typecheck": "tsc -p tsconfig.editor.json --noEmit",
+    "editor:test": "vitest run --config vitest.editor.config.ts",
+    "editor:e2e": "playwright test --config playwright.editor.config.ts"
   },
   "dependencies": {
     "@dax/protocol": "workspace:*",
@@ -27,6 +32,7 @@
     "@dax/engine": "workspace:*",
     "@dax/server": "workspace:*",
     "@playwright/test": "1.56.1",
+    "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.2",

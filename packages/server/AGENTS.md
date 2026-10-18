@@ -50,6 +50,8 @@ Test: `pnpm --filter @dax/server test` (needs FFmpeg; media tests skip without i
 
 ## Media URLs (see `mediaUrl()` in the protocol)
 
+The waveform and filmstrip formats are defined in the protocol (`WaveformSchema`, `FILMSTRIP_FRAME_WIDTH/HEIGHT`, `filmstripFrameCount`, `waveformRate`); the desktop editor reads them from there, so change them there, not here.
+
 - `proxy.mp4`: 480p H.264 (or best available encoder) + AAC, about 0.5 s GOP, `+faststart`; 404 until its `proxy` job is done. Range supported.
 - `thumb.jpg?t=<sec>&w=<px>`: JPEG, `t` clamped to the media, `w` 16..640 (default 160), made on demand and cached.
 - `waveform.json`: `{ version, duration, peaksPerSecond, peaks[] }`, peaks in 0..1 (50/s, fewer for very long media). 404 if no audio.

@@ -7,7 +7,14 @@ import { existsSync } from "node:fs";
 import { mkdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { type Asset, chooseEncoder, listEncoders, type Project } from "@dax/core";
-import type { MediaKind } from "@dax/protocol";
+import {
+  FILMSTRIP_FRAME_HEIGHT,
+  FILMSTRIP_FRAME_WIDTH,
+  FILMSTRIP_FRAMES_HEADER,
+  filmstripFrameCount,
+  type MediaKind,
+  waveformRate,
+} from "@dax/protocol";
 import { isAbortError, type ProcessRegistry, runFfmpegProcess } from "./ffmpeg-run.js";
 import type { JobHandle, JobManager } from "./jobs.js";
 import type { Logger } from "./logger.js";
@@ -15,10 +22,6 @@ import { resolveInsideRoots } from "./paths.js";
 
 /** Height of the preview proxy. Sources shorter than this are not upscaled. */
 const PROXY_HEIGHT = 480;
-/** Filmstrip frame size in pixels; the strip is `frames * FILMSTRIP_W` wide. */
-const FILMSTRIP_W = 96;
-/** Filmstrip frame height in pixels. */
-const FILMSTRIP_H = 54;
 /** Proxy transcodes are heavy: at most this many run at once. */
 const MAX_PROXY_JOBS = 2;
 /** Thumbnails, waveforms and filmstrips are light but the UI can ask for dozens at once: cap the FFmpeg processes. */
@@ -54,15 +57,10 @@ interface Entry {
   error?: string;
 }
 
-/** Number of frames in an asset's filmstrip: one per second, between 4 and 120. Clients use this to map x positions to times. */
-export function filmstripFrames(durationSec: number): number {
-  return Math.min(120, Math.max(4, Math.ceil(durationSec)));
-}
+/** Number of frames in an asset's filmstrip (one per second, 4 to 120); defined in the protocol so clients agree. */
+export const filmstripFrames = filmstripFrameCount;
 
-/** Waveform samples per second for an asset: 50, reduced for very long media so the JSON stays under about 20000 values. */
-export function waveformRate(durationSec: number): number {
-  return durationSec > 400 ? Math.max(1, Math.floor(20000 / durationSec)) : 50;
-}
+export { waveformRate };
 
 /** Reduce 16-bit mono PCM to peak levels: the largest absolute sample in each window, scaled to 0..1 and rounded to 3 decimals. */
 export class PeakAccumulator {
@@ -283,7 +281,7 @@ export class MediaPipeline {
     return this.once(out, async () => {
       const n = filmstripFrames(entry.asset.duration);
       const tmp = `${out}.${randomBytes(4).toString("hex")}.tmp.jpg`;
-      const fit = `scale=${FILMSTRIP_W}:${FILMSTRIP_H}:force_original_aspect_ratio=decrease`;
+      const fit = `scale=${FILMSTRIP_FRAME_WIDTH}:${FILMSTRIP_FRAME_HEIGHT}:force_original_aspect_ratio=decrease`;
       await runFfmpegProcess({
         registry: this.cfg.registry,
         signal: this.abort.signal,
@@ -291,7 +289,7 @@ export class MediaPipeline {
           ...["-y", "-loglevel", "error", "-i", await source(), "-an"],
           ...[
             "-vf",
-            `fps=${n}/${Math.max(0.001, entry.asset.duration).toFixed(6)},${fit},pad=${FILMSTRIP_W}:${FILMSTRIP_H}:(ow-iw)/2:(oh-ih)/2,tile=${n}x1`,
+            `fps=${n}/${Math.max(0.001, entry.asset.duration).toFixed(6)},${fit},pad=${FILMSTRIP_FRAME_WIDTH}:${FILMSTRIP_FRAME_HEIGHT}:(ow-iw)/2:(oh-ih)/2,tile=${n}x1`,
           ],
           ...["-frames:v", "1", "-q:v", "6", "-f", "image2", tmp],
         ],
@@ -371,7 +369,7 @@ export class MediaPipeline {
             path,
             contentType: "image/jpeg",
             cacheControl: "private, max-age=3600",
-            headers: { "X-Dax-Frames": String(filmstripFrames(asset.duration)) },
+            headers: { [FILMSTRIP_FRAMES_HEADER]: String(filmstripFrames(asset.duration)) },
           };
         }
         case "thumb.jpg": {

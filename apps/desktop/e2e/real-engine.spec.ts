@@ -32,7 +32,9 @@ test("imports a clip, runs a manual edit, and the UI follows the engine", async 
 
   // The Media tab: the card and its thumbnail, made by the engine's FFmpeg pipeline and served with the token.
   await page.getByRole("tab", { name: "Media" }).click();
-  await expect(page.getByText("interview.mp4", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("tabpanel", { name: "Media" }).getByText("interview.mp4", { exact: true }),
+  ).toBeVisible();
   await expect
     .poll(() =>
       page
@@ -49,11 +51,22 @@ test("imports a clip, runs a manual edit, and the UI follows the engine", async 
       const url = (kind: string) => `${base}/api/media/${id}/${kind}${q}`;
       const proxy = await fetch(url("proxy.mp4"), { headers: { Range: "bytes=0-99" } });
       const wave = await fetch(url("waveform.json"));
+      // The editor's own <img> request for this file (no-cors, so no CORS headers) may already sit in the browser cache,
+      // and fetch() would then reuse that entry and fail its CORS check: ask the network.
+      const strip = await fetch(url("filmstrip.jpg"), { cache: "no-store" });
+      const bitmap = await createImageBitmap(await strip.blob());
       return {
+        stripFrames: Number(strip.headers.get("x-dax-frames")),
+        stripSize: [bitmap.width, bitmap.height],
         proxyStatus: proxy.status,
         proxyType: proxy.headers.get("content-type"),
         proxyRange: proxy.headers.get("content-range"),
-        wave: (await wave.json()) as { peaks: number[]; duration: number },
+        wave: (await wave.json()) as {
+          version: number;
+          peaksPerSecond: number;
+          peaks: number[];
+          duration: number;
+        },
       };
     },
     [engine.url, engine.token, assetId],
@@ -61,6 +74,10 @@ test("imports a clip, runs a manual edit, and the UI follows the engine", async 
   expect(media.proxyStatus).toBe(206);
   expect(media.proxyType).toBe("video/mp4");
   expect(media.proxyRange).toMatch(/^bytes 0-99\//);
+  // Formats the editor relies on (defined in @dax/protocol): 96x54 frames in one row, the count in a header.
+  expect(media.stripFrames).toBeGreaterThanOrEqual(4);
+  expect(media.stripSize).toEqual([media.stripFrames * 96, 54]);
+  expect(media.wave).toMatchObject({ version: 1, peaksPerSecond: 50 });
   expect(media.wave.peaks.length).toBeGreaterThan(10);
   expect(media.wave.duration).toBeGreaterThan(5);
 

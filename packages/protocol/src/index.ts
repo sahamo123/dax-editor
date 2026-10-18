@@ -1,7 +1,7 @@
 // The contract between the engine server and everything that talks to it (desktop UI, CLI, MCP, tests).
 // Types and zod schemas only; no behaviour. If you change a shape here, both sides get a compile error.
 
-import type { HistoryItem, Project } from "@dax/core";
+import type { HistoryItem, OverlayStyle, Project } from "@dax/core";
 import { z } from "zod";
 
 /** Name of the HTTP header carrying the per-launch token: `Authorization: Bearer <token>`. */
@@ -36,6 +36,43 @@ export const API = {
   /** `/api/media/:assetId/proxy.mp4` etc. Build these with {@link mediaUrl}. */
   media: "/api/media",
 } as const;
+
+/** Width in pixels of one filmstrip frame. A `filmstrip.jpg` is `frames * FILMSTRIP_FRAME_WIDTH` wide. */
+export const FILMSTRIP_FRAME_WIDTH = 96;
+/** Height in pixels of the filmstrip (and of each frame). Frames are letterboxed to 96x54, whatever the video's aspect ratio. */
+export const FILMSTRIP_FRAME_HEIGHT = 54;
+/** Name of the response header on `filmstrip.jpg` that carries the frame count. */
+export const FILMSTRIP_FRAMES_HEADER = "X-Dax-Frames";
+
+/**
+ * Number of frames in an asset's filmstrip: one per second of `durationSec`, between 4 and 120. Frame `k` shows
+ * source time `k * duration / frames`. A client that cannot read the header can also use `image width / FILMSTRIP_FRAME_WIDTH`.
+ */
+export function filmstripFrameCount(durationSec: number): number {
+  return Math.min(120, Math.max(4, Math.ceil(durationSec)));
+}
+
+/** Waveform samples per second for an asset of `durationSec`: 50, reduced for very long media so the JSON stays under about 20000 values. */
+export function waveformRate(durationSec: number): number {
+  return durationSec > 400 ? Math.max(1, Math.floor(20000 / durationSec)) : 50;
+}
+
+/**
+ * The body of `waveform.json`: peak levels of the first audio stream, spread evenly over the whole asset
+ * (`peaks.length` is about `duration * peaksPerSecond`). Each peak is the largest absolute sample of its window, from 0 to 1.
+ */
+export const WaveformSchema = z.object({
+  /** Format version; 1 today. */
+  version: z.literal(1),
+  /** Length of the asset in seconds, the span the peaks cover. */
+  duration: z.number().nonnegative(),
+  /** Peaks per second of source time (see {@link waveformRate}). */
+  peaksPerSecond: z.number().positive(),
+  /** Peak levels, 0 to 1. */
+  peaks: z.array(z.number().min(0).max(1)),
+});
+/** A validated {@link WaveformSchema} value. */
+export type Waveform = z.infer<typeof WaveformSchema>;
 
 /** The kinds of media URL the server serves for an asset. */
 export type MediaKind = "proxy.mp4" | "thumb.jpg" | "waveform.json" | "filmstrip.jpg";
@@ -252,6 +289,8 @@ export interface PresetInfo {
   defaultDuration: number;
   defaultText: string;
   defaultSubtitle?: string;
+  /** How the preset looks (font size, colours, box, position), so the UI can draw a faithful sample. Absent means the core defaults. */
+  style?: Partial<OverlayStyle>;
 }
 
 /** Everything the UI needs to draw itself. Pushed over the WebSocket after every change. */

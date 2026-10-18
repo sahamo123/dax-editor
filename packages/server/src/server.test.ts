@@ -52,6 +52,8 @@ describe("startup and state", () => {
       expect(s.presets[0]).toMatchObject({
         id: expect.any(String),
         defaultDuration: expect.any(Number),
+        // The editor draws preset samples from this, so it must come through.
+        style: expect.any(Object),
       });
       expect(s.settings).toEqual({ activeProvider: "local", providers: {} });
       expect(s.providers.map((p) => p.kind).sort()).toEqual(

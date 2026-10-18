@@ -166,6 +166,7 @@ export class Engine {
           defaultDuration: p.defaultDuration,
           defaultText: p.defaultText,
           ...(p.defaultSubtitle !== undefined ? { defaultSubtitle: p.defaultSubtitle } : {}),
+          style: p.style,
         }),
       ),
       jobs: this.jobs.list(),

@@ -160,7 +160,7 @@ test("selecting something in the editor opens the Inspector tab", async ({
   await expect(page.getByRole("tab", { name: "Presets" })).toHaveAttribute("aria-selected", "true");
 
   // The editor module reports a selection through useEditor(); the shell reacts by showing the Inspector.
-  await page.getByRole("region", { name: "Timeline" }).getByRole("button").first().click();
+  await page.getByRole("region", { name: "Timeline" }).getByTestId("clip").first().click();
   await expect(page.getByRole("tab", { name: "Inspector" })).toHaveAttribute(
     "aria-selected",
     "true",

@@ -4,6 +4,8 @@ import {
   ApiKeyRequestSchema,
   ChatRequestSchema,
   CommandRequestSchema,
+  FILMSTRIP_FRAME_WIDTH,
+  filmstripFrameCount,
   ImportRequestSchema,
   JobStartedSchema,
   LocalModelInstallRequestSchema,
@@ -12,6 +14,8 @@ import {
   PROVIDER_KINDS,
   ProjectNewRequestSchema,
   SettingsSchema,
+  WaveformSchema,
+  waveformRate,
 } from "./index.js";
 
 describe("protocol schemas", () => {
@@ -78,6 +82,20 @@ describe("protocol schemas", () => {
     expect(() => LocalModelInstallRequestSchema.parse({ modelId: "" })).toThrow();
     expect(JobStartedSchema.parse({ jobId: "j1" }).jobId).toBe("j1");
     expect(() => JobStartedSchema.parse({})).toThrow();
+  });
+
+  it("describes the media formats clients rely on", () => {
+    expect(filmstripFrameCount(0.5)).toBe(4);
+    expect(filmstripFrameCount(10.2)).toBe(11);
+    expect(filmstripFrameCount(99999)).toBe(120);
+    expect(FILMSTRIP_FRAME_WIDTH).toBe(96);
+    expect(waveformRate(60)).toBe(50);
+    expect(waveformRate(4000)).toBe(5);
+    const wave = { version: 1, duration: 2, peaksPerSecond: 50, peaks: [0, 0.5, 1] };
+    expect(WaveformSchema.parse(wave)).toEqual(wave);
+    // A bare array (what the editor once guessed) is not the format.
+    expect(() => WaveformSchema.parse([0, 0.5])).toThrow();
+    expect(() => WaveformSchema.parse({ ...wave, peaks: [2] })).toThrow();
   });
 
   it("builds media URLs with the token and escaped ids", () => {
