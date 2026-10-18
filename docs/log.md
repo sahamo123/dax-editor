@@ -1,0 +1,11 @@
+# Project log
+
+## 2026-10-18
+
+* **Milestone**: OKF adopted. `docs/` is now an [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format) v0.2 bundle with a scribe step, see [knowledge protocol](/engineering/knowledge-protocol.md).
+* **Creation**: `packages/evals` harness with an oracle adapter and 3 starter tasks. The oracle passes 3/3.
+* **Creation**: dev environment: Biome lint, TypeDoc documentation-coverage gate, knip dead-code check, conventional-commit and pre-commit hooks, AGENTS.md, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, GOVERNANCE, issue and PR templates, CODEOWNERS, Dependabot, and a cloud-session start hook.
+* **Update**: fixed two build issues found while setting up. The shared tsconfig `outDir` resolved to the repo root. pnpm's built-in `setup` command shadowed our script, so it was renamed `bootstrap`.
+* **Decision**: recorded the decisions: Tauri 2; Apache-2.0 with LGPL-safe FFmpeg; TypeScript engine as a sidecar; no Remotion, free-only; local files only for v0.1 with a Connector interface; FFmpeg built-ins first, then a HyperFrames plugin; Blender as a phase-2 plugin; chat backends Anthropic, OpenAI-compatible, Ollama and an embedded Gemma model. See [ADR 0001](/adr/0001-tauri-desktop-shell.md), [ADR 0002](/adr/0002-apache-2-and-lgpl-ffmpeg.md), [ADR 0003](/adr/0003-typescript-engine-sidecar.md), [ADR 0004](/adr/0004-free-only-no-remotion.md), [ADR 0005](/adr/0005-connector-interface-local-first.md), [ADR 0006](/adr/0006-draft-approve-for-external-agents.md), [ADR 0007](/adr/0007-agent-agnostic-repo-and-okf.md), and [ADR 0008](/adr/0008-custom-eval-harness.md). ADR 0006 is proposed and not yet implemented.
+* **Update**: research landscape written, moved from `docs/RESEARCH.md`. See [landscape](/research/landscape.md) and [OpenChatCut learnings](/research/openchatcut-learnings.md).
+* **Creation**: engine core in `packages/core`: timeline model with undo/redo, FFmpeg probe, silence and scene detection, renderer, transcript helpers, and the Connector interface. 28 tests. Draft PR: https://github.com/sahamo123/dax-editor/pull/1

@@ -1,5 +1,7 @@
+// A Session holds the current project with undo/redo history and optional saving to disk.
+
 import { readFile, writeFile } from "node:fs/promises";
-import { ProjectSchema, type Project } from "./schema.js";
+import { type Project, ProjectSchema } from "./schema.js";
 import { emptyProject } from "./timeline.js";
 
 /**
@@ -16,6 +18,7 @@ export class Session {
     private readonly file?: string,
   ) {}
 
+  /** Open a project file, creating an empty project named `fallbackName` if it does not exist yet. Throws if the file exists but is not a valid project. */
   static async open(file: string, fallbackName = "Untitled"): Promise<Session> {
     try {
       const raw = await readFile(file, "utf8");
@@ -28,6 +31,7 @@ export class Session {
     }
   }
 
+  /** Write the current project to disk. Does nothing for sessions without a backing file. */
   async save(): Promise<void> {
     if (this.file) await writeFile(this.file, JSON.stringify(this.project, null, 2));
   }
@@ -42,14 +46,17 @@ export class Session {
     return next;
   }
 
+  /** Whether {@link Session.undo} has anything to revert. */
   get canUndo(): boolean {
     return this.undoStack.length > 0;
   }
 
+  /** Whether {@link Session.redo} has anything to re-apply. */
   get canRedo(): boolean {
     return this.redoStack.length > 0;
   }
 
+  /** Revert the most recent {@link Session.apply}. Throws if there is nothing to undo. */
   async undo(): Promise<Project> {
     const prev = this.undoStack.pop();
     if (!prev) throw new Error("Nothing to undo");
@@ -59,6 +66,7 @@ export class Session {
     return prev;
   }
 
+  /** Re-apply the most recently undone edit. Throws if there is nothing to redo. */
   async redo(): Promise<Project> {
     const next = this.redoStack.pop();
     if (!next) throw new Error("Nothing to redo");

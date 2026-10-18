@@ -1,5 +1,8 @@
+// Word-timed transcripts and helpers that turn them into edit ranges. Speech-to-text engines plug in via Transcriber.
+
 import type { Range } from "./schema.js";
 
+/** One recognised word, timed in the source file's own time. */
 export interface Word {
   text: string;
   /** Seconds, in the source file's own time. */
@@ -7,6 +10,7 @@ export interface Word {
   end: number;
 }
 
+/** Word-timed transcript of one media file. */
 export interface Transcript {
   language?: string;
   words: Word[];
@@ -14,9 +18,11 @@ export interface Transcript {
 
 /** Anything that can turn a media file into a word-timed transcript (whisper.cpp, Parakeet, ...). */
 export interface Transcriber {
+  /** Transcribe `path`; `language` is an ISO code such as `en`, or omitted to auto-detect. */
   transcribe(path: string, opts?: { language?: string }): Promise<Transcript>;
 }
 
+/** Filler words removed by default. Matching ignores case and punctuation. */
 export const DEFAULT_FILLERS = ["um", "umm", "uh", "uhh", "er", "erm", "hmm", "mm"];
 
 function normalise(text: string): string {

@@ -1,0 +1,2 @@
+# Aider: always load the shared agent instructions.
+read: AGENTS.md

@@ -2,7 +2,7 @@
 
 A free, open-source video editor you drive with plain language. Drop in a video (or record one), say what you want, and watch it get edited. Chat on the left, your video on the right.
 
-> **Status: early.** The video engine (`@dax/core`) works and is tested. The CLI, MCP server and desktop app are not built yet. See the [roadmap](docs/ROADMAP.md).
+> **Status: early.** The video engine (`@dax/core`) and a model-evaluation harness work and are tested. The CLI, MCP server and desktop app are not built yet. Current state: [docs/STATUS.md](docs/STATUS.md). Plan: [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Goals
 
@@ -11,6 +11,7 @@ A free, open-source video editor you drive with plain language. Drop in a video 
 - **Works with any LLM.** Use it from Claude or any MCP client, from the built-in chat with your own API key, with a local model through Ollama, or with a small embedded model.
 - **Desktop app for macOS, Windows and Linux** (Tauri), with a **CLI and MCP server from the start**.
 - **Extensible.** Connectors for cloud storage (Google Drive and more) and optional plugins such as Blender animation come later, built on interfaces that already exist in the engine.
+- **Built to be continued by anyone.** The repo is the source of truth and is readable by any person or AI agent. See [Working on this project](#working-on-this-project).
 
 ## What works today
 
@@ -23,20 +24,24 @@ A free, open-source video editor you drive with plain language. Drop in a video 
 - Transcript types and filler-word detection (the whisper.cpp adapter is not written yet).
 - A `Connector` interface with a local-disk implementation.
 
+`@dax/evals` measures how well a model can edit video (see [docs/evals/overview.md](docs/evals/overview.md)).
+
 ## Develop
 
-Requires Node 20+, [pnpm](https://pnpm.io) and FFmpeg on your `PATH` (or set `DAX_FFMPEG` / `DAX_FFPROBE`).
+Needs Node 22+, [pnpm](https://pnpm.io) (`corepack enable`) and FFmpeg on your `PATH` (or set `DAX_FFMPEG` / `DAX_FFPROBE`).
 
 ```sh
-pnpm install
-pnpm build
-pnpm test
+pnpm bootstrap   # checks tools, installs dependencies, enables git hooks
+pnpm check       # lint, build, doc coverage, knowledge base, dead code, tests (what CI runs)
+pnpm eval --adapter oracle   # run the model-evaluation harness
 ```
 
-## Docs
+## Working on this project
 
-- [Roadmap](docs/ROADMAP.md)
-- [Research: landscape, risks and open questions](docs/RESEARCH.md)
+- **People:** read [CONTRIBUTING.md](CONTRIBUTING.md). Work items are GitHub Issues.
+- **AI agents:** read [AGENTS.md](AGENTS.md) first, then [docs/STATUS.md](docs/STATUS.md). Switching agents takes minutes: [docs/engineering/agent-workflow.md](docs/engineering/agent-workflow.md).
+- **Memory:** `docs/` is an [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format) knowledge base with a project [log](docs/log.md), architecture decisions ([docs/adr](docs/adr/index.md)) and an [index](docs/index.md). How it is kept current: [docs/engineering/knowledge-protocol.md](docs/engineering/knowledge-protocol.md).
+- Also: [Code of Conduct](CODE_OF_CONDUCT.md), [Security policy](SECURITY.md), [Governance](GOVERNANCE.md).
 
 ## License
 

@@ -1,0 +1,11 @@
+{
+  "id": "remove-silences",
+  "description": "Find and remove a silent stretch in the middle of the clip.",
+  "fixture": "tone-silence-tone",
+  "prompt": "Remove all the silent parts of this video.",
+  "tags": ["silence", "core"],
+  "checks": [
+    { "type": "duration", "min": 3.6, "max": 4.6 },
+    { "type": "noSilenceLongerThan", "seconds": 0.5 }
+  ]
+}

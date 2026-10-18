@@ -10,11 +10,26 @@
   },
   "scripts": {
     "build": "pnpm -r --filter \"./packages/*\" build",
-    "test": "pnpm -r --filter \"./packages/*\" test",
-    "typecheck": "pnpm -r typecheck",
-    "dev:desktop": "pnpm --filter @dax/desktop tauri dev"
+    "test": "pnpm -r --filter \"./packages/*\" test && pnpm test:scripts",
+    "typecheck": "pnpm build",
+    "lint": "biome ci --error-on-warnings .",
+    "format": "biome check --write .",
+    "docs:check": "pnpm -r --filter \"./packages/*\" docs:check",
+    "deadcode": "knip",
+    "check:fast": "pnpm lint && pnpm typecheck",
+    "check": "pnpm lint && pnpm build && pnpm docs:check && pnpm docs:okf && pnpm deadcode && pnpm test",
+    "dev:desktop": "pnpm --filter @dax/desktop tauri dev",
+    "eval": "pnpm --filter @dax/evals eval",
+    "bootstrap": "bash scripts/bootstrap.sh",
+    "test:scripts": "node --test \"scripts/*.test.mjs\"",
+    "docs:okf": "node scripts/okf.mjs check docs && node scripts/okf.mjs index docs --check",
+    "docs:index": "node scripts/okf.mjs index docs"
   },
   "devDependencies": {
-    "typescript": "^5.6.0"
+    "@biomejs/biome": "^2.5.15",
+    "knip": "^6.42.0",
+    "typedoc": "^0.28.20",
+    "typescript": "^5.6.0",
+    "yaml": "^2.9.1"
   }
 }

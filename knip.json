@@ -1,0 +1,13 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreBinaries": ["ffmpeg", "ffprobe"],
+  "workspaces": {
+    "packages/core": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/evals": {
+      "entry": ["src/cli.ts", "src/index.ts"],
+      "project": ["src/**/*.ts"]
+    }
+  }
+}

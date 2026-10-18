@@ -1,3 +1,5 @@
+// Turning a project into a video file: encoder selection and the FFmpeg command for the main track.
+
 import { ffmpegBin, run, runFfmpeg } from "./exec.js";
 import type { Project } from "./schema.js";
 import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
@@ -16,16 +18,18 @@ const PREFERRED_ENCODERS = [
   "mpeg4",
 ] as const;
 
+/** Names of the video encoders compiled into the FFmpeg binary in use. */
 export async function listEncoders(): Promise<Set<string>> {
   const { stdout } = await run(ffmpegBin(), ["-hide_banner", "-encoders"]);
   const names = new Set<string>();
   for (const line of stdout.split("\n")) {
-    const m = /^\s*V\S*\s+(\S+)/.exec(line);
-    if (m) names.add(m[1]!);
+    const name = /^\s*V\S*\s+(\S+)/.exec(line)?.[1];
+    if (name) names.add(name);
   }
   return names;
 }
 
+/** Pick the best available H.264 encoder from the preferred list. Throws if none is usable. */
 export function chooseEncoder(available: Set<string>): string {
   const found = PREFERRED_ENCODERS.find((e) => available.has(e));
   if (!found) throw new Error("No usable video encoder found in this FFmpeg build");
@@ -45,6 +49,7 @@ function encoderArgs(encoder: string): string[] {
 
 const n = (x: number) => x.toFixed(6);
 
+/** An FFmpeg argument list plus the expected output length, used to turn progress into a fraction. */
 export interface RenderPlan {
   args: string[];
   duration: number;
@@ -65,7 +70,9 @@ export function buildRenderPlan(project: Project, outPath: string, encoder: stri
     const asset = project.assets[c.assetId];
     if (!asset) throw new Error(`Clip ${c.id} references missing asset ${c.assetId}`);
     if (asset.kind !== "video") {
-      throw new Error(`Asset ${asset.path} is ${asset.kind}; only video can go on the main track for now`);
+      throw new Error(
+        `Asset ${asset.path} is ${asset.kind}; only video can go on the main track for now`,
+      );
     }
     let k = inputIndex.get(asset.id);
     if (k === undefined) {
@@ -96,18 +103,25 @@ export function buildRenderPlan(project: Project, outPath: string, encoder: stri
   const args = [
     "-y",
     ...inputs,
-    "-filter_complex", filters.join(";"),
-    "-map", "[outv]",
-    "-map", "[outa]",
+    "-filter_complex",
+    filters.join(";"),
+    "-map",
+    "[outv]",
+    "-map",
+    "[outa]",
     ...encoderArgs(encoder),
-    "-c:a", "aac",
-    "-b:a", "192k",
-    "-movflags", "+faststart",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-movflags",
+    "+faststart",
     outPath,
   ];
   return { args, duration: timelineDuration(project) };
 }
 
+/** Options for {@link exportProject}. */
 export interface ExportOptions {
   /** Override the automatically chosen encoder. */
   encoder?: string;
@@ -115,6 +129,7 @@ export interface ExportOptions {
   onProgress?: (fraction: number) => void;
 }
 
+/** Render the main track to `outPath` and report which encoder was used. Progress is reported as a fraction from 0 to 1. */
 export async function exportProject(
   project: Project,
   outPath: string,

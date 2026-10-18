@@ -1,0 +1,24 @@
+{
+  "name": "@dax/evals",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Model evaluation harness: runs editing tasks against any model adapter and scores the resulting timeline.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "docs:check": "typedoc",
+    "eval": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@dax/core": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

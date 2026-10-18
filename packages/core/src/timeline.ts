@@ -1,3 +1,5 @@
+// Timeline edit operations. Pure functions (Project in, Project out) with no filesystem or FFmpeg access.
+
 import type { Asset, Clip, Project, Range } from "./schema.js";
 
 /**
@@ -8,15 +10,18 @@ import type { Asset, Clip, Project, Range } from "./schema.js";
  * ripples, i.e. later clips slide left to close any hole.
  */
 
+/** Id of the single track that v0.1 edits. */
 export const MAIN_TRACK = "v1";
 const EPS = 1e-6;
 
 let counter = 0;
+/** Generate a short id such as `clip_lx3k2a1`. Unique within a process; not meant to be unguessable. */
 export function newId(prefix: string): string {
   counter += 1;
   return `${prefix}_${Date.now().toString(36)}${counter.toString(36)}`;
 }
 
+/** Create a project with no assets and one empty main track. Defaults to 1920x1080 at 30 fps. */
 export function emptyProject(
   name: string,
   opts: { width?: number; height?: number; fps?: number } = {},
@@ -34,10 +39,12 @@ export function emptyProject(
   };
 }
 
+/** Length of the clip on the timeline, in seconds. */
 export function clipDuration(c: Clip): number {
   return c.out - c.in;
 }
 
+/** Timeline time, in seconds, at which the clip ends. */
 export function clipEnd(c: Clip): number {
   return c.start + clipDuration(c);
 }
@@ -48,10 +55,12 @@ function mainTrack(p: Project) {
   return t;
 }
 
+/** The clips on the main track in timeline order. Throws if the main track is missing. */
 export function mainClips(p: Project): Clip[] {
   return mainTrack(p).clips;
 }
 
+/** Total length of the main track in seconds; 0 when empty. */
 export function timelineDuration(p: Project): number {
   const clips = mainClips(p);
   const last = clips[clips.length - 1];
@@ -74,6 +83,7 @@ function withClips(p: Project, clips: Clip[]): Project {
   return next;
 }
 
+/** Register a probed media file with the project so clips can reference it. */
 export function addAsset(p: Project, asset: Asset): Project {
   const next = structuredClone(p);
   next.assets[asset.id] = asset;
@@ -106,8 +116,8 @@ export function appendClip(
 export function splitAt(p: Project, t: number): Project {
   const clips = mainClips(p);
   const idx = clips.findIndex((c) => t > c.start + EPS && t < clipEnd(c) - EPS);
-  if (idx === -1) throw new Error(`No clip can be split at ${t}s`);
-  const c = clips[idx]!;
+  const c = clips[idx];
+  if (!c) throw new Error(`No clip can be split at ${t}s`);
   const cut = c.in + (t - c.start);
   const left: Clip = { ...c, out: cut };
   const right: Clip = { ...c, id: newId("clip"), in: cut };
@@ -186,22 +196,23 @@ export function removeAssetRanges(p: Project, assetId: string, ranges: Range[]):
   return deleteRanges(p, assetRangesToTimeline(p, assetId, ranges));
 }
 
+/** Remove one clip and close the gap behind it. */
 export function removeClip(p: Project, clipId: string): Project {
   const clips = mainClips(p);
   if (!clips.some((c) => c.id === clipId)) throw new Error(`Unknown clip "${clipId}"`);
-  return withClips(p, clips.filter((c) => c.id !== clipId));
+  return withClips(
+    p,
+    clips.filter((c) => c.id !== clipId),
+  );
 }
 
 /** Change a clip's source in/out points. */
-export function trimClip(
-  p: Project,
-  clipId: string,
-  trim: { in?: number; out?: number },
-): Project {
+export function trimClip(p: Project, clipId: string, trim: { in?: number; out?: number }): Project {
   const clips = mainClips(p);
   const c = clips.find((c) => c.id === clipId);
   if (!c) throw new Error(`Unknown clip "${clipId}"`);
-  const asset = p.assets[c.assetId]!;
+  const asset = p.assets[c.assetId];
+  if (!asset) throw new Error(`Clip "${clipId}" references missing asset "${c.assetId}"`);
   const inPoint = Math.max(0, trim.in ?? c.in);
   const outPoint = Math.min(asset.duration, trim.out ?? c.out);
   if (outPoint - inPoint <= EPS) throw new Error("Trim would make the clip empty");
@@ -217,12 +228,17 @@ export function moveClip(p: Project, clipId: string, index: number): Project {
   const from = clips.findIndex((c) => c.id === clipId);
   if (from === -1) throw new Error(`Unknown clip "${clipId}"`);
   const [moved] = clips.splice(from, 1);
-  clips.splice(Math.max(0, Math.min(index, clips.length)), 0, moved!);
+  if (!moved) throw new Error(`Unknown clip "${clipId}"`);
+  clips.splice(Math.max(0, Math.min(index, clips.length)), 0, moved);
   return withClips(p, clips);
 }
 
+/** Set a clip's linear gain (1 = unchanged, 0 = muted). */
 export function setClipVolume(p: Project, clipId: string, volume: number): Project {
   const clips = mainClips(p);
   if (!clips.some((c) => c.id === clipId)) throw new Error(`Unknown clip "${clipId}"`);
-  return withClips(p, clips.map((c) => (c.id === clipId ? { ...c, volume } : c)));
+  return withClips(
+    p,
+    clips.map((c) => (c.id === clipId ? { ...c, volume } : c)),
+  );
 }

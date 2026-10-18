@@ -1,0 +1,35 @@
+name: Bug report
+description: Something does not work as expected
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands or clicks. A tiny test clip or an FFmpeg `lavfi` command that generates one is ideal. Please do not attach private footage.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15 / Windows 11 / Ubuntu 24.04
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: dax-editor commit or version, Node and FFmpeg versions
+      placeholder: "abc1234, node 22.4, ffmpeg 7.0"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or error output
+      render: shell

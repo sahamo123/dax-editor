@@ -1,0 +1,5 @@
+# Every change needs review from a code owner (enforced via branch protection,
+# see docs/maintainers/repo-settings.md). Add more owners here as maintainers join.
+*                    @sahamo123
+/.github/            @sahamo123
+/docs/adr/           @sahamo123

@@ -1,3 +1,14 @@
+---
+type: Research
+title: Landscape, risks and gaps
+description: Survey of existing open-source video editors, MCP servers and renderers, with the licensing and technical risks that shaped the plan.
+tags: [research, competitors, licensing, rendering, connectors, security]
+status: stable
+generated:
+  by: process:scribe
+  at: 2026-10-18T18:45:00Z
+---
+
 # Research: landscape, risks and gaps
 
 Written 2026-10-18. Everything below comes from web search snippets and one README fetch, **not** from reading source code. Items marked **(unverified)** are from my own background knowledge or a single secondary source and need checking before we rely on them.

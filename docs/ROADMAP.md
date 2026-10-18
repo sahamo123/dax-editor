@@ -1,3 +1,14 @@
+---
+type: Roadmap
+title: Roadmap
+description: Phased plan for dax-editor with the decisions taken so far, and checklists for the engine, usable v0.1 and phase 2.
+tags: [roadmap, planning]
+status: stable
+generated:
+  by: process:scribe
+  at: 2026-10-18T18:45:00Z
+---
+
 # Roadmap
 
 Decisions so far:
@@ -20,11 +31,18 @@ Decisions so far:
 - [x] Probe, silence detection, scene detection
 - [x] FFmpeg renderer with encoder selection and progress
 - [x] Transcript types, filler-word ranges, `Connector` interface (local)
+- [x] Dev environment: lint/format (Biome), doc-coverage gate (TypeDoc), dead-code check (knip), git hooks, AGENTS.md, contributor docs, OKF knowledge base
+- [x] Evals harness with deterministic oracle adapter and 3 starter tasks
+- [ ] CI workflow (Linux required; macOS and Windows experimental until verified)
+- [ ] OKF validator + index generator scripts
+- [ ] [ADRs 0001-0008](adr/)
+- [ ] First real model adapter (OpenAI-compatible endpoint, covers Ollama and llama.cpp)
+- [ ] Model evaluation study per [model-evaluation-plan](evals/model-evaluation-plan.md)
 - [ ] whisper.cpp transcriber adapter
 - [ ] Proxy generation for preview, thumbnails, waveforms
 - [ ] Captions burn-in and SRT export
 - [ ] Hardware-encoder matrix tested on macOS, Windows, Linux
-- [ ] Eval harness: fixed footage + prompts -> assertions on the resulting timeline
+- [ ] Eval runs against real models: fixed footage + prompts -> assertions on the resulting timeline (the oracle-only harness is done, see above)
 
 ## Phase 1: usable v0.1
 
@@ -44,4 +62,4 @@ Decisions so far:
 - [ ] OTIO / FCPXML / EDL export
 - [ ] Blender plugin
 
-See [RESEARCH.md](RESEARCH.md) for the reasoning and the unverified claims still to check.
+See [research/landscape.md](research/landscape.md) for the reasoning and the unverified claims still to check.

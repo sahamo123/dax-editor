@@ -1,32 +1,52 @@
+// Where media comes from and goes to: the Connector interface and the local-disk implementation. Cloud providers implement the same interface.
+
 import { copyFile, mkdir, readdir, stat } from "node:fs/promises";
-import { basename, join, resolve } from "node:path";
+import { basename, isAbsolute, join, relative, resolve } from "node:path";
 
 /**
- * A Connector is a place media can come from or go to: the local disk today;
- * Google Drive, Dropbox, S3, rclone remotes and so on later. File bytes move
- * directly between the provider and local disk, never through a third-party relay.
+ * True when `child` is `root` itself or lives somewhere beneath it.
+ * Uses `relative()` rather than string prefixes so it is correct for both
+ * `/` and `\` separators and does not confuse `/a/bc` with `/a/b`.
  */
+function isInside(root: string, child: string): boolean {
+  const rel = relative(root, child);
+  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+}
+
+/** A file or folder as listed by a {@link Connector}. */
 export interface RemoteFile {
   /** Provider-specific identifier, passed back to `download`. */
   ref: string;
   name: string;
   isDirectory: boolean;
+  /** Size in bytes; absent for folders or when the provider does not say. */
   size?: number;
+  /** ISO-8601 last-modified time. */
   modified?: string;
   mimeType?: string;
 }
 
+/** Optional controls for downloads and uploads. */
 export interface TransferOptions {
   /** Called with bytes transferred so far and the total, if known. */
   onProgress?: (done: number, total?: number) => void;
+  /** Abort the transfer; partial data may be kept so a later call can resume. */
   signal?: AbortSignal;
 }
 
+/**
+ * A place media can come from or go to: the local disk today; Google Drive,
+ * Dropbox, S3, rclone remotes and so on later. File bytes move directly
+ * between the provider and local disk, never through a third-party relay.
+ */
 export interface Connector {
+  /** Stable identifier, e.g. `local` or `gdrive`. */
   readonly id: string;
+  /** Human-readable name shown in the UI. */
   readonly name: string;
   /** List a folder; omit `folderRef` for the root. */
   list(folderRef?: string): Promise<RemoteFile[]>;
+  /** Describe a single file or folder. */
   stat(ref: string): Promise<RemoteFile>;
   /** Bring a file onto local disk and return its local path. Implementations should resume partial downloads. */
   download(ref: string, destDir: string, opts?: TransferOptions): Promise<string>;
@@ -46,7 +66,7 @@ export class LocalConnector implements Connector {
 
   private check(path: string): string {
     const abs = resolve(path);
-    if (this.roots && !this.roots.some((r) => abs === r || abs.startsWith(r + "/") || abs.startsWith(r + "\\"))) {
+    if (this.roots && !this.roots.some((root) => isInside(root, abs))) {
       throw new Error(`Path is outside the allowed folders: ${abs}`);
     }
     return abs;
@@ -70,6 +90,7 @@ export class LocalConnector implements Connector {
     );
   }
 
+  /** Describe a single file or folder on the local disk. Applies the allowed-folders check. */
   async stat(ref: string): Promise<RemoteFile> {
     const abs = this.check(ref);
     const s = await stat(abs);

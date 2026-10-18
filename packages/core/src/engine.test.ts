@@ -1,12 +1,18 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, existsSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { detectSilence, invertRanges, padSilences, probe } from "./media.js";
 import { exportProject } from "./render.js";
 import { Session } from "./session.js";
-import { addAsset, appendClip, emptyProject, removeAssetRanges, timelineDuration } from "./timeline.js";
+import {
+  addAsset,
+  appendClip,
+  emptyProject,
+  removeAssetRanges,
+  timelineDuration,
+} from "./timeline.js";
 
 function hasFfmpeg(): boolean {
   try {
@@ -29,14 +35,37 @@ describe.skipIf(!hasFfmpeg())("engine end to end (needs ffmpeg)", () => {
     execFileSync(
       "ffmpeg",
       [
-        "-y", "-hide_banner", "-loglevel", "error",
-        "-f", "lavfi", "-i", "testsrc=d=6:s=320x240:r=30",
-        "-f", "lavfi", "-i", "sine=f=440:d=2",
-        "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono:d=2",
-        "-f", "lavfi", "-i", "sine=f=440:d=2",
-        "-filter_complex", "[1:a][2:a][3:a]concat=n=3:v=0:a=1[a]",
-        "-map", "0:v", "-map", "[a]",
-        "-c:v", "mpeg4", "-c:a", "aac", "-shortest",
+        "-y",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-f",
+        "lavfi",
+        "-i",
+        "testsrc=d=6:s=320x240:r=30",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=f=440:d=2",
+        "-f",
+        "lavfi",
+        "-i",
+        "anullsrc=r=44100:cl=mono:d=2",
+        "-f",
+        "lavfi",
+        "-i",
+        "sine=f=440:d=2",
+        "-filter_complex",
+        "[1:a][2:a][3:a]concat=n=3:v=0:a=1[a]",
+        "-map",
+        "0:v",
+        "-map",
+        "[a]",
+        "-c:v",
+        "mpeg4",
+        "-c:a",
+        "aac",
+        "-shortest",
         src,
       ],
       { stdio: "inherit" },
@@ -66,7 +95,10 @@ describe.skipIf(!hasFfmpeg())("engine end to end (needs ffmpeg)", () => {
 
   it("removes the silence and exports a shorter video", async () => {
     const asset = await probe(src);
-    let p = appendClip(addAsset(emptyProject("e2e", { width: 320, height: 240, fps: 30 }), asset), asset.id);
+    let p = appendClip(
+      addAsset(emptyProject("e2e", { width: 320, height: 240, fps: 30 }), asset),
+      asset.id,
+    );
     const silences = padSilences(await detectSilence(src, asset.duration), 0.1);
     p = removeAssetRanges(p, asset.id, silences);
     const expected = timelineDuration(p);

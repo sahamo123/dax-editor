@@ -1,0 +1,8 @@
+{
+  "id": "keep-first-3-seconds",
+  "description": "Trim to an explicit duration using plain wording.",
+  "fixture": "tone-silence-tone",
+  "prompt": "Cut the video down to just the first 3 seconds.",
+  "tags": ["trim", "core"],
+  "checks": [{ "type": "duration", "min": 2.9, "max": 3.1 }, { "type": "clipCount", "max": 1 }]
+}

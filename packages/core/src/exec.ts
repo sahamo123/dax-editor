@@ -1,3 +1,5 @@
+// Thin wrappers for running FFmpeg and ffprobe. The only place in core that starts processes.
+
 import { execFile, spawn } from "node:child_process";
 
 /** Binaries can be overridden so the desktop app can point at bundled sidecars. */
@@ -5,10 +7,12 @@ export function ffmpegBin(): string {
   return process.env.DAX_FFMPEG ?? "ffmpeg";
 }
 
+/** Path to the ffprobe binary; override with `DAX_FFPROBE` (see {@link ffmpegBin}). */
 export function ffprobeBin(): string {
   return process.env.DAX_FFPROBE ?? "ffprobe";
 }
 
+/** Captured output of a finished process. */
 export interface ExecResult {
   stdout: string;
   stderr: string;
@@ -46,7 +50,12 @@ export function runFfmpeg(
     child.on("error", reject);
     child.on("close", (code) => {
       if (code === 0) resolve();
-      else reject(new Error(`ffmpeg exited with ${code}\n${stderr.trim().split("\n").slice(-8).join("\n")}`));
+      else
+        reject(
+          new Error(
+            `ffmpeg exited with ${code}\n${stderr.trim().split("\n").slice(-8).join("\n")}`,
+          ),
+        );
     });
   });
 }

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { invertRanges, padSilences, parseProbe, parseSceneChanges, parseSilenceDetect } from "./media.js";
+import {
+  invertRanges,
+  padSilences,
+  parseProbe,
+  parseSceneChanges,
+  parseSilenceDetect,
+} from "./media.js";
 import { DEFAULT_FILLERS, findFillerRanges, formatTranscript } from "./transcript.js";
 
 describe("parseSilenceDetect", () => {
@@ -16,7 +22,9 @@ describe("parseSilenceDetect", () => {
   });
 
   it("closes a trailing silence at the end of the file", () => {
-    expect(parseSilenceDetect("[silencedetect @ 0x1] silence_start: 8", 10)).toEqual([{ start: 8, end: 10 }]);
+    expect(parseSilenceDetect("[silencedetect @ 0x1] silence_start: 8", 10)).toEqual([
+      { start: 8, end: 10 },
+    ]);
   });
 
   it("clamps a negative start to zero", () => {
@@ -66,12 +74,21 @@ describe("parseProbe", () => {
       },
       "/x/clip.mp4",
     );
-    expect(a).toMatchObject({ kind: "video", duration: 12.5, width: 1280, height: 720, hasAudio: true });
+    expect(a).toMatchObject({
+      kind: "video",
+      duration: 12.5,
+      width: 1280,
+      height: 720,
+      hasAudio: true,
+    });
     expect(a.fps).toBeCloseTo(29.97, 2);
   });
 
   it("treats audio-only files as audio", () => {
-    const a = parseProbe({ format: { duration: "3" }, streams: [{ codec_type: "audio" }] }, "/x/a.wav");
+    const a = parseProbe(
+      { format: { duration: "3" }, streams: [{ codec_type: "audio" }] },
+      "/x/a.wav",
+    );
     expect(a.kind).toBe("audio");
   });
 

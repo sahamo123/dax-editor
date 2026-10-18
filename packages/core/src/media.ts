@@ -1,14 +1,18 @@
+// Looking at media: ffprobe metadata, silence and scene detection, and the pure parsers for FFmpeg's text output.
+
 import { basename, resolve } from "node:path";
 import { ffmpegBin, ffprobeBin, run } from "./exec.js";
-import { newId } from "./timeline.js";
 import type { Asset, Range } from "./schema.js";
+import { newId } from "./timeline.js";
 
 /** Inspect a media file with ffprobe and describe it as an Asset. */
 export async function probe(path: string): Promise<Asset> {
   const abs = resolve(path);
   const { stdout } = await run(ffprobeBin(), [
-    "-v", "error",
-    "-print_format", "json",
+    "-v",
+    "error",
+    "-print_format",
+    "json",
     "-show_format",
     "-show_streams",
     abs,
@@ -16,7 +20,8 @@ export async function probe(path: string): Promise<Asset> {
   return parseProbe(JSON.parse(stdout), abs);
 }
 
-interface ProbeStream {
+/** The subset of an ffprobe stream entry that {@link parseProbe} reads. */
+export interface ProbeStream {
   codec_type?: string;
   width?: number;
   height?: number;
@@ -25,7 +30,11 @@ interface ProbeStream {
   disposition?: { attached_pic?: number };
 }
 
-export function parseProbe(json: { streams?: ProbeStream[]; format?: { duration?: string } }, absPath: string): Asset {
+/** Convert ffprobe's JSON into an {@link Asset}. Kept separate from {@link probe} so it can be tested without ffprobe installed. */
+export function parseProbe(
+  json: { streams?: ProbeStream[]; format?: { duration?: string } },
+  absPath: string,
+): Asset {
   const streams = json.streams ?? [];
   const video = streams.find((s) => s.codec_type === "video");
   const audio = streams.find((s) => s.codec_type === "audio");
@@ -58,6 +67,7 @@ function parseRate(rate?: string): number | undefined {
   return n / d;
 }
 
+/** Tuning for {@link detectSilence}. */
 export interface SilenceOptions {
   /** Anything quieter than this is silence. Default -30 dB. */
   noiseDb?: number;
@@ -74,15 +84,21 @@ export async function detectSilence(
   const noise = opts.noiseDb ?? -30;
   const min = opts.minDuration ?? 0.5;
   const { stderr } = await run(ffmpegBin(), [
-    "-hide_banner", "-nostdin",
-    "-i", resolve(path),
+    "-hide_banner",
+    "-nostdin",
+    "-i",
+    resolve(path),
     "-vn",
-    "-af", `silencedetect=noise=${noise}dB:d=${min}`,
-    "-f", "null", "-",
+    "-af",
+    `silencedetect=noise=${noise}dB:d=${min}`,
+    "-f",
+    "null",
+    "-",
   ]);
   return parseSilenceDetect(stderr, totalDuration);
 }
 
+/** Parse `silencedetect` log output into ranges. A silence still open at end of file is closed at `totalDuration`. */
 export function parseSilenceDetect(stderr: string, totalDuration: number): Range[] {
   const ranges: Range[] = [];
   let open: number | undefined;
@@ -129,15 +145,21 @@ export function padSilences(silences: Range[], pad: number): Range[] {
 /** Timestamps (seconds) where the picture changes sharply. */
 export async function detectScenes(path: string, threshold = 0.4): Promise<number[]> {
   const { stderr } = await run(ffmpegBin(), [
-    "-hide_banner", "-nostdin",
-    "-i", resolve(path),
+    "-hide_banner",
+    "-nostdin",
+    "-i",
+    resolve(path),
     "-an",
-    "-vf", `select='gt(scene,${threshold})',showinfo`,
-    "-f", "null", "-",
+    "-vf",
+    `select='gt(scene,${threshold})',showinfo`,
+    "-f",
+    "null",
+    "-",
   ]);
   return parseSceneChanges(stderr);
 }
 
+/** Extract `pts_time` values, in seconds, from `showinfo` log lines. */
 export function parseSceneChanges(stderr: string): number[] {
   const times: number[] = [];
   for (const line of stderr.split("\n")) {
