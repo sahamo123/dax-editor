@@ -2,6 +2,7 @@
 
 ## 2026-10-18
 
+* **Milestone**: `pnpm check` exits 0 across all packages. Tests pass: 365 core, 292 desktop, 157 agent, 116 server, 52 MCP, 25 CLI, 21 evals, 5 protocol, 3 engine and 14 script. The merged work is on branch `claude/exciting-lamport-1k91fh`. It is not yet on `main` and nothing has run on GitHub CI.
 * **Creation**: `@dax/agent` (`packages/agent`): a provider-neutral tool loop that turns a chat message into edits by calling the command registry. It has OpenAI-compatible and Anthropic providers and reliability features for small models: JSON repair, and recovery of tool calls written as plain text. Eval adapters in `packages/evals` score any provider on the same loop the product uses, and report the tokens and invalid tool calls the backend actually returned.
 * **Creation**: skills layer. 24 `SKILL.md` playbooks in `skills/`, plus a router skill. The loader and router are in `packages/core/src/skills.ts`. They pick the few skills that fit a request, within a character budget, so a small model is not flooded with context.
 * **Creation**: templates. 34 style and industry recipes (16 styles, 18 industries) in `templates/`, a deterministic applier in `packages/core/src/templates.ts`, and the `list_templates` and `apply_template` commands. Templates are data only. An applied template is one history entry, so one undo reverses it.
