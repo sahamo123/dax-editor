@@ -1,0 +1,21 @@
+{
+  "name": "@dax/desktop",
+  "version": "0.0.1",
+  "private": true,
+  "description": "dax-editor desktop app: Tauri 2 shell (src-tauri) around the React UI (src).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "tauri": "tauri",
+    "sidecars:dev": "node scripts/prepare-sidecars.mjs --dev",
+    "sidecars:release": "node scripts/prepare-sidecars.mjs --release",
+    "shell:dev": "node scripts/prepare-sidecars.mjs --dev && tauri dev",
+    "shell:build": "node scripts/prepare-sidecars.mjs --release && tauri build",
+    "shell:test": "node --test \"scripts/*.test.mjs\" && cargo test --manifest-path src-tauri/Cargo.toml",
+    "shell:lint": "cargo fmt --manifest-path src-tauri/Cargo.toml --check && cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.3",
+    "esbuild": "0.28.2"
+  }
+}

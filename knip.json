@@ -1,7 +1,15 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["ffmpeg", "ffprobe"],
+  "ignoreBinaries": ["ffmpeg", "ffprobe", "rustc", "cargo"],
   "workspaces": {
+    "apps/desktop": {
+      "entry": [
+        "scripts/*.test.mjs",
+        "shell-placeholder/dax-server-standin.mjs",
+        "shell-placeholder/web/app.js"
+      ],
+      "project": ["scripts/**/*.mjs", "shell-placeholder/**/*.{js,mjs}"]
+    },
     "packages/core": {
       "project": ["src/**/*.ts"]
     },
