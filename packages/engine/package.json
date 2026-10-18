@@ -1,0 +1,39 @@
+{
+  "name": "@dax/engine",
+  "version": "0.0.1",
+  "description": "The dax engine launcher: starts the local server with the AI agent, skills, provider registry and optional local model and speech-to-text wired in.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "dax-engine": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "test": "vitest run",
+    "docs:check": "typedoc",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@dax/agent": "workspace:*",
+    "@dax/core": "workspace:*",
+    "@dax/protocol": "workspace:*",
+    "@dax/server": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

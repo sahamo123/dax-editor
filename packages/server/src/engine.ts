@@ -8,6 +8,7 @@ import {
   type CommandOutcome,
   getCommand,
   OVERLAY_PRESETS,
+  type Transcriber,
   tryRunCommand,
 } from "@dax/core";
 import {
@@ -52,6 +53,8 @@ export interface EngineConfig {
   runner: AgentRunner | AgentRunnerFactory;
   providers: ProviderRegistry;
   localModel: LocalModelController;
+  /** Speech-to-text used by `transcribe` and the cut commands; absent means those commands report that transcription is unavailable. */
+  transcriber?: Transcriber;
   log: Logger;
   /** Sends an event to every connected WebSocket client. */
   emit: (event: WsEvent) => void;
@@ -247,6 +250,7 @@ export class Engine {
       session: this.projects.session,
       source: "manual",
       allowedRoots: [...this.cfg.allowedRoots],
+      ...(this.cfg.transcriber ? { transcriber: this.cfg.transcriber } : {}),
       ...extra,
     };
   }

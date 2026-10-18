@@ -7,6 +7,7 @@ import type { AddressInfo } from "node:net";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 import type { Duplex } from "node:stream";
+import type { Transcriber } from "@dax/core";
 import { API, type ServerInfo } from "@dax/protocol";
 import { Engine } from "./engine.js";
 import { HttpError, readJsonBody, sendError, sendJson } from "./http-util.js";
@@ -55,6 +56,8 @@ export interface ServerOptions {
   providers?: ProviderRegistry;
   /** Controls the embedded local model. Defaults to {@link NullLocalModelController}. */
   localModel?: LocalModelController;
+  /** Speech-to-text engine for transcription; omit when none is installed. */
+  transcriber?: Transcriber;
   /** Where to log. Defaults to stderr; stdout is reserved for the startup line. */
   logger?: Logger;
   /** Log every request (method, path, status; never the query string). */
@@ -98,6 +101,7 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
     runner: options.agentRunner ?? new NoRunner(),
     providers: options.providers ?? new NullProviderRegistry(),
     localModel: options.localModel ?? new NullLocalModelController(),
+    ...(options.transcriber ? { transcriber: options.transcriber } : {}),
     log,
     emit: (event) => hub.broadcast(event),
     hasListeners: () => hub.size > 0,

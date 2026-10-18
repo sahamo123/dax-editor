@@ -8,6 +8,7 @@ import {
   getCommand,
   type Session,
   type ToolSpec,
+  type Transcriber,
 } from "@dax/core";
 import type { AgentEvent } from "@dax/protocol";
 import { buildSystemPrompt } from "./prompt.js";
@@ -62,6 +63,8 @@ export interface AgentRunOptions {
   signal?: AbortSignal;
   /** If set, imports and exports are limited to these folders. */
   allowedRoots?: string[];
+  /** Speech-to-text engine the transcribe and cut commands use. Omit when none is installed. */
+  transcriber?: Transcriber;
   /** Overrides the agent's `maxTurns` for this run. */
   maxTurns?: number;
 }
@@ -329,6 +332,7 @@ class Loop {
         {
           session: this.run.session,
           allowedRoots: this.run.allowedRoots,
+          transcriber: this.run.transcriber,
           available: this.prepared.available,
         },
         call,

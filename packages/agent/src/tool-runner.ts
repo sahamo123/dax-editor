@@ -7,6 +7,7 @@ import {
   getCommand,
   type Session,
   type ToolSpec,
+  type Transcriber,
   tryRunCommand,
 } from "@dax/core";
 import { parseJsonLoose } from "./json-repair.js";
@@ -30,6 +31,8 @@ export type ToolOutcome =
 export interface ToolRunnerContext {
   session: Session;
   allowedRoots: string[] | undefined;
+  /** Speech-to-text for `transcribe` and the cut commands; absent when none is installed. */
+  transcriber?: Transcriber | undefined;
   /** The tools offered to the model, by name. Calls to anything else are refused. */
   available: ReadonlyMap<string, ToolSpec>;
 }
@@ -140,6 +143,7 @@ export async function runToolCall(
 
   const commandCtx: CommandContext = { session: ctx.session, source: "ai" };
   if (ctx.allowedRoots) commandCtx.allowedRoots = ctx.allowedRoots;
+  if (ctx.transcriber) commandCtx.transcriber = ctx.transcriber;
   const result = await tryRunCommand(commandCtx, name, args);
   if (!result.ok) return { kind: "failed", error: result.error, args, repaired };
   return { kind: "ok", summary: result.summary, data: result.data, args, repaired };

@@ -1,6 +1,7 @@
 // Public surface of @dax/server: start a server in-process, and the interfaces a launcher implements to plug in the AI agent,
 // provider status and the local model. The executable entry point is cli.ts.
 
+export { type ParsedArgs, parseServerArgs, USAGE } from "./args.js";
 export type {
   AgentRunContext,
   AgentRunner,
