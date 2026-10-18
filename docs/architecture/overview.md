@@ -17,8 +17,8 @@ One engine and one command registry, three front doors. Whatever a person can do
 flowchart LR
   subgraph fronts[Three front doors]
     UI[Desktop app<br/>Tauri shell + React UI<br/>planned]
-    CLI[CLI: dax<br/>planned]
-    MCP[MCP server<br/>for external AI agents<br/>planned]
+    CLI[CLI: dax<br/>built]
+    MCP[MCP server<br/>for external AI agents<br/>built]
   end
   SRV[Engine server<br/>HTTP + WebSocket on 127.0.0.1<br/>planned]
   AGENT[Agent loop<br/>built-in chat, tool calls<br/>planned]
@@ -36,8 +36,8 @@ flowchart LR
   AGENT --> APIS
   AGENT --> REG
   SRV --> REG
-  CLI -.->|transport not yet decided| REG
-  MCP -.->|transport not yet decided| REG
+  CLI -->|in-process| REG
+  MCP -->|in-process| REG
   REG --> CORE
   CORE --> FF
   CORE --> STT
@@ -46,9 +46,9 @@ flowchart LR
   SRV -.types.-> PROTO
 ```
 
-**Built today:** `@dax/core` (the engine and the command registry), `@dax/protocol` (the shared contract) and `@dax/evals`. **Planned:** the engine server, agent loop, local model runtime, CLI, MCP server and desktop app. Several of these are being built in parallel right now, but none is merged yet. See [STATUS](../STATUS.md) and the [product v1 spec](../specs/product-v1.md).
+**Built today:** `@dax/core` (the engine and the command registry), `@dax/protocol` (the shared contract), `@dax/evals`, and the `dax` CLI and `dax-mcp` MCP server (`packages/cli`, `packages/mcp`). **Planned or not yet merged:** the engine server, agent loop, local model runtime and desktop app; several are being built in parallel. See [STATUS](../STATUS.md) and the [product v1 spec](../specs/product-v1.md).
 
-How the CLI and MCP server reach the registry (in-process, or through the engine server) is not decided yet. The product spec requires that they use the same commands with the same validation and history.
+The CLI and MCP server run the registry in-process and share project files through `Session`; they do not go through the engine server. See [CLI and MCP server](cli-and-mcp.md). They use the same commands with the same validation and history as every other front door.
 
 ## The engine (`packages/core`)
 
