@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ffmpegBin, run, runFfmpeg } from "./exec.js";
 import { type FontFiles, overlayFilters, type TextFile } from "./overlay-filters.js";
-import type { Project } from "./schema.js";
+import type { Clip, Project } from "./schema.js";
 import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
 
 /**
@@ -53,6 +53,14 @@ function encoderArgs(encoder: string): string[] {
 }
 
 const n = (x: number) => x.toFixed(6);
+
+/** Length of the tiny audio fade at each cut. Stops a hard splice from clicking; too short to hear as a dip. */
+const JOIN_FADE = 0.008;
+
+/** True if clip `b` simply continues clip `a` (same asset, next source moment), so no cut happens between them. */
+function isContinuation(a: Clip | undefined, b: Clip | undefined): boolean {
+  return Boolean(a && b && a.assetId === b.assetId && Math.abs(a.out - b.in) < 1e-3);
+}
 
 /** Where the bundled Inter font files live (OFL-licensed; shipped so text renders identically on every OS). */
 export function bundledFonts(): FontFiles {
@@ -114,9 +122,16 @@ export function buildRenderPlan(
     const vFade =
       (c.fadeIn > 0 ? `,fade=t=in:st=0:d=${n(c.fadeIn)}` : "") +
       (c.fadeOut > 0 ? `,fade=t=out:st=${n(Math.max(0, dur - c.fadeOut))}:d=${n(c.fadeOut)}` : "");
+    // Tiny fades at real cuts (not where one clip continues straight into the next) prevent clicks.
+    const joinIn = i > 0 && !isContinuation(clips[i - 1], c) && dur > JOIN_FADE * 2;
+    const joinOut = i < clips.length - 1 && !isContinuation(c, clips[i + 1]) && dur > JOIN_FADE * 2;
     const aFade =
       (c.fadeIn > 0 ? `,afade=t=in:st=0:d=${n(c.fadeIn)}` : "") +
-      (c.fadeOut > 0 ? `,afade=t=out:st=${n(Math.max(0, dur - c.fadeOut))}:d=${n(c.fadeOut)}` : "");
+      (c.fadeOut > 0
+        ? `,afade=t=out:st=${n(Math.max(0, dur - c.fadeOut))}:d=${n(c.fadeOut)}`
+        : "") +
+      (joinIn ? `,afade=t=in:st=0:d=${n(JOIN_FADE)}` : "") +
+      (joinOut ? `,afade=t=out:st=${n(dur - JOIN_FADE)}:d=${n(JOIN_FADE)}` : "");
     filters.push(
       `[${k}:v]trim=start=${n(c.in)}:end=${n(c.out)},setpts=PTS-STARTPTS,` +
         `scale=${W}:${H}:force_original_aspect_ratio=decrease,` +

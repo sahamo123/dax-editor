@@ -7,6 +7,14 @@ import { basename, dirname, resolve } from "node:path";
 import { type ZodTypeAny, z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { isPathInside } from "./connector.js";
+import {
+  analyzeAudio,
+  applyCutPlan,
+  CUT_PRESET_NAMES,
+  detectSpeechSpans,
+  planCuts,
+  planRanges,
+} from "./cuts.js";
 import { detectScenes, detectSilence, padSilences, probe } from "./media.js";
 import {
   addOverlay,
@@ -68,6 +76,7 @@ export interface CommandDef {
   readOnly: boolean;
   /** True if it cannot be undone from the history (writes files, overwrites). Agents must not run these inside a draft. */
   irreversible: boolean;
+  /** Do the work. Arguments have already been validated against `schema`. */
   run(ctx: CommandContext, args: never): Promise<CommandResult>;
 }
 
@@ -184,6 +193,24 @@ function styleFrom(a: { fontSize?: number; color?: string; position?: OverlaySty
   if (a.color !== undefined) s.color = a.color;
   if (a.position !== undefined) s.position = a.position;
   return s;
+}
+
+/** Analyse an asset and build a cut plan, using its transcript when it has one. */
+async function buildPlan(
+  ctx: CommandContext,
+  assetId: string | undefined,
+  preset: (typeof CUT_PRESET_NAMES)[number],
+) {
+  const asset = pickAsset(ctx.session.project, assetId);
+  const words = asset.transcript?.words;
+  const speech = words ? undefined : detectSpeechSpans(await analyzeAudio(asset.path));
+  return planCuts({
+    assetId: asset.id,
+    duration: asset.duration,
+    preset,
+    ...(words ? { words } : {}),
+    ...(speech ? { speech } : {}),
+  });
 }
 
 /** Every command, in the order they are presented to people and models. */
@@ -506,6 +533,105 @@ export const COMMANDS: readonly CommandDef[] = [
       return {
         summary: `Removed ${cuts.length} silence(s), ${fmt(before - after)} in total. Timeline is now ${fmt(after)}.`,
         data: { removed: cuts.length, secondsRemoved: before - after },
+      };
+    },
+  }),
+
+  define({
+    name: "plan_cuts",
+    description:
+      "Analyse a video's speech and propose cuts (long pauses, filler words, silence at the start and end, false starts, repeated takes) WITHOUT changing anything. Returns a plan id and each proposed cut with its reason and confidence. Use apply_cut_plan to apply it, or smart_cut to do both at once. Presets: gentle, standard (default), tight, podcast, tutorial.",
+    schema: z.object({
+      assetId: assetIdArg,
+      preset: z.enum(CUT_PRESET_NAMES).default("standard").describe("How aggressively to cut"),
+    }),
+    readOnly: true,
+    async run(ctx, a) {
+      const plan = await buildPlan(ctx, a.assetId, a.preset);
+      ctx.session.plans.set(plan.id, plan);
+      const approved = plan.decisions.filter((d) => d.status === "approved").length;
+      const proposed = plan.decisions.length - approved;
+      return {
+        summary: plan.decisions.length
+          ? `Plan ${plan.id}: ${approved} cut(s) ready (${fmt(plan.approvedSeconds)}) and ${proposed} to review (${fmt(plan.proposedSeconds)}).`
+          : "Nothing to cut: no long pauses, fillers or false starts found.",
+        data: {
+          planId: plan.id,
+          preset: plan.preset,
+          approvedSeconds: plan.approvedSeconds,
+          proposedSeconds: plan.proposedSeconds,
+          decisions: plan.decisions.slice(0, 60).map((d) => ({
+            id: d.id,
+            kind: d.kind,
+            start: Number(d.range.start.toFixed(2)),
+            end: Number(d.range.end.toFixed(2)),
+            reason: d.reason,
+            confidence: d.confidence,
+            status: d.status,
+          })),
+        },
+      };
+    },
+  }),
+
+  define({
+    name: "apply_cut_plan",
+    description:
+      "Apply a plan from plan_cuts. By default applies the approved cuts only; set includeProposed to also apply the ones that need review, or list ids in only/exclude. One undo step.",
+    schema: z.object({
+      planId: z.string(),
+      includeProposed: z.boolean().default(false),
+      only: z.array(z.string()).optional().describe("Apply only these decision ids"),
+      exclude: z.array(z.string()).optional().describe("Skip these decision ids"),
+    }),
+    async run(ctx, a) {
+      const plan = ctx.session.plans.get(a.planId);
+      if (!plan) throw new CommandError(`Unknown plan "${a.planId}". Call plan_cuts first.`);
+      const opts = {
+        includeProposed: a.includeProposed,
+        ...(a.only ? { only: a.only } : {}),
+        ...(a.exclude ? { exclude: a.exclude } : {}),
+      };
+      const before = timelineDuration(ctx.session.project);
+      if (
+        assetRangesToTimeline(ctx.session.project, plan.assetId, planRanges(plan, opts)).length ===
+        0
+      ) {
+        return { summary: "Nothing left to cut from that plan. Nothing changed." };
+      }
+      await edit(ctx, `Apply cuts (${plan.preset})`, (p) => applyCutPlan(p, plan, opts));
+      const after = timelineDuration(ctx.session.project);
+      return {
+        summary: `Applied the cuts: removed ${fmt(before - after)}. Timeline is now ${fmt(after)}.`,
+      };
+    },
+  }),
+
+  define({
+    name: "smart_cut",
+    description:
+      "Tighten talking footage in one step: plan the cuts and apply the approved ones (long pauses, filler words when a transcript exists, dead air at the start and end). Cuts that need judgement (false starts, repeated takes) are listed but NOT applied; review them with plan_cuts. This is the best default for 'clean up this video'.",
+    schema: z.object({
+      assetId: assetIdArg,
+      preset: z.enum(CUT_PRESET_NAMES).default("standard").describe("How aggressively to cut"),
+    }),
+    async run(ctx, a) {
+      const plan = await buildPlan(ctx, a.assetId, a.preset);
+      ctx.session.plans.set(plan.id, plan);
+      const before = timelineDuration(ctx.session.project);
+      const ranges = assetRangesToTimeline(ctx.session.project, plan.assetId, planRanges(plan));
+      const review = plan.decisions.filter((d) => d.status === "proposed");
+      if (ranges.length === 0) {
+        return {
+          summary: `No cuts needed.${review.length ? ` ${review.length} possible false start(s) or retake(s) to review (plan ${plan.id}).` : ""}`,
+          data: { planId: plan.id },
+        };
+      }
+      await edit(ctx, `Smart cut (${plan.preset})`, (p) => applyCutPlan(p, plan));
+      const after = timelineDuration(ctx.session.project);
+      return {
+        summary: `Removed ${fmt(before - after)} (${plan.decisions.filter((d) => d.status === "approved").length} cut(s)). Timeline is now ${fmt(after)}.${review.length ? ` ${review.length} more for review: apply_cut_plan with planId ${plan.id} and includeProposed.` : ""}`,
+        data: { planId: plan.id, secondsRemoved: before - after, forReview: review.length },
       };
     },
   }),

@@ -7,3 +7,6 @@ target/
 # Local project files and generated media
 *.dax.json
 .dax-cache/
+
+# Isolated git worktrees used by parallel build agents
+.claude/worktrees/

@@ -1,6 +1,7 @@
 // A Session holds the current project with a full edit history (undo, redo, jump to any earlier state, named checkpoints) and optional saving to disk.
 
 import { readFile, writeFile } from "node:fs/promises";
+import type { CutPlan } from "./cuts.js";
 import { type Project, ProjectSchema } from "./schema.js";
 import { emptyProject, mainClips, timelineDuration } from "./timeline.js";
 
@@ -59,6 +60,8 @@ export class Session {
   private currentId = 0;
   /** For each state, the child that undo/redo should walk back to. */
   private lastChild = new Map<number, number>();
+  /** Cut plans waiting for review, by id. Kept in memory only; applying one is a normal edit in the history. */
+  readonly plans = new Map<string, CutPlan>();
 
   constructor(
     public project: Project,
