@@ -2,6 +2,11 @@
 
 ## 2026-10-18
 
+* **Milestone**: the first full `pnpm check` passes with exit code 0. It covers lint, typecheck, the knowledge-base validation (`pnpm docs:okf`), doc coverage, dead-code check and tests (28 core, 6 evals and 14 script tests). The evals oracle run passes 3/3.
+* **Update**: a one-line purpose comment added to every non-test source file. The TypeDoc doc-coverage gate passes.
+* **Creation**: CI workflow in `.github/workflows/ci.yml`. Linux is required. macOS and Windows are non-blocking until verified. It has not yet run on GitHub.
+* **Creation**: ADRs 0001-0008 in `docs/adr/` (0006 is a draft proposal), the engineering standards, the [architecture overview](/architecture/overview.md), the [evals overview](/evals/overview.md) and [model evaluation plan](/evals/model-evaluation-plan.md), the [spec template](/specs/_template.md), the [repo settings checklist](/maintainers/repo-settings.md), and a scribe subagent definition with pointer configs so other agents read AGENTS.md.
+* **Creation**: OKF validator and index generator. `scripts/okf.mjs` provides `check` and `index`, with its own tests. `pnpm docs:okf` validates the bundle, and `pnpm docs:index` regenerates the index files. Both run in `pnpm check` and CI. See the [knowledge protocol](/engineering/knowledge-protocol.md).
 * **Milestone**: OKF adopted. `docs/` is now an [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format) v0.2 bundle with a scribe step, see [knowledge protocol](/engineering/knowledge-protocol.md).
 * **Creation**: `packages/evals` harness with an oracle adapter and 3 starter tasks. The oracle passes 3/3.
 * **Creation**: dev environment: Biome lint, TypeDoc documentation-coverage gate, knip dead-code check, conventional-commit and pre-commit hooks, AGENTS.md, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, GOVERNANCE, issue and PR templates, CODEOWNERS, Dependabot, and a cloud-session start hook.

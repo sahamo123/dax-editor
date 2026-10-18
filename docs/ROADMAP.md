@@ -6,7 +6,7 @@ tags: [roadmap, planning]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T18:45:00Z
+  at: 2026-10-18T19:30:00Z
 ---
 
 # Roadmap
@@ -33,9 +33,9 @@ Decisions so far:
 - [x] Transcript types, filler-word ranges, `Connector` interface (local)
 - [x] Dev environment: lint/format (Biome), doc-coverage gate (TypeDoc), dead-code check (knip), git hooks, AGENTS.md, contributor docs, OKF knowledge base
 - [x] Evals harness with deterministic oracle adapter and 3 starter tasks
-- [ ] CI workflow (Linux required; macOS and Windows experimental until verified)
-- [ ] OKF validator + index generator scripts
-- [ ] [ADRs 0001-0008](adr/)
+- [ ] CI workflow (Linux required; macOS and Windows experimental until verified) (written, awaiting first run)
+- [x] OKF validator + index generator scripts
+- [x] [ADRs 0001-0008](adr/index.md)
 - [ ] First real model adapter (OpenAI-compatible endpoint, covers Ollama and llama.cpp)
 - [ ] Model evaluation study per [model-evaluation-plan](evals/model-evaluation-plan.md)
 - [ ] whisper.cpp transcriber adapter

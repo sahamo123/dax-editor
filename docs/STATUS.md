@@ -6,7 +6,7 @@ tags: [status, roadmap, handoff]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T18:45:00Z
+  at: 2026-10-18T19:30:00Z
 ---
 
 # Project status
@@ -19,11 +19,15 @@ The engine core (`packages/core`) and the developer tooling are built, and the e
 
 - **Core engine** (`packages/core`): timeline model with undo/redo; FFmpeg probe, silence detection and scene detection; renderer with an LGPL-safe encoder choice; transcript helpers; `Connector` interface (local).
 - **Evals harness** (`packages/evals`): oracle adapter passes 3/3 starter tasks.
-- **Tooling**: lint, typecheck, doc coverage, dead-code check and tests are all green on Linux.
+- **Tooling**: `pnpm check` exits 0 on Linux: lint, typecheck, knowledge-base validation, doc coverage, dead-code check and tests (28 core, 6 evals and 14 script tests).
+- **Dev environment**: Biome lint and format, TypeDoc doc-coverage gate, knip dead-code check, git hooks, AGENTS.md and contributor docs.
+- **Knowledge base**: OKF validator and index generator (`pnpm docs:okf`, `pnpm docs:index`); ADRs 0001-0008 (0006 is a draft proposal); engineering docs; architecture overview; evals docs; spec template; maintainer checklist.
+- **Scribe step**: a scribe subagent definition, and the routine documented in the knowledge protocol.
+- **CI workflow**: written in `.github/workflows/ci.yml`, with Linux required and macOS and Windows non-blocking. It has not yet run on GitHub.
 
 ## In progress
 
-- Dev environment hardening: CI workflow, engineering docs, ADRs, OKF validator and index generator.
+- Nothing in flight. Next is the first pull request merge and enabling repo settings.
 
 ## Next up (in order)
 
@@ -42,6 +46,7 @@ The engine core (`packages/core`) and the developer tooling are built, and the e
 - Confirm the Gemma 4 licence and tool-calling behaviour before relying on it. **(unverified)**
 - Google Drive needs a decision on OAuth app verification: restricted scope or Picker. **(unverified)**
 - macOS and Windows CI results are unknown until the first CI run.
+- First CI run on GitHub, to confirm Linux passes and to see macOS and Windows results.
 
 ## Known issues
 
@@ -55,3 +60,4 @@ The engine core (`packages/core`) and the developer tooling are built, and the e
 1. Run `pnpm bootstrap` (one-time: checks the toolchain, installs dependencies, enables git hooks).
 2. Run `pnpm check` (everything CI runs).
 3. Read the newest entries in [log](log.md), then pick the top issue in GitHub Issues.
+4. After your work, do the scribe step (see [knowledge protocol](engineering/knowledge-protocol.md)).
