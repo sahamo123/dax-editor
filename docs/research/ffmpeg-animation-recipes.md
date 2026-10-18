@@ -21,7 +21,6 @@ Test conventions. **Tested**: the fragment exited 0 on the local FFmpeg 6.1.1 bu
 2. **Second video layer after the join.** Each B-roll insert is prepared as its own chain: `setpts=PTS-STARTPTS+T/TB` moves it to timeline time, `scale` fits it, and `fade` softens it. It is then applied with `overlay` and `enable='between(t,s,e)'`, always with `eof_action=pass` (G4). A full-screen cutaway is the same overlay at 0,0 on a full-size input. The B-roll's own audio is dropped, so the main audio is untouched.
 3. **Motion overlays after the video layers.** PNGs are looped (`-loop 1 -t <duration>`), `format=rgba`, and animated with `fade`, `scale eval=frame` or an `overlay` expression. Growing shapes use a scaled colour source, not `drawbox` (G1).
 4. **Zoom on the primary track.** `zoompan` with `d=1` for keyframes, or `scale eval=frame` plus a `crop` whose offset comes from the zoom expression (G2). Ken Burns needs a pre-scale (G8).
-5. **Text and captions last,** in timeline time, as now.
 6. **Audio buses meeting in one `amix`.** Voice is `[a_main]`. Music is trimmed or looped, faded and ducked by `sidechaincompress` keyed on a copy of the voice. SFX splits one decode with `asplit` and delays each branch with `adelay`. One `amix normalize=0`, then `alimiter level=disabled`, `loudnorm`, `aresample=48000` (G5, G6, G9).
 7. **Keep graphs manageable** with `-filter_complex_script`, one `asplit` or `split` per asset, and typed parameters that generate the expressions (section 8).
 
@@ -164,11 +163,9 @@ Exit 234: `Expressions with frame variables 'n', 't', 'pos' are not valid in ini
 
 ## 3. Music layer
 
-Inputs for the ducking tests: `-i main.mp4 -stream_loop -1 -i music.wav`. The test music is a 220 Hz tone and the voice is a 300 Hz tone in bursts, 0.7 s on and 0.5 s off.
-
 ### 3.1 Ducking music under the voice (tested, RMS checked)
 
-Input 0 is the voice and input 1 is the music. `sidechaincompress` compresses its **first** input and takes its key from its **second**, so the music goes first and a copy of the voice goes second (G9).
+Inputs: `-i main.mp4 -stream_loop -1 -i music.wav` (voice: 300 Hz tone in 0.7 s bursts; music: 220 Hz tone). Input 0 is the voice and input 1 is the music. `sidechaincompress` compresses its **first** input and takes its key from its **second**, so the music goes first and a copy of the voice goes second (G9).
 
 ```
 [0:a]anull[vk];[1:a]atrim=0:6,asetpts=PTS-STARTPTS,volume=0.6[mus];[mus][vk]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=300[duck]
@@ -267,13 +264,11 @@ Corrected linear ramp, 1x for 2 s then 0.5x, output with `-fps_mode passthrough`
 setpts='(if(lt(T,2),T,2+(T-2)*2))/TB'
 ```
 
-Smooth ramp, speed falling from 1x at 2 s to 0.5x at 4 s and held after, with a constant output frame rate (**263 frames**, last timestamp 8.73 s, against the expected 8.77 s from the integral of 1/speed):
+Smooth ramp, speed falling from 1x at 2 s to 0.5x at 4 s and held after, with a constant output frame rate (**263 frames**, last timestamp 8.73 s, against the expected 8.77 s; the log term is the integral of 1/speed; UI parameters: keyframes of time and speed):
 
 ```
 setpts='(if(lt(T,2),T,if(lt(T,4),2-4*log(1-0.25*(T-2)),4.7726+2*(T-4))))/TB',fps=30
 ```
-
-The log term is the integral of 1/speed, so output time is continuous. UI parameters: keyframes (time, speed), with the integral computed per segment in the typed layer.
 
 ### 6.2 Audio for a ramp (tested, duration checked)
 
@@ -387,7 +382,6 @@ Real-world reports (closest matches found; no Stack Overflow or Reddit thread ma
 - **R2. `zoompan` shake.** An FFmpeg trac comment reports shaky output and calls 2x upscaling before `zoompan` a partial, slow fix. Measured here: 4x cut direction changes from 136 to 32 (2.3).
 - **R3. `overlay` `eof_action`.** A 2020 patch proposed changing the default to `pass`, and the reply rejected it because existing scripts rely on `repeat` (5.3).
 - **R4. `amix` normalisation.** FFmpeg trac ticket #8033 discusses mixing without renormalisation. `normalize` is on by default, and `normalize=0` clips unless a limiter follows (4.2).
-- **R5. Speed ramps with `N` and `PTS`.** A 2018 ffmpeg-user thread advises against mixing `N` and `PTS` in one `setpts` expression, which the `/TB` form in 6.1 avoids.
 
 ## Sources
 
@@ -400,7 +394,6 @@ Fetched with WebFetch and read for this note:
 Seen in web search results only (not fetched; cited for pointers, not facts):
 
 - https://ffmpeg.org/pipermail/ffmpeg-trac/2021-May/058498.html (amix `normalize`, R4).
-- https://ffmpeg.org/pipermail/ffmpeg-user/2018-July/040632.html (freeze frames and mixing `N` with `PTS`, R5).
 - https://trac.ffmpeg.org/wiki/How%20to%20speed%20up%20/%20slow%20down%20a%20video (speed changes and dropped frames).
 - https://lists.ffmpeg.org/archives/list/ffmpeg-user@ffmpeg.org/thread/CJH2SEPGGFUCQ3YS4VXB7CKJS5OZAPCN/ (a `sidechaincompress` thread that reports a problem with the input order. Cause not confirmed. See G9).
 
