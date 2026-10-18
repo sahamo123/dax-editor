@@ -1,0 +1,36 @@
+{
+  "name": "@dax/desktop",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The dax-editor desktop UI (React + Vite, packaged with Tauri).",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "editor:dev": "vite --config vite.editor.config.ts",
+    "editor:mock": "node src/editor/dev/mock-server.ts",
+    "editor:typecheck": "tsc -p tsconfig.editor.json --noEmit",
+    "editor:test": "vitest run --config vitest.editor.config.ts",
+    "editor:e2e": "playwright test --config playwright.editor.config.ts"
+  },
+  "dependencies": {
+    "@dax/protocol": "workspace:*",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@dax/core": "workspace:*",
+    "@playwright/test": "1.56.1",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.0"
+  }
+}

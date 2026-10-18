@@ -1,0 +1,60 @@
+/* Layout for the dev harness only: preview over toolbar over timeline, presets and inspector at the side. */
+
+@font-face {
+  font-family: "Inter";
+  font-weight: 400;
+  src: url("http://127.0.0.1:4390/fonts/Inter-Regular.otf") format("opentype");
+}
+@font-face {
+  font-family: "Inter";
+  font-weight: 700;
+  src: url("http://127.0.0.1:4390/fonts/Inter-Bold.otf") format("opentype");
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  background: #0b0d11;
+  color-scheme: dark;
+}
+.h-root {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  height: 100%;
+}
+.h-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto 300px;
+  min-width: 0;
+  min-height: 0;
+}
+.h-preview {
+  min-height: 0;
+}
+.h-timeline {
+  min-height: 0;
+}
+.h-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 0;
+  border-left: 1px solid #2c313b;
+  background: #14171c;
+}
+.h-side-presets,
+.h-side-inspector {
+  min-height: 0;
+  overflow: auto;
+}
+.h-side-presets {
+  border-bottom: 1px solid #2c313b;
+}
+.h-msg {
+  padding: 24px;
+  color: #e7e9ee;
+  font-family: system-ui, sans-serif;
+}
