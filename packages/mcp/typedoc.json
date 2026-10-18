@@ -1,0 +1,21 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "tsconfig": "tsconfig.json",
+  "emit": "none",
+  "treatWarningsAsErrors": true,
+  "validation": {
+    "notExported": true,
+    "invalidLink": true,
+    "notDocumented": true
+  },
+  "requiredToBeDocumented": [
+    "Function",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Variable",
+    "Method",
+    "Accessor"
+  ]
+}
