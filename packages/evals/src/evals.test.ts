@@ -80,5 +80,6 @@ describe("metrics", () => {
     const table = formatSummary(summarize([{ ...base, taskId: "a", pass: true }]));
     expect(table).toContain("| Adapter |");
     expect(table).toContain("1/1 (100%)");
+    expect(table).toContain("1/4 (25%)");
   });
 });

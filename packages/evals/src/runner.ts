@@ -2,14 +2,14 @@
 
 import { addAsset, appendClip, emptyProject, probe, Session } from "@dax/core";
 import { generateFixture } from "./fixtures.js";
-import type { RunRecord } from "./metrics.js";
+import type { RunRecord, ToolCallCounts } from "./metrics.js";
 import { runChecks } from "./score.js";
 import type { EvalTask } from "./task.js";
 
 /** What an adapter hands back after attempting a task. */
 export interface AgentResult {
   turns: number;
-  toolCalls: { total: number; invalid: number };
+  toolCalls: ToolCallCounts;
   inputTokens?: number;
   outputTokens?: number;
 }
@@ -52,7 +52,6 @@ export async function runTask(
   task: EvalTask,
   opts: RunOptions,
 ): Promise<RunRecord> {
-  const started = Date.now();
   const fixturePath = await generateFixture(task.fixture, opts.fixtureDir);
   const asset = await probe(fixturePath);
   const project = appendClip(addAsset(emptyProject(task.id), asset), asset.id);
@@ -60,11 +59,15 @@ export async function runTask(
 
   let result: AgentResult = { turns: 0, toolCalls: { total: 0, invalid: 0 } };
   let error: string | undefined;
+  // Time only the attempt: fixture generation and scoring (which renders video) are not model time,
+  // and counting them would make tokens-per-second look worse than the model really is.
+  const started = Date.now();
   try {
     result = await adapter.run({ task, session, assetId: asset.id, fixturePath });
   } catch (err) {
     error = err instanceof Error ? err.message : String(err);
   }
+  const latencyMs = Date.now() - started;
 
   const score = error
     ? { pass: false, failures: [`adapter error: ${error}`] }
@@ -77,7 +80,7 @@ export async function runTask(
     failures: score.failures,
     turns: result.turns,
     toolCalls: result.toolCalls,
-    latencyMs: Date.now() - started,
+    latencyMs,
   };
   if (result.inputTokens !== undefined) record.inputTokens = result.inputTokens;
   if (result.outputTokens !== undefined) record.outputTokens = result.outputTokens;
