@@ -9,8 +9,11 @@ Root rules in `/AGENTS.md` apply; this file adds package specifics.
 |---|---|
 | `schema.ts` | zod schemas and types: `Asset`, `Clip`, `Track`, `Timeline`, `Project`, `Range`, `Overlay`, caption settings, output format. |
 | `timeline.ts` | **Pure** edit operations (`splitAt`, `deleteRange`, `keepRanges`, `trimClip`, fades, ...). Take a `Project`, return a new one. |
-| `commands.ts` | **The command registry.** `COMMANDS` is the only way a project changes. The UI, built-in AI, MCP and CLI all call it. Each command has typed arguments, a model-facing description, `readOnly` and `irreversible` flags. `commandTools()` gives JSON-schema tool specs. 33 commands today. |
+| `commands.ts` | **The command registry.** `COMMANDS` is the only way a project changes. The UI, built-in AI, MCP and CLI all call it. Each command has typed arguments, a model-facing description, `readOnly` and `irreversible` flags. `commandTools()` gives JSON-schema tool specs. 35 commands today: 33 here and 2 template commands from `template-commands.ts`. |
 | `session.ts` | `Session`: current project plus a history **tree** of labelled states (`manual`, `ai`, `template`). Jump to any state, save named checkpoints, optional save to a `.dax.json` file. |
+| `skills.ts` | Skills layer: loads the `SKILL.md` playbooks in `skills/` and picks the few that fit a request within a character budget. Pure and deterministic. |
+| `templates.ts` | Template packs (data in `templates/`) and the **deterministic applier**: it composes existing commands on a scratch session and commits the result as one history entry. No AI involved. |
+| `template-commands.ts` | The two template commands, `list_templates` and `apply_template`. |
 | `cuts.ts` | Cut engine: floor-relative speech detection with hysteresis, five cut presets, `planCuts` (a reviewable plan where every decision has a kind, reason, confidence and status), `applyCutPlan`. Design: `docs/research/cut-intelligence.md`. |
 | `captions.ts` | Word-timed captions computed from the timeline's transcripts at render time (so they follow every cut), three looks, ASS subtitle file for burn-in. |
 | `overlays.ts` | Pure edit operations for text overlays: add, update, move, remove, and `shiftOverlaysForDelete` for ripple deletes. |
@@ -35,6 +38,7 @@ Bundled font: `assets/fonts/` (Inter, OFL-1.1, see `LICENSE-Inter.txt`).
 - User text never enters an FFmpeg filter string. It goes through text files (`overlay-filters.ts`).
 - Cut decisions that judge content (false starts, repeated takes) are **proposals** until approved. Nothing applies them silently.
 - Commands must be safe to run twice. `remove_silences` and `remove_fillers` were once not idempotent; a regression test now guards this. Add one for any new command that removes material.
+- Templates and skills are **data**. They never carry file paths or FFmpeg arguments. A template application is one history entry, so one undo reverses it.
 - Parsers (`parseSilenceDetect`, `parseProbe`, ...) are separate from the functions that run FFmpeg so they are testable without it.
 
 ## Testing
