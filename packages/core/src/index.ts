@@ -2,6 +2,7 @@ export * from "./captions.js";
 export * from "./commands.js";
 export * from "./connector.js";
 export * from "./cuts.js";
+export * from "./encoders.js";
 export { ffmpegBin, ffprobeBin } from "./exec.js";
 export * from "./ids.js";
 export * from "./media.js";

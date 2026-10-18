@@ -18,7 +18,8 @@ Root rules in `/AGENTS.md` apply; this file adds package specifics.
 | `presets.ts` | Built-in text presets (`OVERLAY_PRESETS`, six animations: fade, slide-up, slide-left, pop, typewriter, none) and `overlayFromPreset`. Pure data. |
 | `ids.ts` | `newId(prefix)`, the id generator for clips, overlays and history items. |
 | `media.ts` | ffprobe, silence and scene detection, and the parsers for their output. |
-| `render.ts` | Build and run the FFmpeg command for the main track, its overlays and captions; fit modes; pick an LGPL-safe encoder. |
+| `render.ts` | Build and run the FFmpeg command for the main track, its overlays and captions; fit modes. Export falls back to the next encoder when one cannot run. |
+| `encoders.ts` | Encoder choice shared with the server: `rankEncoders`, `probeEncoder` (1-frame lavfi test, cached 10 min) and `withEncoderFallback` (retry next encoder only if a synthetic probe shows the encoder itself is dead). |
 | `transcript.ts` | Transcript types, `Transcriber` interface, filler-word ranges. (No speech-to-text adapter yet.) |
 | `connector.ts` | `Connector` interface for media sources/destinations; `LocalConnector`. |
 | `exec.ts` | Thin process runners. Honors `DAX_FFMPEG` / `DAX_FFPROBE`. |

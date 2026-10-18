@@ -5,42 +5,11 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildAss, captionLines } from "./captions.js";
-import { ffmpegBin, run, runFfmpeg } from "./exec.js";
+import { withEncoderFallback } from "./encoders.js";
+import { runFfmpeg } from "./exec.js";
 import { type FontFiles, filterPath, overlayFilters, type TextFile } from "./overlay-filters.js";
 import type { Clip, Project } from "./schema.js";
 import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
-
-/**
- * Preferred H.264 encoders, best first. libx264 is GPL, so builds we ship
- * (LGPL) rely on the platform encoders and fall back to what is available.
- */
-const PREFERRED_ENCODERS = [
-  "libx264",
-  "h264_videotoolbox",
-  "h264_nvenc",
-  "h264_qsv",
-  "h264_amf",
-  "libopenh264",
-  "mpeg4",
-] as const;
-
-/** Names of the video encoders compiled into the FFmpeg binary in use. */
-export async function listEncoders(): Promise<Set<string>> {
-  const { stdout } = await run(ffmpegBin(), ["-hide_banner", "-encoders"]);
-  const names = new Set<string>();
-  for (const line of stdout.split("\n")) {
-    const name = /^\s*V\S*\s+(\S+)/.exec(line)?.[1];
-    if (name) names.add(name);
-  }
-  return names;
-}
-
-/** Pick the best available H.264 encoder from the preferred list. Throws if none is usable. */
-export function chooseEncoder(available: Set<string>): string {
-  const found = PREFERRED_ENCODERS.find((e) => available.has(e));
-  if (!found) throw new Error("No usable video encoder found in this FFmpeg build");
-  return found;
-}
 
 function encoderArgs(encoder: string): string[] {
   switch (encoder) {
@@ -222,26 +191,35 @@ export function buildRenderPlan(
 
 /** Options for {@link exportProject}. */
 export interface ExportOptions {
-  /** Override the automatically chosen encoder. */
+  /** Force one encoder and do not fall back to another if it fails. */
   encoder?: string;
   /** Called with a fraction between 0 and 1. */
   onProgress?: (fraction: number) => void;
 }
 
-/** Render the main track to `outPath` and report which encoder was used. Progress is reported as a fraction from 0 to 1. */
+/**
+ * Render the main track to `outPath` and report which encoder was used. Progress is reported as a fraction from 0 to 1.
+ * If the preferred encoder cannot run on this machine (a listed hardware encoder with no hardware), the next one is tried;
+ * see {@link withEncoderFallback}. Progress restarts from 0 after a fallback.
+ */
 export async function exportProject(
   project: Project,
   outPath: string,
   opts: ExportOptions = {},
 ): Promise<{ encoder: string; duration: number }> {
-  const encoder = opts.encoder ?? chooseEncoder(await listEncoders());
   const workDir = await mkdtemp(join(tmpdir(), "dax-render-"));
   try {
-    const plan = buildRenderPlan(project, outPath, encoder, { workDir });
-    for (const f of plan.files) await writeFile(f.path, f.content, "utf8");
-    await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)));
-    opts.onProgress?.(1);
-    return { encoder, duration: plan.duration };
+    const { encoder, value: duration } = await withEncoderFallback(
+      async (enc) => {
+        const plan = buildRenderPlan(project, outPath, enc, { workDir });
+        for (const f of plan.files) await writeFile(f.path, f.content, "utf8");
+        await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)));
+        opts.onProgress?.(1);
+        return plan.duration;
+      },
+      opts.encoder ? { candidates: [opts.encoder] } : {},
+    );
+    return { encoder, duration };
   } finally {
     await rm(workDir, { recursive: true, force: true });
   }

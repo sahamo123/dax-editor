@@ -18,17 +18,48 @@ export interface ExecResult {
   stderr: string;
 }
 
+/** Options for {@link run}. */
+export interface RunOptions {
+  /** Kill the process and reject with an `AbortError`-named error when aborted. */
+  signal?: AbortSignal;
+  /** Kill the process and reject if it runs longer than this many milliseconds. */
+  timeoutMs?: number;
+}
+
+/** An error named `AbortError`, the shape every cancellable runner in this repo rejects with. */
+export function abortError(): Error {
+  const e = new Error("Cancelled");
+  e.name = "AbortError";
+  return e;
+}
+
+/** True for an error raised because a {@link RunOptions.signal} fired. */
+export function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === "AbortError";
+}
+
 /** Run a binary to completion. FFmpeg prints most diagnostics to stderr, so both are returned. */
-export function run(bin: string, args: string[]): Promise<ExecResult> {
+export function run(bin: string, args: string[], opts: RunOptions = {}): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
-    execFile(bin, args, { maxBuffer: 64 * 1024 * 1024 }, (err, stdout, stderr) => {
-      if (err) {
-        const tail = stderr.trim().split("\n").slice(-5).join("\n");
-        reject(new Error(`${bin} failed: ${err.message}\n${tail}`));
-      } else {
-        resolve({ stdout, stderr });
-      }
-    });
+    if (opts.signal?.aborted) return reject(abortError());
+    execFile(
+      bin,
+      args,
+      {
+        maxBuffer: 64 * 1024 * 1024,
+        ...(opts.signal ? { signal: opts.signal } : {}),
+        ...(opts.timeoutMs ? { timeout: opts.timeoutMs, killSignal: "SIGKILL" as const } : {}),
+      },
+      (err, stdout, stderr) => {
+        if (err) {
+          if (opts.signal?.aborted) return reject(abortError());
+          const tail = stderr.trim().split("\n").slice(-5).join("\n");
+          reject(new Error(`${bin} failed: ${err.message}\n${tail}`));
+        } else {
+          resolve({ stdout, stderr });
+        }
+      },
+    );
   });
 }
 
