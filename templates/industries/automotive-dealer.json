@@ -1,0 +1,275 @@
+{
+  "id": "automotive-dealer",
+  "version": 1,
+  "kind": "industry",
+  "name": "Automotive dealer",
+  "description": "Vehicle video: model, year and trim lower-third, a price callout with fine print along the whole clip, a test-drive end card, and gentle pacing. Captions and music are listed as not available yet.",
+  "tags": ["automotive", "car", "dealer", "reels", "youtube"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 19",
+  "variables": [
+    {
+      "name": "vehicle",
+      "label": "Year, model and trim",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "2026 Rivera GT Sport"
+    },
+    {
+      "name": "stock",
+      "label": "Stock number",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "example": "Stock #A1234"
+    },
+    {
+      "name": "price",
+      "label": "Advertised price",
+      "type": "text",
+      "required": false,
+      "maxLength": 24,
+      "example": "$31,990"
+    },
+    {
+      "name": "fine_print",
+      "label": "Price fine print",
+      "type": "text",
+      "required": false,
+      "maxLength": 100,
+      "default": "Price excludes taxes and fees. See dealer for details.",
+      "example": "Price excludes taxes and fees. See dealer for details."
+    },
+    {
+      "name": "business_name",
+      "label": "Dealership",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Lakeside Motors"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Book a test drive",
+      "example": "Book a test drive"
+    },
+    {
+      "name": "phone",
+      "label": "Phone number",
+      "type": "phone",
+      "required": false,
+      "example": "+1 555 010 0199"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "youtube-shorts"
+        }
+      ]
+    },
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 120,
+        "max": 300
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 120,
+            "max": 300
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "4:5",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-feed"
+        },
+        {
+          "platform": "facebook-feed"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "gentle"
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "name": "Engine sound or feature",
+      "durationSec": {
+        "min": 0,
+        "max": 3
+      },
+      "guidance": "Open on the sound or the best feature."
+    },
+    {
+      "id": "exterior",
+      "name": "Exterior",
+      "durationSec": {
+        "min": 3,
+        "max": 8
+      },
+      "guidance": "Walk around slowly.",
+      "overlay": "vehicle"
+    },
+    {
+      "id": "interior",
+      "name": "Interior and tech",
+      "durationSec": {
+        "min": 8,
+        "max": 15
+      },
+      "guidance": "Show what the driver uses."
+    },
+    {
+      "id": "engine",
+      "name": "Engine",
+      "durationSec": {
+        "min": 5,
+        "max": 5
+      },
+      "guidance": "Let it play; no music under it."
+    },
+    {
+      "id": "price",
+      "name": "Price or offer",
+      "durationSec": {
+        "min": 4,
+        "max": 4
+      },
+      "guidance": "Price with fine print.",
+      "overlay": "price"
+    },
+    {
+      "id": "cta",
+      "name": "Call to action",
+      "durationSec": {
+        "min": 3,
+        "max": 3
+      },
+      "guidance": "Location and booking.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "vehicle",
+      "preset": "lower-third-slide",
+      "text": "{{vehicle}}",
+      "subtitle": "{{stock}}",
+      "when": "vehicle",
+      "anchor": "start",
+      "offset": 1,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "price",
+      "preset": "callout-slide-up",
+      "text": "{{price}}",
+      "when": "price",
+      "anchor": "end",
+      "offset": 4,
+      "duration": 4,
+      "minDuration": 1.5,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "disclosure",
+      "preset": "caption-bottom",
+      "text": "{{fine_print}}",
+      "when": "fine_print",
+      "anchor": "full",
+      "offset": 0,
+      "minDuration": 1,
+      "priority": 0
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{business_name}} · {{phone}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3.5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.4,
+    "out": 0.8
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Spec text on screen.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "description": "Energetic music, but none under the engine.",
+      "requires": ["music-bed", "audio-ducking"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "advertising",
+      "text": "Advertised prices, fees and finance or lease terms generally have to be disclosed in the ad. Rules differ by country and state."
+    },
+    {
+      "category": "advertising",
+      "text": "'Certified' claims must match the programme's real requirements. Manufacturer logos follow your dealer agreement."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "price-fees",
+      "ask": "Does the advertised price include or clearly list taxes and fees?"
+    },
+    {
+      "id": "trim",
+      "ask": "Are the year, model and trim shown correct for the car in the video?"
+    }
+  ]
+}

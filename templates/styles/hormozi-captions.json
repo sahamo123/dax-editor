@@ -1,0 +1,180 @@
+{
+  "id": "hormozi-captions",
+  "version": 1,
+  "kind": "style",
+  "name": "Punchy talking head (Hormozi-style)",
+  "description": "Vertical talking head with every pause and filler cut out, a bold hook line in the first second and a single call to action at the end. Word-by-word captions and punch-in zooms, which define this look, are listed as not available yet.",
+  "tags": ["talking-head", "short-form", "captions", "fast-cuts", "tiktok", "reels", "shorts"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.1",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Hook line",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "You are editing your videos wrong"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Follow for more",
+      "example": "Follow for part 2"
+    },
+    {
+      "name": "url",
+      "label": "Web address (optional)",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "youtube-shorts",
+          "lengthSec": {
+            "min": 15,
+            "max": 180
+          },
+          "note": "Shorts can run up to 3 minutes"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "tight"
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "name": "Hook",
+      "durationSec": {
+        "min": 0,
+        "max": 3
+      },
+      "guidance": "Open on the claim or the promise. No intro, no logo, no breath before the first word.",
+      "footage": "Speaker close to camera, mid-sentence.",
+      "overlay": "hook"
+    },
+    {
+      "id": "point",
+      "name": "The point",
+      "durationSec": {
+        "min": 10,
+        "max": 40
+      },
+      "guidance": "One idea only. A fresh angle or a tighter frame every 1 to 3 seconds keeps it moving.",
+      "footage": "Same take, cut tight."
+    },
+    {
+      "id": "cta",
+      "name": "One ask",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Ask for one thing: follow, comment or click.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "hook",
+      "preset": "title-pop",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.2,
+      "duration": 2.2,
+      "minDuration": 1,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3.5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.4
+  },
+  "deferred": [
+    {
+      "id": "word-captions",
+      "title": "Word-by-word captions",
+      "description": "Two to four words on screen at a time, bold uppercase, the spoken word highlighted with a dark outline, lower third, each word popping in.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "punch-ins",
+      "title": "Punch-in zooms",
+      "description": "Alternate a wide and a 10 to 20 percent tighter frame at each jump cut.",
+      "requires": ["zoom-keyframes"]
+    },
+    {
+      "id": "speaker-fit",
+      "title": "Speaker fills the frame",
+      "description": "Re-frame the speaker to fill at least 60 percent of the vertical frame.",
+      "requires": ["reframe"]
+    },
+    {
+      "id": "music-bed",
+      "title": "Quiet music bed",
+      "description": "Subtle low-energy music under the voice, with no transition sound effects.",
+      "requires": ["music-bed", "audio-ducking"]
+    },
+    {
+      "id": "grade",
+      "title": "Contrasty colour",
+      "description": "Higher contrast, warm skin tones and a near-black background.",
+      "requires": ["color-grade"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "advertising",
+      "text": "Claims about results, savings, speed or income need evidence you can show. Avoid guarantees, and say 'results vary' next to any result you show."
+    },
+    {
+      "category": "general",
+      "text": "The style name describes a publicly discussed editing pattern. This template is not affiliated with or endorsed by any creator, and it does not copy anyone's footage, graphics or captions."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "hook-true",
+      "ask": "Does the hook line match what the video really delivers?"
+    }
+  ]
+}

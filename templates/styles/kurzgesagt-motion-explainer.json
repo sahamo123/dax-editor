@@ -1,0 +1,197 @@
+{
+  "id": "kurzgesagt-motion-explainer",
+  "version": 1,
+  "kind": "style",
+  "name": "Motion-graphic explainer (Kurzgesagt-style)",
+  "description": "For animated, narration-timed explainers. It keeps the narration pacing untouched (no cuts), and adds a title, one stat callout and an end card. The illustrated look itself comes from your animation; score and sound effects are listed as not available yet.",
+  "tags": ["explainer", "animation", "youtube", "narration"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.5",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Title or big question",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "How big is a trillion?"
+    },
+    {
+      "name": "key_fact",
+      "label": "Stat to call out",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "1,000,000,000,000"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Sources in the description",
+      "example": "Sources in the description"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 300,
+        "max": 900
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 300,
+            "max": 900
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "skip": true,
+    "reason": "the narration sets the pace of the animation, so pauses are kept"
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "name": "Visual hook",
+      "durationSec": {
+        "min": 5,
+        "max": 15
+      },
+      "guidance": "Open on a visual metaphor and a big number.",
+      "overlay": "title"
+    },
+    {
+      "id": "explain",
+      "name": "Explanation",
+      "durationSec": {
+        "min": 60,
+        "max": 300
+      },
+      "guidance": "Animate each idea as the narrator says it."
+    },
+    {
+      "id": "scale",
+      "name": "Scale moment",
+      "durationSec": {
+        "min": 10,
+        "max": 30
+      },
+      "guidance": "Show the size or time scale in one image.",
+      "overlay": "stat"
+    },
+    {
+      "id": "wrap",
+      "name": "Takeaway and sources",
+      "durationSec": {
+        "min": 10,
+        "max": 20
+      },
+      "guidance": "State the takeaway; show where the facts come from.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "stat",
+      "preset": "callout-slide-up",
+      "text": "{{key_fact}}",
+      "when": "key_fact",
+      "anchor": "start",
+      "offset": 12,
+      "duration": 4,
+      "minDuration": 1.5,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.5,
+    "out": 1
+  },
+  "deferred": [
+    {
+      "id": "score",
+      "title": "Composed score and sound effects",
+      "description": "A music score and sound effects for mood.",
+      "requires": ["music-bed", "sound-effects"]
+    },
+    {
+      "id": "graphics",
+      "title": "Illustrations and infographics",
+      "description": "Flat vector artwork and infographic overlays.",
+      "requires": ["image-overlays"]
+    },
+    {
+      "id": "camera",
+      "title": "Animated camera moves",
+      "description": "Drawn camera moves instead of punch-ins.",
+      "requires": ["zoom-keyframes"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "copyright",
+      "text": "Use your own artwork or properly licensed illustrations; do not copy another studio's characters or style assets."
+    },
+    {
+      "category": "general",
+      "text": "The style name describes a publicly discussed editing pattern. This template is not affiliated with or endorsed by any creator, and it does not copy anyone's footage, graphics or captions."
+    }
+  ],
+  "confirmations": []
+}
