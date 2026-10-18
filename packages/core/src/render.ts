@@ -153,8 +153,9 @@ export function buildRenderPlan(
     }
     const fonts = ctx.fonts ?? bundledFonts();
     const chain: string[] = [];
-    for (const o of overlays) {
-      const built = overlayFilters(o, W, H, fonts, ctx.workDir);
+    for (const [i, o] of overlays.entries()) {
+      // Text files are named by position, never by id, so a hostile id cannot reach outside workDir or collide.
+      const built = overlayFilters(o, W, H, fonts, ctx.workDir, `ov${i}`);
       chain.push(...built.filters);
       files.push(...built.files);
     }

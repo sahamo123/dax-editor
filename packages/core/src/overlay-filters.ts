@@ -162,7 +162,9 @@ function drawtext(opts: {
 /**
  * Build the filters for one overlay on a `W`x`H` frame. Times are timeline seconds, which is what
  * FFmpeg's `t` is when these filters run after the clips have been concatenated.
- * `dir` is where this overlay's text files will live (they are named from the overlay id).
+ * `dir` is where this overlay's text files will live. They are named from `stem`, which the renderer sets to the
+ * overlay's position (`ov0`, `ov1`, ...) so that no id from a project file ever becomes part of a path and two overlays
+ * can never share a file. Without `stem`, the id is reduced to letters, digits, `_` and `-`.
  */
 export function overlayFilters(
   o: Overlay,
@@ -170,6 +172,7 @@ export function overlayFilters(
   H: number,
   fonts: FontFiles,
   dir: string,
+  stem: string = o.id.replace(/[^\w-]/g, "_"),
 ): OverlayFilters {
   const s = o.start;
   const e = o.start + o.duration;
@@ -186,7 +189,7 @@ export function overlayFilters(
   const boxBorder = Math.round(g.size * 0.3);
   const files: TextFile[] = [];
   const filters: string[] = [];
-  const base = `${dir.replace(/\\/g, "/")}/${o.id}`;
+  const base = `${dir.replace(/\\/g, "/")}/${stem}`;
 
   const alpha = o.animation === "none" ? "1" : fadeEnvelope(s, e, edge, edge);
   const entrance = progress(s, edge + 0.1);
