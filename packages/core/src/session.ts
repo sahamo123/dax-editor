@@ -66,6 +66,7 @@ export class Session {
   private lastChild = new Map<number, number>();
   /** Cut plans waiting for review, by id. Kept in memory only; applying one is a normal edit in the history. */
   readonly plans = new Map<string, CutPlan>();
+  private lastSaveError: string | undefined;
 
   constructor(
     public project: Project,
@@ -96,11 +97,39 @@ export class Session {
     }
   }
 
-  /** Write the current project to disk. Does nothing for sessions without a backing file. */
+  /**
+   * Message of the most recent failed autosave, or undefined when the last save worked. An edit is applied in
+   * memory before it is saved, so a failed save (disk full, folder removed) does not fail or undo the edit;
+   * callers show this instead so the user knows their work is not on disk.
+   */
+  get saveError(): string | undefined {
+    return this.lastSaveError;
+  }
+
+  /** Record that a save worked, clearing {@link Session.saveError}. Subclasses that override `save` call this after writing. */
+  protected markSaved(): void {
+    this.lastSaveError = undefined;
+  }
+
+  /** Called when an autosave after an edit fails, with the error. Does nothing by default; subclasses may log it. */
+  protected onAutosaveFailed(_err: unknown): void {}
+
+  /** Write the current project to disk. Does nothing for sessions without a backing file. Throws if the write fails. */
   async save(): Promise<void> {
     if (!this.file) return;
     await writeFile(this.file, JSON.stringify(this.project, null, 2));
     await this.saveHistory();
+    this.markSaved();
+  }
+
+  /** Save after a change without letting a failure undo or hide the change: the error goes to {@link Session.saveError}. */
+  private async autosave(): Promise<void> {
+    try {
+      await this.save();
+    } catch (err) {
+      this.lastSaveError = err instanceof Error ? err.message : String(err);
+      this.onAutosaveFailed(err);
+    }
   }
 
   /** Where the history is kept: beside the project file. */
@@ -183,7 +212,8 @@ export class Session {
     if (!e) throw new Error(`Unknown history state ${id}`);
     this.currentId = id;
     this.project = e.project;
-    await this.save();
+    // The state change is already real in memory; a failed save must not turn a done edit into a reported failure.
+    await this.autosave();
     return e.project;
   }
 

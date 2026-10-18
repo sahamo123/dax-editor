@@ -984,7 +984,15 @@ export async function runCommand(
   const parsed = def.schema.safeParse(rawArgs ?? {});
   if (!parsed.success) throw new CommandError(formatIssues(name, parsed.error));
   try {
-    return await def.run(ctx, parsed.data as never);
+    const result = await def.run(ctx, parsed.data as never);
+    // The edit is applied even when autosave fails; say so, or the user and the model believe it is safely on disk.
+    const saveError = def.readOnly ? undefined : ctx.session.saveError;
+    return saveError
+      ? {
+          ...result,
+          summary: `${result.summary} Warning: the project could not be saved (${saveError}).`,
+        }
+      : result;
   } catch (err) {
     if (err instanceof CommandError) throw err;
     // Edit functions throw plain Errors with clear messages ("No clip can be split at 4s").

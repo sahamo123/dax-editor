@@ -169,3 +169,33 @@ describe("Session history on disk", () => {
     expect(reopened.history().length).toBeLessThanOrEqual(400);
   }, 60_000);
 });
+
+describe("Session autosave failures", () => {
+  it("keeps an edit whose autosave failed and reports it through saveError instead of throwing", async () => {
+    // The backing file lives in a folder that does not exist, so every write fails.
+    const dir = mkdtempSync(join(tmpdir(), "dax-sess-"));
+    try {
+      const s = new Session(addAsset(emptyProject("t"), asset), join(dir, "missing", "p.dax.json"));
+      // Before the fix apply() rejected here while the edit stayed applied, so a retry duplicated it.
+      await s.apply((p) => appendClip(p, "a1"), { label: "Add clip" });
+      expect(timelineDuration(s.project)).toBe(10);
+      expect(s.history().at(-1)).toMatchObject({ label: "Add clip", current: true });
+      expect(s.saveError).toBeTruthy();
+      // An explicit save still throws: the caller asked for the write itself.
+      await expect(s.save()).rejects.toThrow();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("has no saveError while saves work", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "dax-sess-"));
+    try {
+      const s = await Session.open(join(dir, "p.dax.json"), "t");
+      await s.apply((p) => addAsset(p, asset));
+      expect(s.saveError).toBeUndefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

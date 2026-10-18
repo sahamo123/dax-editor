@@ -2,7 +2,7 @@
 // Uses FFmpeg-generated footage where a project needs real assets; those tests skip without FFmpeg.
 
 import { existsSync } from "node:fs";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { AgentEvent, StateResponse, WsEvent } from "@dax/protocol";
 import { describe, expect, it } from "vitest";
@@ -284,6 +284,38 @@ describe("projects", () => {
       expect(
         (await h.post("/api/project/open", { path: join(h.workDir, "missing.dax.json") })).status,
       ).toBe(400);
+    });
+  });
+
+  it("keeps an edit when autosave fails and reports saveError instead of failing the command", async () => {
+    await withServer({}, async (h) => {
+      await h.post("/api/project/new", { name: "Disk trouble" });
+      // Make the autosave target unwritable: a directory now sits where the project file should be.
+      const projects = join(h.dataDir, "projects");
+      const file = (await readdir(projects)).filter((f) => f.startsWith("disk-trouble"))[0] ?? "";
+      await rm(join(projects, file));
+      await mkdir(join(projects, file));
+
+      const r = await h.command("set_format", { preset: "square-1080" });
+      // Before the fix this was { ok: false } while the edit stayed applied, so an AI retry duplicated it.
+      expect(r.ok).toBe(true);
+      expect(String(r.summary)).toContain("could not be saved");
+      const s = await stateOf(h);
+      expect(s.project.timeline.width).toBe(1080);
+      expect(s.canUndo).toBe(true);
+      expect(s.saveError).toBeTruthy();
+    });
+  });
+
+  it("does not move the project to a new location when save-as fails", async () => {
+    await withServer({}, async (h) => {
+      await h.post("/api/project/new", { name: "Stay put" });
+      const blocked = join(h.workDir, "blocked.dax.json");
+      await mkdir(blocked); // a directory with the target name: the write cannot succeed
+      const r = await h.post("/api/project/save", { path: blocked });
+      expect(r.status).toBeGreaterThanOrEqual(400);
+      const s = await stateOf(h);
+      expect(s.projectPath).toBeUndefined(); // still the scratch project, not "saved at blocked.dax.json"
     });
   });
 

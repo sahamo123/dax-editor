@@ -176,6 +176,8 @@ export class Engine {
     };
     const path = this.projects.projectPath;
     if (path !== undefined) state.projectPath = path;
+    const saveError = session.saveError;
+    if (saveError !== undefined) state.saveError = this.cfg.log.redact(saveError);
     return state;
   }
 

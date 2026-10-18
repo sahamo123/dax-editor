@@ -178,6 +178,8 @@ export interface StateResponse {
   serverVersion: string;
   /** Path of the open project file, if it has been saved. */
   projectPath?: string;
+  /** Set while the last autosave failed: edits are kept in memory but are not on disk. The UI should warn the user. */
+  saveError?: string;
 }
 
 /** Something that happened during an AI run. The UI renders these as the chat transcript. */
