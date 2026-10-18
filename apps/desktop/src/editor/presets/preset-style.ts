@@ -45,9 +45,9 @@ export function presetStyle(preset: PresetWithStyle): OverlayStyle {
 /** Longest a chip animates before looping, in seconds. */
 const CHIP_MAX_DURATION = 2.6;
 /** Delay before the sample appears in each loop, so the entrance animation is visible. */
-export const CHIP_LEAD = 0.25;
+const CHIP_LEAD = 0.25;
 /** Pause after the sample leaves before the loop restarts. */
-export const CHIP_TAIL = 0.7;
+const CHIP_TAIL = 0.7;
 
 /** An overlay sample for a preset, starting at {@link CHIP_LEAD}, short enough to loop quickly. */
 export function presetSample(preset: PresetWithStyle): OverlayView & Pick<Overlay, "id"> {

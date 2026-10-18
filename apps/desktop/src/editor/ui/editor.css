@@ -5,24 +5,39 @@
  */
 
 :root {
-  --dx-bg: #111318;
-  --dx-surface: #181b21;
-  --dx-surface-2: #20242c;
-  --dx-surface-3: #2a2f39;
-  --dx-border: #2c313b;
-  --dx-text: #e7e9ee;
-  --dx-muted: #8d95a4;
-  --dx-accent: #5aa9ff;
-  --dx-accent-soft: rgba(90, 169, 255, 0.18);
-  --dx-danger: #ff6b6b;
+  /* Shared with the app shell: these resolve to the shell's design tokens (src/app/styles/tokens.css) when present,
+     and to the fallback values when the editor is used on its own (the dev harness). */
+  --dx-bg: var(--bg-0, #111318);
+  --dx-surface: var(--bg-1, #181b21);
+  --dx-surface-2: var(--bg-2, #20242c);
+  --dx-surface-3: var(--bg-3, #2a2f39);
+  --dx-border: var(--border, #2c313b);
+  --dx-text: var(--text, #e7e9ee);
+  --dx-muted: var(--text-dim, #8d95a4);
+  --dx-accent: var(--accent, #5aa9ff);
+  --dx-accent-soft: var(--accent-soft, rgba(90, 169, 255, 0.18));
+  --dx-danger: var(--danger, #ff6b6b);
+  --dx-video-bg: var(--bg-video, #050607);
+  --dx-ui-font: var(
+    --font,
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif
+  );
+
+  /* Editor-specific colours. */
   --dx-playhead: #ff4d57;
   --dx-snap: #ffd24a;
   --dx-clip: #26364d;
   --dx-clip-audio: #172538;
   --dx-wave: #6fd3a8;
+  /* Overlay text is drawn with Inter to match the export (the shell can supply the font files). */
   --dx-overlay-font:
     "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --dx-ui-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 /* ---------- shared ---------- */
@@ -73,7 +88,7 @@ body.dx-dragging {
   height: 100%;
   min-height: 0;
   display: flex;
-  background: #050607;
+  background: var(--dx-video-bg);
 }
 .dx-preview-viewport {
   flex: 1;
@@ -156,6 +171,14 @@ body.dx-dragging {
   overflow: hidden;
   pointer-events: none;
   z-index: 1;
+}
+.dx-caption-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+  font-family: var(--dx-overlay-font);
 }
 .dx-ovl-text {
   font-family: var(--dx-overlay-font);

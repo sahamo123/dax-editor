@@ -12,9 +12,10 @@ import {
   PresetsPanel,
   PreviewPane,
   Timeline,
+  useEditor,
   useEditorShortcuts,
-} from "../index.ts";
-import type { EditorApi } from "../types.ts";
+} from "../index";
+import type { EditorApi } from "../types";
 import "./harness.css";
 
 const params = new URLSearchParams(window.location.search);
@@ -27,9 +28,25 @@ async function fetchState(): Promise<StateResponse> {
   return (await r.json()) as StateResponse;
 }
 
-/** Shortcut binder, rendered inside the provider (hooks need its context). */
+/**
+ * Shortcut binder, rendered inside the provider (hooks need its context). Like the real app shell, the harness
+ * (not the editor module) owns the undo/redo keys.
+ */
 function Shortcuts() {
   useEditorShortcuts();
+  const { run } = useEditor();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.defaultPrevented) return;
+      const k = e.key.toLowerCase();
+      if (k === "z" && !e.shiftKey) void run("undo");
+      else if ((k === "z" && e.shiftKey) || k === "y") void run("redo");
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [run]);
   return null;
 }
 
@@ -42,7 +59,7 @@ function Shell({ api }: { api: EditorApi }) {
           <div className="h-preview">
             <PreviewPane />
           </div>
-          <EditorToolbar />
+          <EditorToolbar history />
           <div className="h-timeline">
             <Timeline />
           </div>

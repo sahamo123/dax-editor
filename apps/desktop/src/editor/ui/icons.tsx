@@ -48,7 +48,7 @@ export type IconName =
   | "mute";
 
 /** The icon components by name. */
-export const ICONS: Record<IconName, (p: IconProps) => ReactElement> = {
+const ICONS: Record<IconName, (p: IconProps) => ReactElement> = {
   play: (p) => (
     <Svg {...p}>
       <path d="M8 5.5v13l11-6.5z" {...filled} />

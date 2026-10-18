@@ -9,11 +9,24 @@ Measures how well a model edits video. Root rules in `/AGENTS.md` apply; read `d
 - **Adapter** (`ModelAdapter`): one way of attempting tasks (a local model, a hosted API, the oracle).
 - **Oracle**: a hand-written solver. Not a model. It proves the harness works and shows the best possible score. If the oracle fails a task, the task or checker is wrong.
 
+## Running real models
+
+```sh
+pnpm eval --adapter oracle
+pnpm eval --adapter openai --base-url http://127.0.0.1:8080/v1 --model NAME            # llama-server, Ollama, LM Studio
+pnpm eval --adapter openai --base-url https://openrouter.ai/api/v1 --model ID --api-key-env OPENROUTER_API_KEY
+pnpm eval --adapter anthropic --model ID [--api-key-env VAR]                           # default key variable: ANTHROPIC_API_KEY
+```
+
+Optional: `--temperature N|default` (default 0 so runs are comparable), `--tool-style full|compact` (default `compact` for `openai`, `full` for `anthropic`; non-default values appear in the adapter id), `--max-tokens N`, `--timeout-sec N`, `--out records.json`. Exit code 1 = a task failed, 2 = bad options. The `openai` and `anthropic` adapters (`AgentAdapter`, built on `@dax/agent`) run the same loop and system prompt as the product. Keys are read only from the named environment variable.
+
+Accounting rules (keep them stable so results stay comparable): `invalid` = tool calls that could not run because the call itself was wrong; broken JSON the agent repaired counts as valid and is counted in `repaired`; token counts are recorded only if the backend reported usage for every round trip, otherwise they are absent (shown as `n/a`); `latencyMs` is the model attempt only, excluding fixture generation and scoring.
+
 ## Adding things
 
 - **A task:** add `tasks/<id>.json` (id is kebab-case and must match the oracle's `switch` if you want the oracle to solve it), run `pnpm eval --adapter oracle`.
 - **A check type:** add a variant to `CheckSchema` in `src/task.ts` and handle it in `src/score.ts`. Keep checks outcome-based.
-- **An adapter:** implement `ModelAdapter` in a new file, register it in `makeAdapter` in `src/cli.ts`, and record tokens and invalid tool calls honestly in `AgentResult`.
+- **An adapter:** implement `ModelAdapter` in a new file, register it in `makeAdapter` in `src/adapters.ts`, and record tokens and invalid tool calls honestly in `AgentResult`.
 
 ## Rules
 

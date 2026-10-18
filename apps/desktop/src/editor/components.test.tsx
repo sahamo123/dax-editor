@@ -128,7 +128,7 @@ describe("useEditor / EditorProvider", () => {
 describe("EditorToolbar", () => {
   it("enables undo/redo from the server state and runs the commands", () => {
     const api = makeApi(makeState(defaultProject(), { canUndo: true, canRedo: false }));
-    renderEditor(<EditorToolbar />, api);
+    renderEditor(<EditorToolbar history />, api);
     expect(screen.getByTestId("undo")).toBeEnabled();
     expect(screen.getByTestId("redo")).toBeDisabled();
     fireEvent.click(screen.getByTestId("undo"));
@@ -241,23 +241,16 @@ describe("useEditorShortcuts", () => {
     expect(api.run).toHaveBeenCalledWith("remove_clip", { clipId: "c1" });
   });
 
-  it("Ctrl/Cmd+Z undoes, Shift+Ctrl/Cmd+Z and Ctrl+Y redo, only when available", () => {
+  it("does not bind undo/redo: the app shell owns Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z and Ctrl+Y", () => {
     const api = makeApi(makeState(defaultProject(), { canUndo: true, canRedo: true }));
     renderEditor(<Probe />, api);
     key("z", { ctrlKey: true });
-    expect(api.run).toHaveBeenLastCalledWith("undo", undefined);
     key("z", { metaKey: true });
-    expect(api.run).toHaveBeenCalledTimes(2);
     key("z", { ctrlKey: true, shiftKey: true });
-    expect(api.run).toHaveBeenLastCalledWith("redo", undefined);
     key("y", { ctrlKey: true });
-    expect(api.run).toHaveBeenCalledTimes(4);
-
-    const none = makeApi(makeState(defaultProject()));
-    const r = renderEditor(<Probe />, none);
-    key("z", { ctrlKey: true });
-    expect(none.run).not.toHaveBeenCalled();
-    r.unmount();
+    expect(api.run).not.toHaveBeenCalled();
+    // And it does not swallow the keys, so the shell's handler still sees them.
+    expect(fireEvent.keyDown(window, { key: "z", ctrlKey: true })).toBe(true);
   });
 
   it("arrows step a frame, Shift+arrows a second, Home/End jump", () => {
@@ -633,13 +626,13 @@ describe("EditorProvider api updates", () => {
     const first = makeApi(makeState(defaultProject()));
     const r = render(
       <EditorProvider api={first}>
-        <EditorToolbar />
+        <EditorToolbar history />
       </EditorProvider>,
     );
     expect(screen.getByTestId("undo")).toBeDisabled();
     r.rerender(
       <EditorProvider api={makeApi(makeState(defaultProject(), { canUndo: true }))}>
-        <EditorToolbar />
+        <EditorToolbar history />
       </EditorProvider>,
     );
     expect(screen.getByTestId("undo")).toBeEnabled();

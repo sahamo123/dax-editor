@@ -4,7 +4,7 @@
 import type { Clip, Overlay, Project } from "@dax/core";
 
 /** Id of the main video track that v0.1 edits (mirrors `MAIN_TRACK` in @dax/core). */
-export const MAIN_TRACK_ID = "v1";
+const MAIN_TRACK_ID = "v1";
 
 /** Smallest timeline length, in seconds, the UI lets a clip or overlay shrink to. */
 export const MIN_OVERLAY_DURATION = 0.2;

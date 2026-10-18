@@ -1,0 +1,189 @@
+{
+  "id": "gaming-highlights",
+  "version": 1,
+  "kind": "industry",
+  "name": "Gaming highlights",
+  "description": "Highlight clip: game and moment title in the first seconds, dead time trimmed tight and a channel end card. Captions, sound effects and HUD-aware cropping are listed as not available yet.",
+  "tags": ["gaming", "highlights", "shorts", "tiktok", "youtube"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 13",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Game and moment",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "1v4 clutch on the final round"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Full video on my channel",
+      "example": "Full video on my channel"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 35
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        }
+      ]
+    },
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 180,
+        "max": 480
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 180,
+            "max": 480
+          }
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "tight"
+  },
+  "beats": [
+    {
+      "id": "action",
+      "name": "Action hook",
+      "durationSec": {
+        "min": 0,
+        "max": 2
+      },
+      "guidance": "Start on the action, not the setup.",
+      "overlay": "hook"
+    },
+    {
+      "id": "setup",
+      "name": "Setup",
+      "durationSec": {
+        "min": 2,
+        "max": 5
+      },
+      "guidance": "One line."
+    },
+    {
+      "id": "payoff",
+      "name": "Payoff",
+      "durationSec": {
+        "min": 5,
+        "max": 15
+      },
+      "guidance": "Let it play; silence is fine on the payoff."
+    },
+    {
+      "id": "reaction",
+      "name": "Reaction",
+      "durationSec": {
+        "min": 2,
+        "max": 4
+      },
+      "guidance": "Quick reaction."
+    },
+    {
+      "id": "loop",
+      "name": "Loop or next",
+      "durationSec": {
+        "min": 2,
+        "max": 2
+      },
+      "guidance": "Point to the full video.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "hook",
+      "preset": "title-pop",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.2,
+      "duration": 2.2,
+      "minDuration": 1,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 2.5,
+      "minDuration": 1.5,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.2
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions for commentary",
+      "description": "Captions when you talk over the clip.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "sfx",
+      "title": "Sound effects",
+      "description": "Short effects on the payoff.",
+      "requires": ["sound-effects"]
+    },
+    {
+      "id": "music",
+      "title": "Music",
+      "description": "Licensed music under the game audio.",
+      "requires": ["music-bed", "audio-ducking"]
+    },
+    {
+      "id": "hud",
+      "title": "Crop that keeps the HUD",
+      "description": "A vertical crop that keeps the on-screen game information in view.",
+      "requires": ["reframe"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "copyright",
+      "text": "Game publishers have fan-content rules, and game or stream music can trigger takedowns. Check the publisher's policy."
+    },
+    {
+      "category": "privacy",
+      "text": "Voices of other players on voice chat, especially minors, need consent."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": []
+}

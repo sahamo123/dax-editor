@@ -8,7 +8,7 @@ import { clamp, snapToFrame } from "./lib/time";
 import type { EditorSelection } from "./types";
 
 /** A preset being dragged from the Presets panel towards the timeline. */
-export interface PresetDragState {
+interface PresetDragState {
   preset: PresetInfo;
   /** Pointer position in viewport pixels, for the floating drag ghost. */
   clientX: number;
@@ -58,7 +58,7 @@ const INITIAL: EditorState = {
 };
 
 /** Rates cycled by repeated L / J key presses. */
-export const SPEEDS = [1, 2, 4] as const;
+const SPEEDS = [1, 2, 4] as const;
 
 /** The editor UI store. One instance lives inside each `EditorProvider`. */
 export class EditorStore {

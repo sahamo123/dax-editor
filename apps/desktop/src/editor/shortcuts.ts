@@ -18,7 +18,7 @@ const NON_TEXT_INPUTS = [
 ];
 
 /** True if the event came from something that should keep the key for itself (typing, or button activation). */
-export function isEditableTarget(target: EventTarget | null, key: string): boolean {
+function isEditableTarget(target: EventTarget | null, key: string): boolean {
   if (!(target instanceof HTMLElement)) return false;
   const tag = target.tagName;
   if (tag === "INPUT") {
@@ -48,11 +48,12 @@ export function isEditableTarget(target: EventTarget | null, key: string): boole
  * | L, J | play forward / reverse (press again for 2x, 4x) |
  * | S | split at playhead |
  * | Delete, Backspace | ripple-delete the selection |
- * | Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z (or Ctrl+Y) | undo, redo |
  * | Left, Right | step one frame (Shift: one second) |
  * | Home, End | jump to start, end |
  * | + / - (or =), Shift+Z | zoom in / out, fit |
  * | Escape | clear the selection |
+ *
+ * Undo and redo keys are deliberately not bound here: the app shell owns them (Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z, Ctrl+Y).
  */
 export function useEditorShortcuts(): void {
   const store = useEditorStore();
@@ -62,15 +63,11 @@ export function useEditorShortcuts(): void {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.isComposing) return;
       if (isEditableTarget(e.target, e.key)) return;
-      const mod = e.metaKey || e.ctrlKey;
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       let handled = true;
 
-      if (mod) {
-        if (key === "z") void (e.shiftKey ? actions.redo() : actions.undo());
-        else if (key === "y") void actions.redo();
-        else handled = false;
-      } else if (e.altKey) {
+      if (e.metaKey || e.ctrlKey || e.altKey) {
+        // Undo/redo (Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z, Ctrl+Y) belong to the app shell, so there is exactly one binding.
         handled = false;
       } else {
         switch (key) {

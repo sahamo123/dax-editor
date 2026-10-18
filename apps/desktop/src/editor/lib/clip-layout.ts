@@ -56,7 +56,7 @@ export function minClipDuration(fps: number): number {
 }
 
 /** Which edge of a clip is being trimmed. */
-export type TrimEdge = "start" | "end";
+type TrimEdge = "start" | "end";
 
 /** Inputs for {@link previewTrim}. */
 export interface TrimInput {

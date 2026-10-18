@@ -15,8 +15,6 @@ export const CLIP_PAD = 5;
 export const THUMB_H = 46;
 /** Height of the waveform part of a clip block. */
 export const WAVE_H = VIDEO_H - 2 * CLIP_PAD - THUMB_H;
-/** Width of a trim handle's hit area at each end of a block. */
-export const HANDLE_W = 9;
 /** Extra seconds of empty room after the last item, so there is somewhere to drop or drag to. */
 export const TAIL_SECONDS = 8;
 /** Pixel step used to quantise the visible window, so scrolling re-renders blocks only now and then. */

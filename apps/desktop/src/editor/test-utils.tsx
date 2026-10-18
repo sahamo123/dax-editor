@@ -6,6 +6,7 @@ import { render } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { vi } from "vitest";
 import { EditorProvider } from "./context";
+import "./test-polyfills";
 import type { EditorApi } from "./types";
 
 /** A clip fixture; `start` is filled in by {@link makeProject}. */
@@ -67,6 +68,7 @@ export function makeProject(clips: Clip[], overlays: Overlay[] = []): Project {
       width: 1920,
       height: 1080,
       fps: 30,
+      fit: "contain",
       tracks: [{ id: "v1", kind: "video", clips: placed }],
       overlays,
     },

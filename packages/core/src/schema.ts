@@ -111,13 +111,44 @@ export const OverlaySchema = z.object({
 /** A validated {@link OverlaySchema} value. */
 export type Overlay = z.infer<typeof OverlaySchema>;
 
+/** How footage that does not match the output shape is fitted: bars, crop to fill, or a blurred copy behind. */
+export const FITS = ["contain", "cover", "blur"] as const;
+/** One of {@link FITS}. */
+export type Fit = (typeof FITS)[number];
+
+/** Built-in caption looks. */
+export const CAPTION_STYLES = ["classic", "bold-pop", "minimal"] as const;
+/** One of {@link CAPTION_STYLES}. */
+export type CaptionStyle = (typeof CAPTION_STYLES)[number];
+
+/**
+ * Captions made from the speech transcripts of the clips on the timeline. Their presence turns captions
+ * on. Lines are computed when needed, so they follow every edit automatically.
+ */
+export const CaptionSettingsSchema = z.object({
+  style: z.enum(CAPTION_STYLES).default("classic"),
+  /** Most words shown at once. */
+  maxWords: z.number().int().min(1).max(8).default(4),
+  uppercase: z.boolean().default(false),
+  color: HexColorSchema.default("#ffffff"),
+  /** Colour of the word being spoken (`bold-pop` style). */
+  highlight: HexColorSchema.default("#facc15"),
+  position: z.enum(["bottom", "center", "top"]).default("bottom"),
+});
+/** A validated {@link CaptionSettingsSchema} value. */
+export type CaptionSettings = z.infer<typeof CaptionSettingsSchema>;
+
 /** Output format (`width`, `height`, `fps`) plus the tracks and overlays that make up the edit. */
 export const TimelineSchema = z.object({
   width: z.number().int().positive(),
   height: z.number().int().positive(),
   fps: z.number().positive(),
+  /** How clips are fitted into the frame. `contain` leaves bars, `cover` crops to fill, `blur` puts a blurred copy behind. */
+  fit: z.enum(FITS).default("contain"),
   tracks: z.array(TrackSchema),
   overlays: z.array(OverlaySchema).default([]),
+  /** Present when captions are on. */
+  captions: CaptionSettingsSchema.optional(),
 });
 /** A validated {@link TimelineSchema} value. */
 export type Timeline = z.infer<typeof TimelineSchema>;

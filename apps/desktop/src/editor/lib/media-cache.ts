@@ -60,7 +60,7 @@ function subscribe(map: Map<string, Set<() => void>>, key: string, fn: () => voi
 }
 
 /** Start loading a waveform (once per URL). Safe to call repeatedly. */
-export function loadWaveform(url: string): void {
+function loadWaveform(url: string): void {
   if (waveformCache.has(url)) return;
   waveformCache.set(url, { status: "loading" });
   fetch(url)
@@ -97,7 +97,7 @@ const imageCache = new Map<string, Loadable<ImageSize>>();
 const imageListeners = new Map<string, Set<() => void>>();
 
 /** Start loading an image to learn its size (once per URL). The browser cache then serves it to CSS backgrounds. */
-export function loadImageSize(url: string): void {
+function loadImageSize(url: string): void {
   if (imageCache.has(url)) return;
   imageCache.set(url, { status: "loading" });
   const img = new Image();
@@ -129,12 +129,6 @@ export function useImageSize(url: string | null): ImageSize | null | undefined {
   const entry = imageCache.get(url);
   if (!entry || entry.status === "loading") return undefined;
   return entry.status === "ready" ? entry.value : null;
-}
-
-/** Forget cached media (used by tests and when the server restarts with new files). */
-export function clearMediaCache(): void {
-  waveformCache.clear();
-  imageCache.clear();
 }
 
 /**

@@ -7,7 +7,7 @@ import type { EditorStore } from "../store";
 import { GUTTER, WINDOW_MARGIN, WINDOW_QUANTUM } from "./constants";
 
 /** The visible window in pixels from the time origin, quantised so scrolling rarely changes it. */
-export interface ViewWindow {
+interface ViewWindow {
   from: number;
   to: number;
 }

@@ -5,7 +5,7 @@ import type { CommandResponse } from "@dax/protocol";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /** Milliseconds of quiet after the last change before the draft is sent. */
-export const DRAFT_DELAY_MS = 400;
+const DRAFT_DELAY_MS = 400;
 
 /**
  * Draft state for one field.

@@ -165,6 +165,7 @@ test.describe("overlays and presets", () => {
     await openHarness(page);
     const z = await zoomOf(page);
     const preset = page.locator('[data-preset-id="lower-third-slide"]');
+    await preset.scrollIntoViewIfNeeded();
     const box = await preset.boundingBox();
     const lane = await page.locator(".dx-lane-overlay").first().boundingBox();
     if (!box || !lane) throw new Error("layout not ready");

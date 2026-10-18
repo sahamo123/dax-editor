@@ -3,8 +3,8 @@
 
 import { expect, type Page } from "@playwright/test";
 
-export const MOCK = "http://127.0.0.1:4390";
-export const TOKEN = "dev-token";
+const MOCK = "http://127.0.0.1:4390";
+const TOKEN = "dev-token";
 export const SHOTS = "src/editor/dev/.artifacts/screenshots";
 
 /** The pieces of project state the tests read back from the server (the source of truth). */

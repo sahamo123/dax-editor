@@ -1,5 +1,7 @@
+export * from "./captions.js";
 export * from "./commands.js";
 export * from "./connector.js";
+export * from "./cuts.js";
 export { ffmpegBin, ffprobeBin } from "./exec.js";
 export * from "./ids.js";
 export * from "./media.js";
@@ -9,5 +11,8 @@ export * from "./presets.js";
 export * from "./render.js";
 export * from "./schema.js";
 export * from "./session.js";
+export * from "./skills.js";
+export * from "./template-commands.js";
+export * from "./templates.js";
 export * from "./timeline.js";
 export * from "./transcript.js";

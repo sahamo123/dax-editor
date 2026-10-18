@@ -2,7 +2,7 @@
 
 import { newId } from "./ids.js";
 import { shiftOverlaysForDelete } from "./overlays.js";
-import type { Asset, Clip, Project, Range, Transcript } from "./schema.js";
+import type { Asset, Clip, Fit, Project, Range, Transcript } from "./schema.js";
 
 /**
  * Pure edit operations. Each takes a project and returns a new one; the input
@@ -29,6 +29,7 @@ export function emptyProject(
       width: opts.width ?? 1920,
       height: opts.height ?? 1080,
       fps: opts.fps ?? 30,
+      fit: "contain",
       tracks: [{ id: MAIN_TRACK, kind: "video", clips: [] }],
       overlays: [],
     },
@@ -272,5 +273,35 @@ export function setAssetTranscript(p: Project, assetId: string, transcript: Tran
   const next = structuredClone(p);
   const asset = next.assets[assetId];
   if (asset) asset.transcript = transcript;
+  return next;
+}
+
+/** Ready-made output formats for the platforms people publish to. */
+export const FORMAT_PRESETS = {
+  "landscape-1080p": { width: 1920, height: 1080 },
+  "landscape-720p": { width: 1280, height: 720 },
+  "portrait-1080x1920": { width: 1080, height: 1920 },
+  "square-1080": { width: 1080, height: 1080 },
+  "portrait-4x5": { width: 1080, height: 1350 },
+} as const;
+
+/** Change the output size and/or frame rate. Sizes must be even numbers (H.264 requires it). */
+export function setFormat(
+  p: Project,
+  fmt: { width?: number; height?: number; fps?: number; fit?: Fit },
+): Project {
+  const width = fmt.width ?? p.timeline.width;
+  const height = fmt.height ?? p.timeline.height;
+  const fps = fmt.fps ?? p.timeline.fps;
+  if (!Number.isInteger(width) || !Number.isInteger(height) || width < 16 || height < 16) {
+    throw new Error("Width and height must be whole numbers of at least 16");
+  }
+  if (width % 2 !== 0 || height % 2 !== 0) throw new Error("Width and height must be even numbers");
+  if (!(fps >= 1 && fps <= 120)) throw new Error("Frame rate must be between 1 and 120");
+  const next = structuredClone(p);
+  next.timeline.width = width;
+  next.timeline.height = height;
+  next.timeline.fps = fps;
+  if (fmt.fit) next.timeline.fit = fmt.fit;
   return next;
 }

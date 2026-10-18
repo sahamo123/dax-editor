@@ -76,7 +76,14 @@ function ZoomSlider() {
  * Editing toolbar. Place it above the timeline (or wherever suits the layout).
  * Pair it with `useEditorShortcuts()` so the keys match the buttons' tooltips.
  */
-export function EditorToolbar({ className }: { className?: string }) {
+export function EditorToolbar({
+  className,
+  history = false,
+}: {
+  className?: string;
+  /** Show Undo/Redo buttons. Off by default because the app shell has its own in the top bar. */
+  history?: boolean;
+}) {
   const api = useEditorApi();
   const store = useEditorStore();
   const actions = useEditActions();
@@ -106,28 +113,32 @@ export function EditorToolbar({ className }: { className?: string }) {
       aria-label="Editor"
       data-testid="toolbar"
     >
-      {group(
+      {history ? (
         <>
-          <Tool
-            icon="undo"
-            label="Undo"
-            shortcut="Ctrl+Z"
-            testId="undo"
-            disabled={!state.canUndo}
-            onClick={() => void actions.undo()}
-          />
-          <Tool
-            icon="redo"
-            label="Redo"
-            shortcut="Shift+Ctrl+Z"
-            testId="redo"
-            disabled={!state.canRedo}
-            onClick={() => void actions.redo()}
-          />
-        </>,
-        "History",
-      )}
-      <Separator />
+          {group(
+            <>
+              <Tool
+                icon="undo"
+                label="Undo"
+                shortcut="Ctrl+Z"
+                testId="undo"
+                disabled={!state.canUndo}
+                onClick={() => void actions.undo()}
+              />
+              <Tool
+                icon="redo"
+                label="Redo"
+                shortcut="Shift+Ctrl+Z"
+                testId="redo"
+                disabled={!state.canRedo}
+                onClick={() => void actions.redo()}
+              />
+            </>,
+            "History",
+          )}
+          <Separator />
+        </>
+      ) : null}
       {group(
         <>
           <Tool

@@ -2,7 +2,18 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignoreBinaries": ["ffmpeg", "ffprobe"],
   "workspaces": {
+    "apps/desktop": {
+      "entry": ["e2e/*.spec.ts"],
+      "project": ["src/**/*.{ts,tsx}", "e2e/**/*.{ts,mts,mjs}"]
+    },
+    "packages/agent": {
+      "project": ["src/**/*.ts"]
+    },
     "packages/core": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/engine": {
+      "entry": ["src/cli.ts", "src/index.ts"],
       "project": ["src/**/*.ts"]
     },
     "packages/evals": {
@@ -10,6 +21,9 @@
       "project": ["src/**/*.ts"]
     },
     "packages/protocol": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/server": {
       "project": ["src/**/*.ts"]
     }
   }

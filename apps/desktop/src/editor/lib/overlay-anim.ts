@@ -5,7 +5,7 @@
 import type { Overlay } from "@dax/core";
 
 /** Seconds an overlay takes to fade/slide in and out (the core `EDGE`). */
-export const EDGE_SECONDS = 0.4;
+const EDGE_SECONDS = 0.4;
 /** Longest text that gets the letter-by-letter typewriter effect; longer text fades in instead. */
 export const TYPEWRITER_MAX_CHARS = 80;
 /** Slide distances as a fraction of the frame, matching the export (`H * 0.06`, `W * 0.3`). */

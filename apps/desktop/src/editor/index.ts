@@ -11,4 +11,4 @@ export { PreviewPane } from "./preview/PreviewPane";
 export { useEditorShortcuts } from "./shortcuts";
 export { Timeline } from "./timeline/Timeline";
 export { EditorToolbar } from "./toolbar/EditorToolbar";
-export type { EditorApi, EditorSelection, EditorUi } from "./types";
+export type { EditorApi } from "./types";

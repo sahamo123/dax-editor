@@ -5,7 +5,7 @@
 import type { PointerEvent as ReactPointerEvent } from "react";
 
 /** Pointer movement since the drag started, in pixels, including any scrolling done while dragging. */
-export interface DragInfo {
+interface DragInfo {
   dx: number;
   dy: number;
   clientX: number;
@@ -13,7 +13,7 @@ export interface DragInfo {
 }
 
 /** How a drag ended: dropped, cancelled with Escape/pointer loss, or released without moving past the threshold. */
-export type DragOutcome = "commit" | "cancel" | "click";
+type DragOutcome = "commit" | "cancel" | "click";
 
 /** Callbacks for {@link startPointerDrag}. */
 export interface DragHandlers {

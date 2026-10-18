@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  estimateWidth,
   filterPath,
+  fitText,
   overlayFilters,
   quoteFilterValue,
   TYPEWRITER_MAX_CHARS,
@@ -34,7 +36,8 @@ describe("overlayFilters", () => {
     expect(filters.join("")).not.toContain("pwned");
     expect(filters.join("")).toContain("expansion=none");
     expect(files).toHaveLength(1);
-    expect(files[0]?.content).toBe(hostile);
+    // Long text is word-wrapped, which turns some spaces into line breaks; nothing else may change.
+    expect(files[0]?.content.replace(/\n/g, " ")).toBe(hostile);
     expect(filters[0]).toContain(`textfile='${files[0]?.path}'`);
   });
 
@@ -66,5 +69,39 @@ describe("overlayFilters", () => {
 
   it("only shows the overlay between its start and end", () => {
     expect(build("title-fade", "Hi").filters[0]).toContain("enable='between(t,1,4)'");
+  });
+});
+
+describe("fitText", () => {
+  it("wraps long text to the width and keeps short text on one line", () => {
+    const short = fitText("Hello world", 60, 600, true);
+    expect(short.text).toBe("Hello world");
+    expect(short.fontPx).toBe(60);
+    const long = fitText("This is a rather long title that cannot fit on one line", 60, 600, true);
+    const lines = long.text.split("\n");
+    expect(lines.length).toBeGreaterThan(1);
+    for (const l of lines) expect(estimateWidth(l, long.fontPx, true)).toBeLessThanOrEqual(600);
+  });
+
+  it("shrinks the font when a single word is wider than the frame", () => {
+    const r = fitText("Supercalifragilisticexpialidocious", 100, 400, false);
+    expect(r.fontPx).toBeLessThan(100);
+    expect(estimateWidth(r.text, r.fontPx, false)).toBeLessThanOrEqual(400);
+  });
+
+  it("keeps explicit line breaks and handles full-width characters", () => {
+    expect(fitText("one\ntwo", 50, 900, false).text).toBe("one\ntwo");
+    const cjk = fitText("你好世界你好世界你好世界", 80, 300, false);
+    expect(cjk.fontPx).toBeLessThan(80);
+  });
+
+  it("wraps overlay text in the filter graph for a narrow frame", () => {
+    const o = overlayFromPreset("title-fade", {
+      start: 0,
+      duration: 3,
+      text: "A fairly long title for a vertical video",
+    });
+    const built = overlayFilters(o, 360, 640, fonts, "/t");
+    expect(built.files[0]?.content).toContain("\n");
   });
 });

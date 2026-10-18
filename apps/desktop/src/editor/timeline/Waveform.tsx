@@ -22,7 +22,7 @@ const BAR = 2;
 const STEP = 3;
 
 /** Draw the bars for a window of a clip. Exported for tests. */
-export function drawWaveform(
+function drawWaveform(
   ctx: CanvasRenderingContext2D,
   peaks: Peaks,
   o: Pick<WaveformProps, "assetDuration" | "sourceIn" | "zoom" | "volume" | "height"> & {

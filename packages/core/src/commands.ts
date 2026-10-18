@@ -6,7 +6,16 @@ import { existsSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { type ZodTypeAny, z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { captionLines, hasCaptionSource, setCaptions } from "./captions.js";
 import { isPathInside } from "./connector.js";
+import {
+  analyzeAudio,
+  applyCutPlan,
+  CUT_PRESET_NAMES,
+  detectSpeechSpans,
+  planCuts,
+  planRanges,
+} from "./cuts.js";
 import { detectScenes, detectSilence, padSilences, probe } from "./media.js";
 import {
   addOverlay,
@@ -17,8 +26,17 @@ import {
 } from "./overlays.js";
 import { getPreset, OVERLAY_PRESETS, overlayFromPreset } from "./presets.js";
 import { exportProject } from "./render.js";
-import { ANIMATIONS, type Asset, type OverlayStyle, POSITIONS, type Project } from "./schema.js";
+import {
+  ANIMATIONS,
+  type Asset,
+  CAPTION_STYLES,
+  FITS,
+  type OverlayStyle,
+  POSITIONS,
+  type Project,
+} from "./schema.js";
 import type { HistorySource, Session } from "./session.js";
+import { TEMPLATE_COMMANDS } from "./template-commands.js";
 import {
   addAsset,
   appendClip,
@@ -26,17 +44,20 @@ import {
   clipEnd,
   deleteRange,
   deleteRanges,
+  FORMAT_PRESETS,
   keepRanges,
   mainClips,
   moveClip,
   removeClip,
+  setAssetTranscript,
   setClipFades,
   setClipVolume,
+  setFormat,
   splitAt,
   timelineDuration,
   trimClip,
 } from "./timeline.js";
-import { findFillerRanges, formatTranscript } from "./transcript.js";
+import { findFillerRanges, formatTranscript, type Transcriber } from "./transcript.js";
 
 /** What a command needs to run. */
 export interface CommandContext {
@@ -47,6 +68,8 @@ export interface CommandContext {
   source?: HistorySource;
   /** Called with a fraction from 0 to 1 by long-running commands such as export. */
   onProgress?: (fraction: number) => void;
+  /** Speech-to-text engine used by `transcribe`. Absent when none is set up. */
+  transcriber?: Transcriber;
 }
 
 /** What a command returns. `summary` is short plain text meant to be read by a person or a model. */
@@ -68,6 +91,7 @@ export interface CommandDef {
   readOnly: boolean;
   /** True if it cannot be undone from the history (writes files, overwrites). Agents must not run these inside a draft. */
   irreversible: boolean;
+  /** Do the work. Arguments have already been validated against `schema`. */
   run(ctx: CommandContext, args: never): Promise<CommandResult>;
 }
 
@@ -154,6 +178,9 @@ function describeProject(p: Project) {
       fadeIn: c.fadeIn,
       fadeOut: c.fadeOut,
     })),
+    captions: p.timeline.captions
+      ? { ...p.timeline.captions, lines: captionLines(p, p.timeline.captions.maxWords).length }
+      : null,
     overlays: p.timeline.overlays.map((o) => ({
       id: o.id,
       start: Number(o.start.toFixed(3)),
@@ -184,6 +211,24 @@ function styleFrom(a: { fontSize?: number; color?: string; position?: OverlaySty
   if (a.color !== undefined) s.color = a.color;
   if (a.position !== undefined) s.position = a.position;
   return s;
+}
+
+/** Analyse an asset and build a cut plan, using its transcript when it has one. */
+async function buildPlan(
+  ctx: CommandContext,
+  assetId: string | undefined,
+  preset: (typeof CUT_PRESET_NAMES)[number],
+) {
+  const asset = pickAsset(ctx.session.project, assetId);
+  const words = asset.transcript?.words;
+  const speech = words ? undefined : detectSpeechSpans(await analyzeAudio(asset.path));
+  return planCuts({
+    assetId: asset.id,
+    duration: asset.duration,
+    preset,
+    ...(words ? { words } : {}),
+    ...(speech ? { speech } : {}),
+  });
 }
 
 /** Every command, in the order they are presented to people and models. */
@@ -311,6 +356,116 @@ export const COMMANDS: readonly CommandDef[] = [
         summary: `${words.length} word(s).`,
         data: { assetId: asset.id, text: formatTranscript({ words }) },
       };
+    },
+  }),
+
+  define({
+    name: "transcribe",
+    description:
+      "Turn the speech in a video into a word-timed transcript (needed for removing filler words, precise cuts at word boundaries, and captions). Takes a while on long videos. Safe to repeat; replaces the old transcript.",
+    schema: z.object({
+      assetId: assetIdArg,
+      language: z
+        .string()
+        .min(2)
+        .max(10)
+        .optional()
+        .describe("ISO language code such as en; omit to auto-detect"),
+    }),
+    async run(ctx, a) {
+      if (!ctx.transcriber) {
+        throw new CommandError(
+          "Speech recognition is not set up yet, so this video cannot be transcribed.",
+        );
+      }
+      const asset = pickAsset(ctx.session.project, a.assetId);
+      const transcript = await ctx.transcriber.transcribe(
+        asset.path,
+        a.language ? { language: a.language } : {},
+      );
+      await edit(ctx, `Transcribe ${basename(asset.path)}`, (p) =>
+        setAssetTranscript(p, asset.id, transcript),
+      );
+      return {
+        summary: `Transcribed ${transcript.words.length} word(s) from ${basename(asset.path)}.`,
+        data: { assetId: asset.id, words: transcript.words.length, language: transcript.language },
+      };
+    },
+  }),
+
+  define({
+    name: "set_format",
+    description:
+      "Change the output format: a preset (landscape-1080p, landscape-720p, portrait-1080x1920 for Shorts/Reels/TikTok, square-1080, portrait-4x5 for Instagram) or an explicit width, height and frame rate. `fit` says what to do when the footage is a different shape: contain (bars), cover (crop to fill), blur (blurred copy behind, popular for vertical). Choosing a portrait or square preset without a fit uses blur.",
+    schema: z.object({
+      preset: z
+        .enum(
+          Object.keys(FORMAT_PRESETS) as [
+            keyof typeof FORMAT_PRESETS,
+            ...(keyof typeof FORMAT_PRESETS)[],
+          ],
+        )
+        .optional(),
+      width: z.number().int().min(16).max(8192).optional(),
+      height: z.number().int().min(16).max(8192).optional(),
+      fps: z.number().min(1).max(120).optional(),
+      fit: z.enum(FITS).optional(),
+    }),
+    async run(ctx, a) {
+      const fmtArgs = a.preset ? { ...FORMAT_PRESETS[a.preset] } : {};
+      const size: { width?: number; height?: number; fps?: number; fit?: (typeof FITS)[number] } = {
+        ...fmtArgs,
+      };
+      const tall = a.preset !== undefined && !a.preset.startsWith("landscape");
+      if (a.fit !== undefined) size.fit = a.fit;
+      else if (tall && ctx.session.project.timeline.fit === "contain") size.fit = "blur";
+      else if (a.preset?.startsWith("landscape")) size.fit = "contain";
+      if (a.width !== undefined) size.width = a.width;
+      if (a.height !== undefined) size.height = a.height;
+      if (a.fps !== undefined) size.fps = a.fps;
+      await edit(ctx, "Change format", (p) => setFormat(p, size));
+      const t = ctx.session.project.timeline;
+      return { summary: `Format is now ${t.width}x${t.height} at ${t.fps} fps (fit: ${t.fit}).` };
+    },
+  }),
+
+  define({
+    name: "set_captions",
+    description:
+      "Turn on captions made from the speech transcript (they follow every cut automatically), change their look, or turn them off. Needs a transcript: run transcribe first. Styles: classic (white text on a dark box, bottom), bold-pop (big uppercase words with the spoken word highlighted, centre; popular for Shorts/Reels/TikTok), minimal (plain small text).",
+    schema: z.object({
+      enabled: z.boolean().default(true).describe("false turns captions off"),
+      style: z.enum(CAPTION_STYLES).optional(),
+      maxWords: z.number().int().min(1).max(8).optional().describe("Most words on screen at once"),
+      uppercase: z.boolean().optional(),
+      color: z
+        .string()
+        .regex(/^#[0-9a-fA-F]{6}$/)
+        .optional()
+        .describe("Text colour as #RRGGBB"),
+      highlight: z
+        .string()
+        .regex(/^#[0-9a-fA-F]{6}$/)
+        .optional()
+        .describe("Colour of the spoken word (bold-pop)"),
+      position: z.enum(["bottom", "center", "top"]).optional(),
+    }),
+    async run(ctx, a) {
+      if (!a.enabled) {
+        await edit(ctx, "Turn captions off", (p) => setCaptions(p, null));
+        return { summary: "Captions are off." };
+      }
+      if (!hasCaptionSource(ctx.session.project)) {
+        throw new CommandError(
+          "No transcript on the timeline yet, so there is nothing to caption. Run transcribe first.",
+        );
+      }
+      const { enabled: _enabled, ...patch } = a;
+      const clean = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
+      await edit(ctx, "Set captions", (p) => setCaptions(p, clean));
+      const c = ctx.session.project.timeline.captions;
+      const n = captionLines(ctx.session.project, c?.maxWords ?? 4).length;
+      return { summary: `Captions on (${c?.style}), ${n} line(s).` };
     },
   }),
 
@@ -511,6 +666,105 @@ export const COMMANDS: readonly CommandDef[] = [
   }),
 
   define({
+    name: "plan_cuts",
+    description:
+      "Analyse a video's speech and propose cuts (long pauses, filler words, silence at the start and end, false starts, repeated takes) WITHOUT changing anything. Returns a plan id and each proposed cut with its reason and confidence. Use apply_cut_plan to apply it, or smart_cut to do both at once. Presets: gentle, standard (default), tight, podcast, tutorial.",
+    schema: z.object({
+      assetId: assetIdArg,
+      preset: z.enum(CUT_PRESET_NAMES).default("standard").describe("How aggressively to cut"),
+    }),
+    readOnly: true,
+    async run(ctx, a) {
+      const plan = await buildPlan(ctx, a.assetId, a.preset);
+      ctx.session.plans.set(plan.id, plan);
+      const approved = plan.decisions.filter((d) => d.status === "approved").length;
+      const proposed = plan.decisions.length - approved;
+      return {
+        summary: plan.decisions.length
+          ? `Plan ${plan.id}: ${approved} cut(s) ready (${fmt(plan.approvedSeconds)}) and ${proposed} to review (${fmt(plan.proposedSeconds)}).`
+          : "Nothing to cut: no long pauses, fillers or false starts found.",
+        data: {
+          planId: plan.id,
+          preset: plan.preset,
+          approvedSeconds: plan.approvedSeconds,
+          proposedSeconds: plan.proposedSeconds,
+          decisions: plan.decisions.slice(0, 60).map((d) => ({
+            id: d.id,
+            kind: d.kind,
+            start: Number(d.range.start.toFixed(2)),
+            end: Number(d.range.end.toFixed(2)),
+            reason: d.reason,
+            confidence: d.confidence,
+            status: d.status,
+          })),
+        },
+      };
+    },
+  }),
+
+  define({
+    name: "apply_cut_plan",
+    description:
+      "Apply a plan from plan_cuts. By default applies the approved cuts only; set includeProposed to also apply the ones that need review, or list ids in only/exclude. One undo step.",
+    schema: z.object({
+      planId: z.string(),
+      includeProposed: z.boolean().default(false),
+      only: z.array(z.string()).optional().describe("Apply only these decision ids"),
+      exclude: z.array(z.string()).optional().describe("Skip these decision ids"),
+    }),
+    async run(ctx, a) {
+      const plan = ctx.session.plans.get(a.planId);
+      if (!plan) throw new CommandError(`Unknown plan "${a.planId}". Call plan_cuts first.`);
+      const opts = {
+        includeProposed: a.includeProposed,
+        ...(a.only ? { only: a.only } : {}),
+        ...(a.exclude ? { exclude: a.exclude } : {}),
+      };
+      const before = timelineDuration(ctx.session.project);
+      if (
+        assetRangesToTimeline(ctx.session.project, plan.assetId, planRanges(plan, opts)).length ===
+        0
+      ) {
+        return { summary: "Nothing left to cut from that plan. Nothing changed." };
+      }
+      await edit(ctx, `Apply cuts (${plan.preset})`, (p) => applyCutPlan(p, plan, opts));
+      const after = timelineDuration(ctx.session.project);
+      return {
+        summary: `Applied the cuts: removed ${fmt(before - after)}. Timeline is now ${fmt(after)}.`,
+      };
+    },
+  }),
+
+  define({
+    name: "smart_cut",
+    description:
+      "Tighten talking footage in one step: plan the cuts and apply the approved ones (long pauses, filler words when a transcript exists, dead air at the start and end). Cuts that need judgement (false starts, repeated takes) are listed but NOT applied; review them with plan_cuts. This is the best default for 'clean up this video'.",
+    schema: z.object({
+      assetId: assetIdArg,
+      preset: z.enum(CUT_PRESET_NAMES).default("standard").describe("How aggressively to cut"),
+    }),
+    async run(ctx, a) {
+      const plan = await buildPlan(ctx, a.assetId, a.preset);
+      ctx.session.plans.set(plan.id, plan);
+      const before = timelineDuration(ctx.session.project);
+      const ranges = assetRangesToTimeline(ctx.session.project, plan.assetId, planRanges(plan));
+      const review = plan.decisions.filter((d) => d.status === "proposed");
+      if (ranges.length === 0) {
+        return {
+          summary: `No cuts needed.${review.length ? ` ${review.length} possible false start(s) or retake(s) to review (plan ${plan.id}).` : ""}`,
+          data: { planId: plan.id },
+        };
+      }
+      await edit(ctx, `Smart cut (${plan.preset})`, (p) => applyCutPlan(p, plan));
+      const after = timelineDuration(ctx.session.project);
+      return {
+        summary: `Removed ${fmt(before - after)} (${plan.decisions.filter((d) => d.status === "approved").length} cut(s)). Timeline is now ${fmt(after)}.${review.length ? ` ${review.length} more for review: apply_cut_plan with planId ${plan.id} and includeProposed.` : ""}`,
+        data: { planId: plan.id, secondsRemoved: before - after, forReview: review.length },
+      };
+    },
+  }),
+
+  define({
     name: "remove_fillers",
     description:
       "Cut filler words such as um and uh using the transcript. Needs a transcript (see get_transcript).",
@@ -703,6 +957,7 @@ export const COMMANDS: readonly CommandDef[] = [
       return { summary: `Exported ${fmt(r.duration)} to ${out}.`, data: { path: out } };
     },
   }),
+  ...TEMPLATE_COMMANDS,
 ];
 
 /** Look up a command by name. */

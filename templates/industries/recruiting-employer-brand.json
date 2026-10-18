@@ -1,0 +1,231 @@
+{
+  "id": "recruiting-employer-brand",
+  "version": 1,
+  "kind": "industry",
+  "name": "Recruiting and employer brand",
+  "description": "Natural day-in-the-life edit: role and location title, employee lower-third and an apply end card, with pauses only lightly trimmed. Captions and music are listed as not available yet.",
+  "tags": ["recruiting", "hr", "employer-brand", "linkedin", "careers"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 16",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Role or team",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Join our design team"
+    },
+    {
+      "name": "location",
+      "label": "Location and remote policy",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "London · Hybrid"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Employee name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Employee role",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Apply today",
+      "example": "Apply today"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/careers"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 30,
+        "max": 150
+      },
+      "platforms": [
+        {
+          "platform": "linkedin",
+          "lengthSec": {
+            "min": 30,
+            "max": 90
+          }
+        },
+        {
+          "platform": "website",
+          "lengthSec": {
+            "min": 90,
+            "max": 150
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "youtube-shorts"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "gentle"
+  },
+  "beats": [
+    {
+      "id": "role",
+      "name": "Role or team",
+      "durationSec": {
+        "min": 0,
+        "max": 4
+      },
+      "guidance": "Say who you are hiring.",
+      "overlay": "title"
+    },
+    {
+      "id": "day",
+      "name": "Day in the life",
+      "durationSec": {
+        "min": 15,
+        "max": 30
+      },
+      "guidance": "Natural moments, not a scripted monologue.",
+      "overlay": "employee"
+    },
+    {
+      "id": "work",
+      "name": "The work and the team",
+      "durationSec": {
+        "min": 15,
+        "max": 30
+      },
+      "guidance": "Real work and real people."
+    },
+    {
+      "id": "expect",
+      "name": "What to expect",
+      "durationSec": {
+        "min": 10,
+        "max": 10
+      },
+      "guidance": "Growth, flexibility, pay if you can."
+    },
+    {
+      "id": "apply",
+      "name": "Apply",
+      "durationSec": {
+        "min": 4,
+        "max": 4
+      },
+      "guidance": "One link.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "subtitle": "{{location}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.3,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "employee",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 3,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.4,
+    "out": 0.8
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Captions, since most workplace video is watched muted.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "music",
+      "title": "Light music",
+      "description": "Light and optimistic, or none.",
+      "requires": ["music-bed", "audio-ducking"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "general",
+      "text": "Job ads often have equal-opportunity and pay-transparency rules that differ by place. Check the wording."
+    },
+    {
+      "category": "privacy",
+      "text": "Employees must agree to appear and to later reuse of the video."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": []
+}

@@ -1,0 +1,263 @@
+{
+  "id": "explainer-vox-style",
+  "version": 1,
+  "kind": "style",
+  "name": "Narrated explainer (Vox / Johnny Harris-style)",
+  "description": "Narration-led explainer: question on screen first, a source or name lower-third, one key-fact callout and an end card. Maps, archival B-roll and push-ins are listed as not available yet.",
+  "tags": ["explainer", "documentary", "journalism", "youtube", "narration"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.4",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Opening question",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "Why is this city sinking?"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Speaker name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Speaker role or company",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "key_fact",
+      "label": "Key fact to call out",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Sinking 10 cm every year"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Read the sources",
+      "example": "Read the sources"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 480,
+        "max": 1200
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 480,
+            "max": 1200
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 45,
+        "max": 90
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "instagram-reels"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "gentle"
+  },
+  "beats": [
+    {
+      "id": "question",
+      "name": "Question or scene",
+      "durationSec": {
+        "min": 3,
+        "max": 10
+      },
+      "guidance": "Open on a question or a concrete scene; make the topic clear within 10 seconds.",
+      "overlay": "title"
+    },
+    {
+      "id": "context",
+      "name": "Context",
+      "durationSec": {
+        "min": 10,
+        "max": 60
+      },
+      "guidance": "What happened, with dates."
+    },
+    {
+      "id": "analysis",
+      "name": "Analysis",
+      "durationSec": {
+        "min": 120,
+        "max": 600
+      },
+      "guidance": "Cut to the narration. Let the voice pause for emphasis; do not fill every second.",
+      "footage": "Archival clips, maps, simple text callouts."
+    },
+    {
+      "id": "counter",
+      "name": "Counter-view",
+      "durationSec": {
+        "min": 30,
+        "max": 90
+      },
+      "guidance": "Give the strongest opposing view fairly."
+    },
+    {
+      "id": "sources",
+      "name": "Sources and next step",
+      "durationSec": {
+        "min": 5,
+        "max": 10
+      },
+      "guidance": "Show where the facts come from.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 4,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "key-fact",
+      "preset": "callout-slide-up",
+      "text": "{{key_fact}}",
+      "when": "key_fact",
+      "anchor": "start",
+      "offset": 8,
+      "duration": 4,
+      "minDuration": 1.5,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.4,
+    "out": 0.8
+  },
+  "deferred": [
+    {
+      "id": "archival",
+      "title": "Archival and news B-roll",
+      "description": "Clips cut to the narration, not as filler.",
+      "requires": ["broll"]
+    },
+    {
+      "id": "maps",
+      "title": "Maps and graphics",
+      "description": "Maps, charts and simple text callouts.",
+      "requires": ["image-overlays"]
+    },
+    {
+      "id": "push-ins",
+      "title": "Slow push-ins",
+      "description": "Slow zoom on maps and archival shots.",
+      "requires": ["zoom-keyframes"]
+    },
+    {
+      "id": "music",
+      "title": "Music under narration",
+      "description": "Music kept low so the voice stays clear.",
+      "requires": ["music-bed", "audio-ducking"]
+    },
+    {
+      "id": "grade",
+      "title": "Film-like colour",
+      "description": "A restrained, film-like look.",
+      "requires": ["color-grade"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "copyright",
+      "text": "Footage, images, memes, logos and music from other people need permission or a licence that covers your use. Fair use depends on the country and is not automatic."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "general",
+      "text": "Name and date your sources. Do not present older footage as current, and keep quotes accurate and in context."
+    },
+    {
+      "category": "ai-disclosure",
+      "text": "If any shot is AI-generated or altered to look real, check whether the platform requires a disclosure label."
+    },
+    {
+      "category": "general",
+      "text": "The style name describes a publicly discussed editing pattern. This template is not affiliated with or endorsed by any creator, and it does not copy anyone's footage, graphics or captions."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "sources",
+      "ask": "Is every number and quote sourced and dated?"
+    }
+  ]
+}

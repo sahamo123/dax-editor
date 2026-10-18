@@ -1,6 +1,7 @@
 // A Session holds the current project with a full edit history (undo, redo, jump to any earlier state, named checkpoints) and optional saving to disk.
 
 import { readFile, writeFile } from "node:fs/promises";
+import type { CutPlan } from "./cuts.js";
 import { type Project, ProjectSchema } from "./schema.js";
 import { emptyProject, mainClips, timelineDuration } from "./timeline.js";
 
@@ -34,6 +35,9 @@ export interface HistoryItem {
   overlays: number;
 }
 
+/** Most states kept; older ones are pruned (checkpoints and the current state are always kept). */
+const MAX_HISTORY = 400;
+
 interface HistoryEntry {
   id: number;
   parent: number | null;
@@ -55,32 +59,35 @@ interface HistoryEntry {
  * History lives in memory for the life of the session; only the current project is saved.
  */
 export class Session {
-  private entries: HistoryEntry[];
+  private entries = new Map<number, HistoryEntry>();
+  private nextId = 1;
   private currentId = 0;
   /** For each state, the child that undo/redo should walk back to. */
   private lastChild = new Map<number, number>();
+  /** Cut plans waiting for review, by id. Kept in memory only; applying one is a normal edit in the history. */
+  readonly plans = new Map<string, CutPlan>();
 
   constructor(
     public project: Project,
     private readonly file?: string,
   ) {
-    this.entries = [
-      {
-        id: 0,
-        parent: null,
-        label: "Start",
-        source: "system",
-        at: new Date().toISOString(),
-        project,
-      },
-    ];
+    this.entries.set(0, {
+      id: 0,
+      parent: null,
+      label: "Start",
+      source: "system",
+      at: new Date().toISOString(),
+      project,
+    });
   }
 
   /** Open a project file, creating an empty project named `fallbackName` if it does not exist yet. Throws if the file exists but is not a valid project. */
   static async open(file: string, fallbackName = "Untitled"): Promise<Session> {
     try {
       const raw = await readFile(file, "utf8");
-      return new Session(ProjectSchema.parse(JSON.parse(raw)), file);
+      const session = new Session(ProjectSchema.parse(JSON.parse(raw)), file);
+      await session.loadHistory();
+      return session;
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
       const s = new Session(emptyProject(fallbackName), file);
@@ -91,17 +98,88 @@ export class Session {
 
   /** Write the current project to disk. Does nothing for sessions without a backing file. */
   async save(): Promise<void> {
-    if (this.file) await writeFile(this.file, JSON.stringify(this.project, null, 2));
+    if (!this.file) return;
+    await writeFile(this.file, JSON.stringify(this.project, null, 2));
+    await this.saveHistory();
+  }
+
+  /** Where the history is kept: beside the project file. */
+  private get historyFile(): string | undefined {
+    return this.file ? `${this.file}.history.json` : undefined;
+  }
+
+  /** Keep the history from growing forever: drop the oldest states, but never the current one or a named checkpoint. */
+  private prune(): void {
+    if (this.entries.size <= MAX_HISTORY) return;
+    const protectedIds = new Set<number>([this.currentId]);
+    for (const e of this.entries.values()) if (e.name) protectedIds.add(e.id);
+    const ids = [...this.entries.keys()].sort((a, b) => a - b);
+    let excess = this.entries.size - MAX_HISTORY;
+    for (const id of ids) {
+      if (excess <= 0) break;
+      if (protectedIds.has(id)) continue;
+      this.entries.delete(id);
+      this.lastChild.delete(id);
+      excess--;
+    }
+    for (const e of this.entries.values()) {
+      if (e.parent !== null && !this.entries.has(e.parent)) e.parent = null;
+    }
+    for (const [parent, child] of this.lastChild) {
+      if (!this.entries.has(parent) || !this.entries.has(child)) this.lastChild.delete(parent);
+    }
+  }
+
+  private async saveHistory(): Promise<void> {
+    const file = this.historyFile;
+    if (!file) return;
+    this.prune();
+    const data = {
+      version: 1,
+      currentId: this.currentId,
+      nextId: this.nextId,
+      entries: [...this.entries.values()],
+      lastChild: [...this.lastChild.entries()],
+    };
+    await writeFile(file, JSON.stringify(data));
+  }
+
+  /** Load a saved history if it belongs to the project on disk; otherwise start fresh. Never throws. */
+  private async loadHistory(): Promise<void> {
+    const file = this.historyFile;
+    if (!file) return;
+    try {
+      const data = JSON.parse(await readFile(file, "utf8")) as {
+        version?: number;
+        currentId?: number;
+        nextId?: number;
+        entries?: HistoryEntry[];
+        lastChild?: [number, number][];
+      };
+      if (data.version !== 1 || !Array.isArray(data.entries) || typeof data.currentId !== "number")
+        return;
+      const entries = new Map(data.entries.map((e) => [e.id, e] as const));
+      const current = entries.get(data.currentId);
+      // Only trust the history if its current state is exactly the project on disk.
+      if (!current || JSON.stringify(current.project) !== JSON.stringify(this.project)) return;
+      for (const e of entries.values()) e.project = ProjectSchema.parse(e.project);
+      this.entries = entries;
+      this.currentId = data.currentId;
+      this.nextId = Math.max(data.nextId ?? 0, ...entries.keys()) + 1;
+      this.lastChild = new Map(data.lastChild ?? []);
+    } catch {
+      // Missing, unreadable or stale history is not an error: the project itself is what matters.
+    }
   }
 
   private get current(): HistoryEntry {
-    const e = this.entries[this.currentId];
+    const e = this.entries.get(this.currentId);
     if (!e) throw new Error("History is corrupt: current state is missing");
     return e;
   }
 
   private async moveTo(id: number): Promise<Project> {
-    const e = this.entries[id];
+    const e = this.entries.get(id);
     if (!e) throw new Error(`Unknown history state ${id}`);
     this.currentId = id;
     this.project = e.project;
@@ -113,14 +191,14 @@ export class Session {
   async apply(edit: (p: Project) => Project, meta: EditMeta = {}): Promise<Project> {
     const next = edit(this.project);
     const entry: HistoryEntry = {
-      id: this.entries.length,
+      id: this.nextId++,
       parent: this.currentId,
       label: meta.label ?? "Edit",
       source: meta.source ?? "manual",
       at: new Date().toISOString(),
       project: next,
     };
-    this.entries.push(entry);
+    this.entries.set(entry.id, entry);
     this.lastChild.set(this.currentId, entry.id);
     return this.moveTo(entry.id);
   }
@@ -152,31 +230,33 @@ export class Session {
 
   /** Every state ever reached in this session, oldest first, with the current one flagged. */
   history(): HistoryItem[] {
-    return this.entries.map((e) => {
-      const item: HistoryItem = {
-        id: e.id,
-        parent: e.parent,
-        label: e.label,
-        source: e.source,
-        at: e.at,
-        current: e.id === this.currentId,
-        duration: timelineDuration(e.project),
-        clips: mainClips(e.project).length,
-        overlays: e.project.timeline.overlays.length,
-      };
-      if (e.name) item.name = e.name;
-      return item;
-    });
+    return [...this.entries.values()]
+      .sort((a, b) => a.id - b.id)
+      .map((e) => {
+        const item: HistoryItem = {
+          id: e.id,
+          parent: e.parent,
+          label: e.label,
+          source: e.source,
+          at: e.at,
+          current: e.id === this.currentId,
+          duration: timelineDuration(e.project),
+          clips: mainClips(e.project).length,
+          overlays: e.project.timeline.overlays.length,
+        };
+        if (e.name) item.name = e.name;
+        return item;
+      });
   }
 
   /** Jump to any earlier (or later) state by id. Nothing is discarded; you can jump back again. */
   async restore(id: number): Promise<Project> {
-    if (!this.entries[id]) throw new Error(`Unknown history state ${id}`);
+    if (!this.entries.has(id)) throw new Error(`Unknown history state ${id}`);
     // Make redo from every ancestor lead toward the restored state.
-    let e: HistoryEntry | undefined = this.entries[id];
+    let e: HistoryEntry | undefined = this.entries.get(id);
     while (e && e.parent !== null) {
       this.lastChild.set(e.parent, e.id);
-      e = this.entries[e.parent];
+      e = this.entries.get(e.parent);
     }
     return this.moveTo(id);
   }
@@ -185,13 +265,13 @@ export class Session {
   checkpoint(name: string): void {
     const clean = name.trim();
     if (!clean) throw new Error("Checkpoint name cannot be empty");
-    for (const e of this.entries) if (e.name === clean) delete e.name;
+    for (const e of this.entries.values()) if (e.name === clean) delete e.name;
     this.current.name = clean;
   }
 
   /** Jump back to a named version. Throws if no checkpoint has that name. */
   async restoreCheckpoint(name: string): Promise<Project> {
-    const e = this.entries.find((x) => x.name === name.trim());
+    const e = [...this.entries.values()].find((x) => x.name === name.trim());
     if (!e) throw new Error(`No checkpoint named "${name}"`);
     return this.restore(e.id);
   }

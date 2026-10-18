@@ -14,13 +14,19 @@ import {
   PlaybackEngine,
 } from "../playback/engine";
 import { Icon } from "../ui/icons";
+import { CaptionLayer } from "./CaptionLayer";
 import { OverlayLayer } from "./OverlayLayer";
 
 /** Overlays at the live playhead. A separate component so only this subtree re-renders at 60 Hz. */
 function LiveOverlays() {
   const project = useProject();
   const time = useEditorSelector((s) => s.playhead);
-  return <OverlayLayer overlays={project.timeline.overlays} time={time} />;
+  return (
+    <>
+      <CaptionLayer project={project} />
+      <OverlayLayer overlays={project.timeline.overlays} time={time} />
+    </>
+  );
 }
 
 /**
@@ -135,6 +141,8 @@ export function PreviewPane({ className }: { className?: string }) {
   }, [proxyJobs]);
 
   const aspect = project.timeline.width / project.timeline.height;
+  // `cover` crops to fill like the export. `blur` (a blurred copy behind) is previewed as `contain`.
+  const fit = project.timeline.fit === "cover" ? "cover" : "contain";
   const empty = clips.length === 0;
   const duration = clips.reduce((n, c) => n + clipDur(c), 0);
 
@@ -153,6 +161,7 @@ export function PreviewPane({ className }: { className?: string }) {
           <video
             ref={video0}
             className="dx-video"
+            style={{ objectFit: fit }}
             playsInline
             preload="auto"
             data-testid="video-a"
@@ -161,6 +170,7 @@ export function PreviewPane({ className }: { className?: string }) {
           <video
             ref={video1}
             className="dx-video"
+            style={{ objectFit: fit }}
             playsInline
             preload="auto"
             data-testid="video-b"
