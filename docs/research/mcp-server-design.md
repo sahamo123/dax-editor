@@ -34,11 +34,10 @@ Source tags: **(fetched)** = page read in full or searched with WebFetch; **(sea
 - Current protocol version is **2026-07-28**. Clients and servers may support several versions at once (fetched: https://modelcontextprotocol.io/docs/2026-07-28/learn/versioning.md).
 - 2026-07-28 key changes (fetched: https://modelcontextprotocol.io/specification/2026-07-28/changelog.md):
   - Protocol-level sessions and the `Mcp-Session-Id` header are removed from Streamable HTTP. List results no longer vary per connection.
-  - The `initialize` handshake is removed. Each request carries version and capabilities in `_meta`.
-  - `server/discover` is mandatory on servers.
+  - The `initialize` handshake is removed. Each request carries version and capabilities in `_meta`, and `server/discover` is mandatory on servers.
   - SSE resumability (`Last-Event-ID`) is removed. A broken stream loses the in-flight request, and the client must re-issue it.
   - HTTP+SSE is reclassified as Deprecated. Migrate to Streamable HTTP.
-  - Roots, Sampling and Logging are deprecated. Log to stderr on stdio.
+  - Roots, Sampling and Logging are deprecated. On stdio, log to stderr, since stdout must carry only protocol messages (fetched: https://modelcontextprotocol.io/docs/2026-07-28/tools/debugging.md).
 - 2025-11-25 (fetched: https://modelcontextprotocol.io/specification/2025-11-25/basic/transports): Streamable HTTP uses sessions and `MCP-Session-Id`. Servers SHOULD bind to 127.0.0.1 and MUST validate `Origin`.
 - Transports: **stdio** is newline-delimited JSON-RPC over a child process's stdin and stdout. **Streamable HTTP** is one endpoint, POST for each message, replies as JSON or a request-scoped SSE stream. **HTTP+SSE** is deprecated: "The SSE (Server-Sent Events) transport is deprecated. Use HTTP servers instead, where available" (fetched: https://code.claude.com/docs/en/mcp).
 - Which spec each shipping client speaks is **(unverified)** per product. Verified only with the SDK clients: the v1 client negotiated `2025-11-25` against the v2 server and got a session (verified run).
@@ -200,26 +199,13 @@ server.registerTool('export_video', {
 - Stateless: `sessionIdGenerator: undefined`, with a new `McpServer` and transport per request. The v2 client got no session id and made two calls.
 - Recommendation: keep stateful for clients that still send `initialize` and `Mcp-Session-Id`. Store draft state under a server-minted handle, so either mode works.
 
-### 3.5 v1 (`@modelcontextprotocol/sdk` 1.32.1) options (verified run)
-
-```ts
-new StreamableHTTPServerTransport({
-  sessionIdGenerator: () => randomUUID(),
-  allowedHosts: [`127.0.0.1:${PORT}`, `localhost:${PORT}`],
-  allowedOrigins: [`http://127.0.0.1:${PORT}`, `http://localhost:${PORT}`], // [] DISABLES the Origin check
-  enableDnsRebindingProtection: true,
-});
-```
-
-### 3.6 Client, stdio, in-memory (verified runs)
+### 3.5 Client, stdio, in-memory, v1 (verified runs)
 
 - v2 client: `new StreamableHTTPClientTransport(new URL(url), { requestInit: { headers: { Authorization } } })` from `@modelcontextprotocol/client`.
 - v2 stdio: `StdioClientTransport` from `@modelcontextprotocol/client/stdio`. A child server built on `StdioServerTransport` from `@modelcontextprotocol/server/stdio` returned `echo: hi`.
 - In-memory, both lines: `InMemoryTransport.createLinkedPair()` (v1 from `@modelcontextprotocol/sdk/inMemory.js`, v2 from `@modelcontextprotocol/server`). Connect the server to one end and the client to the other. No network.
-
-### 3.7 Tool annotation caveat
-
-Annotations are hints. Clients MUST consider annotations untrusted unless they come from trusted servers, and servers MUST validate all tool inputs (fetched: https://modelcontextprotocol.io/specification/2025-11-25/server/tools). Our server enforces safety itself and does not rely on `readOnlyHint`.
+- v1 options (verified run): `new StreamableHTTPServerTransport({ sessionIdGenerator, allowedHosts: [`127.0.0.1:${PORT}`, `localhost:${PORT}`], allowedOrigins: [`http://127.0.0.1:${PORT}`, `http://localhost:${PORT}`], enableDnsRebindingProtection: true })`. An empty `allowedOrigins` DISABLES the Origin check (pitfall 1).
+- Annotations are hints. Clients MUST consider them untrusted unless they come from trusted servers, and servers MUST validate all tool inputs (fetched: https://modelcontextprotocol.io/specification/2025-11-25/server/tools). Our server enforces safety itself and does not rely on `readOnlyHint`.
 
 ## 4. Security
 
@@ -273,13 +259,11 @@ The local-server page warns that "Prompt injection in untrusted content can stee
 
 ## 7. Pitfalls
 
-1. **v1 `allowedOrigins: []` silently disables the Origin check.** Observed: with an empty array a request with `Origin: https://evil.example` got 400, not 403. The v1 `webStandardStreamableHttp.js` checks Origin only when the list has entries (verified run). Fix: always pass an explicit list, or use the v2 `originValidation` guard.
+1. **v1 `allowedOrigins: []` silently disables the Origin check.** Observed: with an empty array a request with `Origin: https://evil.example` got 400, not 403. The v1 `webStandardStreamableHttp.js` checks Origin only when the list has entries (verified run). Fix: pass a non-empty list, for example `allowedOrigins: ['http://127.0.0.1:53918', 'http://localhost:53918']` with `allowedHosts` and `enableDnsRebindingProtection: true`, or use the v2 `originValidation` guard.
 2. **Old SDK HTTP servers had no DNS-rebinding protection.** Affected TypeScript SDK releases before 1.24.0 (CVE-2025-66414) **(search result)**. Fix: upgrade past the patched version and check Host on every request. stdio is not affected.
 3. **Local debug tools became attack paths.** The MCP Inspector CVE-2025-49596 let a web page drive a localhost proxy, fixed in 0.14.1 **(search result)**. Lesson: `dax mcp` debug endpoints need the same token as the main one, and no unauthenticated listener on any port.
 4. **Claude Code expands credential-named variables to empty.** Names such as `ANTHROPIC_AUTH_TOKEN` expand to nothing inside `url` and `headers`, so the header becomes `Bearer ` and the server returns 401. Fix: use our own name, such as `DAX_MCP_TOKEN` (fetched: https://code.claude.com/docs/en/mcp).
 5. **Gemini CLI `url` means SSE, not Streamable HTTP.** Copying a Cursor or Claude Desktop remote entry into Gemini CLI can fail silently **(search result, one tutorial)**. Fix: use `httpUrl` (fetched: Gemini doc). A GitHub issue reports a "missing header" failure with `httpUrl`, whose resolution was not found **(search result: github/github-mcp-server issue 1219)**.
-
-Also: stdout must carry only protocol messages, so log to stderr in stdio mode (fetched: debugging page).
 
 ## Sources
 
