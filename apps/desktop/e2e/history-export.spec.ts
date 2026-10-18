@@ -36,7 +36,7 @@ test("history lists every state with its author, restores on click, and keeps ch
   await page.getByLabel("Checkpoint name").fill("With title");
   await page.getByRole("button", { name: "Save checkpoint" }).click();
   await expect(page.getByRole("button", { name: "Restore checkpoint With title" })).toBeVisible();
-  expect(server.session.history().some((h) => h.name === "With title")).toBe(true);
+  expect((await server.history()).some((h) => h.name === "With title")).toBe(true);
 
   // Go back to the state before the AI edit.
   await list.getByRole("button", { name: /Split at 2s/ }).click();
@@ -44,12 +44,12 @@ test("history lists every state with its author, restores on click, and keeps ch
     "aria-current",
     "step",
   );
-  expect(server.session.project.timeline.overlays).toHaveLength(0);
+  expect((await server.project()).timeline.overlays).toHaveLength(0);
   await shot("06-history-restored");
 
   // Nothing is lost: restore the checkpoint to come back.
   await page.getByRole("button", { name: "Restore checkpoint With title" }).click();
-  await expect.poll(() => server.session.project.timeline.overlays.length).toBe(1);
+  await expect.poll(async () => (await server.project()).timeline.overlays.length).toBe(1);
 });
 
 test("Ctrl+Z and Shift+Ctrl+Z undo and redo, but not while typing in a text box", async ({
@@ -66,16 +66,16 @@ test("Ctrl+Z and Shift+Ctrl+Z undo and redo, but not while typing in a text box"
 
   await page.locator("body").click({ position: { x: 700, y: 400 } });
   await page.keyboard.press("Control+z");
-  await expect.poll(() => server.session.project.timeline.overlays.length).toBe(0);
+  await expect.poll(async () => (await server.project()).timeline.overlays.length).toBe(0);
   await page.keyboard.press("Control+Shift+z");
-  await expect.poll(() => server.session.project.timeline.overlays.length).toBe(1);
+  await expect.poll(async () => (await server.project()).timeline.overlays.length).toBe(1);
 
   // In a text field the browser's own text undo wins.
   await page.getByRole("tab", { name: "History" }).click();
   await page.getByLabel("Checkpoint name").click();
   await page.keyboard.press("Control+z");
   await page.waitForTimeout(300);
-  expect(server.session.project.timeline.overlays).toHaveLength(1);
+  expect((await server.project()).timeline.overlays).toHaveLength(1);
 });
 
 test("export shows progress on the button and announces the finished file", async ({
@@ -85,7 +85,7 @@ test("export shows progress on the button and announces the finished file", asyn
   sampleVideo,
   shot,
 }) => {
-  const server = await startServer({ exportPadMs: 2500 });
+  const server = await startServer();
   await server.importPaths([sampleVideo]);
   await openApp(server);
 
@@ -100,7 +100,7 @@ test("export shows progress on the button and announces the finished file", asyn
   await expect(busy).toBeVisible();
   await expect(busy).toBeDisabled();
   await shot("07-exporting");
-  await expect(page.getByText(/Exported .* to .*Untitled\.mp4/)).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("Exported Untitled.mp4.")).toBeVisible({ timeout: 30_000 });
   await expect(
     page.getByRole("banner").getByRole("button", { name: "Export", exact: true }),
   ).toBeEnabled();

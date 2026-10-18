@@ -15,6 +15,7 @@ import {
   type AgentEvent,
   type CommandResponse,
   type JobInfo,
+  type LocalModelStatus,
   PROVIDER_KINDS,
   type PresetInfo,
   type ProviderKind,
@@ -29,7 +30,6 @@ import type {
   AgentRunner,
   AgentRunnerFactory,
   LocalModelController,
-  LocalModelStatus,
   ProviderRegistry,
   RunnerEnv,
 } from "./interfaces.js";
@@ -480,6 +480,19 @@ export class Engine {
   /** Stop the local model. */
   async stopLocalModel(): Promise<void> {
     await this.cfg.localModel.stop();
+    this.invalidateProviders();
+  }
+
+  /**
+   * Stop the model and delete its downloaded files.
+   * @throws HttpError 409 while a download or start is running, 501 if the controller cannot uninstall.
+   */
+  async uninstallLocalModel(): Promise<void> {
+    const model = this.cfg.localModel;
+    if (!model.uninstall) throw new HttpError(501, "Removing the local model is not supported");
+    if (this.localTask) throw new HttpError(409, "A local model task is already running.");
+    await model.stop();
+    await model.uninstall();
     this.invalidateProviders();
   }
 

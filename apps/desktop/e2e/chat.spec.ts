@@ -29,7 +29,7 @@ test("a chat run streams text and tool steps, and Undo this change reverts it", 
   await expect(step).toContainText("Succeeded");
   await expect(step).toContainText('Added "My Video"');
   await expect(log.getByText("I added a title at the start.")).toBeVisible();
-  expect(server.session.project.timeline.overlays).toHaveLength(1);
+  expect((await server.project()).timeline.overlays).toHaveLength(1);
 
   // Steps expand to show exactly what was called.
   await step.locator("summary").click();
@@ -38,12 +38,12 @@ test("a chat run streams text and tool steps, and Undo this change reverts it", 
 
   await page.getByRole("button", { name: "Undo this change" }).click();
   await expect(log.getByText("Change undone.")).toBeVisible();
-  expect(server.session.project.timeline.overlays).toHaveLength(0);
+  expect((await server.project()).timeline.overlays).toHaveLength(0);
   await expect(page.getByRole("button", { name: "Undo this change" })).toBeHidden();
 
   // ... and can be brought back.
   await log.getByRole("button", { name: "Redo" }).click();
-  await expect.poll(() => server.session.project.timeline.overlays.length).toBe(1);
+  await expect.poll(async () => (await server.project()).timeline.overlays.length).toBe(1);
 });
 
 test("a run that makes several edits is undone in one click and keeps manual work safe", async ({
@@ -63,7 +63,7 @@ test("a run that makes several edits is undone in one click and keeps manual wor
     "Succeeded",
   );
   await expect(page.getByRole("button", { name: "Undo this change" })).toBeVisible();
-  const shortened = server.session.history().filter((h) => h.source === "ai").length;
+  const shortened = (await server.history()).filter((h) => h.source === "ai").length;
   expect(shortened).toBeGreaterThanOrEqual(1);
 
   // A manual edit after the run means a blanket undo would also discard the user's work: the button goes away.
@@ -140,5 +140,5 @@ test("with no assistant set up the chat is disabled but editing still works", as
   const undo = page.getByRole("banner").getByRole("button", { name: "Undo" });
   await expect(undo).toBeEnabled();
   await undo.click();
-  await expect.poll(() => server.session.project.timeline.overlays.length).toBe(0);
+  await expect.poll(async () => (await server.project()).timeline.overlays.length).toBe(0);
 });

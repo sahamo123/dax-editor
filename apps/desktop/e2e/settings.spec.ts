@@ -120,7 +120,7 @@ test("the chat header switches assistants without opening Settings", async ({
   await openApp(server);
 
   await page.getByLabel("Assistant", { exact: true }).selectOption("cli-codex");
-  await expect.poll(() => server.settings.activeProvider).toBe("cli-codex");
+  await expect.poll(async () => (await server.api.settings()).activeProvider).toBe("cli-codex");
   await expect(page.getByTestId("provider-status")).toContainText("Codex CLI is ready");
 });
 

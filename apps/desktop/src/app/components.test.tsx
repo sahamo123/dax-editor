@@ -164,10 +164,16 @@ describe("SettingsDialog", () => {
       s.setLocalModel({
         installed: false,
         running: false,
-        recommended: { id: "m1", label: "Model One", sizeBytes: 2 * 1024 ** 3 },
+        detail: "Not downloaded",
+        modelId: "m1",
+        label: "Model One",
+        description: "Small and quick.",
+        sizeBytes: 2 * 1024 ** 3,
       });
       s.patchUi({ settingsOpen: true });
     });
+    expect(screen.getByText("Model One")).toBeInTheDocument();
+    expect(screen.getByText("Small and quick.")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Download (2.0 GB)" }));
     expect(controller.localModel).toHaveBeenCalledWith({ action: "install", modelId: "m1" });
   });
@@ -177,12 +183,14 @@ describe("SettingsDialog", () => {
       s.setLocalModel({
         installed: false,
         running: false,
-        recommended: { id: "m1", label: "Model One", sizeBytes: 1024 },
+        detail: "Not downloaded",
+        sizeBytes: 1024,
       });
+      // The label is exactly what the server sends for its `model-download` job.
       s.applyJob({
         id: "j",
         kind: "model-download",
-        label: "Model One",
+        label: "Downloading the local model",
         progress: 0.4,
         status: "running",
       });
@@ -191,6 +199,51 @@ describe("SettingsDialog", () => {
     expect(
       screen.getByRole("progressbar", { name: "Downloading the local model" }),
     ).toHaveAttribute("aria-valuenow", "40");
+    // The label must not be doubled up with a verb ("Downloading Downloading ...").
+    expect(screen.queryByText(/Downloading Downloading/)).toBeNull();
+  });
+
+  it("cancels a running download and removes a stopped model", async () => {
+    const { controller } = renderApp(<SettingsDialog />, (s) => {
+      s.setLocalModel({ installed: false, running: false, detail: "Not downloaded" });
+      s.applyJob({
+        id: "j",
+        kind: "model-download",
+        label: "Downloading the local model",
+        progress: 0.1,
+        status: "running",
+      });
+      s.patchUi({ settingsOpen: true });
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Cancel download" }));
+    expect(controller.localModel).toHaveBeenCalledWith({ action: "cancel" });
+  });
+
+  it("offers Start and Remove for a downloaded model", async () => {
+    const { controller } = renderApp(<SettingsDialog />, (s) => {
+      s.setLocalModel({ installed: true, running: false, detail: "Downloaded" });
+      s.patchUi({ settingsOpen: true });
+    });
+    await userEvent.click(screen.getByRole("button", { name: "Remove download" }));
+    expect(controller.localModel).toHaveBeenCalledWith({ action: "uninstall" });
+    await userEvent.click(screen.getByRole("button", { name: "Start" }));
+    expect(controller.localModel).toHaveBeenCalledWith({ action: "start" });
+  });
+
+  it("explains a build without a local model instead of offering a download", () => {
+    renderApp(<SettingsDialog />, (s) => {
+      s.setLocalModel({
+        installed: false,
+        running: false,
+        supported: false,
+        detail: "Local model support is not available in this build",
+      });
+      s.patchUi({ settingsOpen: true });
+    });
+    expect(screen.getByTestId("local-model-unsupported")).toHaveTextContent(
+      "Local model support is not available in this build",
+    );
+    expect(screen.queryByRole("button", { name: /Download/ })).toBeNull();
   });
 
   it("says plainly when the engine has no local model support yet", () => {
@@ -198,7 +251,7 @@ describe("SettingsDialog", () => {
       s.setLocalModel("unavailable");
       s.patchUi({ settingsOpen: true });
     });
-    expect(screen.getByText(/isn't available from this engine yet/)).toBeInTheDocument();
+    expect(screen.getByText(/did not report the local model's status/)).toBeInTheDocument();
   });
 
   it("shows CLI status from the engine", async () => {

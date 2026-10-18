@@ -22,6 +22,16 @@ export const API = {
   apiKey: "/api/settings/api-key",
   providers: "/api/providers",
   localModel: "/api/local-model",
+  /** `POST`: download the local model as a `model-download` job. Body: {@link LocalModelInstallRequestSchema}. */
+  localModelInstall: "/api/local-model/install",
+  /** `POST`: start the downloaded model as a `model-start` job. */
+  localModelStart: "/api/local-model/start",
+  /** `POST`: stop the running model. */
+  localModelStop: "/api/local-model/stop",
+  /** `POST`: abort a running download or start. */
+  localModelCancel: "/api/local-model/cancel",
+  /** `POST`: stop the model if needed and delete its downloaded files. */
+  localModelUninstall: "/api/local-model/uninstall",
   ws: "/ws",
   /** `/api/media/:assetId/proxy.mp4` etc. Build these with {@link mediaUrl}. */
   media: "/api/media",
@@ -123,6 +133,84 @@ export const ApiKeyRequestSchema = z.object({
 /** A validated {@link ApiKeyRequestSchema} value. */
 export type ApiKeyRequest = z.infer<typeof ApiKeyRequestSchema>;
 
+/** Optional body of `POST /api/local-model/install`: which model to download. Omitted means "the recommended one". */
+export const LocalModelInstallRequestSchema = z.object({
+  modelId: z.string().min(1).max(200).optional(),
+});
+/** A validated {@link LocalModelInstallRequestSchema} value. */
+export type LocalModelInstallRequest = z.infer<typeof LocalModelInstallRequestSchema>;
+
+// ---------- responses ----------
+
+/** Snapshot of the embedded local model, as returned by `GET /api/local-model`. */
+export const LocalModelStatusSchema = z.object({
+  /** Model files are on disk. */
+  installed: z.boolean(),
+  /** The model server is running and accepting requests. */
+  running: z.boolean(),
+  /** Human-readable summary such as "Not downloaded (2.1 GB)". Always present so the UI has something to show. */
+  detail: z.string(),
+  /**
+   * False when this build has no local-model runtime at all (nothing can be installed or started).
+   * Omitted means supported. The UI then explains `detail` instead of offering a download.
+   */
+  supported: z.boolean().optional(),
+  /** Id of the installed model, or of the one `install` would fetch. */
+  modelId: z.string().optional(),
+  /** Display name of that model, such as "Qwen 2.5 3B (small, fast)". */
+  label: z.string().optional(),
+  /** One sentence on what that model is good for. */
+  description: z.string().optional(),
+  /** Download size in bytes of the model that `install` would fetch, if known. */
+  sizeBytes: z.number().nonnegative().optional(),
+  /** OpenAI-compatible base URL while running. */
+  baseUrl: z.string().optional(),
+});
+/** A validated {@link LocalModelStatusSchema} value. */
+export type LocalModelStatus = z.infer<typeof LocalModelStatusSchema>;
+
+/** Reply (HTTP 202) to `POST /api/local-model/install` and `/start`: the id of the `model-download` or `model-start` job to follow. */
+export const JobStartedSchema = z.object({ jobId: z.string().min(1) });
+/** A validated {@link JobStartedSchema} value. */
+export type JobStarted = z.infer<typeof JobStartedSchema>;
+
+/** Reply to `GET /api/health`. */
+export const HealthResponseSchema = z.object({ ok: z.literal(true), version: z.string() });
+/** A validated {@link HealthResponseSchema} value. */
+export type HealthResponse = z.infer<typeof HealthResponseSchema>;
+
+/** Reply (HTTP 202) to `POST /api/chat`: the id carried by every `chat` event of the run. A provider that is not set up is reported by an `error` event, not by a failed request. */
+export const ChatStartedSchema = z.object({ runId: z.string().min(1) });
+/** A validated {@link ChatStartedSchema} value. */
+export type ChatStarted = z.infer<typeof ChatStartedSchema>;
+
+/** Reply to `POST /api/chat/cancel` (`cancelled` is false if no run was active) and `POST /api/local-model/cancel`. */
+export const CancelResponseSchema = z.object({ cancelled: z.boolean() });
+/** A validated {@link CancelResponseSchema} value. */
+export type CancelResponse = z.infer<typeof CancelResponseSchema>;
+
+/** Reply to `POST /api/local-model/stop` and `/uninstall`. */
+export const OkResponseSchema = z.object({ ok: z.literal(true) });
+/** A validated {@link OkResponseSchema} value. */
+export type OkResponse = z.infer<typeof OkResponseSchema>;
+
+/** The `data` of a successful `POST /api/import` reply: ids of the new assets and the files that could not be imported. */
+export const ImportResultSchema = z.object({
+  assetIds: z.array(z.string()),
+  failed: z.array(z.object({ path: z.string(), error: z.string() })),
+});
+/** A validated {@link ImportResultSchema} value. */
+export type ImportResult = z.infer<typeof ImportResultSchema>;
+
+/**
+ * The `data` of a successful `export_video` reply. The reply comes as soon as FFmpeg has started (the summary says
+ * "started"), so `jobId` names the `export` job whose `job` events report progress, completion (with `result`
+ * set to the file written) or failure.
+ */
+export const ExportStartedSchema = z.object({ jobId: z.string().min(1) });
+/** A validated {@link ExportStartedSchema} value. */
+export type ExportStarted = z.infer<typeof ExportStartedSchema>;
+
 // ---------- state and events ----------
 
 /** Whether a provider can be used right now, and what is missing if not. */
@@ -134,7 +222,10 @@ export interface ProviderStatus {
   detail: string;
   /** True if an API key is stored for this provider. */
   hasApiKey?: boolean;
-  /** For `cli-*` providers: true if the CLI reports that the user is signed in. */
+  /**
+   * For `cli-*` providers: true if the CLI reports that the user is signed in, false if it is installed but
+   * signed out. Omitted when the tool is not installed or its state is unknown (for example no bridge in this build).
+   */
   signedIn?: boolean;
 }
 

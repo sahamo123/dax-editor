@@ -45,7 +45,7 @@ test("imports a video by typed path and shows it in the editor and the media bin
 
   await expect(page.getByText("Video imported.")).toBeVisible();
   await expect(page.getByText("Drop a video here or click Import")).toBeHidden();
-  expect(Object.keys(server.session.project.assets)).toHaveLength(1);
+  expect(Object.keys((await server.project()).assets)).toHaveLength(1);
 
   await page.getByRole("tab", { name: "Media" }).click();
   await expect(page.getByText("interview.mp4", { exact: true })).toBeVisible();

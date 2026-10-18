@@ -2,7 +2,13 @@
 // The server never imports @dax/agent or @dax/local-llm; the launcher injects implementations of these interfaces.
 
 import type { Session } from "@dax/core";
-import type { AgentEvent, ProviderKind, ProviderStatus, Settings } from "@dax/protocol";
+import type {
+  AgentEvent,
+  LocalModelStatus,
+  ProviderKind,
+  ProviderStatus,
+  Settings,
+} from "@dax/protocol";
 
 /** Everything an {@link AgentRunner} gets for one run. */
 export interface AgentRunContext {
@@ -42,22 +48,6 @@ export interface ProviderRegistry {
   list(env: RunnerEnv): Promise<ProviderStatus[]>;
 }
 
-/** Snapshot of the embedded local model, as returned by `GET /api/local-model`. */
-export interface LocalModelStatus {
-  /** Model files are on disk. */
-  installed: boolean;
-  /** The model server is running and accepting requests. */
-  running: boolean;
-  /** Human-readable summary such as "Not downloaded (2.1 GB)". */
-  detail: string;
-  /** Id of the installed or recommended model, if known. */
-  modelId?: string;
-  /** Download size in bytes of the model that `install` would fetch, if known. */
-  sizeBytes?: number;
-  /** OpenAI-compatible base URL while running. */
-  baseUrl?: string;
-}
-
 /** Options passed to long-running {@link LocalModelController} operations. */
 export interface LocalModelTask {
   /** Report progress as a fraction from 0 to 1. */
@@ -76,4 +66,9 @@ export interface LocalModelController {
   start(task: LocalModelTask): Promise<void>;
   /** Stop the model server. Must be safe to call when it is not running. */
   stop(): Promise<void>;
+  /**
+   * Delete the downloaded model files to free disk space. The server stops the model first.
+   * Optional: a controller without it makes `POST /api/local-model/uninstall` answer 501.
+   */
+  uninstall?(): Promise<void>;
 }

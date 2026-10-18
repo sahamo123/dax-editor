@@ -37,11 +37,12 @@ export function createProviderRegistry(options: RegistryOptions = {}): ProviderR
             detail: ready ? "Ready" : "Download and start the built-in model",
           });
         } else {
+          // `signedIn` is left out on purpose: without a bridge we cannot know, and `false` would tell the
+          // user to sign in to a tool this build cannot use anyway (see ProviderStatus.signedIn).
           out.push({
             kind,
             available: false,
             detail: "Sign-in bridge not installed in this build",
-            signedIn: false,
           });
         }
       }

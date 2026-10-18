@@ -21,6 +21,11 @@ function setup(clientOver: Record<string, unknown> = {}) {
     setApiKey: vi.fn(async () => ({ ok: true, value: {} })),
     putSettings: vi.fn(async () => ({ ok: true, value: {} })),
     importMedia: vi.fn(async () => ({ ok: true, summary: "Imported" })),
+    getLocalModel: vi.fn(async () => ({
+      ok: true,
+      value: { installed: true, running: false, detail: "Downloaded" },
+    })),
+    localModel: vi.fn(async () => ({ ok: true, value: {} })),
   };
   const client = { ...base, ...clientOver } as typeof base;
   let opts: LiveSocketOptions | null = null;
@@ -170,6 +175,89 @@ describe("controller", () => {
     expect(store.getState().chat[0]).toMatchObject({ cancelling: true });
     await pending;
     expect(store.getState().chat[0]).toMatchObject({ status: "cancelled" });
+  });
+
+  it("announces a finished export from its job events, not from the command reply", async () => {
+    const { store, client, controller, socket } = setup({
+      run: vi.fn(async () => ({
+        ok: true,
+        summary: "Export of out.mp4 started.",
+        data: { jobId: "j1" },
+      })),
+    });
+    const job = {
+      id: "j1",
+      kind: "export" as const,
+      label: "Export out.mp4",
+      progress: 0.5,
+      status: "running" as const,
+    };
+    socket().onEvent({ type: "job", job });
+    expect(await controller.exportTo("/tmp/out.mp4", false)).toBe(true);
+    expect(client.run).toHaveBeenCalledWith("export_video", {
+      path: "/tmp/out.mp4",
+      overwrite: false,
+    });
+    // "started" is not news once the job events are doing the talking.
+    expect(store.getState().toasts).toHaveLength(0);
+    socket().onEvent({
+      type: "job",
+      job: { ...job, progress: 1, status: "done", result: "/tmp/out.mp4" },
+    });
+    expect(store.getState().toasts.map((t) => t.text)).toEqual(["Exported out.mp4."]);
+  });
+
+  it("toasts the command reply of an export that never became a job, and a failed export job", async () => {
+    const { store, controller, socket } = setup({
+      run: vi.fn(async () => ({ ok: true, summary: "Exported to /tmp/out.mp4." })),
+    });
+    await controller.exportTo("/tmp/out.mp4", true);
+    expect(store.getState().toasts[0]?.text).toBe("Exported to /tmp/out.mp4.");
+    const job = {
+      id: "j2",
+      kind: "export" as const,
+      label: "Export",
+      progress: 0.2,
+      status: "running" as const,
+    };
+    socket().onEvent({ type: "job", job });
+    socket().onEvent({ type: "job", job: { ...job, status: "error", error: "Disk full" } });
+    expect(store.getState().toasts.at(-1)).toMatchObject({ tone: "error", text: "Disk full" });
+  });
+
+  it("names the reason when only some of the imported files worked", async () => {
+    const { store, controller } = setup({
+      importMedia: vi.fn(async () => ({
+        ok: true,
+        summary: "Imported 1 file(s). 1 failed.",
+        data: { assetIds: ["a1"], failed: [{ path: "/b.mp4", error: "Not a video file" }] },
+      })),
+    });
+    expect(await controller.importPaths(["/a.mp4", "/b.mp4"])).toBe(true);
+    expect(store.getState().toasts[0]).toMatchObject({ tone: "error" });
+    expect(store.getState().toasts[0]?.text).toContain("Not a video file");
+  });
+
+  it("re-reads the local model status after every action, because the replies do not carry it", async () => {
+    const { store, client, controller } = setup();
+    await controller.localModel({ action: "stop" });
+    expect(client.localModel).toHaveBeenCalledWith({ action: "stop" });
+    expect(client.getLocalModel).toHaveBeenCalledTimes(1);
+    expect(store.getState().localModel).toMatchObject({ installed: true, detail: "Downloaded" });
+    await controller.loadLocalModel();
+    expect(client.getLocalModel).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the old status and says why when a local model action is refused", async () => {
+    const { store, client, controller } = setup({
+      localModel: vi.fn(async () => ({
+        ok: false,
+        error: "A local model task is already running.",
+      })),
+    });
+    await controller.localModel({ action: "install" });
+    expect(client.getLocalModel).not.toHaveBeenCalled();
+    expect(store.getState().toasts[0]?.text).toContain("already running");
   });
 
   it("saves API keys first, once, and never keeps them", async () => {

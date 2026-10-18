@@ -7,7 +7,6 @@ export type {
   AgentRunner,
   AgentRunnerFactory,
   LocalModelController,
-  LocalModelStatus,
   LocalModelTask,
   ProviderRegistry,
   RunnerEnv,

@@ -385,6 +385,22 @@ describe("settings and providers", () => {
     });
   });
 
+  it('asks the registry again on every GET /api/providers, so "Check again" is never stale', async () => {
+    let calls = 0;
+    const registry: ProviderRegistry = {
+      async list() {
+        calls++;
+        return [{ kind: "cli-claude", available: calls > 1, detail: `check ${calls}` }];
+      },
+    };
+    await withServer({ providers: registry }, async (h) => {
+      const first = (await h.req("/api/providers")).json<Array<{ available: boolean }>>();
+      const second = (await h.req("/api/providers")).json<Array<{ available: boolean }>>();
+      expect(first[0]?.available).toBe(false);
+      expect(second[0]?.available).toBe(true);
+    });
+  });
+
   it("survives a registry that throws", async () => {
     const registry: ProviderRegistry = {
       async list() {
@@ -591,6 +607,10 @@ describe("local model endpoints", () => {
         calls.push("stop");
         state.running = false;
       },
+      async uninstall() {
+        calls.push("uninstall");
+        state.installed = false;
+      },
     };
     return { controller, calls };
   }
@@ -600,7 +620,9 @@ describe("local model endpoints", () => {
       expect((await h.req("/api/local-model")).json()).toMatchObject({
         installed: false,
         running: false,
+        supported: false,
       });
+      expect((await h.post("/api/local-model/uninstall", {})).status).toBe(501);
       const ws = await h.ws();
       const r = await h.post("/api/local-model/install", {});
       expect(r.status).toBe(202);
@@ -644,6 +666,32 @@ describe("local model endpoints", () => {
       expect((await h.post("/api/local-model/stop", {})).json()).toEqual({ ok: true });
       expect((await h.req("/api/local-model")).json()).toMatchObject({ running: false });
       expect(calls).toEqual(["install:tiny", "start", "stop"]);
+    });
+  });
+
+  it("uninstalls the model: stops it first, then deletes it", async () => {
+    const { controller, calls } = fakeController();
+    await withServer({ localModel: controller }, async (h) => {
+      const ws = await h.ws();
+      const install = await h.post("/api/local-model/install", {});
+      const jobId = install.json<{ jobId: string }>().jobId;
+      await ws.waitForAny((e) => isJob(e) && e.job.id === jobId && e.job.status === "done");
+      expect((await h.req("/api/local-model")).json()).toMatchObject({ installed: true });
+      const r = await h.post("/api/local-model/uninstall", {});
+      expect(r.status).toBe(200);
+      expect(r.json()).toEqual({ ok: true });
+      expect((await h.req("/api/local-model")).json()).toMatchObject({ installed: false });
+      expect(calls.slice(-2)).toEqual(["stop", "uninstall"]);
+    });
+  });
+
+  it("refuses to uninstall while a download or start is running", async () => {
+    const { controller, calls } = fakeController();
+    await withServer({ localModel: controller }, async (h) => {
+      await h.post("/api/local-model/start", {});
+      expect((await h.post("/api/local-model/uninstall", {})).status).toBe(409);
+      expect(calls).not.toContain("uninstall");
+      await h.post("/api/local-model/cancel", {});
     });
   });
 

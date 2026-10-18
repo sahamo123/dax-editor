@@ -53,6 +53,11 @@ describe("authentication", () => {
       ["POST", "/api/settings/api-key"],
       ["GET", "/api/providers"],
       ["GET", "/api/local-model"],
+      ["POST", "/api/local-model/install"],
+      ["POST", "/api/local-model/start"],
+      ["POST", "/api/local-model/stop"],
+      ["POST", "/api/local-model/cancel"],
+      ["POST", "/api/local-model/uninstall"],
       ["GET", "/api/media/asset_1/proxy.mp4"],
       ["GET", "/api/does-not-exist"],
     ] as const) {

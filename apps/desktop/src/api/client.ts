@@ -6,15 +6,23 @@ import {
   API,
   type ApiKeyRequest,
   AUTH_SCHEME,
+  type CancelResponse,
+  type ChatStarted,
   type CommandResponse,
   type ErrorResponse,
+  type HealthResponse,
+  type JobStarted,
+  JobStartedSchema,
+  type LocalModelInstallRequest,
+  type LocalModelStatus,
+  LocalModelStatusSchema,
   type ProjectNewRequest,
   type ProviderKind,
   type ProviderStatus,
   type Settings,
   type StateResponse,
 } from "@dax/protocol";
-import type { LocalModelAction, LocalModelStatus } from "./local-model";
+import type { LocalModelAction } from "./local-model";
 
 /** Outcome of an API call that returns data. */
 export type ApiResult<T> = { ok: true; value: T } | { ok: false; error: string; status?: number };
@@ -51,11 +59,26 @@ export function isStateResponse(x: unknown): x is StateResponse {
   );
 }
 
+/** The part of a zod schema this file needs; avoids depending on zod directly. */
+interface Parser<T> {
+  safeParse(value: unknown): { success: true; data: T } | { success: false };
+}
+
+/** Check a reply against its protocol schema; a mismatch is a failure, not data to pass on. */
+function parsed<T>(schema: Parser<T>, value: unknown, what: string): ApiResult<T> {
+  const r = schema.safeParse(value);
+  return r.success
+    ? { ok: true, value: r.data }
+    : { ok: false, error: `The editor engine sent an unexpected ${what}.` };
+}
+
 function errorFromBody(body: unknown, status: number): string {
+  // A rejected token gets one plain sentence whatever the server's wording is.
+  if (status === 401) return "The editor engine rejected the access token.";
   if (isRecord(body) && typeof (body as Partial<ErrorResponse>).error === "string") {
     return (body as unknown as ErrorResponse).error;
   }
-  if (status === 401 || status === 403) return "The editor engine rejected the access token.";
+  if (status === 403) return "The editor engine refused this request.";
   return `The editor engine answered with an error (HTTP ${status}).`;
 }
 
@@ -116,7 +139,7 @@ export class DaxClient {
   }
 
   /** `GET /api/health`: true if the server answers with the right token. */
-  async health(): Promise<ApiResult<unknown>> {
+  async health(): Promise<ApiResult<HealthResponse>> {
     return this.request("GET", API.health);
   }
 
@@ -140,41 +163,47 @@ export class DaxClient {
     return { ok: false, error: "The editor engine sent an unexpected reply." };
   }
 
-  /** `POST /api/import`: import video files by absolute path and put them on the timeline. */
+  /**
+   * `POST /api/import`: import video files by absolute path and put them on the timeline. The server answers
+   * HTTP 200 `{ ok: false, error }` when nothing could be imported and `{ ok: true, summary, data }` otherwise,
+   * where `data` is an `ImportResult` from `@dax/protocol` (some of the files may have failed).
+   */
   async importMedia(paths: string[]): Promise<CommandResponse> {
     const r = await this.request<CommandResponse>("POST", API.importMedia, { paths }, 0);
     if (!r.ok) return { ok: false, error: r.error };
     const v: unknown = r.value;
     if (isRecord(v) && v.ok === false && typeof v.error === "string") return v as CommandResponse;
-    return {
-      ok: true,
-      summary: isRecord(v) && typeof v.summary === "string" ? v.summary : "Imported.",
-    };
+    if (isRecord(v) && v.ok === true && typeof v.summary === "string") return v as CommandResponse;
+    return { ok: false, error: "The editor engine sent an unexpected reply." };
   }
 
-  /** `POST /api/project/new`. */
-  async projectNew(req: Partial<ProjectNewRequest> = {}): Promise<ApiResult<unknown>> {
+  /** `POST /api/project/new`: the server answers with the new project's full state. */
+  async projectNew(req: Partial<ProjectNewRequest> = {}): Promise<ApiResult<StateResponse>> {
     return this.request("POST", API.projectNew, req);
   }
 
-  /** `POST /api/project/open` with a project file path. */
-  async projectOpen(path: string): Promise<ApiResult<unknown>> {
+  /** `POST /api/project/open` with a project file path (it must end in `.dax.json`); answers with the full state. */
+  async projectOpen(path: string): Promise<ApiResult<StateResponse>> {
     return this.request("POST", API.projectOpen, { path });
   }
 
-  /** `POST /api/project/save`, to `path` or the project's current file. */
-  async projectSave(path?: string): Promise<ApiResult<unknown>> {
+  /** `POST /api/project/save`, to `path` or the project's current file; answers with the full state. */
+  async projectSave(path?: string): Promise<ApiResult<StateResponse>> {
     return this.request("POST", API.projectSave, path ? { path } : {});
   }
 
-  /** `POST /api/chat`: start an AI run. Progress arrives as `chat` events over the WebSocket. */
-  async chat(message: string): Promise<ApiResult<unknown>> {
+  /**
+   * `POST /api/chat`: start an AI run (HTTP 202 `{ runId }`). Progress arrives as `chat` events over the
+   * WebSocket. A provider that is not set up is not a failed request: the run's first event is an `error`.
+   * Only an already-running AI run (409) or a malformed message (400) is refused here.
+   */
+  async chat(message: string): Promise<ApiResult<ChatStarted>> {
     // No timeout: a server that holds the request open until the run ends must not look like a failure.
     return this.request("POST", API.chat, { message }, 0);
   }
 
-  /** `POST /api/chat/cancel`: stop the running AI run, if any. */
-  async chatCancel(): Promise<ApiResult<unknown>> {
+  /** `POST /api/chat/cancel`: stop the running AI run, if any (`cancelled` is false when none was running). */
+  async chatCancel(): Promise<ApiResult<CancelResponse>> {
     return this.request("POST", API.chatCancel, {});
   }
 
@@ -188,8 +217,11 @@ export class DaxClient {
     return this.request("PUT", API.settings, settings);
   }
 
-  /** `POST /api/settings/api-key`: store a key. The server never returns it, and neither does this client. */
-  async setApiKey(kind: ProviderKind, apiKey: string): Promise<ApiResult<unknown>> {
+  /**
+   * `POST /api/settings/api-key`: store a key. The server answers with the refreshed provider list (which
+   * says `hasApiKey` but never holds the key), and this client never returns the key either.
+   */
+  async setApiKey(kind: ProviderKind, apiKey: string): Promise<ApiResult<ProviderStatus[]>> {
     const body: ApiKeyRequest = { kind, apiKey };
     return this.request("POST", API.apiKey, body);
   }
@@ -201,11 +233,38 @@ export class DaxClient {
 
   /** `GET /api/local-model`: state of the embedded model. */
   async getLocalModel(): Promise<ApiResult<LocalModelStatus>> {
-    return this.request("GET", API.localModel);
+    const r = await this.request<unknown>("GET", API.localModel);
+    return r.ok ? parsed(LocalModelStatusSchema, r.value, "local model status") : r;
   }
 
-  /** `POST /api/local-model`: download, start, stop or remove the embedded model. Progress comes as `job` events. */
-  async localModel(action: LocalModelAction): Promise<ApiResult<LocalModelStatus>> {
-    return this.request("POST", API.localModel, action);
+  /**
+   * Download, start, stop, cancel or remove the embedded model. Each action is its own endpoint on the server.
+   * Install and start answer 202 with the id of the job to follow (`jobId`); the others finish before they answer.
+   * Re-read {@link DaxClient.getLocalModel} afterwards: none of the replies carries the new status.
+   */
+  async localModel(action: LocalModelAction): Promise<ApiResult<Partial<JobStarted>>> {
+    switch (action.action) {
+      case "install": {
+        const body: LocalModelInstallRequest = action.modelId ? { modelId: action.modelId } : {};
+        const r = await this.request<unknown>("POST", API.localModelInstall, body);
+        return r.ok ? parsed(JobStartedSchema, r.value, "reply") : r;
+      }
+      case "start": {
+        const r = await this.request<unknown>("POST", API.localModelStart, {});
+        return r.ok ? parsed(JobStartedSchema, r.value, "reply") : r;
+      }
+      case "stop":
+        return this.simple(API.localModelStop);
+      case "cancel":
+        return this.simple(API.localModelCancel);
+      case "uninstall":
+        return this.simple(API.localModelUninstall);
+    }
+  }
+
+  /** POST an empty JSON body to `path` and ignore the (tiny) reply. */
+  private async simple(path: string): Promise<ApiResult<Partial<JobStarted>>> {
+    const r = await this.request<unknown>("POST", path, {});
+    return r.ok ? { ok: true, value: {} } : r;
   }
 }

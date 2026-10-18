@@ -89,4 +89,12 @@ describe("createProviderRegistry", () => {
     expect(withKey.find((p) => p.kind === "anthropic")?.available).toBe(true);
     expect(withKey.find((p) => p.kind === "local")?.available).toBe(true);
   });
+
+  it("does not claim the user is signed out of a CLI it cannot drive", async () => {
+    const list = await createProviderRegistry().list(env(settings()));
+    for (const p of list.filter((x) => x.kind.startsWith("cli-"))) {
+      // `signedIn: false` would make the UI say "run <tool> once to sign in"; absent means "not installed".
+      expect(p).not.toHaveProperty("signedIn");
+    }
+  });
 });
