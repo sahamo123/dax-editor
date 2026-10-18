@@ -9,6 +9,14 @@
       "entry": ["src/cli.ts", "src/index.ts"],
       "project": ["src/**/*.ts"]
     },
+    "packages/local-llm": {
+      "entry": [
+        "src/scripts/*.ts",
+        "src/test-helpers/orphan-parent.mjs",
+        "src/test-helpers/fake-llama-server.mjs"
+      ],
+      "project": ["src/**/*.ts"]
+    },
     "packages/protocol": {
       "project": ["src/**/*.ts"]
     }
