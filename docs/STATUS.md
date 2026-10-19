@@ -50,7 +50,7 @@ Built in separate git worktrees under `.claude/worktrees`. None of these is merg
 - Hardening pass for the independent review's 3 high and 9 medium findings: export encoder fallback, preview blocklist, rollback after a failed autosave, path traversal through overlay ids, atomic and cancellable export, history pruning, a cancel signal, context budgets for small models, and safe template replacement.
 - `@dax/local-llm`: embedded Gemma-class model runtime (llama-server).
 - `@dax/stt`: whisper.cpp speech-to-text.
-- Tauri shell (`apps/desktop/src-tauri`).
+- Tauri shell (`apps/desktop/src-tauri`): built and checked on Linux with the engine sidecar. macOS and Windows packaging, signing and the release workflow are not run; see [ADR 0010](adr/0010-desktop-sidecar-packaging.md) and the maintainer guide.
 - Reconciling the desktop client with the engine server API.
 - Core engine: zoom keyframes, music ducking and image overlays.
 - Scouts on cut-quality field notes, audio enhancement and screen recording.
