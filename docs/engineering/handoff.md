@@ -62,3 +62,14 @@ These exist only in local worktrees under `.claude/worktrees/` on the machine th
 - Never name a model or vendor as an author or in a commit message.
 - Never weaken security checks to get a test green.
 - Run the scribe step (log, status, indexes) when you finish a milestone: `pnpm docs:index && pnpm docs:okf`.
+
+## Before leaving a machine: nothing may live only there
+
+Dependencies are not a concern: `pnpm install` rebuilds `node_modules` from the lockfile, and the runtime installers fetch llama.cpp, whisper.cpp and model files on demand, verified against pinned hashes. Do not commit them.
+
+What must be on the branch before you stop:
+
+1. `git status` is clean, and `git log origin/claude/exciting-lamport-1k91fh..HEAD` is empty (everything is pushed).
+2. No worktree holds commits or edits the branch lacks. Check with `git worktree list` and, for each, `git -C <worktree> status --short` and `git rev-list --count claude/exciting-lamport-1k91fh..HEAD`. Merge or copy the work to the branch first.
+3. Scratch, logs and downloads under `/tmp`, `scratchpad` or `/root/.cache` are not needed. Keep only what a commit needs.
+4. Plans and findings go in `docs/` (status, log, research), not in a chat or a file outside the repo.
