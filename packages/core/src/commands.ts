@@ -213,6 +213,11 @@ function styleFrom(a: { fontSize?: number; color?: string; position?: OverlaySty
   return s;
 }
 
+/** Seconds of a word's decaying tail kept after speech without a transcript. */
+const SPEECH_HANGOVER = 0.12;
+/** Seconds before a soft onset kept when speech comes from loudness alone. */
+const SPEECH_LOOKBACK = 0.06;
+
 /** Analyse an asset and build a cut plan, using its transcript when it has one. */
 async function buildPlan(
   ctx: CommandContext,
@@ -234,7 +239,11 @@ async function buildPlan(
       );
     }
   }
-  const speech = !words && levels ? detectSpeechSpans(levels) : undefined;
+  // Without a transcript the speech spans set the edges: keep 120 ms of a decaying tail, and 60 ms before a soft onset.
+  const speech =
+    !words && levels
+      ? detectSpeechSpans(levels, { hangover: SPEECH_HANGOVER, lookback: SPEECH_LOOKBACK })
+      : undefined;
   return planCuts({
     assetId: asset.id,
     duration: asset.duration,

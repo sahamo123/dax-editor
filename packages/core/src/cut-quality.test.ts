@@ -7,7 +7,16 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { runCommand } from "./commands.js";
-import { type AudioLevels, analyzeAudio, applyCutPlan, estimateFloor, planCuts } from "./cuts.js";
+import {
+  type AudioLevels,
+  analyzeAudio,
+  applyCutPlan,
+  clippedTailRatio,
+  detectSpeechSpans,
+  estimateFloor,
+  planCuts,
+  planRanges,
+} from "./cuts.js";
 import { probe } from "./media.js";
 import { exportProject } from "./render.js";
 import type { Word } from "./schema.js";
@@ -165,6 +174,8 @@ interface Scene {
   voice: [number, number][];
   music?: Sound[];
   laugh?: Sound[];
+  /** Constant white-noise bursts, such as a word-final "s" or "sh" (no pulsing). */
+  fricative?: Sound[];
 }
 
 /** FFmpeg `between()` terms joined with `+`; `0` when empty. */
@@ -184,12 +195,15 @@ function synthesize(path: string, scene: Scene): void {
     ),
   );
   // White noise has an RMS of amplitude / sqrt(3).
-  const laugh = sum(
-    (scene.laugh ?? []).map(
+  const laugh = sum([
+    ...(scene.laugh ?? []).map(
       (l) =>
         `between(t,${l.from},${l.to})*${(10 ** (l.db / 20) * Math.sqrt(3)).toFixed(6)}*(0.5+0.5*sin(2*PI*4*t))`,
     ),
-  );
+    ...(scene.fricative ?? []).map(
+      (l) => `between(t,${l.from},${l.to})*${(10 ** (l.db / 20) * Math.sqrt(3)).toFixed(6)}`,
+    ),
+  ]);
   const room = (10 ** (scene.roomDb / 20) * Math.sqrt(3)).toFixed(6);
   const d = scene.duration;
   execFileSync("ffmpeg", [
@@ -323,5 +337,151 @@ describe("plan_cuts when the audio cannot be read", () => {
     const data = r.data as { warnings?: string[]; decisions: { kind: string }[] };
     expect(data.warnings?.[0]).toMatch(/could not be read/);
     expect(data.decisions.some((d) => d.kind === "pause")).toBe(true);
+  });
+});
+
+describe("word tails are kept (unit)", () => {
+  // Word "one" ends at 0.5 s. Its final "s" is a 0.2 s noise tail at floor+4 dB (-56 dB against a -60 dB room),
+  // too quiet to count as sound for the energy gate, so only the padding can protect it. Next word at 2.5 s.
+  const words = w("one@0.2-0.5", "two@2.5-2.8");
+  const levels = frames(
+    [ROOM, 0.2],
+    [VOICE, 0.3],
+    [-56, 0.2],
+    [ROOM, 1.8],
+    [VOICE, 0.3],
+    [ROOM, 0.5],
+  );
+  const pause = (duration = 3.3) =>
+    planCuts({ assetId: "a", duration, words, levels }).decisions.find((d) => d.kind === "pause");
+
+  it("measures the share of word-tail energy that a cut removes", () => {
+    // Nothing removed: nothing clipped.
+    expect(clippedTailRatio(levels, words, [])).toBe(0);
+    // The whole tail window removed: everything clipped.
+    expect(clippedTailRatio(levels, words, [{ start: 0.5, end: 0.7 }])).toBeCloseTo(1, 5);
+    // Only the last 100 ms of a 200 ms tail removed: half.
+    expect(clippedTailRatio(levels, words, [{ start: 0.6, end: 0.7 }])).toBeCloseTo(0.5, 2);
+  });
+
+  it("does not cut into a word-final tail", () => {
+    const p = pause();
+    expect(p).toBeDefined();
+    expect(p?.status).toBe("approved");
+    // The tail ends at 0.7 s; the pause must start no earlier than that.
+    expect(p?.range.start).toBeGreaterThanOrEqual(0.7 - 0.01);
+  });
+
+  it("grows the cut past a decaying word tail that is still audible", () => {
+    // The tail falls from -20 dB to -50 dB over 0.3 s after the word, then room tone. The fixed 0.2 s pad would
+    // leave the last 0.1 s of it to be cut, so the cut must start where the tail has gone quiet (0.8 s).
+    const decay: [number, number][] = Array.from({ length: 15 }, (_, i) => [
+      -20 - (30 * i) / 14,
+      0.02,
+    ]);
+    const lv = frames([ROOM, 0.2], [VOICE, 0.3], ...decay, [ROOM, 1.5], [VOICE, 0.3], [ROOM, 0.5]);
+    const p = planCuts({
+      assetId: "a",
+      duration: 3.1,
+      words: w("one@0.2-0.5", "two@2.3-2.6"),
+      levels: lv,
+    });
+    const pause = p.decisions.find((d) => d.kind === "pause");
+    expect(pause?.status).toBe("approved");
+    expect(pause?.range.start).toBeGreaterThanOrEqual(0.8 - 0.001);
+    // The growth is bounded: the pause still starts within 0.3 s of the word end.
+    expect(pause?.range.start).toBeLessThanOrEqual(0.5 + 0.3 + 0.001);
+  });
+
+  it("grows the cut back over a soft onset before the next word", () => {
+    // Before "two" (2.3 s) the sound rises from -50 dB at 2.1 s to -20 dB: a soft "s" or "f" that the pad would clip.
+    const rise: [number, number][] = Array.from({ length: 10 }, (_, i) => [
+      -50 + (30 * i) / 9,
+      0.02,
+    ]);
+    const lv = frames([ROOM, 0.2], [VOICE, 0.3], [ROOM, 1.6], ...rise, [VOICE, 0.3], [ROOM, 0.5]);
+    const p = planCuts({
+      assetId: "a",
+      duration: 3.1,
+      words: w("one@0.2-0.5", "two@2.3-2.6"),
+      levels: lv,
+    });
+    const pause = p.decisions.find((d) => d.kind === "pause");
+    expect(pause?.status).toBe("approved");
+    // The cut now ends where the rise starts (2.1 s), not at the 2.2 s pad.
+    expect(pause?.range.end).toBeLessThanOrEqual(2.1 + 0.001);
+  });
+
+  it("keeps more silence after a word than before the next one (2:1)", () => {
+    const p = planCuts({ assetId: "a", duration: 6, words: w("a@0-0.5", "b@3-3.3") });
+    const pause = p.decisions.find((d) => d.kind === "pause");
+    // standard: 0.3 s of silence is kept, 2/3 after the word and 1/3 before the next.
+    expect((pause?.range.start ?? 0) - 0.5).toBeCloseTo(0.2, 2);
+    expect(3 - (pause?.range.end ?? 0)).toBeCloseTo(0.1, 2);
+  });
+
+  it("removes the same total silence as before (keep length unchanged)", () => {
+    const p = planCuts({ assetId: "a", duration: 6, words: w("a@0-0.5", "b@3-3.3") });
+    const pause = p.decisions.find((d) => d.kind === "pause");
+    expect((pause?.range.end ?? 0) - (pause?.range.start ?? 0)).toBeCloseTo(2.5 - 0.3, 2);
+  });
+});
+
+describe.skipIf(!hasFfmpeg())("word tails on real audio (needs ffmpeg)", () => {
+  let dir: string;
+  beforeAll(() => {
+    dir = mkdtempSync(join(tmpdir(), "dax-tails-"));
+  });
+  afterAll(() => rmSync(dir, { recursive: true, force: true }));
+
+  it("a word-final fricative survives the cut, and the clipped-tail share is near zero", async () => {
+    // Three words, each a 0.5 s voiced sound followed by a 0.2 s "s" at floor+4 dB; 1 s of room tone between words.
+    const starts = [0.5, 2.2, 3.9];
+    const scene: Scene = {
+      duration: 6,
+      roomDb: ROOM,
+      voice: starts.map((s) => [s, s + 0.5] as [number, number]),
+      // floor+4 dB: quiet enough that the energy gate treats the gap as silent, so only the padding protects it.
+      fricative: starts.map((s) => ({ from: s + 0.5, to: s + 0.7, db: -56 })),
+    };
+    const src = join(dir, "tails.mov");
+    synthesize(src, scene);
+    const a = await probe(src);
+    const levels = await analyzeAudio(src);
+    // The transcript times the word by its vowel, so the "s" is the 0.2 s tail after the word end.
+    const spoken = starts.map((s, i) => ({ text: `w${i}`, start: s, end: s + 0.5 }));
+    const plan = planCuts({ assetId: a.id, duration: a.duration, words: spoken, levels });
+    const removed = planRanges(plan);
+    expect(clippedTailRatio(levels, spoken, removed)).toBeLessThan(0.05);
+    // And the cut still removes the silence it should (the two 1.2 s gaps are shortened).
+    expect(plan.approvedSeconds).toBeGreaterThan(1.5);
+  }, 60_000);
+});
+
+describe("speech spans keep word tails and soft onsets (unit)", () => {
+  const frames = (...spec: [number, number][]): AudioLevels => ({
+    frameSeconds: 0.02,
+    db: spec.flatMap(([db, seconds]) => Array<number>(Math.round(seconds / 0.02)).fill(db)),
+  });
+
+  it("extends a span past a dip that is still audible (hangover)", () => {
+    // Speech ends at 1.5 s, dips under the off threshold for 60 ms, then the tail is still audible for 100 ms.
+    const lv = frames([-60, 0.5], [-20, 1], [-56, 0.06], [-50, 0.1], [-60, 0.5]);
+    const plain = detectSpeechSpans(lv);
+    expect(plain[0]?.end).toBeCloseTo(1.5, 2);
+    const held = detectSpeechSpans(lv, { hangover: 0.12 });
+    expect(held[0]?.end).toBeGreaterThanOrEqual(1.5 + 0.12 - 0.001);
+  });
+
+  it("does not extend a span whose following 120 ms are silent", () => {
+    const lv = frames([-60, 0.5], [-20, 1], [-60, 0.5]);
+    expect(detectSpeechSpans(lv, { hangover: 0.12 })[0]?.end).toBeCloseTo(1.5, 2);
+  });
+
+  it("starts a span before a soft onset that is already above the room tone (lookback)", () => {
+    // A soft consonant at -52 dB (above floor+6) for 60 ms before the loud vowel that starts at 0.56 s.
+    const lv = frames([-60, 0.5], [-52, 0.06], [-20, 1]);
+    expect(detectSpeechSpans(lv)[0]?.start).toBeCloseTo(0.56, 2);
+    expect(detectSpeechSpans(lv, { lookback: 0.06 })[0]?.start).toBeLessThanOrEqual(0.5 + 0.001);
   });
 });
