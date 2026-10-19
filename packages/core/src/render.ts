@@ -82,7 +82,7 @@ export function buildRenderPlan(
   const inputIndex = new Map<string, number>();
   /** Open `path` as a new input, with options that must come before its `-i`. Returns its index. */
   const addInput = (path: string, options: string[] = []): number => {
-    inputs.push(...options, "-i", path);
+    inputs.push(...options, "-protocol_whitelist", "file", "-i", path);
     return inputCount++;
   };
   const filters: string[] = [];

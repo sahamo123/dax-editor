@@ -35,6 +35,8 @@ export function analyzeAudio(path: string, opts: RunOptions = {}): Promise<Audio
         "-v",
         "error",
         "-nostdin",
+        "-protocol_whitelist",
+        "file",
         "-i",
         resolve(path),
         "-vn",
