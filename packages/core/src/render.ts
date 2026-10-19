@@ -9,6 +9,7 @@ import { ffmpegBin, run, runFfmpeg } from "./exec.js";
 import { type FontFiles, filterPath, overlayFilters, type TextFile } from "./overlay-filters.js";
 import type { Clip, Project } from "./schema.js";
 import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
+import { zoomFilters, zoomsOf } from "./zoom.js";
 
 /**
  * Preferred H.264 encoders, best first. libx264 is GPL, so builds we ship
@@ -87,8 +88,9 @@ export interface RenderContext {
 }
 
 /**
- * Turn the project into one FFmpeg command: trim each clip (with fades), normalise, concat,
- * then draw the text overlays on top of the joined video.
+ * Turn the project into one FFmpeg command: trim each clip (with fades), normalise, concat, then
+ * (in this order) zoom the joined picture, draw image overlays, draw text overlays and captions, and mix the
+ * music and sound-effect layer under the main audio. Everything after the join works in timeline time.
  */
 export function buildRenderPlan(
   project: Project,
@@ -100,8 +102,16 @@ export function buildRenderPlan(
   if (clips.length === 0) throw new Error("Timeline is empty");
   const { width: W, height: H, fps } = project.timeline;
 
+  /** FFmpeg input arguments, flat (`-i a.mp4 -loop 1 ... -i b.png`). */
   const inputs: string[] = [];
+  let inputCount = 0;
+  /** Input index per asset, so a file used by several clips (or as music) is opened once. */
   const inputIndex = new Map<string, number>();
+  /** Open `path` as a new input, with options that must come before its `-i`. Returns its index. */
+  const addInput = (path: string, options: string[] = []): number => {
+    inputs.push(...options, "-i", path);
+    return inputCount++;
+  };
   const filters: string[] = [];
   const concatPads: string[] = [];
 
@@ -115,9 +125,8 @@ export function buildRenderPlan(
     }
     let k = inputIndex.get(asset.id);
     if (k === undefined) {
-      k = inputs.length / 2;
+      k = addInput(asset.path);
       inputIndex.set(asset.id, k);
-      inputs.push("-i", asset.path);
     }
     const dur = clipDuration(c);
     const vFade =
@@ -168,9 +177,18 @@ export function buildRenderPlan(
 
   filters.push(`${concatPads.join("")}concat=n=${clips.length}:v=1:a=1[outv][outa]`);
 
+  const total = timelineDuration(project);
+  let videoLabel = "[outv]";
+
+  // Zooms scale the joined picture, so they come before anything that must not zoom (images, text, captions).
+  const zoomed = zoomFilters(zoomsOf(project), videoLabel, "[vzoom]", W, H, total);
+  if (zoomed.length > 0) {
+    filters.push(...zoomed);
+    videoLabel = "[vzoom]";
+  }
+
   // Overlays and captions are drawn after the join so their times are timeline times.
   const files: TextFile[] = [];
-  let videoLabel = "[outv]";
   const overlays = [...project.timeline.overlays].sort(
     (a, b) => a.lane - b.lane || a.start - b.start,
   );
@@ -195,7 +213,7 @@ export function buildRenderPlan(
       const fontsDir = dirname(fonts.regular);
       chain.push(`subtitles=filename=${filterPath(assPath)}:fontsdir=${filterPath(fontsDir)}`);
     }
-    filters.push(`[outv]${chain.join(",")}[final]`);
+    filters.push(`${videoLabel}${chain.join(",")}[final]`);
     videoLabel = "[final]";
   }
 
@@ -217,7 +235,7 @@ export function buildRenderPlan(
     "+faststart",
     outPath,
   ];
-  return { args, duration: timelineDuration(project), files };
+  return { args, duration: total, files };
 }
 
 /** Options for {@link exportProject}. */

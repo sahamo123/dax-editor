@@ -16,6 +16,7 @@ import {
   planCuts,
   planRanges,
 } from "./cuts.js";
+import { describeEffects, EFFECT_COMMANDS } from "./effect-commands.js";
 import { detectScenes, detectSilence, padSilences, probe } from "./media.js";
 import {
   addOverlay,
@@ -190,6 +191,7 @@ function describeProject(p: Project) {
       preset: o.preset,
       animation: o.animation,
     })),
+    ...describeEffects(p),
   };
 }
 
@@ -236,13 +238,15 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "get_project",
     description:
-      "Describe the current project: format, total duration, imported assets, the clips on the timeline (with ids and times in seconds), and text overlays. Call this first, and again after edits, to see the real state.",
+      "Describe the current project: format, total duration, imported assets, the clips on the timeline (with ids and times in seconds), text overlays and zooms. Call this first, and again after edits, to see the real state.",
     schema: z.object({}),
     readOnly: true,
     async run(ctx) {
       const d = describeProject(ctx.session.project);
+      // Effects are mentioned only when there are some, so a plain project reads as before.
+      const extras = [d.zooms.length ? `${d.zooms.length} zoom(s)` : ""].filter(Boolean);
       return {
-        summary: `${d.name}: ${fmt(d.duration)}, ${d.clips.length} clip(s), ${d.overlays.length} overlay(s), ${d.assets.length} asset(s).`,
+        summary: `${d.name}: ${fmt(d.duration)}, ${d.clips.length} clip(s), ${d.overlays.length} overlay(s), ${d.assets.length} asset(s)${extras.length ? `, ${extras.join(", ")}` : ""}.`,
         data: d,
       };
     },
@@ -957,6 +961,7 @@ export const COMMANDS: readonly CommandDef[] = [
       return { summary: `Exported ${fmt(r.duration)} to ${out}.`, data: { path: out } };
     },
   }),
+  ...EFFECT_COMMANDS,
   ...TEMPLATE_COMMANDS,
 ];
 

@@ -54,7 +54,7 @@ export const ClipSchema = z.object({
 /** A validated {@link ClipSchema} value. */
 export type Clip = z.infer<typeof ClipSchema>;
 
-/** An ordered lane of clips. v0.1 only edits the single main video track ({@link MAIN_TRACK}). */
+/** An ordered lane of clips. The main video track (`v1`) is gapless; the optional audio track (`a1`) is free-form. */
 export const TrackSchema = z.object({
   id: z.string(),
   kind: z.enum(["video", "audio"]),
@@ -111,6 +111,33 @@ export const OverlaySchema = z.object({
 /** A validated {@link OverlaySchema} value. */
 export type Overlay = z.infer<typeof OverlaySchema>;
 
+/** How a zoom moves between its start and end scale. `linear` is constant speed; the others start and/or finish gently. */
+export const EASES = ["linear", "ease-in", "ease-out", "ease-in-out"] as const;
+/** One of {@link EASES}. */
+export type Ease = (typeof EASES)[number];
+
+/** Largest zoom factor. Beyond about 3x the picture is too soft to be useful. */
+export const MAX_ZOOM = 3;
+
+/**
+ * A punch-in or push-in on the finished picture between `start` and `start + duration` (timeline seconds).
+ * The picture is scaled from `fromScale` to `toScale` (1 = unzoomed, 1.25 = 25 percent closer) following
+ * `ease`; equal scales are a hard punch-in that holds. `x` and `y` are the point that stays in view, as a
+ * fraction of the frame (0.5, 0.5 is the centre). Zoom ranges on a timeline never overlap.
+ */
+export const ZoomSchema = z.object({
+  id: z.string(),
+  start: z.number().nonnegative(),
+  duration: z.number().positive(),
+  fromScale: z.number().min(1).max(MAX_ZOOM),
+  toScale: z.number().min(1).max(MAX_ZOOM),
+  ease: z.enum(EASES).default("ease-in-out"),
+  x: z.number().min(0).max(1).default(0.5),
+  y: z.number().min(0).max(1).default(0.5),
+});
+/** A validated {@link ZoomSchema} value. */
+export type Zoom = z.infer<typeof ZoomSchema>;
+
 /** How footage that does not match the output shape is fitted: bars, crop to fill, or a blurred copy behind. */
 export const FITS = ["contain", "cover", "blur"] as const;
 /** One of {@link FITS}. */
@@ -147,6 +174,8 @@ export const TimelineSchema = z.object({
   fit: z.enum(FITS).default("contain"),
   tracks: z.array(TrackSchema),
   overlays: z.array(OverlaySchema).default([]),
+  /** Punch-ins and push-ins on the finished picture. Absent means none. */
+  zooms: z.array(ZoomSchema).optional(),
   /** Present when captions are on. */
   captions: CaptionSettingsSchema.optional(),
 });

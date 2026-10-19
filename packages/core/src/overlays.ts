@@ -5,15 +5,26 @@ import { OverlaySchema } from "./schema.js";
 
 const EPS = 1e-6;
 
+/** Anything placed on the timeline for a stretch of time: text and image overlays, zooms. Times are timeline seconds. */
+export interface Timed {
+  start: number;
+  duration: number;
+}
+
 /**
  * Keep overlays attached to the footage they were placed over after the
  * timeline range [from, to) is deleted and the gap closed. Overlays after the
  * range slide left; overlays crossing it lose the deleted part; overlays that
- * sat entirely inside it disappear.
+ * sat entirely inside it disappear. Works for any {@link Timed} item (image overlays and zooms follow
+ * the same rule), and returns new objects without touching the input.
  */
-export function shiftOverlaysForDelete(overlays: Overlay[], from: number, to: number): Overlay[] {
+export function shiftOverlaysForDelete<T extends Timed>(
+  overlays: readonly T[],
+  from: number,
+  to: number,
+): T[] {
   const gap = to - from;
-  const out: Overlay[] = [];
+  const out: T[] = [];
   for (const o of overlays) {
     const end = o.start + o.duration;
     if (end <= from + EPS) {

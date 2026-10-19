@@ -3,6 +3,7 @@
 import { newId } from "./ids.js";
 import { shiftOverlaysForDelete } from "./overlays.js";
 import type { Asset, Clip, Fit, Project, Range, Transcript } from "./schema.js";
+import { shiftZoomsForDelete } from "./zoom.js";
 
 /**
  * Pure edit operations. Each takes a project and returns a new one; the input
@@ -140,8 +141,10 @@ export function deleteRange(p: Project, from: number, to: number): Project {
     if (e > to + EPS) out.push({ ...c, id: newId("clip"), in: c.in + (to - s), fadeIn: 0 });
   }
   const next = withClips(p, out);
-  // Overlays are placed in timeline time, so they must move with the footage they sit over.
+  // Overlays, images and zooms are placed in timeline time, so they must move with the footage they sit
+  // over. Music is anchored to the timeline instead and sound effects to their moment (see shiftAudioForDelete).
   next.timeline.overlays = shiftOverlaysForDelete(next.timeline.overlays, from, to);
+  if (next.timeline.zooms) next.timeline.zooms = shiftZoomsForDelete(next.timeline.zooms, from, to);
   return next;
 }
 
