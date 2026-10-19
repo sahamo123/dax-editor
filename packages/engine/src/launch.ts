@@ -5,12 +5,14 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type CliBridges, createCliBridges } from "@dax/bridges";
 import type { Transcriber } from "@dax/core";
+import { LocalModelManager, type LocalModelManagerOptions } from "@dax/local-llm";
 import {
   type LocalModelController,
   type RunningServer,
   type ServerOptions,
   startServer,
 } from "@dax/server";
+import { createLocalModelController, localConnection } from "./local-model.js";
 import { createProviderRegistry } from "./providers.js";
 import { createRunnerFactory, type RunnerFactoryOptions } from "./runner.js";
 
@@ -24,8 +26,17 @@ export interface LaunchOptions
   skillsDir?: string;
   /** Speech-to-text engine. */
   transcriber?: Transcriber;
-  /** Embedded model controller; its endpoint is used by the `local` provider. */
-  localModelController?: LocalModelController;
+  /**
+   * Embedded model controller; its endpoint is used by the `local` provider. Default: a controller over a
+   * `LocalModelManager` in the data folder (nothing is downloaded or started until the user asks). Pass an instance to
+   * inject one (tests use fakes); pass `false` to report the built-in model as unsupported in this build.
+   */
+  localModelController?: LocalModelController | false;
+  /**
+   * Options for the default `LocalModelManager` (test seams such as hardware detection or `fetch`). The data folder is
+   * always the server's. Ignored when a controller is injected or the built-in model is turned off.
+   */
+  localModelOptions?: Omit<LocalModelManagerOptions, "dataDir">;
   /** Hooks for extra providers such as signed-in CLIs. Ignored when `cliBridges` is supplied or disabled. */
   extraProviders?: RunnerFactoryOptions["extraProviders"];
   /**
@@ -66,9 +77,23 @@ function hasSkillFolder(dir: string): boolean {
 
 /** Start the full engine. */
 export async function launch(options: LaunchOptions): Promise<RunningServer> {
-  const { skillsDir, transcriber, localModelController, extraProviders, cliBridges, ...server } =
-    options;
-  const local = localModelController;
+  const {
+    skillsDir,
+    transcriber,
+    localModelController,
+    localModelOptions,
+    extraProviders,
+    cliBridges,
+    ...server
+  } = options;
+  // The built-in model is on by default; `false` leaves the server's own "not supported in this build" controller in place.
+  const local: LocalModelController | undefined =
+    localModelController === false
+      ? undefined
+      : (localModelController ??
+        createLocalModelController({
+          manager: new LocalModelManager({ dataDir: server.dataDir, ...localModelOptions }),
+        }));
   const dir = skillsDir ?? defaultSkillsDir();
   // Bridges are on by default. They spawn nothing until the Settings screen or a chat run asks.
   const bridges: CliBridges | undefined =
@@ -83,14 +108,8 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
       : extraProviders
         ? { extraProviders }
         : {}),
-    ...(local
-      ? {
-          localEndpoint: async () => {
-            const s = await local.status();
-            return s.running ? s.baseUrl : undefined;
-          },
-        }
-      : {}),
+    // The `local` provider reads the running model's address and key on every run, so a restart is picked up at once.
+    ...(local ? { localEndpoint: () => localConnection(local) } : {}),
   });
   const started = await startServer({
     ...server,

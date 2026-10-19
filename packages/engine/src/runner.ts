@@ -21,8 +21,9 @@ import {
 } from "@dax/core";
 import type { ProviderKind } from "@dax/protocol";
 import type { AgentRunner, AgentRunnerFactory, RunnerEnv } from "@dax/server";
+import type { LocalConnection } from "./local-model.js";
 
-/** Context window assumed for the built-in model when Settings says nothing (it is a small model). */
+/** Context window used for the built-in model only when neither Settings nor the running model says what it is. */
 const BUILT_IN_CONTEXT_TOKENS = 8192;
 
 /** Default model names per hosted provider; users can override them in Settings. */
@@ -41,8 +42,25 @@ function safeHost(baseUrl: string): string {
   }
 }
 
-/** Where the embedded model's OpenAI-compatible endpoint is, or undefined when it is not running. */
-export type LocalEndpoint = () => Promise<string | undefined>;
+/** Where the embedded model's OpenAI-compatible endpoint is and how to authenticate to it; undefined when it is not running. */
+export type LocalEndpoint = () => Promise<LocalConnection | undefined>;
+
+/**
+ * How the `local` provider talks to the running built-in model. Settings win; otherwise the model's own catalog name and
+ * the window it was started with, so the agent budgets for the model that is really loaded.
+ */
+export function localProviderSettings(
+  cfg: { model?: string; contextTokens?: number },
+  connection: LocalConnection,
+): { baseUrl: string; apiKey?: string; model: string; contextTokens: number } {
+  return {
+    baseUrl: connection.baseUrl,
+    // Only the loopback server is ever called here, so the key never leaves this machine.
+    ...(connection.apiKey ? { apiKey: connection.apiKey } : {}),
+    model: cfg.model ?? connection.modelId ?? "local",
+    contextTokens: cfg.contextTokens ?? connection.contextTokens ?? BUILT_IN_CONTEXT_TOKENS,
+  };
+}
 
 /** Everything {@link createRunnerFactory} needs besides the server's own settings. */
 export interface RunnerFactoryOptions {
@@ -142,12 +160,17 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       };
     }
     if (kind === "local") {
-      const baseUrl = await options.localEndpoint?.();
-      if (!baseUrl) return "The built-in model is not running. Download and start it in Settings.";
+      const connection = await options.localEndpoint?.();
+      if (!connection)
+        return "The built-in model is not running. Download and start it in Settings.";
+      const local = localProviderSettings(cfg, connection);
       return {
-        provider: createOpenAiProvider({ baseUrl, model: model ?? "local" }),
-        // The built-in model is small; its window is what the Settings value says, else the built-in default.
-        contextTokens: cfg.contextTokens ?? BUILT_IN_CONTEXT_TOKENS,
+        provider: createOpenAiProvider({
+          baseUrl: local.baseUrl,
+          model: local.model,
+          ...(local.apiKey ? { apiKey: local.apiKey } : {}),
+        }),
+        contextTokens: local.contextTokens,
       };
     }
     return `The ${kind} provider is not available in this build.`;

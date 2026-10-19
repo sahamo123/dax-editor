@@ -199,6 +199,9 @@ importers:
       '@dax/core':
         specifier: workspace:*
         version: link:../core
+      '@dax/local-llm':
+        specifier: workspace:*
+        version: link:../local-llm
       '@dax/protocol':
         specifier: workspace:*
         version: link:../protocol
