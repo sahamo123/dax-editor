@@ -155,6 +155,39 @@ describe("launch and speech-to-text", () => {
     const reply = await runCommand(server.info, "transcribe", { assetId: "no-such-asset" });
     expect(reply).toMatchObject({ ok: false, error: expect.stringContaining("not set up") });
   });
+
+  it("uses an injected transcriber instead of building the default", async () => {
+    dataDir = mkdtempSync(join(tmpdir(), "dax-launch-"));
+    const server = await launch({
+      dataDir,
+      port: 0,
+      cliBridges: false,
+      localModelController: false,
+      transcriber: { transcribe: async () => ({ words: [] }) },
+    });
+    running = server;
+    const reply = await runCommand(server.info, "transcribe", { assetId: "no-such-asset" });
+    expect(reply.error).not.toContain("not set up");
+  });
+});
+
+describe("launch with the embedded local model turned off", () => {
+  it("reports the built-in model as not supported in this build", async () => {
+    dataDir = mkdtempSync(join(tmpdir(), "dax-launch-"));
+    const server = await launch({
+      dataDir,
+      port: 0,
+      cliBridges: false,
+      localModelController: false,
+      transcriber: false,
+    });
+    running = server;
+    const res = await fetch(`${server.info.url}${API.localModel}`, {
+      headers: { Authorization: `Bearer ${server.info.token}` },
+    });
+    const status = (await res.json()) as LocalModelStatus;
+    expect(status).toMatchObject({ installed: false, running: false, supported: false });
+  });
 });
 
 describe("launch and the embedded local model", () => {
