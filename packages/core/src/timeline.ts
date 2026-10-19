@@ -12,6 +12,14 @@ import type { Asset, Clip, Fit, Overlay, Project, Range, Transcript } from "./sc
  * ripples, i.e. later clips slide left to close any hole.
  */
 
+/**
+ * The asset with this id, or undefined. Only the project's own entries count: a plain index would answer for ids such as
+ * `__proto__` or `constructor` with something inherited from Object.
+ */
+export function ownAsset(p: Project, id: string): Asset | undefined {
+  return Object.hasOwn(p.assets, id) ? p.assets[id] : undefined;
+}
+
 /** Id of the single track that v0.1 edits. */
 export const MAIN_TRACK = "v1";
 const EPS = 1e-6;
@@ -93,7 +101,7 @@ export function appendClip(
   assetId: string,
   slice: { in?: number; out?: number } = {},
 ): Project {
-  const asset = p.assets[assetId];
+  const asset = ownAsset(p, assetId);
   if (!asset) throw new Error(`Unknown asset "${assetId}"`);
   const inPoint = slice.in ?? 0;
   const outPoint = Math.min(slice.out ?? asset.duration, asset.duration);
@@ -225,7 +233,7 @@ export function trimClip(p: Project, clipId: string, trim: { in?: number; out?: 
   const clips = mainClips(p);
   const c = clips.find((c) => c.id === clipId);
   if (!c) throw new Error(`Unknown clip "${clipId}"`);
-  const asset = p.assets[c.assetId];
+  const asset = ownAsset(p, c.assetId);
   if (!asset) throw new Error(`Clip "${clipId}" references missing asset "${c.assetId}"`);
   const inPoint = Math.max(0, trim.in ?? c.in);
   const outPoint = Math.min(asset.duration, trim.out ?? c.out);
@@ -321,9 +329,9 @@ export function setClipFades(
 
 /** Attach (or replace) the speech transcript of an asset. Times are in the asset's own time. */
 export function setAssetTranscript(p: Project, assetId: string, transcript: Transcript): Project {
-  if (!p.assets[assetId]) throw new Error(`Unknown asset "${assetId}"`);
+  if (!ownAsset(p, assetId)) throw new Error(`Unknown asset "${assetId}"`);
   const next = structuredClone(p);
-  const asset = next.assets[assetId];
+  const asset = ownAsset(next, assetId);
   if (asset) asset.transcript = transcript;
   return next;
 }

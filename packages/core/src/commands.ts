@@ -8,7 +8,7 @@ import { basename, dirname, resolve } from "node:path";
 import { type ZodTypeAny, z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { captionLines, hasCaptionSource, setCaptions } from "./captions.js";
-import { isPathInside } from "./connector.js";
+import { isPathInside, realpathOfNearest } from "./connector.js";
 import {
   analyzeAudio,
   applyCutPlan,
@@ -49,6 +49,7 @@ import {
   keepRanges,
   mainClips,
   moveClip,
+  ownAsset,
   removeClip,
   setAssetTranscript,
   setClipFades,
@@ -146,23 +147,38 @@ function cancellable(ctx: CommandContext): { signal: AbortSignal } | Record<stri
 /** The asset a command should work on: the one given, else the video on the timeline. */
 function pickAsset(p: Project, assetId?: string): Asset {
   if (assetId) {
-    const a = p.assets[assetId];
+    const a = ownAsset(p, assetId);
     if (!a) throw new CommandError(`Unknown asset "${assetId}". Call get_project to see assets.`);
     return a;
   }
   const used = mainClips(p)[0]?.assetId;
-  const fromTimeline = used ? p.assets[used] : undefined;
+  const fromTimeline = used ? ownAsset(p, used) : undefined;
   if (fromTimeline) return fromTimeline;
   const all = Object.values(p.assets);
   if (all.length === 1 && all[0]) return all[0];
   throw new CommandError("No video to work on. Import a video first (import_media).");
 }
 
-function checkPath(ctx: CommandContext, path: string): string {
+/**
+ * Check a path a command was given against the folders the caller allowed. Symlinks are resolved on both sides, so a
+ * link inside an allowed folder cannot lead outside it. Without any folders, commands started by the AI or a template
+ * refuse every path; the CLI and the desktop app pass no folders on purpose (they act in the user's own shell).
+ * @returns the absolute, normalised path.
+ * @throws CommandError when the path is not allowed.
+ */
+async function checkPath(ctx: CommandContext, path: string): Promise<string> {
   const abs = resolve(path);
-  if (ctx.allowedRoots && !ctx.allowedRoots.some((root) => isPathInside(resolve(root), abs))) {
-    throw new CommandError(`Path is outside the allowed folders: ${abs}`);
+  if (!ctx.allowedRoots) {
+    if (ctx.source === "ai" || ctx.source === "template") {
+      throw new CommandError(`No folders are allowed for this action, so ${abs} cannot be used.`);
+    }
+    return abs;
   }
+  const outside = () => new CommandError(`Path is outside the allowed folders: ${abs}`);
+  if (!ctx.allowedRoots.some((root) => isPathInside(resolve(root), abs))) throw outside();
+  const real = await realpathOfNearest(abs);
+  const roots = await Promise.all(ctx.allowedRoots.map((r) => realpathOfNearest(resolve(r))));
+  if (!roots.some((root) => isPathInside(root, real))) throw outside();
   return abs;
 }
 
@@ -491,7 +507,7 @@ export const COMMANDS: readonly CommandDef[] = [
       "Import a video file from the user's computer and put it at the end of the timeline. Takes a full file path.",
     schema: z.object({ path: z.string().min(1).describe("Absolute path of a video file") }),
     async run(ctx, a) {
-      const abs = checkPath(ctx, a.path);
+      const abs = await checkPath(ctx, a.path);
       if (!existsSync(abs)) throw new CommandError(`File not found: ${abs}`);
       const asset = await probe(abs, cancellable(ctx));
       if (asset.kind !== "video") {
@@ -960,8 +976,8 @@ export const COMMANDS: readonly CommandDef[] = [
     }),
     irreversible: true,
     async run(ctx, a) {
-      const out = checkPath(ctx, a.path);
-      checkPath(ctx, dirname(out));
+      const out = await checkPath(ctx, a.path);
+      await checkPath(ctx, dirname(out));
       if (!out.toLowerCase().endsWith(".mp4"))
         throw new CommandError("Export path must end in .mp4");
       if (existsSync(out) && !a.overwrite) {

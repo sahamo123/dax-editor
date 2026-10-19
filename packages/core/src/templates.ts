@@ -21,7 +21,7 @@ import {
 import { getPreset } from "./presets.js";
 import { HexColorSchema, type Overlay, POSITIONS, type Project } from "./schema.js";
 import { Session } from "./session.js";
-import { clipDuration, FORMAT_PRESETS, mainClips, timelineDuration } from "./timeline.js";
+import { clipDuration, FORMAT_PRESETS, mainClips, ownAsset, timelineDuration } from "./timeline.js";
 
 // ---------------------------------------------------------------------------------------------
 // Vocabulary
@@ -569,8 +569,11 @@ export function defaultTemplatesDir(): string {
   if (fromEnv) return resolve(fromEnv);
   let dir = dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 8; i++) {
+    // A README alone is not enough: any ancestor folder may have one. The shipped catalogue always has `styles/`.
     const candidate = join(dir, "templates");
-    if (existsSync(join(candidate, "README.md"))) return candidate;
+    if (existsSync(join(candidate, "README.md")) && existsSync(join(candidate, "styles"))) {
+      return candidate;
+    }
     dir = dirname(dir);
   }
   throw new TemplateError(
@@ -836,7 +839,7 @@ function renameOverlay(p: Project, from: string, to: string): Project {
 
 function pickMainAsset(p: Project) {
   const first = mainClips(p)[0];
-  const asset = first ? p.assets[first.assetId] : undefined;
+  const asset = first ? ownAsset(p, first.assetId) : undefined;
   if (!asset) throw new TemplateError("There is no video on the timeline. Import a video first.");
   return asset;
 }
