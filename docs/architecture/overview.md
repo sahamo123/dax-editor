@@ -48,7 +48,7 @@ flowchart LR
 
 **Built today:** `@dax/core` (the engine and the command registry), `@dax/protocol` (the shared contract), `@dax/evals`, and the `dax` CLI and `dax-mcp` MCP server (`packages/cli`, `packages/mcp`). **Planned or not yet merged:** the engine server, agent loop, local model runtime and desktop app; several are being built in parallel. See [STATUS](../STATUS.md) and the [product v1 spec](../specs/product-v1.md).
 
-The CLI and MCP server run the registry in-process and share project files through `Session`; they do not go through the engine server. See [CLI and MCP server](cli-and-mcp.md). They use the same commands with the same validation and history as every other front door.
+The CLI and MCP server run the registry in-process and share project files through `Session`; they do not go through the engine server. See [CLI and MCP server](cli-and-mcp.md). The engine's chat can also be answered by the user's own signed-in command-line agent through the bridges, which reuse the MCP endpoint on the live session. See [CLI bridges](cli-bridges.md). They use the same commands with the same validation and history as every other front door.
 
 ## The engine (`packages/core`)
 

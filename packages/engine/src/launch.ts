@@ -3,6 +3,7 @@
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { type CliBridges, createCliBridges } from "@dax/bridges";
 import type { Transcriber } from "@dax/core";
 import {
   type LocalModelController,
@@ -25,8 +26,14 @@ export interface LaunchOptions
   transcriber?: Transcriber;
   /** Embedded model controller; its endpoint is used by the `local` provider. */
   localModelController?: LocalModelController;
-  /** Hooks for extra providers such as signed-in CLIs. */
+  /** Hooks for extra providers such as signed-in CLIs. Ignored when `cliBridges` is supplied or disabled. */
   extraProviders?: RunnerFactoryOptions["extraProviders"];
+  /**
+   * The signed-in command-line agent bridges (`@dax/bridges`). Default: enabled, built with the engine's data folder.
+   * Pass an instance to inject one (tests use fakes); pass `false` to turn the bridges off entirely. The launcher
+   * closes the bridges when the server closes.
+   */
+  cliBridges?: CliBridges | false;
 }
 
 /** Find the shipped `skills/` folder: the environment override first, then walking up from this file. */
@@ -46,13 +53,23 @@ export function defaultSkillsDir(
 
 /** Start the full engine. */
 export async function launch(options: LaunchOptions): Promise<RunningServer> {
-  const { skillsDir, transcriber, localModelController, extraProviders, ...server } = options;
+  const { skillsDir, transcriber, localModelController, extraProviders, cliBridges, ...server } =
+    options;
   const local = localModelController;
   const dir = skillsDir ?? defaultSkillsDir();
+  // Bridges are on by default. They spawn nothing until the Settings screen or a chat run asks.
+  const bridges: CliBridges | undefined =
+    cliBridges === false
+      ? undefined
+      : (cliBridges ?? createCliBridges({ dataDir: options.dataDir, transcriber }));
   const runner = createRunnerFactory({
     ...(dir ? { skillsDir: dir } : {}),
     ...(transcriber ? { transcriber } : {}),
-    ...(extraProviders ? { extraProviders } : {}),
+    ...(bridges
+      ? { extraProviders: bridges.extraProviders }
+      : extraProviders
+        ? { extraProviders }
+        : {}),
     ...(local
       ? {
           localEndpoint: async () => {
@@ -62,13 +79,23 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
         }
       : {}),
   });
-  return startServer({
+  const started = await startServer({
     ...server,
     agentRunner: runner,
-    providers: createProviderRegistry(
-      local ? { localReady: async () => (await local.status()).running } : {},
-    ),
+    providers: createProviderRegistry({
+      ...(local ? { localReady: async () => (await local.status()).running } : {}),
+      ...(bridges ? { cliStatuses: bridges.statuses } : {}),
+    }),
     ...(local ? { localModel: local } : {}),
     ...(transcriber ? { transcriber } : {}),
   });
+  if (!bridges) return started;
+  // Stop the CLI processes and remove their temporary files before the server reports itself closed.
+  return {
+    info: started.info,
+    async close() {
+      await started.close();
+      await bridges.close();
+    },
+  };
 }

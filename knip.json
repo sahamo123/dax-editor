@@ -9,6 +9,9 @@
     "packages/agent": {
       "project": ["src/**/*.ts"]
     },
+    "packages/bridges": {
+      "project": ["src/**/*.ts"]
+    },
     "packages/cli": {
       "project": ["src/**/*.ts"]
     },

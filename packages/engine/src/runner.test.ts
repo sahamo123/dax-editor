@@ -89,4 +89,30 @@ describe("createProviderRegistry", () => {
     expect(withKey.find((p) => p.kind === "anthropic")?.available).toBe(true);
     expect(withKey.find((p) => p.kind === "local")?.available).toBe(true);
   });
+
+  it("reports the real state of the cli-* providers when a bridge supplies it", async () => {
+    const statuses = [
+      { kind: "cli-claude" as const, available: true, detail: "Ready.", signedIn: true },
+      { kind: "cli-codex" as const, available: false, detail: "Not supported yet." },
+    ];
+    const list = await createProviderRegistry({ cliStatuses: async () => statuses }).list(
+      env(settings()),
+    );
+    expect(list.find((p) => p.kind === "cli-claude")).toEqual(statuses[0]);
+    expect(list.find((p) => p.kind === "cli-codex")).toEqual(statuses[1]);
+    // Gemini is not in the bridge's answer, so it falls back to the generic message.
+    expect(list.find((p) => p.kind === "cli-gemini")?.detail).toMatch(
+      /not installed in this build/,
+    );
+  });
+
+  it("says it could not check the cli-* providers when the bridge fails, and never throws", async () => {
+    const list = await createProviderRegistry({
+      cliStatuses: async () => {
+        throw new Error("boom");
+      },
+    }).list(env(settings()));
+    const claude = list.find((p) => p.kind === "cli-claude");
+    expect(claude).toMatchObject({ available: false, detail: "Could not check this provider" });
+  });
 });

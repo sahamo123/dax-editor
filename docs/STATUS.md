@@ -28,6 +28,7 @@ The engine has a command registry, a cut engine, word-timed captions, text overl
 - **Core engine basics**: FFmpeg probe, silence detection and scene detection; transcript helpers; `Connector` interface (local).
 - **CLI** (`packages/cli`, `dax`): `commands`, `run <command> --json '{...}'`, `project new|show`, `import`, `cut`, `export`, `mcp`, `serve`. Machine-readable `--json` output and documented exit codes; projects persist as `.dax.json` with their undo history, so `dax run undo` works between invocations.
 - **MCP server** (`packages/mcp`, `dax-mcp`): every core command as a tool (annotations from `readOnly`/`irreversible`), a `preview_frame` image tool, project and history resources, export progress and cancellation. stdio, or loopback Streamable HTTP with a bearer token and Host/Origin checks. See [CLI and MCP server](architecture/cli-and-mcp.md).
+- **CLI bridges** (`packages/bridges`, `@dax/bridges`, see [CLI bridges](architecture/cli-bridges.md)): Claude Code runs as a chat backend through the user's own signed-in `claude` binary. dax exposes its editing tools over a per-run loopback MCP endpoint on the live project session, and edits are credited to `ai`. The CLI may use only those tools. Settings shows not installed, not signed in, or ready. Codex is detected and reported as not supported yet. Gemini is deliberately not supported. Tested with a fake CLI, plus a recorded real run. Credentials are never read.
 - **Shared contract** (`packages/protocol`, `@dax/protocol`): request, response and event types for the server, desktop UI and agent.
 - **Evals harness** (`packages/evals`): oracle adapter passes 3/3 starter tasks.
 - **Tooling**: `pnpm check` exits 0 on Linux: lint, typecheck, knowledge-base validation, doc coverage, dead-code check and tests (124 core, 5 protocol, 6 evals, 14 script).
@@ -46,7 +47,8 @@ Built in parallel, each in its own git worktree under `.claude/worktrees`. None 
 - Tauri shell (`apps/desktop/src-tauri`).
 - Skills layer (`skills/`) and template packs with an applier (`templates/`).
 - `@dax/stt`: whisper.cpp speech-to-text.
-- Research tasks, relaunched after silently failing: Tauri sidecar packaging, embedded local LLM, CLI sign-in bridges, MCP server design, timeline UI patterns, FFmpeg animation recipes (audio layers, zoom, B-roll), and speech-to-text.
+- Research tasks, relaunched after silently failing: Tauri sidecar packaging, embedded local LLM, MCP server design, timeline UI patterns, FFmpeg animation recipes (audio layers, zoom, B-roll), and speech-to-text. The CLI sign-in bridge research is done (see [research](research/cli-subscription-bridges.md)) and the Claude Code bridge is built.
+- CLI bridges, open items: Codex needs a confirmed per-run MCP setup before it can run (API key first, subscription sign-in opt-in). The Claude bridge still needs a live end-to-end check on each supported Claude Code version, and a written answer from Anthropic on the bridge (the compliance page suggests asking sales).
 
 ## Next up (in priority order)
 
