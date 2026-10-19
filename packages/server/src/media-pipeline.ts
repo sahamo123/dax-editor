@@ -105,6 +105,8 @@ export class MediaPipeline {
   private readonly proxySlots = new Limiter(MAX_PROXY_JOBS);
   private readonly derivedSlots = new Limiter(MAX_DERIVED_TASKS);
   private readonly started = new Set<string>();
+  /** Last setup failure reported per asset id, so retries that fail the same way do not add a job each time. */
+  private readonly setupErrors = new Map<string, string>();
   private readonly abort = new AbortController();
 
   constructor(
@@ -131,12 +133,24 @@ export class MediaPipeline {
       if (this.started.has(asset.id) || this.entries.has(asset.id) || asset.kind === "image")
         continue;
       this.started.add(asset.id);
-      this.start(asset).catch((err) => {
-        // Typically the source file is missing or outside the allowed folders. Show it to the user as a failed job.
-        const msg = isAbortError(err) ? "Cancelled" : message(err);
-        this.cfg.log.warn(`media setup failed for ${asset.id}: ${msg}`);
-        this.cfg.jobs.create("proxy", `Preparing ${basename(asset.path)}`).fail(msg);
-      });
+      this.start(asset).then(
+        () => this.setupErrors.delete(asset.id),
+        (err) => this.setupFailed(asset, err),
+      );
+    }
+  }
+
+  /** Record a setup failure: the attempt is forgotten so a later change retries it, and the user sees the failure once. */
+  private setupFailed(asset: Asset, err: unknown): void {
+    // Typically the source file is missing or outside the allowed folders. Show it to the user as a failed job.
+    const msg = isAbortError(err) ? "Cancelled" : message(err);
+    // Forget the attempt so the next change tries again: the file may be back (a drive remounted, a file restored).
+    this.started.delete(asset.id);
+    this.cfg.log.warn(`media setup failed for ${asset.id}: ${msg}`);
+    // Every change retries, so report a failure once per distinct message rather than once per change.
+    if (this.setupErrors.get(asset.id) !== msg) {
+      this.setupErrors.set(asset.id, msg);
+      this.cfg.jobs.create("proxy", `Preparing ${basename(asset.path)}`).fail(msg);
     }
   }
 
