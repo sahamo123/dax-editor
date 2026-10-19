@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["ffmpeg", "ffprobe", "rustc"],
+  "ignoreBinaries": ["ffmpeg", "ffprobe", "rustc", "espeak-ng", "pgrep"],
   "workspaces": {
     "apps/desktop": {
       "entry": ["e2e/*.spec.ts"],
@@ -40,6 +40,9 @@
       "project": ["src/**/*.ts"]
     },
     "packages/server": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/stt": {
       "project": ["src/**/*.ts"]
     }
   }
