@@ -58,7 +58,7 @@ export async function extractAudio(
   };
   const args = ["-hide_banner", "-nostdin", "-y", "-loglevel", "error"];
   if (opts.startSec) args.push("-ss", String(opts.startSec));
-  args.push("-i", path);
+  args.push("-protocol_whitelist", "file", "-i", path);
   if (opts.durationSec !== undefined) args.push("-t", String(opts.durationSec));
   // "-map 0:a:0" fails loudly on silent video instead of writing an empty file.
   args.push("-map", "0:a:0", "-vn", "-ac", "1", "-ar", String(WHISPER_SAMPLE_RATE));

@@ -28,10 +28,24 @@ export const TranscriptSchema = z.object({
 /** A validated {@link TranscriptSchema} value. */
 export type Transcript = z.infer<typeof TranscriptSchema>;
 
+/**
+ * An absolute local file path. A path reaches FFmpeg as an input name, so a URL or protocol
+ * (`https:`, `file:`, `concat:`, `pipe:`) and a relative path are refused. A single letter before
+ * the colon is a Windows drive letter (`C:\`), which stays valid.
+ */
+const LocalPathSchema = z
+  .string()
+  .refine((p) => !/^[a-zA-Z][a-zA-Z0-9+.-]+:/.test(p), {
+    message: "must be a local file path, not a URL or protocol",
+  })
+  .refine((p) => /^(?:[a-zA-Z]:[\\/]|[\\/])/.test(p), {
+    message: "must be an absolute file path",
+  });
+
 /** A source media file known to the project. `duration` is in seconds; `hasAudio` lets the renderer synthesise silence for clips without an audio stream. */
 export const AssetSchema = z.object({
   id: IdSchema,
-  path: z.string(),
+  path: LocalPathSchema,
   kind: z.enum(["video", "audio", "image"]),
   duration: z.number().finite().nonnegative(),
   width: z.number().finite().int().positive().optional(),

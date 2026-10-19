@@ -95,6 +95,8 @@ export async function detectSilence(
     [
       "-hide_banner",
       "-nostdin",
+      "-protocol_whitelist",
+      "file",
       "-i",
       resolve(path),
       "-vn",
@@ -167,6 +169,8 @@ export async function detectScenes(
     [
       "-hide_banner",
       "-nostdin",
+      "-protocol_whitelist",
+      "file",
       "-i",
       resolve(path),
       "-an",
