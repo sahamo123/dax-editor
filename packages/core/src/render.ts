@@ -4,6 +4,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { audioLayerFilters } from "./audio-layer.js";
 import { buildAss, captionLines } from "./captions.js";
 import { ffmpegBin, run, runFfmpeg } from "./exec.js";
 import { type FontFiles, filterPath, overlayFilters, type TextFile } from "./overlay-filters.js";
@@ -217,6 +218,27 @@ export function buildRenderPlan(
     videoLabel = "[final]";
   }
 
+  // The audio layer mixes under the joined main audio; with no audio clips the main audio is used as it is.
+  let audioLabel = "[outa]";
+  const mixed = audioLayerFilters({
+    project,
+    mainLabel: audioLabel,
+    total,
+    inputFor: (assetId) => {
+      const known = inputIndex.get(assetId);
+      if (known !== undefined) return known;
+      const asset = project.assets[assetId];
+      if (!asset) throw new Error(`Audio clip references missing asset ${assetId}`);
+      const k = addInput(asset.path);
+      inputIndex.set(assetId, k);
+      return k;
+    },
+  });
+  if (mixed) {
+    filters.push(...mixed.filters);
+    audioLabel = mixed.label;
+  }
+
   const args = [
     "-y",
     ...inputs,
@@ -225,7 +247,7 @@ export function buildRenderPlan(
     "-map",
     videoLabel,
     "-map",
-    "[outa]",
+    audioLabel,
     ...encoderArgs(encoder),
     "-c:a",
     "aac",

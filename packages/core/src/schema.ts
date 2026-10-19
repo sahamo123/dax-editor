@@ -36,10 +36,19 @@ export const AssetSchema = z.object({
 /** A validated {@link AssetSchema} value. */
 export type Asset = z.infer<typeof AssetSchema>;
 
+/** What a clip on the audio track is for. Music ducks under speech; a sound effect (`sfx`) never does. */
+export const AUDIO_ROLES = ["music", "sfx"] as const;
+/** One of {@link AUDIO_ROLES}. */
+export type AudioRole = (typeof AUDIO_ROLES)[number];
+
 /**
  * A clip places a slice of an asset ([in, out] in source seconds) on the
  * timeline at `start` (timeline seconds). `fadeIn` / `fadeOut` are the lengths,
  * in seconds, of a fade from/to black (and silence) at the clip's edges.
+ *
+ * `role`, `loop` and `length` are used only by clips on the audio track (`a1`), where clips are
+ * placed freely (they may overlap and leave gaps): `length` is how long the clip lasts on the
+ * timeline, and with `loop` the slice [in, out] repeats to fill it. On the main track they are ignored.
  */
 export const ClipSchema = z.object({
   id: z.string(),
@@ -50,6 +59,9 @@ export const ClipSchema = z.object({
   volume: z.number().nonnegative().default(1),
   fadeIn: z.number().nonnegative().default(0),
   fadeOut: z.number().nonnegative().default(0),
+  role: z.enum(AUDIO_ROLES).optional(),
+  loop: z.boolean().optional(),
+  length: z.number().positive().optional(),
 });
 /** A validated {@link ClipSchema} value. */
 export type Clip = z.infer<typeof ClipSchema>;
@@ -138,6 +150,18 @@ export const ZoomSchema = z.object({
 /** A validated {@link ZoomSchema} value. */
 export type Zoom = z.infer<typeof ZoomSchema>;
 
+/**
+ * How music is lowered while someone speaks on the main track. `amountDb` is roughly how many decibels
+ * quieter the music gets under speech; `releaseSeconds` is how long it takes to come back up afterwards.
+ */
+export const DuckingSchema = z.object({
+  enabled: z.boolean().default(true),
+  amountDb: z.number().min(3).max(30).default(12),
+  releaseSeconds: z.number().min(0.05).max(3).default(0.4),
+});
+/** A validated {@link DuckingSchema} value. */
+export type Ducking = z.infer<typeof DuckingSchema>;
+
 /** How footage that does not match the output shape is fitted: bars, crop to fill, or a blurred copy behind. */
 export const FITS = ["contain", "cover", "blur"] as const;
 /** One of {@link FITS}. */
@@ -176,6 +200,8 @@ export const TimelineSchema = z.object({
   overlays: z.array(OverlaySchema).default([]),
   /** Punch-ins and push-ins on the finished picture. Absent means none. */
   zooms: z.array(ZoomSchema).optional(),
+  /** How music ducks under speech. Absent means the defaults ({@link DuckingSchema}). */
+  ducking: DuckingSchema.optional(),
   /** Present when captions are on. */
   captions: CaptionSettingsSchema.optional(),
 });

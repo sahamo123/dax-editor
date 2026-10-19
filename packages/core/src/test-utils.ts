@@ -1,7 +1,7 @@
 // Helpers shared by the rendering tests: make small synthetic media with FFmpeg, and measure what a render produced
 // (pixel positions, audio levels). Test-only: it is not exported from the package and is excluded from the build.
 
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -27,7 +27,7 @@ export function removeTempDir(dir: string): void {
 }
 
 /** Run FFmpeg quietly with the given arguments; throws with FFmpeg's message on failure. */
-function ff(args: string[]): void {
+export function ff(args: string[]): void {
   execFileSync("ffmpeg", ["-y", "-v", "error", ...args], { maxBuffer: 64 * 1024 * 1024 });
 }
 
@@ -97,4 +97,91 @@ export function boxEdges(
     }
   }
   return { left, right, top, bottom };
+}
+
+/** Levels of a stretch of audio, in dBFS. `band` limits the measurement to a narrow band around that frequency in Hz. */
+export function audioLevels(
+  file: string,
+  startSec: number,
+  seconds: number,
+  band?: number,
+): { rmsDb: number; peakDb: number } {
+  const filter = `${band ? `bandpass=f=${band}:width_type=h:w=30,` : ""}astats=metadata=0`;
+  // astats reports on stderr, which spawnSync always returns.
+  const run = spawnSync(
+    "ffmpeg",
+    [
+      "-hide_banner",
+      "-ss",
+      String(startSec),
+      "-t",
+      String(seconds),
+      "-i",
+      file,
+      "-vn",
+      "-af",
+      filter,
+      "-f",
+      "null",
+      "-",
+    ],
+    { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 },
+  );
+  return parseLevels(run.stderr);
+}
+
+/** Read the overall RMS and peak lines from `astats` output (the last occurrence is the overall block). */
+function parseLevels(text: string): { rmsDb: number; peakDb: number } {
+  const last = (label: string): number => {
+    const all = [...text.matchAll(new RegExp(`${label} dB: (-?inf|-?[\\d.]+)`, "g"))];
+    const raw = all.at(-1)?.[1];
+    if (raw === undefined) throw new Error(`astats printed no "${label}"`);
+    return raw.endsWith("inf") ? Number.NEGATIVE_INFINITY : Number(raw);
+  };
+  return { rmsDb: last("RMS level"), peakDb: last("Peak level") };
+}
+
+/** Speech stand-in: a 1500 Hz tone of amplitude `amp` that is on for 0.8 s and off for 0.6 s, repeating, with a flat grey picture. */
+export function makeSpeechVideo(path: string, seconds: number, amp: number): void {
+  ff([
+    ...["-f", "lavfi", "-i", `color=c=0x303030:s=640x360:r=30:d=${seconds}`],
+    ...[
+      ...["-f", "lavfi", "-i"],
+      `aevalsrc='${amp}*sin(2*PI*1500*t)*lt(mod(t,1.4),0.8)':s=48000:d=${seconds}:c=stereo`,
+    ],
+    ...["-pix_fmt", "yuv420p", "-c:v", "libx264", "-c:a", "aac", "-shortest", path],
+  ]);
+}
+
+/** A steady sine tone file (WAV) of `freq` Hz and amplitude `amp`, `seconds` long. */
+export function makeTone(path: string, freq: number, seconds: number, amp = 0.5): void {
+  ff([
+    ...["-f", "lavfi", "-i", `aevalsrc='${amp}*sin(2*PI*${freq}*t)':s=48000:d=${seconds}:c=stereo`],
+    ...["-c:a", "pcm_s16le", path],
+  ]);
+}
+
+/** A solid-colour PNG (with an alpha channel) of the given size, for image overlay tests. */
+export function makePng(path: string, color: string, w: number, h: number): void {
+  ff(["-f", "lavfi", "-i", `color=c=${color}:s=${w}x${h},format=rgba`, "-frames:v", "1", path]);
+}
+
+/** Duration of the audio stream of `file` in seconds, from ffprobe. */
+export function audioDuration(file: string): number {
+  const out = execFileSync(
+    "ffprobe",
+    [
+      "-v",
+      "error",
+      "-select_streams",
+      "a:0",
+      "-show_entries",
+      "stream=duration",
+      "-of",
+      "csv=p=0",
+      file,
+    ],
+    { encoding: "utf8" },
+  );
+  return Number(out.trim());
 }

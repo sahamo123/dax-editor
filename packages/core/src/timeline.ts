@@ -1,5 +1,6 @@
 // Timeline edit operations. Pure functions (Project in, Project out) with no filesystem or FFmpeg access.
 
+import { shiftAudioForDelete } from "./audio-layer.js";
 import { newId } from "./ids.js";
 import { shiftOverlaysForDelete } from "./overlays.js";
 import type { Asset, Clip, Fit, Project, Range, Transcript } from "./schema.js";
@@ -145,6 +146,7 @@ export function deleteRange(p: Project, from: number, to: number): Project {
   // over. Music is anchored to the timeline instead and sound effects to their moment (see shiftAudioForDelete).
   next.timeline.overlays = shiftOverlaysForDelete(next.timeline.overlays, from, to);
   if (next.timeline.zooms) next.timeline.zooms = shiftZoomsForDelete(next.timeline.zooms, from, to);
+  next.timeline.tracks = shiftAudioForDelete(next.timeline.tracks, from, to);
   return next;
 }
 

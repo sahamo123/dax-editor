@@ -1,3 +1,4 @@
+export * from "./audio-layer.js";
 export * from "./captions.js";
 export * from "./commands.js";
 export * from "./connector.js";

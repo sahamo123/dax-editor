@@ -1,13 +1,36 @@
-import { describe, expect, it } from "vitest";
+// The effects commands through the registry: arguments, safety (repeat, undo, errors) and, with FFmpeg, importing real
+// files and exporting a video that has a zoom, music and a logo together.
+
+import { join } from "node:path";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { audioClips } from "./audio-layer.js";
 import { COMMANDS, type CommandContext, commandTools, runCommand } from "./commands.js";
+import { probe } from "./media.js";
 import { Session } from "./session.js";
-import { addAsset, appendClip, emptyProject } from "./timeline.js";
+import {
+  ff,
+  hasFfmpeg,
+  makePng,
+  makeSpeechVideo,
+  makeTempDir,
+  makeTone,
+  removeTempDir,
+} from "./test-utils.js";
+import { addAsset, appendClip, emptyProject, timelineDuration } from "./timeline.js";
 import { zoomsOf } from "./zoom.js";
 
-const EFFECT_NAMES = ["add_zoom", "update_zoom", "remove_zoom"];
+const EFFECT_NAMES = [
+  "add_zoom",
+  "update_zoom",
+  "remove_zoom",
+  "add_audio",
+  "update_audio",
+  "remove_audio",
+  "set_ducking",
+];
 
 describe("effects commands in the registry", () => {
-  it("registers the three zoom commands, with short plain descriptions and documented arguments", () => {
+  it("registers the zoom and audio commands, with short plain descriptions and documented arguments", () => {
     const tools = commandTools({ names: EFFECT_NAMES });
     expect(tools.map((t) => t.name).sort()).toEqual([...EFFECT_NAMES].sort());
     for (const t of tools) {
@@ -140,4 +163,110 @@ describe("zoom commands", () => {
     await runCommand(ctx, "delete_range", { from: 1, to: 3 });
     expect(zoomsOf(ctx.session.project)[0]).toMatchObject({ start: 4, duration: 2 });
   });
+});
+
+describe.skipIf(!hasFfmpeg())("audio and image commands with real files (needs ffmpeg)", () => {
+  let dir: string;
+  let videoPath: string;
+  const f = (name: string) => join(dir, name);
+
+  beforeAll(async () => {
+    dir = makeTempDir("dax-fx-cmd-");
+    videoPath = f("talk.mp4");
+    makeSpeechVideo(videoPath, 6, 0.4);
+    makeTone(f("song.wav"), 220, 3, 0.5);
+    makeTone(f("pop.wav"), 880, 0.4, 0.5);
+    makePng(f("logo.png"), "red", 200, 100);
+    ff(["-f", "lavfi", "-i", "color=c=blue:s=64x64:r=10:d=1", f("mute.mp4")]);
+  }, 60_000);
+  afterAll(() => removeTempDir(dir));
+
+  async function ctx(extra: Partial<CommandContext> = {}): Promise<CommandContext> {
+    const asset = await probe(videoPath);
+    const p = appendClip(
+      addAsset(emptyProject("e2e", { width: 640, height: 360 }), asset),
+      asset.id,
+    );
+    return { session: new Session(p), ...extra };
+  }
+
+  it("imports music by path, places it, and one undo takes it (and its import) away", async () => {
+    const c = await ctx();
+    const r = await runCommand(c, "add_audio", { path: f("song.wav"), start: 1, volume: 0.4 });
+    expect(r.summary).toMatch(/Added music "song.wav" from 1s for 3s; it will drop under speech/);
+    const clip = audioClips(c.session.project)[0];
+    expect(clip).toMatchObject({ role: "music", start: 1, volume: 0.4, length: 3 });
+    expect(Object.values(c.session.project.assets).some((a) => a.kind === "audio")).toBe(true);
+    await runCommand(c, "undo", {});
+    expect(audioClips(c.session.project)).toHaveLength(0);
+    expect(Object.values(c.session.project.assets).some((a) => a.kind === "audio")).toBe(false);
+  }, 30_000);
+
+  it("fills the rest of the video when asked to loop, and gives music default fades", async () => {
+    const c = await ctx();
+    await runCommand(c, "add_audio", { path: f("song.wav"), start: 1, loop: true });
+    const clip = audioClips(c.session.project)[0];
+    expect(clip?.length).toBeCloseTo(timelineDuration(c.session.project) - 1, 3);
+    expect(clip?.loop).toBe(true);
+    expect(clip?.fadeIn).toBeGreaterThan(0);
+    expect(clip?.fadeOut).toBeGreaterThan(0);
+  }, 30_000);
+
+  it("is safe to repeat: the same file at the same start is not added twice", async () => {
+    const c = await ctx();
+    await runCommand(c, "add_audio", { path: f("song.wav") });
+    const states = c.session.history().length;
+    const again = await runCommand(c, "add_audio", { path: f("song.wav") });
+    expect(again.summary).toMatch(/nothing changed/);
+    expect(audioClips(c.session.project)).toHaveLength(1);
+    expect(Object.keys(c.session.project.assets)).toHaveLength(2); // the video and the song, once
+    expect(c.session.history()).toHaveLength(states);
+    // A different start is a second clip; an effect is a separate role and not a duplicate.
+    await runCommand(c, "add_audio", { path: f("song.wav"), start: 4 });
+    await runCommand(c, "add_audio", { path: f("pop.wav"), role: "sfx", start: 2 });
+    expect(audioClips(c.session.project)).toHaveLength(3);
+  }, 30_000);
+
+  it("updates, removes and sets ducking, each as one undoable step", async () => {
+    const c = await ctx();
+    const id = (
+      (await runCommand(c, "add_audio", { path: f("song.wav") })).data as { audioId: string }
+    ).audioId;
+    await runCommand(c, "update_audio", { audioId: id, volume: 0.1, start: 2, fadeOut: 0.5 });
+    expect(audioClips(c.session.project)[0]).toMatchObject({ volume: 0.1, start: 2, fadeOut: 0.5 });
+
+    const d = await runCommand(c, "set_ducking", { amountDb: 18 });
+    expect(d.summary).toMatch(/18 dB/);
+    expect(c.session.project.timeline.ducking).toMatchObject({ enabled: true, amountDb: 18 });
+    expect((await runCommand(c, "set_ducking", { enabled: false })).summary).toMatch(/Ducking off/);
+    await runCommand(c, "undo", {});
+    expect(c.session.project.timeline.ducking?.enabled).toBe(true);
+
+    await runCommand(c, "remove_audio", { audioId: id });
+    expect(audioClips(c.session.project)).toHaveLength(0);
+    await expect(runCommand(c, "remove_audio", { audioId: id })).rejects.toThrow(/Unknown audio/);
+    await runCommand(c, "undo", {});
+    expect(audioClips(c.session.project)).toHaveLength(1);
+  }, 30_000);
+
+  it("says plainly what is wrong with a file or an argument", async () => {
+    const c = await ctx();
+    await expect(runCommand(c, "add_audio", {})).rejects.toThrow(/Give a path/);
+    await expect(runCommand(c, "add_audio", { path: f("song.wav"), assetId: "x" })).rejects.toThrow(
+      /either path or assetId/,
+    );
+    await expect(runCommand(c, "add_audio", { path: f("missing.wav") })).rejects.toThrow(
+      /not found/,
+    );
+    await expect(runCommand(c, "add_audio", { path: f("logo.png") })).rejects.toThrow(
+      /needs a music or sound file/,
+    );
+    await expect(runCommand(c, "add_audio", { path: f("mute.mp4") })).rejects.toThrow(/no sound/);
+    await expect(runCommand(c, "add_audio", { assetId: "nope" })).rejects.toThrow(/Unknown asset/);
+    const locked = await ctx({ allowedRoots: [join(dir, "nowhere")] });
+    await expect(runCommand(locked, "add_audio", { path: f("song.wav") })).rejects.toThrow(
+      /outside the allowed folders/,
+    );
+    expect(audioClips(c.session.project)).toHaveLength(0);
+  }, 30_000);
 });

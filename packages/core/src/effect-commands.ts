@@ -5,11 +5,28 @@
 // small language models: short, plain, one example at most. The add_* commands are safe to repeat: the same range
 // (zoom) or the same file at the same time (audio, image) updates the existing item instead of adding a second one.
 
+import { existsSync } from "node:fs";
+import { basename, resolve } from "node:path";
 import { type ZodTypeAny, z } from "zod";
+import {
+  addAudioClip,
+  audioClipEnd,
+  audioClipFrom,
+  audioClipLength,
+  audioClips,
+  DEFAULT_MUSIC_VOLUME,
+  duckingOf,
+  isAudioSource,
+  removeAudioClip,
+  setDucking,
+  updateAudioClip,
+} from "./audio-layer.js";
 import type { CommandContext, CommandDef, CommandResult } from "./commands.js";
+import { isPathInside } from "./connector.js";
 import { newId } from "./ids.js";
-import { EASES, MAX_ZOOM, type Project } from "./schema.js";
-import { timelineDuration } from "./timeline.js";
+import { probe } from "./media.js";
+import { type Asset, AUDIO_ROLES, EASES, MAX_ZOOM, type Project } from "./schema.js";
+import { addAsset, timelineDuration } from "./timeline.js";
 import {
   addZoom,
   removeZoom,
@@ -61,6 +78,51 @@ async function editIfChanged(
 }
 
 const NOTHING_CHANGED = " It was already like this, so nothing changed.";
+
+/**
+ * Find or import the file a command refers to. `assetId` uses a known asset; `path` opens a file (inside the
+ * allowed folders) and reuses the asset if that file was imported before. `accept` says what the command needs.
+ * Returns the asset and whether it still has to be added to the project. Throws an error with a plain message
+ * for a missing file, a path outside the allowed folders, or a file of the wrong kind.
+ */
+async function resolveMediaAsset(
+  ctx: CommandContext,
+  args: { path?: string | undefined; assetId?: string | undefined },
+  accept: "audio" | "image",
+): Promise<{ asset: Asset; isNew: boolean }> {
+  const project = ctx.session.project;
+  const what = accept === "audio" ? "a music or sound file" : "a picture (PNG or JPG)";
+  if (args.assetId && args.path) throw new Error("Give either path or assetId, not both.");
+  if (!args.assetId && !args.path) throw new Error(`Give a path to ${what}, or an assetId.`);
+  let asset: Asset | undefined;
+  let isNew = false;
+  if (args.assetId) {
+    asset = project.assets[args.assetId];
+    if (!asset) throw new Error(`Unknown asset "${args.assetId}". Call get_project to see assets.`);
+  } else if (args.path) {
+    const abs = resolve(args.path);
+    if (ctx.allowedRoots && !ctx.allowedRoots.some((r) => isPathInside(resolve(r), abs))) {
+      throw new Error(`Path is outside the allowed folders: ${abs}`);
+    }
+    asset = Object.values(project.assets).find((a) => a.path === abs);
+    if (!asset) {
+      if (!existsSync(abs)) throw new Error(`File not found: ${abs}`);
+      asset = await probe(abs);
+      isNew = true;
+    }
+  }
+  if (!asset) throw new Error(`Give a path to ${what}, or an assetId.`);
+  const ok = accept === "audio" ? isAudioSource(asset) : asset.kind === "image";
+  if (!ok) {
+    const found = asset.kind === "video" && !asset.hasAudio ? "a video with no sound" : asset.kind;
+    throw new Error(`${basename(asset.path)} is ${found}; this needs ${what}.`);
+  }
+  return { asset, isNew };
+}
+
+/** Add `asset` to the project unless it is already there. */
+const withAsset = (p: Project, asset: Asset): Project =>
+  p.assets[asset.id] ? p : addAsset(p, asset);
 
 const startArg = (what: string) =>
   z.number().min(0).describe(`${what}, in seconds on the timeline`);
@@ -211,11 +273,195 @@ const zoomCommands: CommandDef[] = [
   }),
 ];
 
+// ---------------------------------------------------------------------------------------------
+// Music and sound effects
+// ---------------------------------------------------------------------------------------------
+
+const volumeArg = z
+  .number()
+  .min(0)
+  .max(2)
+  .optional()
+  .describe(`Loudness: 1 = as recorded. Music defaults to ${DEFAULT_MUSIC_VOLUME}, effects to 1.`);
+
+const addAudioSchema = z.object({
+  path: z.string().min(1).optional().describe("Full path of a music or sound file to import"),
+  assetId: z.string().optional().describe("Or an audio asset that is already imported"),
+  role: z
+    .enum(AUDIO_ROLES)
+    .default("music")
+    .describe("music is lowered under speech automatically; sfx is a short sound that is not"),
+  start: startArg("Where it starts").default(0),
+  length: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      "How long it plays, in seconds. Default: the whole file, or the rest of the video when loop is true.",
+    ),
+  loop: z.boolean().default(false).describe("Repeat the file to fill length (music beds)"),
+  sourceStart: z.number().min(0).optional().describe("Start this far into the file, in seconds"),
+  volume: volumeArg,
+  fadeIn: z.number().min(0).max(60).optional().describe("Fade in, seconds (music default 1)"),
+  fadeOut: z.number().min(0).max(60).optional().describe("Fade out, seconds (music default 2)"),
+});
+
+const updateAudioSchema = z.object({
+  audioId: z.string().describe("Audio clip id from get_project"),
+  start: startArg("New start").optional(),
+  length: z.number().positive().optional().describe("New length in seconds"),
+  sourceStart: z.number().min(0).optional().describe("Start this far into the file"),
+  loop: z.boolean().optional().describe("Repeat the file to fill the length"),
+  role: z.enum(AUDIO_ROLES).optional().describe("music ducks under speech; sfx does not"),
+  volume: volumeArg,
+  fadeIn: z.number().min(0).max(60).optional().describe("Fade in, seconds"),
+  fadeOut: z.number().min(0).max(60).optional().describe("Fade out, seconds"),
+});
+
+const duckingSchema = z.object({
+  enabled: z.boolean().optional().describe("false stops music dropping under speech"),
+  amountDb: z
+    .number()
+    .min(3)
+    .max(30)
+    .optional()
+    .describe("About how many dB quieter the music gets while someone speaks (default 12)"),
+  releaseSeconds: z
+    .number()
+    .min(0.05)
+    .max(3)
+    .optional()
+    .describe("How long the music takes to come back up afterwards (default 0.4)"),
+});
+
+const audioCommands: CommandDef[] = [
+  define({
+    name: "add_audio",
+    description:
+      "Add background music or a sound effect from an audio file (path or assetId). Music is lowered automatically while someone speaks (see set_ducking). Times are timeline seconds. For a bed under the whole video use loop true; for a whoosh at 12s use role sfx, start 12. Safe to repeat: the same file at the same start is updated.",
+    schema: addAudioSchema,
+    async run(ctx, a) {
+      const { asset, isNew } = await resolveMediaAsset(ctx, a, "audio");
+      const project = ctx.session.project;
+      const total = timelineDuration(project);
+      let length = a.length;
+      if (length === undefined && a.loop) {
+        if (total - a.start < 0.1) {
+          throw new Error("There is no video after that start to fill. Give a length.");
+        }
+        length = total - a.start;
+      }
+      const sourceEnd = asset.duration;
+      const sliceLength = sourceEnd - (a.sourceStart ?? 0);
+      const longest = a.loop
+        ? (length ?? sliceLength)
+        : Math.min(length ?? sliceLength, sliceLength);
+      const music = a.role === "music";
+      // Default fades for music, kept short enough to fit a short clip.
+      const fadeIn = a.fadeIn ?? (music ? Math.min(1, longest * 0.4) : 0);
+      const fadeOut = a.fadeOut ?? (music ? Math.min(2, longest * 0.4) : 0);
+      const clip = audioClipFrom({
+        assetId: asset.id,
+        start: a.start,
+        role: a.role,
+        ...(a.sourceStart !== undefined ? { sourceStart: a.sourceStart } : {}),
+        ...(length !== undefined ? { length } : {}),
+        loop: a.loop,
+        ...(a.volume !== undefined ? { volume: a.volume } : {}),
+        fadeIn,
+        fadeOut,
+        assetDuration: asset.duration,
+      });
+      const existing = audioClips(project).find(
+        (c) =>
+          c.assetId === asset.id &&
+          (c.role ?? "music") === a.role &&
+          Math.abs(c.start - a.start) < SAME_RANGE_TOLERANCE,
+      );
+      const changed = existing
+        ? await editIfChanged(ctx, "Update audio", (p) =>
+            updateAudioClip(p, existing.id, {
+              start: clip.start,
+              in: clip.in,
+              out: clip.out,
+              length: clip.length ?? clip.out - clip.in,
+              loop: clip.loop,
+              volume: clip.volume,
+              fadeIn: clip.fadeIn,
+              fadeOut: clip.fadeOut,
+            }),
+          )
+        : await editIfChanged(ctx, `Add ${a.role === "music" ? "music" : "sound effect"}`, (p) =>
+            addAudioClip(isNew ? withAsset(p, asset) : p, clip),
+          );
+      const id = existing?.id ?? clip.id;
+      const placed = audioClips(ctx.session.project).find((c) => c.id === id);
+      const len = placed ? audioClipLength(placed) : longest;
+      const ducks = music && duckingOf(ctx.session.project).enabled;
+      return {
+        summary: `${existing ? "Updated" : "Added"} ${music ? "music" : "a sound effect"} "${basename(asset.path)}" from ${fmt(a.start)} for ${fmt(len)}${ducks ? "; it will drop under speech" : ""}.${changed ? "" : NOTHING_CHANGED}`,
+        data: { audioId: id, assetId: asset.id },
+      };
+    },
+  }),
+
+  define({
+    name: "update_audio",
+    description:
+      "Change a music or sound-effect clip: when it starts, how long it plays, loudness, fades, looping. Only the fields you give change. Use get_project to find audio ids.",
+    schema: updateAudioSchema,
+    async run(ctx, a) {
+      const patch: Parameters<typeof updateAudioClip>[2] = {};
+      if (a.start !== undefined) patch.start = a.start;
+      if (a.length !== undefined) patch.length = a.length;
+      if (a.sourceStart !== undefined) patch.in = a.sourceStart;
+      if (a.loop !== undefined) patch.loop = a.loop;
+      if (a.role !== undefined) patch.role = a.role;
+      if (a.volume !== undefined) patch.volume = a.volume;
+      if (a.fadeIn !== undefined) patch.fadeIn = a.fadeIn;
+      if (a.fadeOut !== undefined) patch.fadeOut = a.fadeOut;
+      await edit(ctx, "Update audio", (p) => updateAudioClip(p, a.audioId, patch));
+      return { summary: "Audio updated." };
+    },
+  }),
+
+  define({
+    name: "remove_audio",
+    description: "Delete a music or sound-effect clip. Use get_project to find audio ids.",
+    schema: z.object({ audioId: z.string() }),
+    async run(ctx, a) {
+      await edit(ctx, "Remove audio", (p) => removeAudioClip(p, a.audioId));
+      return { summary: "Audio removed." };
+    },
+  }),
+
+  define({
+    name: "set_ducking",
+    description:
+      "Control how music drops while someone speaks on the main track: on or off, how deep (dB), how fast it comes back. Applies to all music; sound effects are never lowered.",
+    schema: duckingSchema,
+    async run(ctx, a) {
+      const patch = Object.fromEntries(Object.entries(a).filter(([, v]) => v !== undefined));
+      await edit(ctx, "Set ducking", (p) => setDucking(p, patch));
+      const d = duckingOf(ctx.session.project);
+      const hasMusic = audioClips(ctx.session.project).some((c) => (c.role ?? "music") === "music");
+      return {
+        summary: `${
+          d.enabled
+            ? `Ducking on: music drops about ${d.amountDb} dB under speech and recovers in ${d.releaseSeconds}s.`
+            : "Ducking off: music keeps its level under speech."
+        }${hasMusic ? "" : " There is no music yet; this applies once you add some."}`,
+      };
+    },
+  }),
+];
+
 /** The effects commands: zoom, audio layer and image overlays. Append them to `COMMANDS`. */
-export const EFFECT_COMMANDS: readonly CommandDef[] = [...zoomCommands];
+export const EFFECT_COMMANDS: readonly CommandDef[] = [...zoomCommands, ...audioCommands];
 
 /**
- * The zooms of a project in the compact form `get_project` shows. Times are rounded to milliseconds.
+ * The zooms, audio clips, images and ducking of a project in the compact form `get_project` shows. Times are
+ * rounded to milliseconds, and asset paths are reduced to file names.
  */
 export function describeEffects(p: Project) {
   const r = (x: number) => Number(x.toFixed(3));
@@ -230,5 +476,18 @@ export function describeEffects(p: Project) {
       x: z.x,
       y: z.y,
     })),
+    audio: audioClips(p).map((c) => ({
+      id: c.id,
+      assetId: c.assetId,
+      file: basename(p.assets[c.assetId]?.path ?? ""),
+      role: c.role ?? "music",
+      start: r(c.start),
+      end: r(audioClipEnd(c)),
+      volume: c.volume,
+      fadeIn: c.fadeIn,
+      fadeOut: c.fadeOut,
+      loop: c.loop ?? false,
+    })),
+    ducking: duckingOf(p),
   };
 }
