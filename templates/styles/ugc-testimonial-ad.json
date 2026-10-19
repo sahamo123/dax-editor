@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "UGC testimonial ad",
-  "description": "Vertical customer-style ad: a pattern-interrupt hook in the first two seconds, the customer's name, an offer callout and a shop-now end card. Captions, handheld punch-ins and trending audio are listed as not available yet.",
+  "description": "Vertical customer-style ad: a pattern-interrupt hook in the first two seconds, the customer's name, an offer callout and a shop-now end card. Small punch-ins on alternate shots and a quiet track (when you supply music) are added. Captions are listed as not available yet.",
   "tags": ["ad", "ugc", "testimonial", "short-form", "tiktok", "reels", "meta"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -201,24 +201,31 @@
   "fades": {
     "out": 0.3
   },
+  "effects": [
+    {
+      "id": "punch-ins",
+      "kind": "zoom",
+      "title": "Handheld-style punch-ins",
+      "description": "A small 8 percent tighter frame on every second shot.",
+      "mode": "alternate-cuts",
+      "scale": 1.08,
+      "every": 2,
+      "minShotSec": 1.5
+    },
+    {
+      "id": "audio",
+      "kind": "music",
+      "title": "Low background track",
+      "description": "A quiet track under the voice, lowered while someone speaks.",
+      "level": 0.15
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Short on-screen captions for sound-off viewing.",
       "requires": ["captions"]
-    },
-    {
-      "id": "punch-ins",
-      "title": "Handheld punch-ins",
-      "description": "Small digital zooms for emphasis.",
-      "requires": ["zoom-keyframes"]
-    },
-    {
-      "id": "audio",
-      "title": "Low or trending audio",
-      "description": "A quiet track under the voice.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

@@ -4,6 +4,7 @@
 
 import { z } from "zod";
 import type { CommandContext, CommandDef, CommandResult } from "./commands.js";
+import { resolveMediaAsset } from "./effect-commands.js";
 import {
   applyTemplate,
   findTemplate,
@@ -42,6 +43,22 @@ const applySchema = z.object({
     .enum(aspects)
     .optional()
     .describe("Output aspect ratio; defaults to the template's main one"),
+  music: z
+    .string()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe(
+      "For templates with a music step: the full path of a music file, or the asset id of one already imported. Music is never bundled. Leave out to use music already on the timeline.",
+    ),
+  logo: z
+    .string()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe(
+      "For templates with a logo step: the full path of a PNG or JPG, or the asset id of one already imported. Leave out to skip the logo.",
+    ),
   existing: z
     .enum(["replace", "skip", "add"])
     .default("replace")
@@ -99,6 +116,7 @@ export const TEMPLATE_COMMANDS: readonly CommandDef[] = [
             example: v.example,
           })),
           cutPreset: "preset" in t.cleanup ? t.cleanup.preset : null,
+          effects: t.effects.map((e) => ({ id: e.id, kind: e.kind, title: e.title })),
           stepsNotAvailableYet: templateRequirements(t),
         })),
       };
@@ -107,7 +125,7 @@ export const TEMPLATE_COMMANDS: readonly CommandDef[] = [
   {
     name: "apply_template",
     description:
-      "Apply a template to the video on the timeline: sets the output format, cuts pauses and fillers with the template's preset, adds the titles, lower-thirds and end card with the right timing, and sets fades. No AI is involved in the edit; you only choose the template and fill its variables. One undo step reverts everything. Returns a report of what was done, skipped (with the reason) and needs review, plus compliance notes. Always tell the user the skipped and needs-review items and the notes, which are general information and not legal advice.",
+      "Apply a template to the video on the timeline: sets the output format, cuts pauses and fillers with the template's preset, adds the titles, lower-thirds and end card with the right timing, adds the template's zoom moves, music bed (ducked under speech) and logo when it has them, and sets fades. No AI is involved in the edit; you only choose the template and fill its variables. One undo step reverts everything. Returns a report of what was done, skipped (with the reason) and needs review, plus compliance notes. Always tell the user the skipped and needs-review items and the notes, which are general information and not legal advice.",
     schema: applySchema,
     readOnly: false,
     irreversible: false,
@@ -119,9 +137,24 @@ export const TEMPLATE_COMMANDS: readonly CommandDef[] = [
           `Unknown template "${a.templateId}". Call list_templates to see the choices.`,
         );
       }
+      // A value that names a known asset is an asset id; anything else is a file path.
+      const media = async (value: string | undefined, accept: "audio" | "image") => {
+        if (!value) return undefined;
+        const known = ctx.session.project.assets[value];
+        const { asset } = await resolveMediaAsset(
+          ctx,
+          known ? { assetId: value } : { path: value },
+          accept,
+        );
+        return asset;
+      };
+      const music = await media(a.music, "audio");
+      const logo = await media(a.logo, "image");
       const report = await applyTemplate(ctx, template, a.variables, {
         existing: a.existing,
         ...(a.aspect ? { aspect: a.aspect } : {}),
+        ...(music ? { music } : {}),
+        ...(logo ? { logo } : {}),
       });
       return {
         summary: `${report.summary} ${report.notes.length ? TEMPLATE_NOTES_DISCLAIMER : ""}`.trim(),

@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Screen recording tutorial",
-  "description": "Tightens a screen recording with narration (long waits trimmed, but pauses kept long enough to follow), then adds a result-first title, the presenter's name and an end card. Cursor-driven zoom, speed-ups and step cards are listed as not available yet.",
+  "description": "Tightens a screen recording with narration (long waits trimmed, but pauses kept long enough to follow), then adds a result-first title, the presenter's name and an end card. A low music bed (when you supply music) is added. Cursor-driven zoom, speed-ups and step cards are listed as not available yet.",
   "tags": ["tutorial", "screen-recording", "how-to", "software", "youtube"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -180,12 +180,21 @@
     "in": 0.3,
     "out": 0.6
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Low music bed",
+      "description": "Quiet music under the narration, lowered while someone speaks.",
+      "level": 0.12
+    }
+  ],
   "deferred": [
     {
       "id": "cursor-zoom",
       "title": "Cursor and click-driven zoom",
-      "description": "Zoom glides to where the cursor clicks, with a click ripple.",
-      "requires": ["cursor-zoom", "zoom-keyframes"]
+      "description": "Zoom glides to where the cursor clicks, with a click ripple. Zoom moves exist, but the editor has no cursor or click track yet.",
+      "requires": ["cursor-zoom"]
     },
     {
       "id": "speed-ups",
@@ -197,13 +206,7 @@
       "id": "step-captions",
       "title": "Step captions and cards",
       "description": "Short step captions and Step N cards.",
-      "requires": ["captions", "image-overlays"]
-    },
-    {
-      "id": "music",
-      "title": "Low music bed",
-      "description": "Quiet music under the narration.",
-      "requires": ["music-bed", "audio-ducking"]
+      "requires": ["captions", "graphic-cards"]
     }
   ],
   "notes": [

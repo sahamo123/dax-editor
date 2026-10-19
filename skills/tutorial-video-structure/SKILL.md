@@ -26,7 +26,7 @@ tags: [tutorial, how to, how-to, lesson, course, teach, teaching, walkthrough, g
 - Teaching pauses matter; `tight` makes tutorials hard to follow.
 - Step titles go in AFTER cutting; cuts shift overlays.
 - Without a transcript you can only guess steps. Ask the user for the step names and times.
-- No zoom on the screen, music or cursor highlights.
+- No cursor highlights, and no zoom that follows the cursor. A fixed zoom or music from a file is possible (see add-music-zoom-or-logo).
 
 ## Do not
 - Do not invent steps the speaker did not teach.

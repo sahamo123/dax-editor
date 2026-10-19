@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Talking head with chapters (Ali Abdaal-style)",
-  "description": "Friendly 16:9 talking head: pauses and fillers trimmed, the topic stated up front, a name lower-third and an end card. Chapter cards, B-roll and sound design are listed as not available yet.",
+  "description": "Friendly 16:9 talking head: pauses and fillers trimmed, the topic stated up front, a name lower-third and an end card. Gentle zoom-ins on every third shot and a quiet music bed (when you supply music) are added. Chapter cards, B-roll and sound effects are listed as not available yet.",
   "tags": ["talking-head", "youtube", "long-form", "chapters", "education"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -175,6 +175,25 @@
     "in": 0.4,
     "out": 0.8
   },
+  "effects": [
+    {
+      "id": "zoom-ins",
+      "kind": "zoom",
+      "title": "Zoom-ins at key moments",
+      "description": "A gentle 10 percent tighter frame on every third shot, not on every sentence.",
+      "mode": "alternate-cuts",
+      "scale": 1.1,
+      "every": 3,
+      "minShotSec": 2
+    },
+    {
+      "id": "music-bed",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "A quiet music bed under the voice, lowered while someone speaks.",
+      "level": 0.15
+    }
+  ],
   "deferred": [
     {
       "id": "broll",
@@ -186,13 +205,7 @@
       "id": "chapter-cards",
       "title": "Chapter cards",
       "description": "Full-screen title cards at each topic change.",
-      "requires": ["image-overlays"]
-    },
-    {
-      "id": "zoom-ins",
-      "title": "Zoom-ins at key moments",
-      "description": "Gentle zoom-ins on the points that matter, not every sentence.",
-      "requires": ["zoom-keyframes"]
+      "requires": ["graphic-cards"]
     },
     {
       "id": "captions",
@@ -202,9 +215,9 @@
     },
     {
       "id": "sound-design",
-      "title": "Music and sound design",
-      "description": "A music bed and small sound effects.",
-      "requires": ["music-bed", "sound-effects", "audio-ducking"]
+      "title": "Sound effects",
+      "description": "Small sound effects at key moments.",
+      "requires": ["sound-effects"]
     }
   ],
   "notes": [

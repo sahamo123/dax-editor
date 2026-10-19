@@ -37,7 +37,7 @@ tags: [shorter, shorten, length, duration, seconds, trim down, cut down]
 
 1. Keep each file under 2,500 characters (the router under 3,000). Small models lose the thread in long text. Cut words, not facts.
 2. Name the exact command and a sensible value. Write call examples as a backticked command, a space, then valid JSON: `` `smart_cut {"preset":"standard"}` ``. A test checks that the command exists and the arguments pass its schema. Use real values (seconds), not placeholders; a quoted placeholder string like `"<id>"` is fine.
-3. Only mention commands that exist. For a capability that does not exist yet (captions, music, B-roll, zoom keyframes), say so and offer the nearest real option. Never pretend.
+3. Only mention commands that exist. For a capability that does not exist yet (captions, B-roll, a music library), say so and offer the nearest real option. Never pretend.
 4. A skill that mentions an irreversible command (today `export_video`) must say it needs the user's confirmation.
 5. Say how to verify with a read-only command (`get_project`, `get_transcript`, `get_history`) and what a good result looks like.
 6. Times are seconds. Say whether a time is timeline time or source time. `delete_range` and `keep_only` use timeline time; `get_transcript`, `detect_silence` and cut plans use source time. Convert with: timeline time = clip start + (source time minus sourceIn).

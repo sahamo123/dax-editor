@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Non-profit appeal",
-  "description": "Person-first appeal: pauses kept for emotional moments, a name lower-third, an impact callout and a donate end card. Captions and music are listed as not available yet.",
+  "description": "Person-first appeal: pauses kept for emotional moments, a name lower-third, an impact callout and a donate end card. Soft music (when you supply it) is added. Captions are listed as not available yet.",
   "tags": ["nonprofit", "fundraising", "charity", "appeal", "youtube", "reels"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -199,18 +199,21 @@
     "in": 1,
     "out": 1.5
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Warm sparse music",
+      "description": "Soft, sparse music, lowered while someone speaks. Never a crisis sting.",
+      "level": 0.12
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Captions for people who watch muted.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Warm sparse music",
-      "description": "Soft music, never a crisis sting.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

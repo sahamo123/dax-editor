@@ -6,9 +6,17 @@
 
 import { existsSync } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
-import { dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import {
+  addAudioClip,
+  audioClipFrom,
+  audioClips,
+  isAudioSource,
+  removeAudioClip,
+  setDucking,
+} from "./audio-layer.js";
 import type { CommandContext } from "./commands.js";
 import {
   analyzeAudio,
@@ -18,10 +26,32 @@ import {
   detectSpeechSpans,
   planCuts,
 } from "./cuts.js";
+import {
+  addImageOverlay,
+  getImagePreset,
+  imageOverlayFromPreset,
+  removeImageOverlay,
+} from "./image-overlays.js";
 import { getPreset } from "./presets.js";
-import { HexColorSchema, type Overlay, POSITIONS, type Project } from "./schema.js";
+import {
+  type Asset,
+  HexColorSchema,
+  IMAGE_POSITIONS,
+  MAX_ZOOM,
+  type Overlay,
+  POSITIONS,
+  type Project,
+} from "./schema.js";
 import { Session } from "./session.js";
-import { clipDuration, FORMAT_PRESETS, mainClips, timelineDuration } from "./timeline.js";
+import {
+  addAsset,
+  clipDuration,
+  FORMAT_PRESETS,
+  mainClips,
+  shotRanges,
+  timelineDuration,
+} from "./timeline.js";
+import { addZoom, removeZoom, zoomFromStyle } from "./zoom.js";
 
 // ---------------------------------------------------------------------------------------------
 // Vocabulary
@@ -34,21 +64,24 @@ export const TEMPLATE_NOTES_DISCLAIMER =
 /**
  * Engine capabilities that do not exist yet, with a plain-language description. A template step that needs one
  * is recorded under `deferred` with `requires: [...]` and reported as skipped, never faked. When the engine
- * gains a feature, remove it here, teach {@link applyTemplate} to run it, and update the templates.
+ * gains a feature, remove it here, teach {@link applyTemplate} to run it (a template `effects` entry), and
+ * update the templates. Already built, and therefore no longer listed: music beds and ducking, zoom moves and
+ * image overlays (see `effects` in {@link TemplateSchema}).
  */
 export const ENGINE_FEATURES = {
   captions: "Word-timed captions (needs a speech-to-text adapter and a caption track)",
-  "music-bed": "A music track under the video",
-  "audio-ducking": "Lowering music automatically under speech",
-  "sound-effects": "Sound effects placed on cuts or emphasis points",
+  "sound-effects":
+    "Sound effects placed automatically on cuts or emphasis points (the audio layer can place one you choose: add_audio with role sfx)",
   broll: "A second video layer for B-roll inserts",
-  "zoom-keyframes": "Punch-in and zoom moves that change over time",
+  "focus-detection":
+    "Knowing where to zoom: the code, the product or the face being talked about (zoom moves exist; the focus point is not found automatically)",
   "cursor-zoom": "Zoom that follows the cursor and clicks in a screen recording",
   "speed-change": "Per-clip speed changes and speed ramps",
   transitions: "Transitions other than fade to black",
   "color-grade": "Colour grading or LUTs",
   reframe: "Re-framing wide footage around the speaker for a vertical or square frame",
-  "image-overlays": "Image, logo, shape and full-frame card overlays",
+  "graphic-cards":
+    "Generated full-frame cards, maps, charts and illustrations (chapter, quote and spec cards). A logo or picture you supply can be placed with add_image_overlay",
   waveform: "An audio waveform or audiogram visual",
   "beat-matching":
     "Finding which part of the footage is which beat (needs shot or scene understanding)",
@@ -114,6 +147,9 @@ export const TEMPLATE_LICENSES = [
 
 /** Ids of the steps every run reports on its own; template steps may not reuse them. */
 const RESERVED_STEP_IDS = ["format", "framing", "cleanup", "fades", "length", "structure"];
+
+/** Upper bound for zoom factors in templates, below the engine's own limit, so a template never asks for a soft picture. */
+const TEMPLATE_MAX_ZOOM = Math.min(MAX_ZOOM, 1.5);
 
 const KEBAB = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const VAR_NAME = /^[a-z][a-z0-9_]{0,31}$/;
@@ -251,6 +287,72 @@ const DeferredSchema = z
   })
   .strict();
 
+/** Fields every effect has: a stable id (used in the report and in the ids of what it adds), a title and a plain description. */
+const effectBase = {
+  id: Kebab,
+  title: z.string().min(1).max(80),
+  description: z.string().min(1).max(400),
+};
+
+/**
+ * Punch-ins or push-ins on the shots of the cut video. A **shot** is a run of clips with no cut between them
+ * (after the cleanup, the shots are the pieces between removed pauses). `alternate-cuts` holds a tighter frame on
+ * every `every`-th shot, the jump-cut look; `push-in` glides slowly towards `scale` over each shot. Shots shorter
+ * than `minShotSec` are left alone.
+ */
+const ZoomEffectSchema = z
+  .object({
+    ...effectBase,
+    kind: z.literal("zoom"),
+    mode: z.enum(["alternate-cuts", "push-in"]),
+    scale: z.number().min(1.02).max(TEMPLATE_MAX_ZOOM),
+    every: z.number().int().min(2).max(6).default(2),
+    minShotSec: z.number().min(0.5).max(60).default(1.5),
+  })
+  .strict();
+
+/**
+ * Music under the video, ducked under speech. The template never ships music (licensing): the caller supplies a
+ * file (`music` in {@link ApplyTemplateOptions}) or already has music on the timeline. `level` is the linear
+ * volume; `scope` `intro` plays it only for the first `introSec` seconds.
+ */
+const MusicEffectSchema = z
+  .object({
+    ...effectBase,
+    kind: z.literal("music"),
+    level: z.number().min(0.03).max(1).default(0.2),
+    scope: z.enum(["full", "intro"]).default("full"),
+    introSec: z.number().min(3).max(60).default(10),
+    duckAmountDb: z.number().min(3).max(30).optional(),
+  })
+  .strict();
+
+/**
+ * A logo or picture the caller supplies (`logo` in {@link ApplyTemplateOptions}), placed with an image preset
+ * and a window counted from the start or the end of the cut video.
+ */
+const LogoEffectSchema = z
+  .object({
+    ...effectBase,
+    kind: z.literal("logo"),
+    preset: z.string().refine(
+      (p) => getImagePreset(p) !== undefined,
+      (p) => ({ message: `Unknown image preset "${p}"` }),
+    ),
+    position: z.enum(IMAGE_POSITIONS).optional(),
+    anchor: z.enum(["start", "end"]),
+    offset: z.number().min(0).max(600).default(0),
+    duration: z.number().min(0.5).max(600),
+    minDuration: z.number().min(0.5).max(60).default(1.5),
+  })
+  .strict();
+
+const EffectSchema = z.discriminatedUnion("kind", [
+  ZoomEffectSchema,
+  MusicEffectSchema,
+  LogoEffectSchema,
+]);
+
 const NoteSchema = z
   .object({ category: z.enum(NOTE_CATEGORIES), text: z.string().min(1).max(500) })
   .strict();
@@ -285,6 +387,11 @@ export const TemplateSchema = z
       .object({ in: z.number().min(0).max(3).optional(), out: z.number().min(0).max(3).optional() })
       .strict()
       .optional(),
+    /**
+     * Steps the engine can do that are not text overlays: zoom moves, a music bed with ducking, a logo. Each is
+     * applied by {@link applyTemplate} and reported like an overlay.
+     */
+    effects: z.array(EffectSchema).max(8).default([]),
     deferred: z.array(DeferredSchema).max(12),
     notes: z.array(NoteSchema).max(12),
     confirmations: z.array(ConfirmationSchema).max(8),
@@ -315,6 +422,10 @@ export const TemplateSchema = z
       t.overlays.map((o) => o.id),
     );
     unique(
+      "effects",
+      t.effects.map((e) => e.id),
+    );
+    unique(
       "deferred",
       t.deferred.map((d) => d.id),
     );
@@ -323,12 +434,14 @@ export const TemplateSchema = z
       t.confirmations.map((c) => c.id),
     );
     // The report lists overlays, deferred steps and confirmations by id, so an id must mean one thing.
-    const stepIds = [...t.overlays, ...t.deferred, ...t.confirmations].map((s) => s.id);
+    const stepIds = [...t.overlays, ...t.effects, ...t.deferred, ...t.confirmations].map(
+      (s) => s.id,
+    );
     stepIds.forEach((id, i) => {
       if (stepIds.indexOf(id) !== i)
         fail(
           ["overlays"],
-          `Id "${id}" is used by more than one overlay, deferred step or confirmation`,
+          `Id "${id}" is used by more than one overlay, effect, deferred step or confirmation`,
         );
       if (RESERVED_STEP_IDS.includes(id))
         fail(["overlays"], `Id "${id}" is reserved for a built-in step`);
@@ -385,6 +498,8 @@ export type TemplateVariable = Template["variables"][number];
 export type TemplateFormat = Template["formats"][number];
 /** A timed text overlay a template adds. */
 export type TemplateOverlayStep = Template["overlays"][number];
+/** A zoom, music or logo step the applier runs. */
+export type TemplateEffect = Template["effects"][number];
 /** A step that needs engine features that do not exist yet. */
 export type TemplateDeferredStep = Template["deferred"][number];
 /** A compliance reminder shown to the user. */
@@ -627,6 +742,7 @@ export type TemplateStepKind =
   | "framing"
   | "cleanup"
   | "overlay"
+  | "effect"
   | "fades"
   | "length"
   | "structure"
@@ -678,6 +794,13 @@ export interface ApplyTemplateOptions {
    * `skip` leaves them untouched; `add` stacks a second copy.
    */
   existing?: "replace" | "skip" | "add";
+  /**
+   * A music file (already probed) for the template's music step. The template never ships music. Without it, music
+   * that is already on the timeline gets the template's ducking; with neither, the step is reported as skipped.
+   */
+  music?: Asset;
+  /** A logo or picture (already probed) for the template's logo step; without it that step is skipped. */
+  logo?: Asset;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -939,6 +1062,9 @@ export async function applyTemplate(
     .splice(overlayFrom)
     .sort((x, y) => (overlayOrder.get(x.id) ?? 0) - (overlayOrder.get(y.id) ?? 0));
   steps.push(...overlayReports);
+  for (const effect of template.effects) {
+    await guarded(effect.id, "effect", () => effectStep(sctx, template, effect, options, add));
+  }
   await guarded("fades", "fades", () => fadesStep(sctx, runCommand, template, add));
 
   const durationAfter = timelineDuration(scratch.project);
@@ -1186,6 +1312,246 @@ async function overlaySteps(a: {
       add(item.step.id, "overlay", fit.fits ? "done" : "needs-review", `Added ${bits.join("; ")}.`);
     });
   }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Effects: zoom, music, logo
+// ---------------------------------------------------------------------------------------------
+
+/** The id of what an effect adds to the project. Zooms add several, so they get `_1`, `_2`, ... after it. */
+function effectBaseId(template: Template, effect: TemplateEffect): string {
+  return `tpl-${template.id}-${effect.id}`;
+}
+
+/** Run one effect on the scratch project and report on it. Effects are replaced when a template is applied again; they never stack. */
+async function effectStep(
+  sctx: CommandContext,
+  template: Template,
+  effect: TemplateEffect,
+  options: ApplyTemplateOptions,
+  add: Add,
+): Promise<void> {
+  const base = effectBaseId(template, effect);
+  const mode = options.existing ?? "replace";
+  const p = sctx.session.project;
+  const owns = (id: string) => ownedBy(id, base);
+  const already =
+    effect.kind === "zoom"
+      ? (p.timeline.zooms ?? []).some((z) => owns(z.id))
+      : effect.kind === "music"
+        ? audioClips(p).some((c) => owns(c.id))
+        : (p.timeline.images ?? []).some((i) => owns(i.id));
+  if (mode === "skip" && already) {
+    add(
+      effect.id,
+      "effect",
+      "skipped",
+      "Already on the timeline from an earlier run; left as it is.",
+    );
+    return;
+  }
+  if (effect.kind === "zoom") return zoomEffect(sctx, effect, base, owns, add);
+  if (effect.kind === "music") return musicEffect(sctx, effect, base, owns, options, add);
+  return logoEffect(sctx, effect, base, owns, options, add);
+}
+
+/** Adds the zooms of a zoom effect to the shots of the cut video, replacing this effect's earlier zooms. */
+async function zoomEffect(
+  sctx: CommandContext,
+  effect: Extract<TemplateEffect, { kind: "zoom" }>,
+  base: string,
+  owns: (id: string) => boolean,
+  add: Add,
+): Promise<void> {
+  const shots = shotRanges(sctx.session.project);
+  const eligible = shots
+    .map((range, index) => ({ range, index }))
+    .filter(({ range }) => range.end - range.start >= effect.minShotSec - EPS);
+  const chosen =
+    effect.mode === "push-in"
+      ? eligible
+      : eligible.filter(({ index }) => (index + 1) % effect.every === 0);
+  let blocked = 0;
+  let added = 0;
+  await sctx.session.apply(
+    (p) => {
+      let q = p;
+      for (const z of (p.timeline.zooms ?? []).filter((x) => owns(x.id))) q = removeZoom(q, z.id);
+      for (const { range } of chosen) {
+        const zoom = zoomFromStyle({
+          id: `${base}_p${added + 1}`,
+          start: ms(range.start),
+          duration: ms(range.end - range.start),
+          scale: effect.scale,
+          style: effect.mode === "push-in" ? "push-in" : "punch-in",
+        });
+        try {
+          q = addZoom(q, zoom);
+          added++;
+        } catch {
+          // Overlaps a zoom the user made by hand: theirs wins.
+          blocked++;
+        }
+      }
+      return q;
+    },
+    { label: `Template: ${effect.title}`, source: "template" },
+  );
+  const what = effect.mode === "push-in" ? "push-in" : "punch-in";
+  if (added === 0) {
+    const why =
+      shots.length < 2 && effect.mode === "alternate-cuts"
+        ? "The video is a single shot (no cuts), so there is nothing to alternate between."
+        : eligible.length === 0
+          ? `Every shot is shorter than ${fmtSec(effect.minShotSec)}.`
+          : "Every candidate shot already has a zoom of your own.";
+    add(effect.id, "effect", "skipped", `${effect.title}: no zooms added. ${why}`);
+    return;
+  }
+  const where =
+    effect.mode === "push-in"
+      ? `on ${added} of ${shots.length} shot(s)`
+      : `on every ${effect.every === 2 ? "second" : `${effect.every}th`} shot (${added} of ${shots.length})`;
+  const extra = blocked ? ` ${blocked} left out because they overlap your own zooms.` : "";
+  add(
+    effect.id,
+    "effect",
+    "done",
+    `${effect.title}: added ${added} ${what}(s) to ${effect.scale}x ${where}.${extra}`,
+  );
+}
+
+/** Puts music under the video, or turns ducking on for music that is already there. */
+async function musicEffect(
+  sctx: CommandContext,
+  effect: Extract<TemplateEffect, { kind: "music" }>,
+  base: string,
+  owns: (id: string) => boolean,
+  options: ApplyTemplateOptions,
+  add: Add,
+): Promise<void> {
+  const total = timelineDuration(sctx.session.project);
+  const ducking = {
+    enabled: true,
+    ...(effect.duckAmountDb ? { amountDb: effect.duckAmountDb } : {}),
+  };
+  const music = options.music;
+  if (music) {
+    if (!isAudioSource(music)) {
+      throw new TemplateError(`${music.path} has no sound, so it cannot be used as music.`);
+    }
+    const length = effect.scope === "intro" ? Math.min(effect.introSec, total) : total;
+    await sctx.session.apply(
+      (p) => {
+        let q = p.assets[music.id] ? p : addAsset(p, music);
+        for (const c of audioClips(q).filter((x) => owns(x.id))) q = removeAudioClip(q, c.id);
+        const clip = audioClipFrom({
+          assetId: music.id,
+          start: 0,
+          length,
+          loop: true,
+          volume: effect.level,
+          fadeIn: Math.min(1, length * 0.4),
+          fadeOut: Math.min(2, length * 0.4),
+          assetDuration: music.duration,
+        });
+        clip.id = base;
+        return setDucking(addAudioClip(q, clip), ducking);
+      },
+      { label: `Template: ${effect.title}`, source: "template" },
+    );
+    const intro = effect.scope === "intro" ? `, for the first ${fmtSec(length)} only` : "";
+    add(
+      effect.id,
+      "effect",
+      "done",
+      `${effect.title}: placed "${basename(music.path)}" at volume ${effect.level}${intro}, lowered under speech (${sctx.session.project.timeline.ducking?.amountDb} dB).`,
+    );
+    return;
+  }
+  const present = audioClips(sctx.session.project).filter((c) => (c.role ?? "music") === "music");
+  if (present.length === 0) {
+    add(
+      effect.id,
+      "effect",
+      "skipped",
+      `${effect.title}: no music was given, so none was added. Music is never bundled (licensing): pass a music file, or add one with add_audio and apply the template again.`,
+    );
+    return;
+  }
+  await sctx.session.apply((p) => setDucking(p, ducking), {
+    label: `Template: ${effect.title}`,
+    source: "template",
+  });
+  const tooLong =
+    effect.scope === "intro" &&
+    present.some((c) => (c.length ?? c.out - c.in) > effect.introSec + 1);
+  add(
+    effect.id,
+    "effect",
+    tooLong ? "needs-review" : "done",
+    `${effect.title}: music is already on the timeline, so ducking was turned on (${sctx.session.project.timeline.ducking?.amountDb} dB under speech).${tooLong ? ` This style wants the music only for the first ${fmtSec(effect.introSec)}; shorten it with update_audio.` : ""}`,
+  );
+}
+
+/** Places a supplied logo, replacing this effect's earlier logo. */
+async function logoEffect(
+  sctx: CommandContext,
+  effect: Extract<TemplateEffect, { kind: "logo" }>,
+  base: string,
+  owns: (id: string) => boolean,
+  options: ApplyTemplateOptions,
+  add: Add,
+): Promise<void> {
+  const logo = options.logo;
+  if (!logo) {
+    add(
+      effect.id,
+      "effect",
+      "skipped",
+      `${effect.title}: no logo was given, so none was added. Pass a PNG or JPG, or place one with add_image_overlay.`,
+    );
+    return;
+  }
+  if (logo.kind !== "image") {
+    throw new TemplateError(`${logo.path} is ${logo.kind}, not a picture (use a PNG or JPG).`);
+  }
+  const total = timelineDuration(sctx.session.project);
+  const duration = Math.min(effect.duration, total);
+  const end = effect.anchor === "end" ? total - effect.offset : effect.offset + duration;
+  const start = Math.max(0, end - duration);
+  if (end - start < effect.minDuration - EPS) {
+    add(
+      effect.id,
+      "effect",
+      "skipped",
+      `${effect.title}: the video is ${fmtSec(total)} long, too short for this logo (it needs at least ${fmtSec(effect.minDuration)}).`,
+    );
+    return;
+  }
+  const image = imageOverlayFromPreset(effect.preset, {
+    assetId: logo.id,
+    start: ms(start),
+    duration: ms(end - start),
+    ...(effect.position ? { position: effect.position } : {}),
+  });
+  image.id = base;
+  await sctx.session.apply(
+    (p) => {
+      let q = p.assets[logo.id] ? p : addAsset(p, logo);
+      for (const i of (q.timeline.images ?? []).filter((x) => owns(x.id))) {
+        q = removeImageOverlay(q, i.id);
+      }
+      return addImageOverlay(q, image);
+    },
+    { label: `Template: ${effect.title}`, source: "template" },
+  );
+  add(
+    effect.id,
+    "effect",
+    "done",
+    `${effect.title}: placed "${basename(logo.path)}" (${image.position}) at ${fmtSec(image.start)} to ${fmtSec(image.start + image.duration)}.`,
+  );
 }
 
 async function fadesStep(

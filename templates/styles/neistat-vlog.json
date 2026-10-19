@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Story vlog (Neistat-style)",
-  "description": "Energetic vlog: jump cuts inside speech with pauses trimmed tight, a day title and a short sign-off. Music-led cutting, push-in cuts and sped-up montages are listed as not available yet.",
+  "description": "Energetic vlog: jump cuts inside speech with pauses trimmed tight, a day title and a short sign-off. A push-in on every second shot is added. Music-led cutting and sped-up montages are listed as not available yet.",
   "tags": ["vlog", "story", "youtube", "jump-cuts"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -137,18 +137,24 @@
     "in": 0.5,
     "out": 1.2
   },
+  "effects": [
+    {
+      "id": "push-in",
+      "kind": "zoom",
+      "title": "Push-in as a cut",
+      "description": "A 12 percent push-in on every second shot, used like a jump cut.",
+      "mode": "alternate-cuts",
+      "scale": 1.12,
+      "every": 2,
+      "minShotSec": 1
+    }
+  ],
   "deferred": [
     {
       "id": "music-first",
       "title": "Music-led cutting",
-      "description": "Choose the music first and cut to its beats.",
-      "requires": ["music-bed"]
-    },
-    {
-      "id": "push-in",
-      "title": "Push-in as a cut",
-      "description": "A digital push-in used as a jump cut.",
-      "requires": ["zoom-keyframes"]
+      "description": "Choose the music first and cut to its beats. Music can be added (add_audio), but the editor cannot cut to its beats.",
+      "requires": ["beat-matching"]
     },
     {
       "id": "speed-montage",

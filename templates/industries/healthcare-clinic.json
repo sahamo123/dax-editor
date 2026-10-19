@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Healthcare clinic",
-  "description": "Low-risk clinic video: provider introduction with credential, a standing 'general information' line, calm pacing and a booking end card. Captions and music are listed as not available yet.",
+  "description": "Low-risk clinic video: provider introduction with credential, a standing 'general information' line, calm pacing and a booking end card. Calm low music (when you supply it) is added. Captions are listed as not available yet.",
   "tags": ["healthcare", "clinic", "dental", "medical", "website"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -195,18 +195,21 @@
     "in": 0.5,
     "out": 1
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Calm low music",
+      "description": "A quiet bed with no urgency, lowered while someone speaks.",
+      "level": 0.1
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Captions for accessibility and sound-off viewing.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Calm low music",
-      "description": "A quiet bed with no urgency.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

@@ -28,6 +28,6 @@ tags: [format, aspect ratio, ratio, platform, vertical, portrait, landscape, squ
 - Screen recordings become unreadable in vertical. Warn.
 
 ## Do not
-- Do not promise a crop, a zoom or subject tracking. They do not exist yet.
+- Do not promise subject tracking or a crop around the speaker. They do not exist yet.
 - Do not guess a platform from a vague "social media"; pick `portrait-1080x1920` and say so, or ask.
 - Do not export unless asked.

@@ -21,7 +21,7 @@ tags: [screen recording, screencast, screen capture, demo, product demo, softwar
 `get_project`: overlays in order, none past the end, duration down only by confirmed cuts.
 
 ## Pitfalls
-- Zoom into clicks, cursor highlights, speed-ups of waits and music do not exist yet; say so (handle-unsupported-requests).
+- Zoom that follows clicks, cursor highlights and speed-ups of waits do not exist yet; say so (handle-unsupported-requests). A zoom on a moment you choose is possible (see add-music-zoom-or-logo).
 - Typing noise or system sounds read as speech, so pauses may not be found.
 - A scene change can be a pop-up, not a new step. Check before labelling.
 - Delete ranges AFTER you confirm them; wrong ones cut useful clicks.

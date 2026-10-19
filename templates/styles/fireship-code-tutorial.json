@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Fast code tutorial (Fireship-style)",
-  "description": "Dense, short coding explainer: dead air cut tight, the problem typed out on screen, one key takeaway callout and an end card. Code zooms, memes and sound effects are listed as not available yet.",
+  "description": "Dense, short coding explainer: dead air cut tight, the problem typed out on screen, one key takeaway callout and an end card. A music bed (when you supply music) is added. Code zooms, memes and sound effects are listed as not available yet.",
   "tags": ["tutorial", "coding", "screen-recording", "youtube", "fast-cuts"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -166,18 +166,27 @@
   "fades": {
     "out": 0.4
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "Music under the voice.",
+      "level": 0.2
+    }
+  ],
   "deferred": [
     {
       "id": "code-zoom",
       "title": "Code zooms",
-      "description": "Zoom into the lines being discussed.",
-      "requires": ["zoom-keyframes"]
+      "description": "Zoom into the lines being discussed. The zoom itself exists (add_zoom with a focus point), but the editor cannot tell which lines are being discussed.",
+      "requires": ["focus-detection"]
     },
     {
       "id": "memes",
       "title": "Meme and image inserts",
       "description": "Short image or meme cutaways for jokes.",
-      "requires": ["image-overlays"]
+      "requires": ["graphic-cards"]
     },
     {
       "id": "sfx",
@@ -190,12 +199,6 @@
       "title": "Captions for terms and jokes",
       "description": "On-screen words for key terms.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Music bed",
-      "description": "Music under the voice.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

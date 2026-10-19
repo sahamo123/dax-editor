@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Local service before and after",
-  "description": "Plumber, salon, HVAC and similar: business lower-third and a call-us end card with phone and licence number, pauses trimmed. BEFORE/AFTER labels, time-lapse and captions are listed as not available yet.",
+  "description": "Plumber, salon, HVAC and similar: business lower-third and a call-us end card with phone and licence number, pauses trimmed. Light music (when you supply it) is added. BEFORE/AFTER labels, time-lapse and captions are listed as not available yet.",
   "tags": ["local-business", "service", "before-after", "reels", "tiktok", "shorts"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -186,6 +186,15 @@
   "fades": {
     "out": 0.3
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Light music",
+      "description": "A light bed, lowered while someone speaks. Skip it if you prefer none.",
+      "level": 0.12
+    }
+  ],
   "deferred": [
     {
       "id": "labels",
@@ -204,12 +213,6 @@
       "title": "Captions",
       "description": "Captions that repeat the phone number.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Light music",
-      "description": "None, or a light bed ducked under speech.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

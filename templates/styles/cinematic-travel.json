@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Cinematic travel film",
-  "description": "For music-led travel footage: no cuts (so natural sound and shot lengths stay as filmed), a place title near the start, a place-and-date card at the end and slow fades. Beat-matched cutting, speed ramps and grading are listed as not available yet.",
+  "description": "For music-led travel footage: no cuts (so natural sound and shot lengths stay as filmed), a place title near the start, a place-and-date card at the end and slow fades. Slow push-ins are added on longer shots. Beat-matched cutting, foley, speed ramps and grading are listed as not available yet.",
   "tags": ["travel", "cinematic", "b-roll", "music-led", "youtube", "reels"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -138,12 +138,23 @@
     "in": 1,
     "out": 1.5
   },
+  "effects": [
+    {
+      "id": "push-ins",
+      "kind": "zoom",
+      "title": "Slow push-ins",
+      "description": "A slow digital push-in on every shot of three seconds or more.",
+      "mode": "push-in",
+      "scale": 1.08,
+      "minShotSec": 3
+    }
+  ],
   "deferred": [
     {
       "id": "beat-cuts",
       "title": "Beat-matched cuts",
-      "description": "Cut the shots to the beats of the music.",
-      "requires": ["music-bed", "beat-matching"]
+      "description": "Cut the shots to the beats of the music. A music track can be added, but the editor cannot find the beats.",
+      "requires": ["beat-matching"]
     },
     {
       "id": "ramps",
@@ -156,12 +167,6 @@
       "title": "Colour grade",
       "description": "A LUT or grade, applied after converting log footage.",
       "requires": ["color-grade"]
-    },
-    {
-      "id": "push-ins",
-      "title": "Slow push-ins",
-      "description": "Slow digital push-ins on still shots.",
-      "requires": ["zoom-keyframes"]
     },
     {
       "id": "transitions",

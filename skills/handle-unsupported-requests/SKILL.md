@@ -1,7 +1,7 @@
 ---
 name: handle-unsupported-requests
-description: Use when the user asks for captions, music, B-roll, zoom, speed changes, transitions, filters or volume, or anything else the editor cannot do yet.
-tags: [volume, louder, quieter, quiet, mute, audio level, fade out, fade in, captions, caption, subtitles, subtitle, music, soundtrack, background music, b-roll, broll, stock footage, logo, image, zoom, punch in, pan, slow motion, speed up, speed, transition, dissolve, wipe, filter, color grade, colour, stabilize, noise, translate, dub, voiceover, sound effect, sfx, green screen]
+description: Use when the user asks for captions, B-roll, speed changes, transitions, filters or volume, or anything else the editor cannot do yet.
+tags: [volume, louder, quieter, quiet, mute, audio level, fade out, fade in, captions, caption, subtitles, subtitle, b-roll, broll, stock footage, pan, slow motion, speed up, speed, transition, dissolve, wipe, filter, color grade, colour, stabilize, noise, translate, dub, voiceover, green screen]
 ---
 
 ## When to use
@@ -11,9 +11,9 @@ The request needs something that is not a registry command. Be honest, offer the
 1. Say plainly: "I can't do X yet." One sentence.
 2. Offer the closest real option and ask if they want it:
    - captions or subtitles (no automatic word-timed captions): with a transcript, one sentence per overlay, `add_overlay {"preset":"caption-bottom","start":12,"duration":3,"text":"First sentence here"}`, only for short videos (about 10 sentences). Time each from `get_transcript` (source to timeline time first).
-   - music, sound effects, voiceover: not supported.
-   - B-roll, logos, images, stock footage: not supported. Nearest: a text note with `callout-slide-up`.
-   - zoom, punch-in, pan, reframe: not supported. Nearest: `smart_cut {"preset":"tight"}` for pace.
+   - music or a sound effect from a file, zoom, punch-in, logo, watermark: supported (see add-music-zoom-or-logo). Not supported: a music library, voiceover.
+   - B-roll, stock footage: not supported. Nearest: a text note with `callout-slide-up`.
+   - pan, reframe, zoom that follows the speaker or cursor: not supported. Nearest: `smart_cut {"preset":"tight"}` for pace.
    - speed up, slow motion: not supported. Nearest: cut the pauses.
    - transitions: only fades to and from black.
    - colour grade, filters, stabilising, noise removal, translation, green screen: not supported.

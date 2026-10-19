@@ -31,7 +31,7 @@ Decisions so far:
 - [x] Probe, silence detection, scene detection
 - [x] FFmpeg renderer with encoder selection and progress
 - [x] Transcript types, filler-word ranges, `Connector` interface (local)
-- [x] Command registry: 33 commands, one definition for the UI, built-in AI, MCP and CLI
+- [x] Command registry: 45 commands, one definition for the UI, built-in AI, MCP and CLI
 - [x] Cut engine: floor-relative speech detection, five presets, reviewable cut plans (false starts and retakes are proposals)
 - [x] Word-timed captions burned in, in three looks, following every cut
 - [x] Fit modes (contain, cover, blur) and output format presets
@@ -61,9 +61,9 @@ Decisions so far:
 - [ ] Tauri app: chat panel, preview, timeline, drag-and-drop import (in progress: desktop UI and Tauri shell)
 - [ ] Screen and mic recording
 - [ ] Format recipes (tutorial, explainer, short-form) as data files (in progress: skills layer and template packs)
-- [ ] Engine gap: music and sound-effect audio layers with ducking
-- [ ] Engine gap: punch-in and zoom keyframes
-- [ ] Engine gap: image, shape and card overlays
+- [x] Engine gap: music and sound-effect audio layers with ducking (`add_audio`, `set_ducking`; the desktop UI and server do not show them yet)
+- [x] Engine gap: punch-in and zoom (`add_zoom`: hard punch-in or slow push-in with easing; no automatic focus detection)
+- [x] Engine gap: image overlays: logos, watermarks and stickers (`add_image_overlay`; shapes and generated cards are still missing)
 - [ ] Engine gap: a second video layer for B-roll
 - [ ] CI on macOS, Windows, Linux; installers
 

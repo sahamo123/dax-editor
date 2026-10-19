@@ -19,7 +19,7 @@ tags: [end card, endcard, cta, call to action, subscribe, follow, like and subsc
 `get_project`: overlay `end` is no later than D, `text` exact, the last clip shows `fadeOut`. If D changes afterwards, move it with `move_overlay {"overlayId":"<id>","start":24}`.
 
 ## Pitfalls
-- There is no end-card preset, no image, logo, button or clickable link. A web address is only text.
+- There is no end-card preset, button or clickable link. A web address is only text. A logo needs a file (see add-music-zoom-or-logo).
 - Cutting after adding the CTA shifts or shrinks it; add it last.
 - Platform end screens (YouTube cards) are added on the platform, not here.
 

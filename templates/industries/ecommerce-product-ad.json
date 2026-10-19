@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Product ad",
-  "description": "Vertical product ad: hook in the first seconds, product name, offer callout and a shop-now end card, with pauses trimmed tight. Captions, music and fast demo cuts are listed as not available yet.",
+  "description": "Vertical product ad: hook in the first seconds, product name, offer callout and a shop-now end card, with pauses trimmed tight. Punch-ins on alternate shots and music (when you supply it) are added. Captions and B-roll cutaways are listed as not available yet.",
   "tags": ["ecommerce", "ad", "product", "tiktok", "meta", "shorts"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -197,6 +197,25 @@
   "fades": {
     "out": 0.3
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Upbeat music",
+      "description": "Upbeat music, lowered while someone speaks.",
+      "level": 0.25
+    },
+    {
+      "id": "punch-ins",
+      "kind": "zoom",
+      "title": "Punch-ins in the demo",
+      "description": "A 20 percent punch-in on every second shot to keep a new picture coming.",
+      "mode": "alternate-cuts",
+      "scale": 1.2,
+      "every": 2,
+      "minShotSec": 1
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
@@ -205,16 +224,10 @@
       "requires": ["captions"]
     },
     {
-      "id": "music",
-      "title": "Upbeat music",
-      "description": "Licensed upbeat music.",
-      "requires": ["music-bed", "audio-ducking"]
-    },
-    {
       "id": "demo-cuts",
-      "title": "A new picture every 1 to 2 seconds",
-      "description": "Cutaways and punch-ins in the demo.",
-      "requires": ["broll", "zoom-keyframes"]
+      "title": "Cutaways in the demo",
+      "description": "A new picture every 1 to 2 seconds: cutaways of the product in use.",
+      "requires": ["broll"]
     }
   ],
   "notes": [

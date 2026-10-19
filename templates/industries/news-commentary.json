@@ -214,7 +214,7 @@
       "id": "quote-cards",
       "title": "Quote cards",
       "description": "Attributed quote cards.",
-      "requires": ["image-overlays"]
+      "requires": ["graphic-cards"]
     },
     {
       "id": "broll",

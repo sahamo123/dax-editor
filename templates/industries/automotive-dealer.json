@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Automotive dealer",
-  "description": "Vehicle video: model, year and trim lower-third, a price callout with fine print along the whole clip, a test-drive end card, and gentle pacing. Captions and music are listed as not available yet.",
+  "description": "Vehicle video: model, year and trim lower-third, a price callout with fine print along the whole clip, a test-drive end card, and gentle pacing. Music (when you supply it) is added. Captions are listed as not available yet.",
   "tags": ["automotive", "car", "dealer", "reels", "youtube"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -234,18 +234,21 @@
     "in": 0.4,
     "out": 0.8
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music",
+      "description": "Energetic music, lowered while someone speaks. Leave it out under engine sound.",
+      "level": 0.25
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Spec text on screen.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Music",
-      "description": "Energetic music, but none under the engine.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

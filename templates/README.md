@@ -28,6 +28,7 @@ Each file is named `<id>.json`. Files starting with `_` are ignored. The schema 
 | `beats` | The shot list: id, name, target `durationSec`, guidance, footage hint, optional `overlay` it belongs to. Guidance for the filmmaker; the editor does not re-arrange footage into it. |
 | `overlays` | Text overlays using ONLY presets from `OVERLAY_PRESETS` (see timing rules below). |
 | `fades` | Seconds of fade in at the start and fade out at the end. |
+| `effects` | Steps the engine can do besides text overlays. Three kinds: `zoom` (`alternate-cuts`: a tighter frame on every n-th shot, the jump-cut look; `push-in`: a slow push over each long shot; with `scale`, `every`, `minShotSec`), `music` (a bed with `level`, ducked under speech; `scope: "intro"` plays it only for the first `introSec` seconds) and `logo` (an image preset such as `logo-end-card`, anchored to the `start` or `end`). Each has an `id`, `title` and `description`. |
 | `deferred` | Steps that need engine features that do not exist yet, each with `requires: [...]`. Always reported as skipped. |
 | `notes` | Compliance reminders shown to the user, each with a category. Always shown with the disclaimer "general notes, not legal advice". |
 | `confirmations` | Questions the user must answer before publishing (current price, release signed, ...). Reported as needs-review. |
@@ -56,16 +57,33 @@ and length. Too-long values are **rejected**, not cut. Unknown variable names ar
 (letters, digits and `. , ' & ( ) / -`), `phone` (7 to 15 digits), `url` (http or https only; shown without the
 scheme). Variables never reach FFmpeg or a shell; the overlay renderer writes text to files.
 
+### Effects: zoom, music, logo
+
+Effects run after the overlays, on the cut video. A **shot** is a run of clips with no cut between them, so
+after the cleanup the shots are the pieces between removed pauses.
+
+- `zoom` adds zoom ranges on the shots. With one shot only there is nothing to alternate between, and the step
+  is reported as skipped. A zoom that would overlap one the user made by hand is left out, and the report says so.
+- `music` needs a file, and **templates never ship music** (licensing). Pass `music` to `apply_template` (a file
+  path, or the id of an audio asset already imported) and it is placed under the whole video (or the intro) at the
+  template's level, ducked under speech. Without it, music already on the timeline gets the template's ducking
+  and is otherwise left alone. With neither, the step is skipped and says to add music with `add_audio`.
+- `logo` needs a picture. Pass `logo` (a PNG or JPG path or asset id); without it the step is skipped.
+
+Effects are always **replaced** when a template is applied again (`existing: "add"` only stacks overlays), and
+they are part of the one undo step. Their ids are `tpl-<template id>-<effect id>`, with `_p1`, `_p2`, ... for zooms.
+
 ### What applying does
 
 `applyTemplate` (and the `apply_template` command) runs, in order: set format, check framing, smart cut with
-the preset (or the preset plus overrides), add overlays, set fades, then report on length, the beat
+the preset (or the preset plus overrides), add overlays, run the effects (zoom, music, logo), set fades, then report on length, the beat
 structure, deferred steps and confirmations. It returns a report where every step is **done**, **skipped**
 (with the reason) or **needs-review**. It is one undo step, and applying it twice replaces its own overlays
 instead of stacking copies (`existing: "replace"`, the default; `"skip"` and `"add"` are the alternatives).
 Overlays are named `tpl-<template id>-<overlay id>`; moving one by hand is undone on the next apply.
 
-Not done on purpose: matching footage to beats, choosing highlights, re-framing a wide video for 9:16
+Not done on purpose: matching footage to beats, choosing highlights, finding where to zoom (the focus point is
+the centre unless a person sets one with `add_zoom`), re-framing a wide video for 9:16
 (it is letterboxed and the report says so), and anything under `deferred`.
 
 ## Adding a template
@@ -74,14 +92,15 @@ Not done on purpose: matching footage to beats, choosing highlights, re-framing 
 2. Fill every field. Keep numbers traceable: put the research section in `source` and prefer values from
    `docs/research/creator-editing-styles.md` and `docs/research/industry-video-templates.md`. If a number is a
    guess, say so in the guidance text.
-3. Use only existing overlay presets (`OVERLAY_PRESETS` in `packages/core/src/presets.ts`) and cut presets.
-   Anything else the style needs (captions, music, B-roll, zoom, sound effects, speed, transitions, colour
-   grade, logos, waveform, re-framing, matching footage to beats) goes under `deferred` with `requires`.
+3. Use only existing overlay presets (`OVERLAY_PRESETS` in `packages/core/src/presets.ts`), image presets
+   (`IMAGE_PRESETS`) and cut presets. Zoom moves, a music bed and a logo go under `effects`. Anything else the style needs
+   (captions, B-roll, sound effects, speed, transitions, colour grade, waveform, re-framing, cards and maps,
+   finding where to zoom, matching footage to beats) goes under `deferred` with `requires`.
    Never fake it with an overlay. The names are the keys of `ENGINE_FEATURES`.
 4. Give every variable an `example` and, where sensible, a `default`. Mark `required: true` only if the
    template is meaningless without it.
 5. Write compliance `notes` for the topics that apply (health, finance, real estate, testimonials, advertising,
-   music, copyright, privacy, AI disclosure, safety). Any template that lists a music step needs a `music` note.
+   music, copyright, privacy, AI disclosure, safety). Any template with a `music` effect needs a `music` note.
    Notes are general information; word them as "check", not as legal conclusions.
 6. Run `pnpm --filter @dax/core test` (every template is validated, applied to a fake project and checked for
    timing, short videos, idempotence and honest reporting) and `pnpm exec biome check --write templates`.

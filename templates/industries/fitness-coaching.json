@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Fitness and coaching clip",
-  "description": "Short vertical coaching clip: exercise name hook, a cue callout, coach lower-third and a trial-booking end card. Captions, music and slow motion are listed as not available yet.",
+  "description": "Short vertical coaching clip: exercise name hook, a cue callout, coach lower-third and a trial-booking end card. Music (when you supply it) is added. Captions and slow motion are listed as not available yet.",
   "tags": ["fitness", "coaching", "health", "reels", "tiktok", "shorts"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -201,18 +201,21 @@
   "fades": {
     "out": 0.3
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music",
+      "description": "Energetic music for intense work, calm for mobility, lowered while someone speaks. One track for the whole video.",
+      "level": 0.25
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Word-level captions so cues land with sound off.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Music",
-      "description": "Energetic music for intense work, calm for mobility, ducked under cues.",
-      "requires": ["music-bed", "audio-ducking"]
     },
     {
       "id": "slowmo",

@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Real estate listing",
-  "description": "Listing video with a price badge, city title, agent lower-third, an optional staging disclosure and a booking end card. Pauses are only lightly trimmed. Captions, music and room-by-room matching are listed as not available yet.",
+  "description": "Listing video with a price badge, city title, agent lower-third, an optional staging disclosure and a booking end card. Pauses are only lightly trimmed. Music (when you supply it) is added. Captions and room-by-room matching are listed as not available yet.",
   "tags": ["real-estate", "listing", "property", "tour", "youtube", "reels"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -284,18 +284,21 @@
     "in": 0.5,
     "out": 1
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Warm background music",
+      "description": "Steady music with no vocals, lowered while someone speaks.",
+      "level": 0.15
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Captions where there is narration.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Warm background music",
-      "description": "Steady music with no vocals, lowered under narration.",
-      "requires": ["music-bed", "audio-ducking"]
     },
     {
       "id": "rooms",

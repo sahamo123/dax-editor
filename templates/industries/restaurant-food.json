@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Restaurant and food",
-  "description": "Short food video that keeps natural sound (no cuts): name and place lower-third, an optional dated offer and a booking end card. Step captions and music are listed as not available yet.",
+  "description": "Short food video that keeps natural sound (no cuts): name and place lower-third, an optional dated offer and a booking end card. Music (when you supply it) is added. Step captions and sound design are listed as not available yet.",
   "tags": ["restaurant", "food", "recipe", "reels", "tiktok"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -183,6 +183,15 @@
   "fades": {
     "out": 0.4
   },
+  "effects": [
+    {
+      "id": "music-bed",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "Licensed music under the video, lowered while someone speaks.",
+      "level": 0.2
+    }
+  ],
   "deferred": [
     {
       "id": "step-text",
@@ -191,10 +200,10 @@
       "requires": ["captions"]
     },
     {
-      "id": "music",
-      "title": "Music and sound design",
-      "description": "Licensed music or sound design.",
-      "requires": ["music-bed", "sound-effects"]
+      "id": "sound-design",
+      "title": "Sound design",
+      "description": "Sizzle, pour and chop sounds layered over the visuals.",
+      "requires": ["sound-effects"]
     }
   ],
   "notes": [

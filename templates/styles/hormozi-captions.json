@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Punchy talking head (Hormozi-style)",
-  "description": "Vertical talking head with every pause and filler cut out, a bold hook line in the first second and a single call to action at the end. Word-by-word captions and punch-in zooms, which define this look, are listed as not available yet.",
+  "description": "Vertical talking head with every pause and filler cut out, a bold hook line in the first second and a single call to action at the end. Every second shot gets a tighter frame (the punch-in look), and a quiet music bed goes under speech when you supply music. Word-by-word captions, which define this look, are listed as not available yet.",
   "tags": ["talking-head", "short-form", "captions", "fast-cuts", "tiktok", "reels", "shorts"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -125,6 +125,25 @@
   "fades": {
     "out": 0.4
   },
+  "effects": [
+    {
+      "id": "punch-ins",
+      "kind": "zoom",
+      "title": "Punch-in zooms",
+      "description": "A 15 percent tighter frame on every second shot, so each jump cut changes the framing.",
+      "mode": "alternate-cuts",
+      "scale": 1.15,
+      "every": 2,
+      "minShotSec": 1
+    },
+    {
+      "id": "music-bed",
+      "kind": "music",
+      "title": "Quiet music bed",
+      "description": "Subtle low-energy music under the voice, with no transition sound effects.",
+      "level": 0.12
+    }
+  ],
   "deferred": [
     {
       "id": "word-captions",
@@ -133,22 +152,10 @@
       "requires": ["captions"]
     },
     {
-      "id": "punch-ins",
-      "title": "Punch-in zooms",
-      "description": "Alternate a wide and a 10 to 20 percent tighter frame at each jump cut.",
-      "requires": ["zoom-keyframes"]
-    },
-    {
       "id": "speaker-fit",
       "title": "Speaker fills the frame",
       "description": "Re-frame the speaker to fill at least 60 percent of the vertical frame.",
       "requires": ["reframe"]
-    },
-    {
-      "id": "music-bed",
-      "title": "Quiet music bed",
-      "description": "Subtle low-energy music under the voice, with no transition sound effects.",
-      "requires": ["music-bed", "audio-ducking"]
     },
     {
       "id": "grade",

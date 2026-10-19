@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Software demo",
-  "description": "Show one workflow that ends in a visible result: outcome title, presenter lower-third, trimmed load times and a free-trial end card. UI zoom, captions and speed-ups are listed as not available yet.",
+  "description": "Show one workflow that ends in a visible result: outcome title, presenter lower-third, trimmed load times and a free-trial end card. Music (when you supply it) is added. UI zoom, captions and speed-ups are listed as not available yet.",
   "tags": ["software", "saas", "demo", "b2b", "linkedin", "youtube"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -205,12 +205,21 @@
     "in": 0.3,
     "out": 0.5
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Light music",
+      "description": "A quiet bed, lowered while someone speaks.",
+      "level": 0.12
+    }
+  ],
   "deferred": [
     {
       "id": "ui-zoom",
       "title": "Zoom on the UI and cursor highlight",
-      "description": "Zoom to the part of the screen being used.",
-      "requires": ["cursor-zoom", "zoom-keyframes"]
+      "description": "Zoom to the part of the screen being used. Zoom moves exist, but the editor has no cursor or click track yet.",
+      "requires": ["cursor-zoom"]
     },
     {
       "id": "captions",
@@ -223,12 +232,6 @@
       "title": "Trim load times",
       "description": "Speed up or cut waiting.",
       "requires": ["speed-change"]
-    },
-    {
-      "id": "music",
-      "title": "Light music",
-      "description": "A quiet bed ducked under speech.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

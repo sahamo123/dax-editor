@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Motion-graphic explainer (Kurzgesagt-style)",
-  "description": "For animated, narration-timed explainers. It keeps the narration pacing untouched (no cuts), and adds a title, one stat callout and an end card. The illustrated look itself comes from your animation; score and sound effects are listed as not available yet.",
+  "description": "For animated, narration-timed explainers. It keeps the narration pacing untouched (no cuts), and adds a title, one stat callout and an end card. The illustrated look itself comes from your animation. A slow push-in and a music score (when you supply music) are added; sound effects are listed as not available yet.",
   "tags": ["explainer", "animation", "youtube", "narration"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -159,24 +159,36 @@
     "in": 0.5,
     "out": 1
   },
-  "deferred": [
+  "effects": [
     {
       "id": "score",
-      "title": "Composed score and sound effects",
-      "description": "A music score and sound effects for mood.",
-      "requires": ["music-bed", "sound-effects"]
+      "kind": "music",
+      "title": "Music score",
+      "description": "A music score under the narration, lowered while someone speaks.",
+      "level": 0.2
+    },
+    {
+      "id": "camera",
+      "kind": "zoom",
+      "title": "Slow camera push",
+      "description": "A slow push-in on each shot of three seconds or more, standing in for the drawn camera moves of the original style.",
+      "mode": "push-in",
+      "scale": 1.05,
+      "minShotSec": 3
+    }
+  ],
+  "deferred": [
+    {
+      "id": "effects",
+      "title": "Sound effects",
+      "description": "Sound effects for mood.",
+      "requires": ["sound-effects"]
     },
     {
       "id": "graphics",
       "title": "Illustrations and infographics",
       "description": "Flat vector artwork and infographic overlays.",
-      "requires": ["image-overlays"]
-    },
-    {
-      "id": "camera",
-      "title": "Animated camera moves",
-      "description": "Drawn camera moves instead of punch-ins.",
-      "requires": ["zoom-keyframes"]
+      "requires": ["graphic-cards"]
     }
   ],
   "notes": [

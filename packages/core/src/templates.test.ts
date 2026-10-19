@@ -1,9 +1,10 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { zodToJsonSchema } from "zod-to-json-schema";
+import { audioClips } from "./audio-layer.js";
 import type { CommandContext, CommandDef } from "./commands.js";
 import { CUT_PRESET_NAMES } from "./cuts.js";
 import { probe } from "./media.js";
@@ -26,15 +27,17 @@ import {
   type Template,
   TemplateError,
   TemplateSchema,
-  templateRequirements,
 } from "./templates.js";
 import {
   addAsset,
   appendClip,
   emptyProject,
   FORMAT_PRESETS,
+  mainClips,
+  shotRanges,
   timelineDuration,
 } from "./timeline.js";
+import { zoomsOf } from "./zoom.js";
 
 const templates = await loadTemplates(defaultTemplatesDir());
 
@@ -201,7 +204,7 @@ describe("template catalogue", () => {
     expect(has("b2b-testimonial", "testimonials")).toBe(true);
     expect(has("ugc-testimonial-ad", "testimonials")).toBe(true);
     for (const t of templates) {
-      if (templateRequirements(t).includes("music-bed")) {
+      if (t.effects.some((e) => e.kind === "music")) {
         expect(
           t.notes.some((n) => n.category === "music"),
           `${t.id} needs a music-licensing note`,
@@ -636,6 +639,264 @@ describe("applyTemplate behaviour", () => {
   });
 });
 
+// ---------- effects: zoom, music, logo ----------
+
+describe("template effects", () => {
+  const get = (id: string) => templates.find((t) => t.id === id) as Template;
+  const song: Asset = {
+    id: "song",
+    path: "/not/a/real/song.mp3",
+    kind: "audio",
+    duration: 90,
+    hasAudio: true,
+  };
+  const logo: Asset = {
+    id: "logo",
+    path: "/not/a/real/logo.png",
+    kind: "image",
+    duration: 0,
+    width: 400,
+    height: 200,
+    hasAudio: false,
+  };
+
+  it("no template still lists a feature the engine has now (music, ducking, zoom, image overlays)", () => {
+    for (const t of templates) {
+      for (const d of t.deferred) {
+        for (const gone of ["music-bed", "audio-ducking", "zoom-keyframes", "image-overlays"]) {
+          expect(d.requires, `${t.id}/${d.id}`).not.toContain(gone);
+        }
+      }
+    }
+    for (const gone of ["music-bed", "audio-ducking", "zoom-keyframes", "image-overlays"]) {
+      expect(Object.keys(ENGINE_FEATURES)).not.toContain(gone);
+    }
+  });
+
+  it("every effect has a unique id, a title and a description, and zoom scales stay modest", () => {
+    for (const t of templates) {
+      const ids = t.effects.map((e) => e.id);
+      expect(new Set(ids).size, t.id).toBe(ids.length);
+      for (const e of t.effects) {
+        expect(e.title.length).toBeGreaterThan(2);
+        expect(e.description.length).toBeGreaterThan(20);
+        if (e.kind === "zoom") expect(e.scale).toBeLessThanOrEqual(1.5);
+      }
+    }
+    // The research calls for these looks; each template that asks for them has the step.
+    const kinds = (id: string) => get(id).effects.map((e) => e.kind);
+    expect(kinds("hormozi-captions")).toEqual(expect.arrayContaining(["zoom", "music"]));
+    expect(kinds("minimal-corporate-linkedin")).toContain("logo");
+    expect(kinds("internal-training")).toEqual(["music"]);
+  });
+
+  it("rejects an unknown kind, an unknown image preset, a stray key and a duplicate id", () => {
+    const sample = structuredClone(get("hormozi-captions")) as Record<string, unknown>;
+    const ok = (effects: unknown[]) => TemplateSchema.safeParse({ ...sample, effects }).success;
+    const zoom = get("hormozi-captions").effects.find((e) => e.kind === "zoom");
+    expect(ok([zoom])).toBe(true);
+    expect(ok([{ ...zoom, kind: "sparkle" }])).toBe(false);
+    expect(ok([{ ...zoom, scale: 2.5 }])).toBe(false);
+    expect(ok([{ ...zoom, shell: "rm -rf /" }])).toBe(false);
+    expect(ok([zoom, zoom])).toBe(false);
+    const logoEffect = get("minimal-corporate-linkedin").effects.find((e) => e.kind === "logo");
+    expect(ok([{ ...logoEffect, preset: "nope" }])).toBe(false);
+    expect(ok([{ ...zoom, id: "hook" }])).toBe(false); // clashes with an overlay id
+  });
+
+  it("puts a tighter frame on every second shot (Hormozi-style), and nothing overlaps", async () => {
+    const t = get("hormozi-captions");
+    const ctx = ctxFor(fakeProject(60));
+    const r = await applyTemplate(ctx, t, allVars(t));
+    const p = ctx.session.project;
+    const shots = shotRanges(p);
+    expect(shots.length).toBeGreaterThan(3);
+    const zooms = zoomsOf(p).filter((z) => z.id.startsWith("tpl-hormozi-captions-punch-ins"));
+    const want = shots.filter((s, i) => i % 2 === 1 && s.end - s.start >= 1);
+    expect(zooms.length).toBeGreaterThan(0);
+    expect(zooms).toHaveLength(want.length);
+    zooms.forEach((z, i) => {
+      expect(z.start).toBeCloseTo(want[i]?.start ?? -1, 2);
+      expect(z.start + z.duration).toBeCloseTo(want[i]?.end ?? -1, 2);
+      expect(z).toMatchObject({ fromScale: 1.15, toScale: 1.15 });
+    });
+    const step = r.steps.find((s) => s.id === "punch-ins");
+    expect(step).toMatchObject({ kind: "effect", status: "done" });
+    expect(step?.detail).toMatch(/1\.15x on every second shot/);
+    // Applying again changes nothing and never stacks.
+    const once = structuredClone(p);
+    const again = await applyTemplate(ctx, t, allVars(t));
+    expect(ctx.session.project).toEqual(once);
+    expect(again.changed).toBe(false);
+  });
+
+  it("glides a slow push-in over each long shot (documentary)", async () => {
+    const t = get("documentary-interview");
+    const ctx = ctxFor(fakeProject(60));
+    await applyTemplate(ctx, t, allVars(t));
+    const zooms = zoomsOf(ctx.session.project);
+    expect(zooms.length).toBeGreaterThan(0);
+    for (const z of zooms) {
+      expect(z.id).toMatch(/^tpl-documentary-interview-push-in_p\d+$/);
+      expect(z.fromScale).toBe(1);
+      expect(z.toScale).toBe(1.05);
+      expect(z.duration).toBeGreaterThanOrEqual(4 - 1e-6);
+    }
+  });
+
+  it("says why when there is nothing to alternate between (a single shot) and keeps zooms of the user's own", async () => {
+    const t = TemplateSchema.parse({
+      ...get("hormozi-captions"),
+      cleanup: { skip: true, reason: "Keep every pause for this test." },
+    });
+    const ctx = ctxFor(fakeProject(30));
+    const r = await applyTemplate(ctx, t, allVars(t));
+    expect(mainClips(ctx.session.project)).toHaveLength(1);
+    const step = r.steps.find((s) => s.id === "punch-ins");
+    expect(step?.status).toBe("skipped");
+    expect(step?.detail).toMatch(/single shot/);
+    expect(zoomsOf(ctx.session.project)).toHaveLength(0);
+
+    // A zoom the user made covers one of the shots: theirs wins, and the report says so.
+    const own = ctxFor(fakeProject(60));
+    await applyTemplate(own, get("hormozi-captions"), {});
+    const first = zoomsOf(own.session.project)[0];
+    expect(first).toBeDefined();
+    const { runCommand } = await import("./commands.js");
+    await runCommand(own, "remove_zoom", { zoomId: first?.id });
+    await runCommand(own, "add_zoom", {
+      start: Math.max(0, (first?.start ?? 0) - 0.01),
+      end: (first?.start ?? 0) + (first?.duration ?? 1) + 0.01,
+      scale: 1.4,
+    });
+    const r2 = await applyTemplate(own, get("hormozi-captions"), {});
+    expect(r2.steps.find((s) => s.id === "punch-ins")?.detail).toMatch(/overlap your own zooms/);
+    expect(zoomsOf(own.session.project).some((z) => z.toScale === 1.4)).toBe(true);
+  });
+
+  it("without a music file it says what to do instead of faking one", async () => {
+    const t = get("hormozi-captions");
+    const ctx = ctxFor(fakeProject(30));
+    const r = await applyTemplate(ctx, t, {});
+    const step = r.steps.find((s) => s.id === "music-bed");
+    expect(step?.status).toBe("skipped");
+    expect(step?.detail).toMatch(/add_audio/);
+    expect(audioClips(ctx.session.project)).toHaveLength(0);
+  });
+
+  it("places supplied music under the whole video, ducked, once, however often it is applied", async () => {
+    const t = get("hormozi-captions");
+    const ctx = ctxFor(fakeProject(40));
+    const r = await applyTemplate(ctx, t, {}, { music: song });
+    const p = ctx.session.project;
+    const D = timelineDuration(p);
+    expect(audioClips(p)).toHaveLength(1);
+    expect(audioClips(p)[0]).toMatchObject({
+      id: "tpl-hormozi-captions-music-bed",
+      role: "music",
+      start: 0,
+      loop: true,
+      volume: 0.12,
+    });
+    expect(audioClips(p)[0]?.length).toBeCloseTo(D, 6);
+    expect(p.timeline.ducking?.enabled).toBe(true);
+    expect(p.assets.song).toBeDefined();
+    expect(r.steps.find((s) => s.id === "music-bed")).toMatchObject({
+      kind: "effect",
+      status: "done",
+    });
+    const once = structuredClone(p);
+    await applyTemplate(ctx, t, {}, { music: song });
+    expect(ctx.session.project).toEqual(once);
+    // One undo takes the whole template, music and its import included.
+    await ctx.session.undo();
+    expect(ctx.session.project.assets.song).toBeUndefined();
+  });
+
+  it("with music already on the timeline it only turns ducking on, and leaves the user's clip alone", async () => {
+    const t = get("events-weddings");
+    const ctx = ctxFor(addAsset(fakeProject(40), song));
+    const { runCommand } = await import("./commands.js");
+    await runCommand(ctx, "add_audio", { assetId: "song", loop: true, volume: 0.5 });
+    await runCommand(ctx, "set_ducking", { enabled: false });
+    const mine = structuredClone(audioClips(ctx.session.project)[0]);
+    const r = await applyTemplate(ctx, t, allVars(t));
+    expect(audioClips(ctx.session.project)).toEqual([mine]);
+    expect(ctx.session.project.timeline.ducking).toMatchObject({ enabled: true, amountDb: 20 });
+    expect(r.steps.find((s) => s.id === "bed")).toMatchObject({ kind: "effect", status: "done" });
+  });
+
+  it("an intro-only bed is placed for the intro, and flagged when the user's music runs much longer", async () => {
+    const t = get("internal-training");
+    const ctx = ctxFor(fakeProject(60));
+    await applyTemplate(ctx, t, allVars(t), { music: song });
+    expect(audioClips(ctx.session.project)[0]?.length).toBe(10);
+
+    const long = ctxFor(addAsset(fakeProject(60), song));
+    const { runCommand } = await import("./commands.js");
+    await runCommand(long, "add_audio", { assetId: "song" });
+    const r = await applyTemplate(long, t, allVars(t));
+    expect(r.steps.find((s) => s.id === "intro-bed")?.status).toBe("needs-review");
+  });
+
+  it("rejects music that has no sound, as a skipped step with the reason", async () => {
+    const t = get("hormozi-captions");
+    const ctx = ctxFor(fakeProject(30));
+    const mute: Asset = { ...song, id: "mute", kind: "video", hasAudio: false };
+    const r = await applyTemplate(ctx, t, {}, { music: mute });
+    const step = r.steps.find((s) => s.id === "music-bed");
+    expect(step?.status).toBe("skipped");
+    expect(step?.detail).toMatch(/no sound/);
+  });
+
+  it("places a supplied logo on the end card, replaces it on a second run, and skips without one", async () => {
+    const t = get("minimal-corporate-linkedin");
+    const none = ctxFor(fakeProject(40));
+    const r0 = await applyTemplate(none, t, allVars(t));
+    expect(r0.steps.find((s) => s.id === "logo")?.status).toBe("skipped");
+    expect(none.session.project.timeline.images ?? []).toHaveLength(0);
+
+    const ctx = ctxFor(fakeProject(40));
+    await applyTemplate(ctx, t, allVars(t), { logo });
+    const D = timelineDuration(ctx.session.project);
+    const images = ctx.session.project.timeline.images ?? [];
+    expect(images).toHaveLength(1);
+    expect(images[0]).toMatchObject({
+      id: "tpl-minimal-corporate-linkedin-logo",
+      assetId: "logo",
+      preset: "logo-end-card",
+      position: "top",
+    });
+    expect((images[0]?.start ?? 0) + (images[0]?.duration ?? 0)).toBeCloseTo(D, 2);
+    const once = structuredClone(ctx.session.project);
+    await applyTemplate(ctx, t, allVars(t), { logo });
+    expect(ctx.session.project).toEqual(once);
+
+    const wrong = ctxFor(fakeProject(40));
+    const r2 = await applyTemplate(wrong, t, allVars(t), { logo: song });
+    expect(r2.steps.find((s) => s.id === "logo")?.detail).toMatch(/not a picture/);
+  });
+
+  it("with existing: skip, an effect already on the timeline is left as it is", async () => {
+    const t = get("hormozi-captions");
+    const ctx = ctxFor(fakeProject(60));
+    await applyTemplate(ctx, t, {}, { music: song });
+    const r = await applyTemplate(ctx, t, {}, { music: song, existing: "skip" });
+    expect(r.steps.find((s) => s.id === "punch-ins")?.detail).toMatch(/Already on the timeline/);
+    expect(r.steps.find((s) => s.id === "music-bed")?.status).toBe("skipped");
+  });
+
+  it("a template that was applied is one undo step, effects included", async () => {
+    const t = get("hormozi-captions");
+    const original = fakeProject(60);
+    const ctx = ctxFor(original);
+    await applyTemplate(ctx, t, allVars(t), { music: song });
+    expect(ctx.session.history()).toHaveLength(2);
+    await ctx.session.undo();
+    expect(ctx.session.project).toEqual(original);
+  });
+});
+
 // ---------- registry commands ----------
 
 describe("template commands", () => {
@@ -673,6 +934,9 @@ describe("template commands", () => {
     );
     const parsed = apply.schema.parse({ templateId: "hormozi-captions" });
     expect(parsed).toMatchObject({ variables: {}, existing: "replace" });
+    expect(
+      apply.schema.safeParse({ templateId: "x", music: "/a/b.mp3", logo: "asset_1" }).success,
+    ).toBe(true);
     const ctx = ctxFor(fakeProject(30));
     const r = await apply.run(ctx, {
       templateId: "hormozi-captions",
@@ -767,6 +1031,45 @@ describe.skipIf(!hasFfmpeg())("templates on generated media (needs ffmpeg)", () 
     expect(ctx.session.history()).toHaveLength(3);
     expect(ctx.session.history()[2]?.source).toBe("template");
   });
+
+  it("adds the zoom moves and music of a style, and the result renders with both", async () => {
+    configureTemplates({ templates });
+    const apply = TEMPLATE_COMMANDS[1] as CommandDef;
+    const music = join(dir, "bed.wav");
+    execFileSync("ffmpeg", ["-y", "-v", "error", "-f", "lavfi", "-i", "sine=f=220:d=10", music]);
+    const ctx = await imported();
+    const r = await apply.run(ctx, {
+      templateId: "hormozi-captions",
+      variables: { title: "Watch this" },
+      music,
+      existing: "replace",
+    } as never);
+    const report = r.data as { steps: { id: string; status: string }[] };
+    expect(report.steps.find((s) => s.id === "music-bed")?.status).toBe("done");
+    expect(report.steps.find((s) => s.id === "punch-ins")?.status).toBe("done");
+    expect(audioClips(ctx.session.project)).toHaveLength(1);
+    expect(zoomsOf(ctx.session.project).length).toBeGreaterThan(0);
+    const out = join(dir, "styled.mp4");
+    await exportProject(ctx.session.project, out);
+    const info = await probe(out);
+    expect(info.duration).toBeCloseTo(timelineDuration(ctx.session.project), 0);
+    expect(info.width).toBe(1080);
+    // The music is audible (the source's own sound is a 440 Hz tone; 220 Hz is the bed).
+    const run = spawnSync(
+      "ffmpeg",
+      [
+        "-hide_banner",
+        "-i",
+        out,
+        "-vn",
+        "-af",
+        "bandpass=f=220:width_type=h:w=30,astats=metadata=0",
+      ].concat(["-f", "null", "-"]),
+      { encoding: "utf8" },
+    );
+    const lines = run.stderr.split("\\n").filter((l) => l.includes("RMS level dB"));
+    expect(Number(lines.at(-1)?.split(":").pop())).toBeGreaterThan(-50);
+  }, 120_000);
 
   it("uses audio analysis with cleanup overrides (podcast clip) and the result renders", async () => {
     const ctx = await imported();

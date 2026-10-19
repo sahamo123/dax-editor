@@ -25,7 +25,7 @@ flowchart LR
   LLM[Local model runtime<br/>embedded Gemma-class model<br/>planned]
   APIS[(Model APIs<br/>user's own key: OpenAI-compatible, Anthropic, Ollama<br/>planned)]
   PROTO[[@dax/protocol<br/>shared request, response and event types<br/>built]]
-  REG[[Command registry<br/>packages/core commands.ts<br/>33 commands, the only way to change a project<br/>built]]
+  REG[[Command registry<br/>packages/core commands.ts<br/>45 commands, the only way to change a project<br/>built]]
   CORE[[@dax/core engine<br/>timeline, cuts, captions, overlays, history tree, render<br/>built]]
   FF[FFmpeg / ffprobe]
   STT[Speech-to-text<br/>Transcriber interface; whisper.cpp planned]
@@ -53,12 +53,13 @@ How the CLI and MCP server reach the registry (in-process, or through the engine
 ## The engine (`packages/core`)
 
 - **Project** (`schema.ts`): assets, a timeline of tracks of clips, text overlays, caption settings and the output format, saved as `.dax.json`. A clip says "play seconds `in` to `out` of this asset, placed at `start` on the timeline".
-- **Commands** (`commands.ts`): the registry. Each command has a name, a description written for a language model, typed arguments, and `readOnly` and `irreversible` flags. `commandTools()` produces the JSON-schema tool specs the agent and MCP use. Currently 33 commands, for example `plan_cuts`, `set_captions`, `add_overlay` and `undo`.
+- **Commands** (`commands.ts`): the registry. Each command has a name, a description written for a language model, typed arguments, and `readOnly` and `irreversible` flags. `commandTools()` produces the JSON-schema tool specs the agent and MCP use. Currently 45 commands, for example `plan_cuts`, `set_captions`, `add_overlay`, `add_zoom`, `add_audio` and `undo`.
 - **Edits** (`timeline.ts`): pure functions, `Project -> Project`. Never mutate their input. Commands call these.
 - **History** (`session.ts`): a tree of labelled states, each tagged `manual`, `ai` or `template`. You can jump to any state, save named checkpoints, and undo then edit without losing the old branch.
 - **Cut engine** (`cuts.ts`): finds pauses from audio levels, with a threshold set relative to each room's noise floor. It proposes cuts (pauses, filler words, false starts, repeated takes) as a plan. Every decision has a reason, a confidence and a status. False starts and repeated takes are proposals only.
 - **Captions** (`captions.ts`): word-timed captions built from the transcripts of the clips on the timeline at render time, so they follow every cut. Burned in through ASS subtitles.
 - **Overlays** (`overlays.ts`, `overlay-filters.ts`, `presets.ts`): titles, lower-thirds, captions and callouts with six animation presets, rendered with FFmpeg `drawtext`.
+- **Effects layers** (`zoom.ts`, `audio-layer.ts`, `image-overlays.ts`, `effect-commands.ts`): punch-in and push-in zooms, music and sound effects with automatic ducking under speech, and logo, watermark and sticker images. See the [effects layers spec](../specs/effects-layers.md).
 - **Perception** (`media.ts`, `transcript.ts`): probe, silence and scene detection, and transcript types. This is how a text-only or small model "sees and hears" the video: it gets numbers and words, not pixels. There is no speech-to-text engine yet.
 - **Render** (`render.ts`): turns the main track, overlays and captions into one FFmpeg command and runs it. Fit modes (contain, cover, blur) fit footage to the output shape.
 - **Connectors** (`connector.ts`): where media comes from and goes to. Local only for now.
@@ -66,7 +67,7 @@ How the CLI and MCP server reach the registry (in-process, or through the engine
 ## Invariants
 
 1. The main track is **gapless**: every edit re-lays clips back to back from time 0.
-2. Clip `in`/`out` are **source time**; clip `start` and overlay `start` are **timeline time**. Convert detected ranges with `assetRangesToTimeline`. Overlays follow ripple deletes (`shiftOverlaysForDelete`).
+2. Clip `in`/`out` are **source time**; clip `start`, overlay, image, zoom and audio-clip `start` are **timeline time**. Convert detected ranges with `assetRangesToTimeline`. Overlays, images and zooms follow ripple deletes (`shiftOverlaysForDelete`); music is anchored to the timeline and is not cut by them.
 3. Edits are non-destructive: source files are never modified.
 4. **Every change to a project goes through the command registry.** No front door edits the project directly. This keeps the UI, the built-in AI, MCP and the CLI identical and undoable.
 5. Agent-facing tools take typed parameters, never raw shell or FFmpeg arguments. User text never enters an FFmpeg filter string; it goes through text files.

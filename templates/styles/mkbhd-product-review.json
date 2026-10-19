@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Product review (MKBHD-style)",
-  "description": "Clean product review: verdict teased early, product name and price lower-third, a verdict callout and an end card. Punch-ins on product details, spec cards and B-roll are listed as not available yet.",
+  "description": "Clean product review: verdict teased early, product name and price lower-third, a verdict callout and an end card. A music bed (when you supply music) is added. Punch-ins on product details, spec cards and B-roll are listed as not available yet.",
   "tags": ["review", "product", "youtube", "tech"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -203,30 +203,33 @@
     "in": 0.3,
     "out": 0.8
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "Low music under the voice.",
+      "level": 0.15
+    }
+  ],
   "deferred": [
     {
       "id": "punch-ins",
       "title": "Punch-ins on product detail",
-      "description": "Zoom into the part being discussed.",
-      "requires": ["zoom-keyframes"]
+      "description": "Zoom into the part of the product being discussed. The zoom itself exists (add_zoom with a focus point), but the editor cannot tell which part that is.",
+      "requires": ["focus-detection"]
     },
     {
       "id": "spec-cards",
       "title": "Spec and price cards",
       "description": "Full-screen cards for specs and prices.",
-      "requires": ["image-overlays"]
+      "requires": ["graphic-cards"]
     },
     {
       "id": "broll",
       "title": "Product B-roll",
       "description": "Close-up cutaways of the product.",
       "requires": ["broll"]
-    },
-    {
-      "id": "music",
-      "title": "Music bed",
-      "description": "Low music under the voice.",
-      "requires": ["music-bed", "audio-ducking"]
     },
     {
       "id": "grade",

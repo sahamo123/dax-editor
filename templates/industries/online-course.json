@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Online course lesson",
-  "description": "Teach one outcome per video: outcome title up front, instructor lower-third, a next-lesson end card, and pauses trimmed but kept long enough to follow. Captions and chapter cards are listed as not available yet.",
+  "description": "Teach one outcome per video: outcome title up front, instructor lower-third, a next-lesson end card, and pauses trimmed but kept long enough to follow. An intro music bed (when you supply music) is added. Captions and chapter cards are listed as not available yet.",
   "tags": ["education", "course", "lesson", "youtube", "learning"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -188,6 +188,17 @@
     "in": 0.3,
     "out": 0.6
   },
+  "effects": [
+    {
+      "id": "intro-bed",
+      "kind": "music",
+      "title": "Intro music bed",
+      "description": "An optional bed on the intro only, never under speech.",
+      "level": 0.2,
+      "scope": "intro",
+      "introSec": 10
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
@@ -199,13 +210,7 @@
       "id": "chapter-cards",
       "title": "Chapter title cards",
       "description": "Full-screen cards at each section.",
-      "requires": ["image-overlays"]
-    },
-    {
-      "id": "intro-bed",
-      "title": "Intro music bed",
-      "description": "An optional bed on the intro only, never under speech.",
-      "requires": ["music-bed"]
+      "requires": ["graphic-cards"]
     }
   ],
   "notes": [

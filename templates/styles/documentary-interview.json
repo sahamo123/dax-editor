@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Documentary interview",
-  "description": "Interview edit that keeps the natural pauses: a title, the interviewee's name and role as a lower-third, and a thank-you end card. B-roll cover, a music bed and subtitles are listed as not available yet.",
+  "description": "Interview edit that keeps the natural pauses: a title, the interviewee's name and role as a lower-third, and a thank-you end card. Subtle push-ins and a music bed (when you supply music) are added. B-roll cover and subtitles are listed as not available yet.",
   "tags": ["documentary", "interview", "lower-third", "youtube", "long-form"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -156,24 +156,30 @@
     "in": 0.6,
     "out": 1
   },
+  "effects": [
+    {
+      "id": "bed",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "A music bed well below the voice, lowered while someone speaks.",
+      "level": 0.12
+    },
+    {
+      "id": "push-in",
+      "kind": "zoom",
+      "title": "Subtle push-ins",
+      "description": "A slow, small push-in (5 percent) on every shot of four seconds or more.",
+      "mode": "push-in",
+      "scale": 1.05,
+      "minShotSec": 4
+    }
+  ],
   "deferred": [
     {
       "id": "broll",
       "title": "B-roll cover",
       "description": "Archival and location footage over the interview.",
       "requires": ["broll"]
-    },
-    {
-      "id": "bed",
-      "title": "Music bed",
-      "description": "A music bed well below the voice.",
-      "requires": ["music-bed", "audio-ducking"]
-    },
-    {
-      "id": "push-in",
-      "title": "Subtle push-ins",
-      "description": "Slow, small zooms on the interviewee.",
-      "requires": ["zoom-keyframes"]
     },
     {
       "id": "subtitles",

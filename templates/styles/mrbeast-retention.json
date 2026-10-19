@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "High-energy retention edit (MrBeast-style)",
-  "description": "Long-form edit that tightens pacing, opens on the outcome, and adds a hook and end card. Density is a setting here, not a rule: the creator has said ultra-fast cutting stopped working for him, so this template tightens pauses but does not chase a cut count. Zooms, sound effects and graphics are listed as not available yet.",
+  "description": "Long-form edit that tightens pacing, opens on the outcome, and adds a hook and end card. Density is a setting here, not a rule: the creator has said ultra-fast cutting stopped working for him, so this template tightens pauses but does not chase a cut count. Punch-in zooms on alternate shots and a music bed (when you supply music) are added. Sound effects and graphics are listed as not available yet.",
   "tags": ["long-form", "retention", "fast-cuts", "youtube", "challenge"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -180,13 +180,26 @@
     "in": 0.3,
     "out": 0.8
   },
-  "deferred": [
+  "effects": [
     {
       "id": "zooms",
+      "kind": "zoom",
       "title": "Frequent zooms",
-      "description": "Quick punch-in zooms on reactions and reveals.",
-      "requires": ["zoom-keyframes"]
+      "description": "A quick 20 percent punch-in on every second shot.",
+      "mode": "alternate-cuts",
+      "scale": 1.2,
+      "every": 2,
+      "minShotSec": 0.8
     },
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "Music under the action, lowered while someone speaks.",
+      "level": 0.25
+    }
+  ],
+  "deferred": [
     {
       "id": "sfx",
       "title": "Sound effects",
@@ -197,7 +210,7 @@
       "id": "graphics",
       "title": "On-screen graphics",
       "description": "Text and icons to re-engage attention when it dips.",
-      "requires": ["image-overlays"]
+      "requires": ["graphic-cards"]
     },
     {
       "id": "broll",
@@ -210,12 +223,6 @@
       "title": "Transitions",
       "description": "Quick wipes and zoom-throughs between scenes.",
       "requires": ["transitions"]
-    },
-    {
-      "id": "music",
-      "title": "Music bed",
-      "description": "Music under the action, lowered under speech.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

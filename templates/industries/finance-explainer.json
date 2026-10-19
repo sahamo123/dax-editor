@@ -237,7 +237,7 @@
       "id": "sources",
       "title": "Source lines and illustrative tags",
       "description": "Source cards and an 'illustrative' tag on numbers.",
-      "requires": ["image-overlays"]
+      "requires": ["graphic-cards"]
     }
   ],
   "notes": [

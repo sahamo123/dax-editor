@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Whiteboard lesson (Khan-style)",
-  "description": "Calm, continuous drawing lesson: pauses kept, a typed question up front and a simple end card. Zoom-ins, a chalkboard background and a quiet music bed are listed as not available yet.",
+  "description": "Calm, continuous drawing lesson: pauses kept, a typed question up front and a simple end card. A quiet music bed (when you supply music) is added. Zoom-ins and a chalkboard background are listed as not available yet.",
   "tags": ["education", "whiteboard", "narration", "youtube", "lesson"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -133,24 +133,27 @@
     "in": 0.3,
     "out": 0.6
   },
+  "effects": [
+    {
+      "id": "bed",
+      "kind": "music",
+      "title": "Quiet music bed",
+      "description": "Very low music under the narration, lowered further while someone speaks.",
+      "level": 0.1
+    }
+  ],
   "deferred": [
     {
       "id": "zoom-ins",
       "title": "Zoom-ins and callouts",
-      "description": "Zoom into the part of the board being explained.",
-      "requires": ["zoom-keyframes"]
+      "description": "Zoom into the part of the board being explained. The zoom itself exists (add_zoom with a focus point), but the editor cannot tell which part that is.",
+      "requires": ["focus-detection"]
     },
     {
       "id": "board",
       "title": "Dark chalkboard background",
       "description": "A digital chalkboard behind the drawing.",
-      "requires": ["image-overlays"]
-    },
-    {
-      "id": "bed",
-      "title": "Quiet music bed",
-      "description": "Very low music under the narration.",
-      "requires": ["music-bed", "audio-ducking"]
+      "requires": ["graphic-cards"]
     }
   ],
   "notes": [

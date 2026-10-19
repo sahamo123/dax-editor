@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Events and weddings",
-  "description": "Highlight film or teaser: names and date title, a vendor credit end card and slow fades. No cuts are made, so vows and speeches are never trimmed. Music cuts, ducking and captions are listed as not available yet.",
+  "description": "Highlight film or teaser: names and date title, a vendor credit end card and slow fades. No cuts are made, so vows and speeches are never trimmed. Music with deep ducking under speech (when you supply music) is added. Music cuts and captions are listed as not available yet.",
   "tags": ["events", "wedding", "highlights", "youtube", "reels"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -169,18 +169,22 @@
     "in": 1,
     "out": 2
   },
+  "effects": [
+    {
+      "id": "bed",
+      "kind": "music",
+      "title": "Music with ducking under speech",
+      "description": "Music that drops fully under vows and speeches and comes back in the gaps.",
+      "level": 0.2,
+      "duckAmountDb": 20
+    }
+  ],
   "deferred": [
     {
       "id": "music",
       "title": "Music swells",
-      "description": "Cut moments to the music.",
-      "requires": ["music-bed", "beat-matching"]
-    },
-    {
-      "id": "ducking",
-      "title": "Duck music under vows and speeches",
-      "description": "Lower music fully under speech.",
-      "requires": ["audio-ducking"]
+      "description": "Cut moments to the music. Music can be added, but the editor cannot find the beats.",
+      "requires": ["beat-matching"]
     },
     {
       "id": "captions",

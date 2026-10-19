@@ -21,7 +21,7 @@ tags: [short, shorts, short form, tiktok, reels, vertical, hook, viral, first se
 `get_project`: format 1080x1920, duration 60 s or less, the first overlay starts at 0.5 s or earlier, the hook is the first words of the video.
 
 ## Pitfalls
-- No captions, zoom or music (handle-unsupported-requests). Many viewers watch muted; say captions are not available.
+- No captions (handle-unsupported-requests). Many viewers watch muted; say captions are not available. Zoom and music from a file are possible (see add-music-zoom-or-logo).
 - Keep text away from the bottom fifth.
 - `move_clip` does not move overlays: add overlays last.
 

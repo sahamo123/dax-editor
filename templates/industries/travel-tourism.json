@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Travel and tourism",
-  "description": "Place-first travel reel: place name title, a practical tip callout and a save-or-book end card. Natural footage is kept uncut. Captions, music and speed ramps are listed as not available yet.",
+  "description": "Place-first travel reel: place name title, a practical tip callout and a save-or-book end card. Natural footage is kept uncut. One music track (when you supply music) is added. Captions and speed ramps are listed as not available yet.",
   "tags": ["travel", "tourism", "destination", "reels", "tiktok", "shorts"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -197,18 +197,21 @@
     "in": 0.4,
     "out": 0.6
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Local or licensed music",
+      "description": "One music track under the whole video, lowered while someone speaks. The editor does not switch between upbeat and calm sections.",
+      "level": 0.25
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Text on screen can replace narration.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Local or licensed music",
-      "description": "Upbeat for activity, calm for landscapes.",
-      "requires": ["music-bed"]
     },
     {
       "id": "ramps",

@@ -127,6 +127,23 @@ export function splitAt(p: Project, t: number): Project {
   return withClips(p, [...clips.slice(0, idx), left, right, ...clips.slice(idx + 1)]);
 }
 
+/**
+ * The shots of the main track as timeline ranges: runs of clips with no cut between them (each clip picks up where
+ * the previous one left off in the same asset). A split that removes nothing does not start a new shot.
+ */
+export function shotRanges(p: Project): Range[] {
+  const shots: Range[] = [];
+  let prev: Clip | undefined;
+  for (const c of mainClips(p)) {
+    const last = shots[shots.length - 1];
+    const continues = prev && prev.assetId === c.assetId && Math.abs(prev.out - c.in) < 1e-3;
+    if (last && continues) last.end = clipEnd(c);
+    else shots.push({ start: c.start, end: clipEnd(c) });
+    prev = c;
+  }
+  return shots;
+}
+
 /** Remove the timeline range [from, to) and close the gap. */
 export function deleteRange(p: Project, from: number, to: number): Project {
   if (to <= from) throw new Error("Range end must be after start");

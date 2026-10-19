@@ -23,7 +23,8 @@ Pick the line that fits, then follow that skill's steps. After every edit run ve
 - verify-your-edit: check the project after an edit with read-only commands
 - handle-ambiguous-requests: vague request or missing detail; ask one question or pick a default
 - explain-what-you-did: short honest summary of what changed
-- handle-unsupported-requests: captions, music, B-roll, zoom, speed, filters; also volume and fades
+- add-music-zoom-or-logo: background music or sound effect from a file, zoom or punch-in, logo or watermark
+- handle-unsupported-requests: captions, B-roll, speed, filters, music library; also volume and fades
 - tutorial-video-structure: how-to or teaching video with steps
 - explainer-video-structure: explainer or pitch with hook, points and call to action
 - podcast-clip: short clip from a long podcast or conversation

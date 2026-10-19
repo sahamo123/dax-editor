@@ -21,7 +21,7 @@ tags: [callout, call out, highlight text, emphasis, emphasize, key point, key nu
 ## Pitfalls
 - The callout is a yellow box at the top; it may cover important picture. Tell the user, and offer `"position":"bottom"`.
 - Overlays use timeline seconds. Cuts made later shift them.
-- It does not point at anything on screen: no arrows, no zoom.
+- It does not point at anything on screen: no arrows. A zoom on the moment is separate (see add-music-zoom-or-logo).
 
 ## Do not
 - Do not call out more than one thing every 4 s.

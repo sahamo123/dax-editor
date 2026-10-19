@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Narrated explainer (Vox / Johnny Harris-style)",
-  "description": "Narration-led explainer: question on screen first, a source or name lower-third, one key-fact callout and an end card. Maps, archival B-roll and push-ins are listed as not available yet.",
+  "description": "Narration-led explainer: question on screen first, a source or name lower-third, one key-fact callout and an end card. Slow push-ins and a low music bed (when you supply music) are added. Maps and archival B-roll are listed as not available yet.",
   "tags": ["explainer", "documentary", "journalism", "youtube", "narration"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -200,6 +200,24 @@
     "in": 0.4,
     "out": 0.8
   },
+  "effects": [
+    {
+      "id": "push-ins",
+      "kind": "zoom",
+      "title": "Slow push-ins",
+      "description": "A slow push-in on every shot of three seconds or more.",
+      "mode": "push-in",
+      "scale": 1.08,
+      "minShotSec": 3
+    },
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music under narration",
+      "description": "Music kept low so the voice stays clear, lowered further while someone speaks.",
+      "level": 0.15
+    }
+  ],
   "deferred": [
     {
       "id": "archival",
@@ -211,19 +229,7 @@
       "id": "maps",
       "title": "Maps and graphics",
       "description": "Maps, charts and simple text callouts.",
-      "requires": ["image-overlays"]
-    },
-    {
-      "id": "push-ins",
-      "title": "Slow push-ins",
-      "description": "Slow zoom on maps and archival shots.",
-      "requires": ["zoom-keyframes"]
-    },
-    {
-      "id": "music",
-      "title": "Music under narration",
-      "description": "Music kept low so the voice stays clear.",
-      "requires": ["music-bed", "audio-ducking"]
+      "requires": ["graphic-cards"]
     },
     {
       "id": "grade",

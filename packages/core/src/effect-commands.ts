@@ -102,7 +102,7 @@ const NOTHING_CHANGED = " It was already like this, so nothing changed.";
  * Returns the asset and whether it still has to be added to the project. Throws an error with a plain message
  * for a missing file, a path outside the allowed folders, or a file of the wrong kind.
  */
-async function resolveMediaAsset(
+export async function resolveMediaAsset(
   ctx: CommandContext,
   args: { path?: string | undefined; assetId?: string | undefined },
   accept: "audio" | "image",

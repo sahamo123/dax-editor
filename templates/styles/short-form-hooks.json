@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Short-form hook edit",
-  "description": "Fast vertical edit for Shorts, Reels and TikTok: payoff-first hook text in the first two seconds, a promise callout and a short loop end card. Interrupt zooms, captions and sound effects are listed as not available yet.",
+  "description": "Fast vertical edit for Shorts, Reels and TikTok: payoff-first hook text in the first two seconds, a promise callout and a short loop end card. Interrupt zooms on alternate shots and a music track (when you supply music) are added. Freeze-frames, captions and sound effects are listed as not available yet.",
   "tags": ["short-form", "hook", "shorts", "reels", "tiktok", "vertical"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -141,6 +141,25 @@
   "fades": {
     "out": 0.25
   },
+  "effects": [
+    {
+      "id": "interrupt-zoom",
+      "kind": "zoom",
+      "title": "Interrupt zooms",
+      "description": "A 20 percent punch-in on every second shot to restart attention.",
+      "mode": "alternate-cuts",
+      "scale": 1.2,
+      "every": 2,
+      "minShotSec": 0.8
+    },
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music",
+      "description": "A track under the voice.",
+      "level": 0.2
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
@@ -149,22 +168,16 @@
       "requires": ["captions"]
     },
     {
-      "id": "interrupt-zoom",
-      "title": "Interrupt zooms",
-      "description": "Zooms and freeze-frames that restart attention.",
-      "requires": ["zoom-keyframes"]
+      "id": "freeze-frames",
+      "title": "Freeze-frames",
+      "description": "Freeze-frames with text that restart attention.",
+      "requires": ["speed-change"]
     },
     {
       "id": "sfx",
       "title": "Sound effects on interrupts",
       "description": "A short effect at each interrupt.",
       "requires": ["sound-effects"]
-    },
-    {
-      "id": "music",
-      "title": "Music",
-      "description": "A track under the voice.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

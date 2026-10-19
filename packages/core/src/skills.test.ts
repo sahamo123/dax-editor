@@ -105,9 +105,9 @@ describe("loadSkills", () => {
 });
 
 describe("the skills in the repo", () => {
-  it("has between 18 and 24 skills plus the router", () => {
+  it("has between 18 and 25 skills plus the router", () => {
     expect(content.length).toBeGreaterThanOrEqual(18);
-    expect(content.length).toBeLessThanOrEqual(24);
+    expect(content.length).toBeLessThanOrEqual(25);
     expect(all.some((s) => s.name === ROUTER_SKILL)).toBe(true);
   });
 
@@ -300,7 +300,15 @@ describe("selectSkills", () => {
     );
     expect(picked("clean up this video")[0]).toBe("tighten-talking-video");
     expect(picked("make a highlight reel of the best parts")[0]).toBe("keep-the-best-parts");
-    expect(picked("add captions and background music")[0]).toBe("handle-unsupported-requests");
+    // Both halves of the request get a playbook: captions are unsupported, music from a file is not.
+    expect(picked("add captions and background music")).toEqual(
+      expect.arrayContaining(["handle-unsupported-requests", "add-music-zoom-or-logo"]),
+    );
+    expect(picked("put my logo in the corner")[0]).toBe("add-music-zoom-or-logo");
+    expect(picked("add background music and duck it under my voice")[0]).toBe(
+      "add-music-zoom-or-logo",
+    );
+    expect(picked("punch in on the price")[0]).toBe("add-music-zoom-or-logo");
     expect(picked("undo that, go back to the earlier version")[0]).toBe("undo-and-versions");
     expect(picked("export it as an mp4")[0]).toBe("export-the-video");
     expect(picked("cut the first 10 seconds")).toContain("remove-a-section");

@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "style",
   "name": "Minimal corporate (LinkedIn)",
-  "description": "Calm, brand-safe video for LinkedIn and company pages: topic and name on screen in the first seconds, a clean end card with the company name and address. Burned-in captions, a logo and a quiet music bed are listed as not available yet.",
+  "description": "Calm, brand-safe video for LinkedIn and company pages: topic and name on screen in the first seconds, a clean end card with the company name and address. A very quiet music bed and your logo on the end card (when you supply them) are added. Burned-in captions are listed as not available yet.",
   "tags": ["corporate", "linkedin", "brand", "b2b", "announcement"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -195,24 +195,32 @@
     "in": 0.3,
     "out": 0.5
   },
+  "effects": [
+    {
+      "id": "logo",
+      "kind": "logo",
+      "title": "Logo end card",
+      "description": "The company logo at the top of the end card, above the company name.",
+      "preset": "logo-end-card",
+      "position": "top",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3
+    },
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Quiet music bed",
+      "description": "Very quiet music, lowered further while someone speaks. No sound effects.",
+      "level": 0.1
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Burned-in captions",
       "description": "Captions drawn into the picture so they keep the brand look and work with sound off.",
       "requires": ["captions"]
-    },
-    {
-      "id": "logo",
-      "title": "Logo end card",
-      "description": "The company logo on the end card.",
-      "requires": ["image-overlays"]
-    },
-    {
-      "id": "music",
-      "title": "Quiet music bed",
-      "description": "Very quiet music, no sound effects.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

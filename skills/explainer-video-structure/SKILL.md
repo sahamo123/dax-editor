@@ -24,7 +24,7 @@ tags: [explainer, explain, pitch, product video, idea, marketing video, promo, p
 `get_project`: duration, clip order and overlays in time order. The title is before 1 s and the closing text ends at the end.
 
 ## Pitfalls
-- No animation, diagrams, B-roll or music exist; say so if they were expected (see handle-unsupported-requests).
+- No animation, diagrams or B-roll exist; say so if they were expected (see handle-unsupported-requests). Music from a file is possible (see add-music-zoom-or-logo).
 - `move_clip` does not move overlays; reorder clips BEFORE adding overlays.
 - Time from transcript to timeline: clip start + (source time minus sourceIn).
 

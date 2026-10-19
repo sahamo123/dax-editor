@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "B2B customer testimonial",
-  "description": "Customer story: name, title and company lower-third, a metric callout with a 'results vary' note, an optional disclosure line for any material connection and a case-study end card. Captions and music are listed as not available yet.",
+  "description": "Customer story: name, title and company lower-third, a metric callout with a 'results vary' note, an optional disclosure line for any material connection and a case-study end card. A quiet music bed (when you supply music) is added. Captions are listed as not available yet.",
   "tags": ["b2b", "testimonial", "case-study", "linkedin", "youtube"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -257,18 +257,21 @@
     "in": 0.4,
     "out": 0.8
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Low music bed",
+      "description": "A quiet bed ducked under speech.",
+      "level": 0.12
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Captions, which LinkedIn advises for video.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Low music bed",
-      "description": "A quiet bed ducked under speech.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

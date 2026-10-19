@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Gaming highlights",
-  "description": "Highlight clip: game and moment title in the first seconds, dead time trimmed tight and a channel end card. Captions, sound effects and HUD-aware cropping are listed as not available yet.",
+  "description": "Highlight clip: game and moment title in the first seconds, dead time trimmed tight and a channel end card. Music (when you supply it) is added. Captions, sound effects and HUD-aware cropping are listed as not available yet.",
   "tags": ["gaming", "highlights", "shorts", "tiktok", "youtube"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -145,6 +145,15 @@
   "fades": {
     "out": 0.2
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music",
+      "description": "Licensed music under the game audio.",
+      "level": 0.2
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
@@ -157,12 +166,6 @@
       "title": "Sound effects",
       "description": "Short effects on the payoff.",
       "requires": ["sound-effects"]
-    },
-    {
-      "id": "music",
-      "title": "Music",
-      "description": "Licensed music under the game audio.",
-      "requires": ["music-bed", "audio-ducking"]
     },
     {
       "id": "hud",

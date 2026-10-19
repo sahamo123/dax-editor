@@ -208,7 +208,7 @@
       "id": "waveform",
       "title": "Waveform visual",
       "description": "An audiogram waveform over a background.",
-      "requires": ["waveform", "image-overlays"]
+      "requires": ["waveform"]
     },
     {
       "id": "speaker-reframe",

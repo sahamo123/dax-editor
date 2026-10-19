@@ -23,7 +23,7 @@ tags: [interview, interviewee, interviewer, testimonial, panel, documentary, q&a
 ## Pitfalls
 - No speaker detection: do not assign a line to a person you cannot be sure of. Ask for a time.
 - A lower third must not run across a cut to the other speaker.
-- No B-roll cutaways, music or captions exist (handle-unsupported-requests).
+- No B-roll cutaways or captions exist (handle-unsupported-requests). Music from a file is possible (see add-music-zoom-or-logo).
 - `tight` makes interviews feel rushed.
 
 ## Do not

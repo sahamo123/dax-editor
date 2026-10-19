@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Recruiting and employer brand",
-  "description": "Natural day-in-the-life edit: role and location title, employee lower-third and an apply end card, with pauses only lightly trimmed. Captions and music are listed as not available yet.",
+  "description": "Natural day-in-the-life edit: role and location title, employee lower-third and an apply end card, with pauses only lightly trimmed. Music (when you supply it) is added. Captions are listed as not available yet.",
   "tags": ["recruiting", "hr", "employer-brand", "linkedin", "careers"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -199,18 +199,21 @@
     "in": 0.4,
     "out": 0.8
   },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Light music",
+      "description": "Light and optimistic music, lowered while someone speaks. Skip it if you prefer none.",
+      "level": 0.15
+    }
+  ],
   "deferred": [
     {
       "id": "captions",
       "title": "Captions",
       "description": "Captions, since most workplace video is watched muted.",
       "requires": ["captions"]
-    },
-    {
-      "id": "music",
-      "title": "Light music",
-      "description": "Light and optimistic, or none.",
-      "requires": ["music-bed", "audio-ducking"]
     }
   ],
   "notes": [

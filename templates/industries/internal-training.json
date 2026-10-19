@@ -3,7 +3,7 @@
   "version": 1,
   "kind": "industry",
   "name": "Internal training",
-  "description": "One objective per video: objective title, a version-and-date label across the whole clip and a where-to-ask end card. Step callouts, captions and music are listed as not available yet.",
+  "description": "One objective per video: objective title, a version-and-date label across the whole clip and a where-to-ask end card. An intro music bed (when you supply music) is added. Step callouts and captions are listed as not available yet.",
   "tags": ["training", "internal", "hr", "learning", "compliance"],
   "license": "Apache-2.0",
   "author": "dax-editor contributors",
@@ -159,6 +159,17 @@
     "in": 0.3,
     "out": 0.5
   },
+  "effects": [
+    {
+      "id": "intro-bed",
+      "kind": "music",
+      "title": "Intro music",
+      "description": "A light music bed on the intro only, never under the lesson.",
+      "level": 0.2,
+      "scope": "intro",
+      "introSec": 10
+    }
+  ],
   "deferred": [
     {
       "id": "step-callouts",
@@ -171,12 +182,6 @@
       "title": "Captions",
       "description": "Captions for compliance training.",
       "requires": ["captions"]
-    },
-    {
-      "id": "intro-bed",
-      "title": "Intro music",
-      "description": "A light bed on the intro only.",
-      "requires": ["music-bed"]
     }
   ],
   "notes": [
