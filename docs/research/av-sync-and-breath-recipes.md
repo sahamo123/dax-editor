@@ -3,10 +3,10 @@ type: Research
 title: A/V sync at cut joins and breath attenuation recipes
 description: Measured causes of audio and video drift at cut joins in the render path (concat takes the longer stream per segment; per-clip fps adds frames), the verified fix (one fps pass per source before trim, cut points on the frame grid), VFR and avg_frame_rate evidence, and tested FFmpeg recipes for breath attenuation with the exact render.ts change.
 tags: [research, cuts, render, ffmpeg, av-sync, vfr, fps, concat, breaths, volume, recipes]
-status: draft
+status: stable
 generated:
   by: process:scribe
-  at: 2026-10-19T00:00:00Z
+  at: 2026-10-19T12:00:00Z
 ---
 
 # A/V sync at cut joins and breath attenuation recipes
@@ -18,6 +18,40 @@ Written 2026-10-19 by the scout. It reads [cut intelligence](cut-intelligence.md
 Scripts live in `/tmp/claude-0/-home-user-dax-editor/2f7e5b03-6060-578c-95f7-af9dd44657ba/scratchpad/av/` (not committed): `sync_test.py`, `stage_test.py`, `fix_test.py`, `vfr_test.py`, `unified_test.py`, `audio_chain.py`, `breath_test.py`, `gain_in_clip.py`.
 
 ---
+
+## 0. Implementation status
+
+The A/V drift fix (sections 2 to 4) is implemented on branch `claude/exciting-lamport-1k91fh`. Breath attenuation (section 5) is **not** implemented.
+
+| Item | Status | Where |
+|---|---|---|
+| One `fps` pass per source before any trim, split into one copy per clip (4.2) | Implemented | `packages/core/src/render.ts`, `buildRenderPlan` |
+| No per-clip `fps` filter | Implemented | `render.ts` |
+| Trim and atrim on frame boundaries; cut points on the grid in the model (4.3, item 1) | Implemented | `timeline.ts` (`snapToFrame`, `deleteRange`, `splitAt`, `trimClip`, `appendClip`, `assetRangesToTimeline`); `cuts.ts` applies plans through `assetRangesToTimeline` |
+| Exact NTSC rates in the filter (4.3, item 2) | Implemented for 23.976, 29.97 and 59.94: a stored decimal maps to its fraction. The project schema still stores a number | `timeline.ts` (`frameRate`) |
+| Regression tests (4.3, item 3; section 6 gates) | Implemented | `av-sync-render.test.ts` (60 joins, 59.94 CFR and VFR sources), `timeline-grid.test.ts` |
+| Breath attenuation (5) | Not implemented | none |
+
+Differences from the sketch in 4.2, decided while implementing:
+
+- Snapping also runs in `assetRangesToTimeline`. A silence or filler cut that removes no whole frame is no longer counted. Before, `remove_silences` could report "Removed 1 silence(s), 0s" and add a history entry on a second pass.
+- Trim times are printed 0.5 ms before their frame boundary (`FRAME_NUDGE`). Six-decimal printing can round an exact boundary a hair past its frame, which keeps or drops one frame.
+- A clip that rounds to no whole frame is left out of the render. Only projects saved before this change can contain one.
+- The end of a source is clamped to its last whole frame (`snapToFrame(..., "floor")`), so a clip never runs past the frames the source has.
+- Projects saved before this change are not re-quantised on open. Their off-grid cuts are snapped at render, so the timeline can differ from the output by up to half a frame per old cut. This is the section 8 decision, left open.
+
+Measured after the change, with ffprobe stream `start_time + duration` against `timelineDuration`. Sixty joins, 320x180 at 30 fps, mpeg4 and AAC:
+
+| Source | Before: picture | Before: sound | After: picture | After: sound | After: picture minus sound |
+|---|---|---|---|---|---|
+| 59.94 CFR (`testsrc2`) | +500.5 ms | +488.9 ms | +0.0003 ms | -0.67 ms | +0.67 ms |
+| VFR, 24 fps average (every fifth frame dropped) | +1633.8 ms | +1696.8 ms | +0.0003 ms | -0.67 ms | +0.67 ms |
+
+Before the change, picture minus sound was +11.7 ms for the CFR source and -63.0 ms for the VFR source. After it, both sources give the same output length, because the cut points fall on the same grid. The -0.67 ms sound offset was not investigated. It is about 32 samples at 48 kHz and well inside one frame.
+
+One-off memory check (not in the tests): peak resident memory of the FFmpeg render process for 60 joins from one source was 243 MB for a 640x360 source of 120 s, 243 MB for 240 s, and 393 MB for 1280x720 at 120 s. The `split` could in principle queue frames for later clips; these runs show no growth with source length. The old graph was not measured for comparison.
+
+Not verified: real footage (lip sync was not checked by eye), 29.97 and 23.976 projects (only the rate mapping is unit tested), sources with a non-zero start time, 48 kHz source audio, FFmpeg 7, Windows and macOS encoders, and export with libx264 (the tests use mpeg4).
 
 ## 1. Verdicts
 
