@@ -1,16 +1,17 @@
 // Where media comes from and goes to: the Connector interface and the local-disk implementation. Cloud providers implement the same interface.
 
 import { copyFile, mkdir, readdir, realpath, stat } from "node:fs/promises";
-import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 /**
  * True when `child` is `root` itself or lives somewhere beneath it.
  * Uses `relative()` rather than string prefixes so it is correct for both
- * `/` and `\` separators and does not confuse `/a/bc` with `/a/b`.
+ * `/` and `\` separators and does not confuse `/a/bc` with `/a/b`. Only a
+ * first segment that is exactly `..` climbs out; `..cfg` is an ordinary name.
  */
 export function isPathInside(root: string, child: string): boolean {
   const rel = relative(root, child);
-  return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+  return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel));
 }
 
 /**
