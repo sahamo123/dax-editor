@@ -38,9 +38,8 @@ export class EngineSession extends Session {
   }
 
   /** Write the current project to {@link EngineSession.savePath} atomically. */
-  override async save(): Promise<void> {
+  protected override async writeProjectFile(): Promise<void> {
     await writeFileAtomic(this.savePath, JSON.stringify(this.project, null, 2));
-    this.markSaved();
   }
 
   /**

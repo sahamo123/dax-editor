@@ -116,10 +116,18 @@ export class Session {
 
   /** Write the current project to disk. Does nothing for sessions without a backing file. Throws if the write fails. */
   async save(): Promise<void> {
-    if (!this.file) return;
-    await writeFile(this.file, JSON.stringify(this.project, null, 2));
+    await this.writeProjectFile();
     await this.saveHistory();
     this.markSaved();
+  }
+
+  /**
+   * Write the project itself. Subclasses that save somewhere else override this; the base writes {@link Session.file}
+   * when there is one and does nothing otherwise.
+   */
+  protected async writeProjectFile(): Promise<void> {
+    if (!this.file) return;
+    await writeFile(this.file, JSON.stringify(this.project, null, 2));
   }
 
   /** Save after a change without letting a failure undo or hide the change: the error goes to {@link Session.saveError}. */
@@ -133,7 +141,7 @@ export class Session {
   }
 
   /** Where the history is kept: beside the project file. */
-  private get historyFile(): string | undefined {
+  protected get historyFile(): string | undefined {
     return this.file ? `${this.file}.history.json` : undefined;
   }
 
@@ -159,7 +167,7 @@ export class Session {
     }
   }
 
-  private async saveHistory(): Promise<void> {
+  protected async saveHistory(): Promise<void> {
     const file = this.historyFile;
     if (!file) return;
     this.prune();
@@ -174,7 +182,7 @@ export class Session {
   }
 
   /** Load a saved history if it belongs to the project on disk; otherwise start fresh. Never throws. */
-  private async loadHistory(): Promise<void> {
+  protected async loadHistory(): Promise<void> {
     const file = this.historyFile;
     if (!file) return;
     try {
