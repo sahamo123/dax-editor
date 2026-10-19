@@ -52,7 +52,14 @@ export interface InstallProgress {
 /** Everything the UI needs to draw the local-model card. */
 export interface LocalModelStatus {
   /** Whether a llama.cpp runtime is installed (or provided through `DAX_LLAMA_SERVER`). */
-  runtime: { installed: boolean; tag?: string; backend?: string; source?: RuntimeInfo["source"] };
+  runtime: {
+    installed: boolean;
+    tag?: string;
+    backend?: string;
+    source?: RuntimeInfo["source"];
+    /** True when the installed build's SHA-256 was checked against a digest (see {@link RuntimeInfo.verified}). */
+    verified?: boolean;
+  };
   /** Models that are completely downloaded. */
   installedModels: { id: string; sizeBytes: number }[];
   /** The model recommended for this machine and the machine facts behind it. */
@@ -135,7 +142,14 @@ export class LocalModelManager {
   private installing:
     | { modelId: string; progress: InstallProgress | undefined; abort: AbortController }
     | undefined;
-  private starting: Promise<ServerHandle> | undefined;
+  /** Starts still in progress, keyed by model id: a second request for the same model joins the first. */
+  private readonly starts = new Map<string, Promise<ServerHandle>>();
+  /**
+   * Bumped by every stop() and by every start that goes on to launch. A start re-checks it after
+   * each await and gives up when it changed, so a stop() during the runtime lookup prevents the
+   * launch without anyone waiting for the pending start.
+   */
+  private generation = 0;
   private readonly listeners = new Set<(event: LocalModelEvent) => void>();
 
   /** @param options See {@link LocalModelManagerOptions}; nothing touches the disk until used. */
@@ -237,7 +251,13 @@ export class LocalModelManager {
       ...(this.o.runtime?.binaryPath ? { binaryPath: this.o.runtime.binaryPath } : {}),
     });
     return info
-      ? { installed: true, tag: info.tag, backend: info.backend, source: info.source }
+      ? {
+          installed: true,
+          tag: info.tag,
+          backend: info.backend,
+          source: info.source,
+          verified: info.verified,
+        }
       : { installed: false };
   }
 
@@ -374,27 +394,42 @@ export class LocalModelManager {
   async start(
     options: { modelId?: string; signal?: AbortSignal; contextSize?: number } = {},
   ): Promise<ServerHandle> {
-    if (this.starting) return await this.starting;
-    this.starting = this.doStart(options).finally(() => {
-      this.starting = undefined;
+    const id = options.modelId ?? (await this.pickInstalled());
+    // Only a start for the same model can be shared; another model gets its own attempt.
+    const pending = this.starts.get(id);
+    if (pending) return await pending;
+    const run: Promise<ServerHandle> = this.doStart(id, options).finally(() => {
+      if (this.starts.get(id) === run) this.starts.delete(id);
     });
-    return await this.starting;
+    this.starts.set(id, run);
+    return await run;
   }
 
-  private async doStart(options: {
-    modelId?: string;
-    signal?: AbortSignal;
-    contextSize?: number;
-  }): Promise<ServerHandle> {
-    const id = options.modelId ?? (await this.pickInstalled());
+  private async doStart(
+    id: string,
+    options: { signal?: AbortSignal; contextSize?: number },
+  ): Promise<ServerHandle> {
     if (this.server?.state === "running" && this.serverModelId === id) {
       return this.handle(this.server, id);
     }
-    await this.stop();
+    // Taking a new generation supersedes any start still waiting for an earlier request.
+    const gen = ++this.generation;
+    const cancelled = () =>
+      new LocalLlmError(`Starting ${id} was cancelled by a later stop() or start()`);
+    // The internal stop does not take a generation: this start must survive it.
+    await this.stopServer();
     const entry = getModel(id, this.catalog);
     const installed = await this.readInstalled(id);
     if (!installed) throw new LocalLlmError(`Model ${id} is not installed; call install() first`);
-    let runtime = await this.resolveRuntime(undefined, options.signal);
+    let runtime: RuntimeInfo;
+    try {
+      runtime = await this.resolveRuntime(undefined, options.signal);
+    } catch (error) {
+      if (gen !== this.generation) throw cancelled();
+      throw error;
+    }
+    // Nothing is launched once a stop() or a newer start has happened while the runtime resolved.
+    if (gen !== this.generation) throw cancelled();
     this.lastError = undefined;
     for (;;) {
       const server = new LlamaServer({
@@ -413,8 +448,15 @@ export class LocalModelManager {
       this.serverModelId = id;
       try {
         await server.start(options.signal);
+        if (gen !== this.generation) {
+          // A stop() arrived while the server was loading: take it down again.
+          await server.stop();
+          throw cancelled();
+        }
         return this.handle(server, id);
       } catch (error) {
+        // A cancelled start leaves the server fields alone: a newer start may own them now.
+        if (gen !== this.generation) throw error instanceof LocalLlmError ? error : cancelled();
         this.lastError = error instanceof Error ? error.message : String(error);
         this.server = undefined;
         this.serverModelId = undefined;
@@ -426,6 +468,7 @@ export class LocalModelManager {
           !options.signal?.aborted
         ) {
           runtime = await this.resolveRuntime(undefined, options.signal, "cpu");
+          if (gen !== this.generation) throw cancelled();
           this.lastError = undefined;
           continue;
         }
@@ -463,8 +506,17 @@ export class LocalModelManager {
     return this.server;
   }
 
-  /** Stop the model server and wait until the process is gone. Safe when nothing runs. */
+  /**
+   * Stop the model server and wait until the process is gone. Safe when nothing runs. A start
+   * still in progress is cancelled: it will not launch a server. This does not wait for that start.
+   */
   async stop(): Promise<void> {
+    this.generation++;
+    await this.stopServer();
+  }
+
+  /** Stop whatever server this manager holds, without cancelling starts (see {@link stop}). */
+  private async stopServer(): Promise<void> {
     const server = this.server;
     this.server = undefined;
     this.serverModelId = undefined;

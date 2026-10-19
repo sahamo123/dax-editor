@@ -13,6 +13,6 @@ generated:
 
 Patches here are unfinished work from builders that stopped. They are not verified and may not apply cleanly after later commits.
 
-- `review-fix-D-F-wip.patch`: review items D (pinned runtime digests and the opt-in for unverified installs) and F (model manager start/stop races), partly written, untested. Start from `docs/engineering/handoff.md`.
+- `review-fix-G-H-wip.patch`: review items G (finite numbers in schemas) and H (asset paths and FFmpeg protocol whitelist), partly written, untested. Applies to the branch as of the D and F merge; check with `git apply --check` first.
 
 To try one: `git apply --check docs/handoff/<file>` first, then fix conflicts, add regression tests, and run `pnpm check` before committing.

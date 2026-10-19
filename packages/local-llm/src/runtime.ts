@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
 import { z } from "zod";
 import { extractArchive } from "./archive.js";
 import { downloadFile } from "./download.js";
-import { HttpError, UnsupportedError } from "./errors.js";
+import { HttpError, UnsupportedError, UnverifiedRuntimeError } from "./errors.js";
 import type { HardwareInfo } from "./hardware.js";
 
 /** Which llama.cpp build to use. `cpu` works everywhere; `vulkan` uses a graphics card. */
@@ -33,6 +33,46 @@ export interface RuntimeTarget {
  * newest release that has an asset for the target is used.
  */
 export const PINNED_RUNTIME_TAG = "b11721";
+
+/**
+ * SHA-256 of each release archive of {@link PINNED_RUNTIME_TAG}, keyed by asset name. The direct
+ * download used when the API is unreachable has no digest from GitHub, so these verify it instead.
+ * They were computed from the release downloads and are NOT yet cross-checked against the `digest`
+ * field the API publishes for the same assets; check that before relying on them for a release.
+ * An asset that is not listed can only be installed with `allowUnverified`.
+ */
+export const PINNED_RUNTIME_DIGESTS: Readonly<Record<string, string>> = {
+  "llama-b11721-bin-macos-arm64.tar.gz":
+    "2ace55512ee1ab4e2703f80c135c2a92d40d3367a5b3a98d21b103ffa7f0eb82",
+  "llama-b11721-bin-macos-x64.tar.gz":
+    "de3e409d44a9130f8e863975c13693f047b1c657180a94485464eb7cd5747579",
+  "llama-b11721-bin-ubuntu-x64.tar.gz":
+    "68c7a4dfb6a53e607b73c00c839bfc81c55141cd0a7697c0252e634190647c2f",
+  "llama-b11721-bin-ubuntu-arm64.tar.gz":
+    "fafae7c6df59f4bcaadf0e1ec4320deaacf0b3f7eeadb4fdf0ad586f0daaf397",
+  "llama-b11721-bin-ubuntu-vulkan-x64.tar.gz":
+    "9b794ea6578bae49a1e871b7ec330a754ce1aa788846eb574f0a1227a75996d5",
+  "llama-b11721-bin-ubuntu-vulkan-arm64.tar.gz":
+    "64215226ec477c8c9f441a5dee18922b436a83f03ef93c06eb76522ff5006306",
+  "llama-b11721-bin-win-cpu-x64.zip":
+    "19f5a91cfbd906fadfb36975a65a0c165c7db1a533d5db129dfa0a533dfdeaa1",
+  "llama-b11721-bin-win-vulkan-x64.zip":
+    "b2dab62833cc07aae4a1f28752874668b6a98d304a7f8ca6c1421a0d1e1a7075",
+  "llama-b11721-bin-win-cpu-arm64.zip":
+    "710ce7825b31bd39bd0325234522e4e9e76d3c04cab00b0c2d3e5b2bc411dc15",
+};
+
+/**
+ * The pinned SHA-256 for `assetName` of release `tag`, or `undefined` when none is pinned. Only
+ * {@link PINNED_RUNTIME_TAG} has pins; other tags are never trusted by digest.
+ */
+function pinnedRuntimeDigest(tag: string, assetName: string): string | undefined {
+  if (tag !== PINNED_RUNTIME_TAG) return undefined;
+  // An own-property check, so a name such as "constructor" cannot match an inherited member.
+  return Object.hasOwn(PINNED_RUNTIME_DIGESTS, assetName)
+    ? PINNED_RUNTIME_DIGESTS[assetName]
+    : undefined;
+}
 
 /** GitHub repository that publishes the release archives. */
 const RUNTIME_REPO = "ggml-org/llama.cpp";
@@ -135,8 +175,8 @@ function pickAsset(release: z.infer<typeof ReleaseSchema>, target: RuntimeTarget
  *
  * With `tag` set, asks the GitHub API for that release; without it, takes the newest releases
  * and uses the first that has a matching asset. If the API cannot be reached (offline,
- * rate-limited) the pinned tag is used with a direct URL and no digest, so verification is lost
- * but installation still works.
+ * rate-limited) the pinned tag is used with a direct URL, verified against
+ * {@link PINNED_RUNTIME_DIGESTS} when that asset is pinned. Any other fallback has no digest.
  *
  * @throws UnsupportedError when no release has an asset for the target.
  */
@@ -190,7 +230,8 @@ export async function resolveRuntimeAsset(
       tag,
       assetName,
       url: `${downloadBase}/${RUNTIME_REPO}/releases/download/${tag}/${assetName}`,
-      sha256: undefined,
+      // No API digest here, so the pinned one (if any) is the only check.
+      sha256: pinnedRuntimeDigest(tag, assetName),
       sizeBytes: undefined,
     };
   }
@@ -244,6 +285,12 @@ export interface EnsureRuntimeOptions {
   apiBase?: string;
   /** Direct download base URL fallback, for tests. */
   downloadBase?: string;
+  /**
+   * Install and run a build that has no SHA-256 to check it against. Default `false`: such a
+   * build is refused with {@link UnverifiedRuntimeError} before anything is downloaded. Also
+   * decides whether an unverified install that is already on disk may be reused.
+   */
+  allowUnverified?: boolean;
 }
 
 const MarkerSchema = z.object({
@@ -377,7 +424,14 @@ export async function ensureRuntime(options: EnsureRuntimeOptions): Promise<Runt
     ...(options.tag ? { tag: options.tag } : {}),
     ...(options.binaryPath ? { binaryPath: options.binaryPath } : {}),
   });
-  if (found) return found;
+  // An override is the caller's own binary, so it is never downloaded and needs no digest. A cached
+  // unverified install is only reused when this call also accepts unverified installs.
+  if (
+    found &&
+    (found.source === "override" || found.verified || options.allowUnverified === true)
+  ) {
+    return found;
+  }
 
   const root = join(options.dataDir, "runtime");
   const flavour = `${target.platform}-${target.arch}-${target.backend}`;
@@ -392,6 +446,12 @@ export async function ensureRuntime(options: EnsureRuntimeOptions): Promise<Runt
     ...(options.downloadBase ? { downloadBase: options.downloadBase } : {}),
     ...(options.signal ? { signal: options.signal } : {}),
   });
+  // Refused before the download: without a digest nothing checks the bytes we would run.
+  if (asset.sha256 === undefined && options.allowUnverified !== true) {
+    throw new UnverifiedRuntimeError(
+      `No SHA-256 is known for ${asset.assetName} (release ${asset.tag}); refusing to install it unverified`,
+    );
+  }
 
   const archivePath = join(options.dataDir, "downloads", asset.assetName);
   await downloadFile(asset.url, archivePath, {

@@ -40,7 +40,8 @@ Known flaky tests: `packages/bridges` ("reports a slow sign-in check") and `pack
 
 Each item needs a regression test that fails before and passes after, one commit per item, and `pnpm check` green.
 
-1. **Review-fix items D and F** (partly written, not applied). Patch: `docs/handoff/review-fix-D-F-wip.patch`. Scope:
+1. **Review-fix items D and F: merged** (commits `60a802d`, `c2fe381`, `d2bab9e`). Remaining: confirm D's digest values against the API when it is reachable.
+   Original scope, for reference:
    - D: pin SHA-256 digests for the pinned llama.cpp tag in source (the digests are in the patch and in `docs/research`), verify before running a binary, and refuse unverified installs unless an explicit `allowUnverified` option (default false) is passed.
    - F: model manager start and stop races. Key in-flight starts by model id; use a generation counter checked after each await; `stop()` during a start must prevent the server from launching.
 2. **Review-fix item E**: the llama.cpp health check trusts any HTTP 200 on the port, then sends the bearer key. Verify the listener is the spawned process before sending the key.

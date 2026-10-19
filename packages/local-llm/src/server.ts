@@ -10,6 +10,7 @@ import { readFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { promisify } from "node:util";
 import { ServerError } from "./errors.js";
+import { listeningPids } from "./listener.js";
 import {
   getFreePort,
   killTree,
@@ -367,13 +368,21 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
           `llama-server exited during start-up (code ${child.exitCode}, signal ${child.signalCode})`,
         );
       }
+      let healthy = false;
       try {
         const response = await doFetch(url, { signal: AbortSignal.timeout(2000) });
-        if (response.status === 200) return;
+        healthy = response.status === 200;
         // 503 means "model still loading"; anything else is also worth another try.
-        await response.body?.cancel();
+        if (!healthy) await response.body?.cancel();
       } catch {
         // connection refused while the process is still starting
+      }
+      if (healthy) {
+        // A 200 only counts once the listener is shown to be ours: the port may belong to another
+        // program, and the caller sends the API key to whatever answers there. Checked outside the
+        // try above so a refusal is not swallowed.
+        await this.assertOwnListener(child);
+        return;
       }
       if (Date.now() > deadline) {
         throw new ServerError(
@@ -381,6 +390,29 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
         );
       }
       await new Promise((r) => setTimeout(r, o.healthPollMs ?? 200));
+    }
+  }
+
+  /**
+   * Confirm that the process listening on our port is the one we spawned, or the server it wraps
+   * (the watchdog's child). Fails closed: a listener that cannot be identified is refused.
+   *
+   * @throws ServerError when another process holds the port, or the owner cannot be determined.
+   */
+  private async assertOwnListener(child: ChildProcess): Promise<void> {
+    const port = this.chosenPort;
+    if (port === undefined) throw new ServerError("No port was chosen for the server");
+    const ours = [child.pid, this.realPid].filter((pid): pid is number => pid !== undefined);
+    const listeners = await listeningPids(port);
+    if (listeners === undefined) {
+      throw new ServerError(
+        `Could not confirm which process listens on port ${port}; not sending the API key to it`,
+      );
+    }
+    if (!listeners.some((pid) => ours.includes(pid))) {
+      throw new ServerError(
+        `Port ${port} is answered by a process that is not the llama-server this app started; not sending the API key to it`,
+      );
     }
   }
 

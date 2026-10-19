@@ -80,7 +80,93 @@ function make(extra: Partial<LocalModelManagerOptions> = {}, env: Record<string,
   return m;
 }
 
+/**
+ * A fetch for the runtime manager that holds every release-API call until `release()` is called,
+ * so a start can be parked in the runtime lookup for as long as a test needs. The release answer
+ * is an error, so a start that does get past the gate fails rather than downloading anything.
+ */
+function gatedReleaseApi(): { fetch: typeof fetch; release: () => void } {
+  let open!: () => void;
+  const gate = new Promise<void>((r) => {
+    open = r;
+  });
+  const fetchGated: typeof fetch = async (input, init) => {
+    if (String(input).includes("/repos/")) {
+      await gate;
+      return new Response("unavailable", { status: 503 });
+    }
+    return await fetch(input, init);
+  };
+  return { fetch: fetchGated, release: () => open() };
+}
+
 describe("LocalModelManager", () => {
+  it("stop() during a start that is still looking up the runtime keeps the server from launching", async () => {
+    // Install with the binary override, so the runtime is not needed to get the model on disk.
+    await make().install("tiny-a");
+    const gate = gatedReleaseApi();
+    const m = make({
+      runtime: {
+        apiBase: files.url,
+        downloadBase: files.url,
+        allowUnverified: true,
+        fetch: gate.fetch,
+      },
+    });
+    const launches: string[] = [];
+    m.onEvent((e) => {
+      if (e.type === "server-state" && e.state === "starting") launches.push(e.state);
+    });
+    const pending = m.start({ modelId: "tiny-a" });
+    const outcome = pending.then(
+      () => "started",
+      (error: unknown) => error,
+    );
+    await new Promise((r) => setTimeout(r, 100)); // let the start reach the release API
+    // stop() must return while the start is still parked: it must not wait for the start.
+    await m.stop();
+    gate.release();
+    const error = await outcome;
+    expect(error).toBeInstanceOf(LocalLlmError);
+    expect(String((error as Error).message)).toMatch(/cancelled/);
+    expect(launches).toEqual([]);
+    expect(m.serverProcess).toBeUndefined();
+  });
+
+  it("a start for another model does not share the pending start, and the old start is cancelled", async () => {
+    await make().install("tiny-a");
+    const gate = gatedReleaseApi();
+    const m = make({
+      runtime: {
+        apiBase: files.url,
+        downloadBase: files.url,
+        allowUnverified: true,
+        fetch: gate.fetch,
+      },
+    });
+    const first = m.start({ modelId: "tiny-a" }).then(
+      () => "started",
+      (error: unknown) => error,
+    );
+    await new Promise((r) => setTimeout(r, 100));
+    // tiny-b is not installed, so its own start must fail on its own terms; before the fix it
+    // joined tiny-a's pending start and waited for the gate.
+    const other = m.start({ modelId: "tiny-b" }).then(
+      () => "started",
+      (error: unknown) => error,
+    );
+    const otherError = await Promise.race([
+      other,
+      new Promise((r) => setTimeout(() => r("hung"), 2000)),
+    ]);
+    gate.release();
+    expect(otherError).toBeInstanceOf(LocalLlmError);
+    expect(String((otherError as Error).message)).toMatch(/not installed/);
+    const firstError = await first;
+    expect(firstError).toBeInstanceOf(LocalLlmError);
+    expect(String((firstError as Error).message)).toMatch(/cancelled/);
+  });
+
   it("reports an empty status with a recommendation before anything is installed", async () => {
     const s = await make().status();
     expect(s.installedModels).toEqual([]);
@@ -276,7 +362,9 @@ describe("LocalModelManager", () => {
     const used: string[] = [];
     const m = make({
       detect: async () => gpuMachine,
-      runtime: { apiBase: files.url, downloadBase: files.url },
+      // The fake API publishes no digest, so this test opts in to an unverified install; the test
+      // is about choosing between builds, not about verification.
+      runtime: { apiBase: files.url, downloadBase: files.url, allowUnverified: true },
       // The "binary" is a data file; the launcher runs the fake server and we record which build was asked for.
       server: {
         launcher: { command: process.execPath, args: [fake] },
