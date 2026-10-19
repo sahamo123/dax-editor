@@ -14,6 +14,7 @@ import {
   TemplateError,
   templateRequirements,
 } from "./templates.js";
+import { ownAsset } from "./timeline.js";
 
 const aspects = Object.keys(TEMPLATE_ASPECTS) as [
   keyof typeof TEMPLATE_ASPECTS,
@@ -140,7 +141,7 @@ export const TEMPLATE_COMMANDS: readonly CommandDef[] = [
       // A value that names a known asset is an asset id; anything else is a file path.
       const media = async (value: string | undefined, accept: "audio" | "image") => {
         if (!value) return undefined;
-        const known = ctx.session.project.assets[value];
+        const known = ownAsset(ctx.session.project, value);
         const { asset } = await resolveMediaAsset(
           ctx,
           known ? { assetId: value } : { path: value },

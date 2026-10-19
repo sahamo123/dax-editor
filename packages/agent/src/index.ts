@@ -1,6 +1,7 @@
 // Public surface of @dax/agent: the agent loop, the two providers, the system prompt and the small-model helpers.
 
 export * from "./agent.js";
+export * from "./budget.js";
 export { type LooseParse, parseJsonLoose } from "./json-repair.js";
 export * from "./prompt.js";
 export { type AnthropicProviderOptions, createAnthropicProvider } from "./providers/anthropic.js";

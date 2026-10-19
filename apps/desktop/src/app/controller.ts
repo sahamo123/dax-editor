@@ -2,11 +2,12 @@
 // socket, feeds server pushes into the store, and exposes plain async actions (run a command, import, export,
 // chat, settings). Actions never throw; failures become toasts or transcript notices.
 
-import type { CommandResponse, ProviderKind, Settings } from "@dax/protocol";
+import type { CommandResponse, ImportResult, ProviderKind, Settings } from "@dax/protocol";
 import type { StoreApi } from "zustand/vanilla";
 import type { DaxClient, LiveSocket, LocalModelAction, SocketStatus } from "../api";
 import { openLiveSocket } from "../api";
 import { aiStepsSince } from "./chat-model";
+import { basename } from "./format";
 import type { AppStore } from "./store";
 
 /** Replaceable pieces, so tests can run the controller without a network. */
@@ -15,6 +16,13 @@ export interface ControllerDeps {
   store: StoreApi<AppStore>;
   /** Defaults to the real {@link openLiveSocket}. */
   openSocket?: typeof openLiveSocket;
+}
+
+/** The files that did not import, if the reply says so (`data` of a partly successful import). */
+function failedImports(r: CommandResponse): ImportResult["failed"] {
+  if (!r.ok || typeof r.data !== "object" || r.data === null) return [];
+  const failed = (r.data as Partial<ImportResult>).failed;
+  return Array.isArray(failed) ? failed : [];
 }
 
 /** Edits to the provider settings made in the Settings dialog. */
@@ -46,7 +54,10 @@ export interface Controller {
   redo(): Promise<void>;
   /** Import files by absolute path. */
   importPaths(paths: string[]): Promise<boolean>;
-  /** Export to `path`. Progress shows through job events; the result is announced with a toast. */
+  /**
+   * Export to `path`. The server answers as soon as FFmpeg has started (with the export job's id), so progress
+   * and the "Exported ..." toast come from job events; a refusal (bad path, file exists) is toasted here.
+   */
   exportTo(path: string, overwrite: boolean): Promise<boolean>;
   /** Show `text` as the user's message and start an AI run. A refusal (no assistant, busy) lands in the transcript. */
   sendChat(text: string): Promise<void>;
@@ -62,7 +73,7 @@ export interface Controller {
   refreshProviders(): Promise<void>;
   /** Read the local model's status; the store gets `"unavailable"` if the engine has no such endpoint. */
   loadLocalModel(): Promise<void>;
-  /** Download, start, stop or remove the local model. Progress arrives as `job` events. */
+  /** Download, start, stop, cancel or remove the local model. Progress arrives as `job` events. */
   localModel(action: LocalModelAction): Promise<void>;
 }
 
@@ -101,6 +112,11 @@ export function createController(deps: ControllerDeps): Controller {
     }
   }
 
+  async function loadLocalModel(): Promise<void> {
+    const r = await client.getLocalModel();
+    store.getState().setLocalModel(r.ok ? r.value : "unavailable");
+  }
+
   const run = async (name: string, args: Record<string, unknown> = {}, quiet = false) => {
     const r = await client.run(name, args);
     if (!r.ok && !quiet) toast("error", r.error);
@@ -134,9 +150,18 @@ export function createController(deps: ControllerDeps): Controller {
           } else if (event.type === "job") {
             const prev = s.jobs[event.job.id];
             s.applyJob(event.job);
-            // Only failures are announced here; a finished export is announced by the command's own reply.
+            // The export command answers when FFmpeg starts, so the job events announce how it ended.
             if (prev?.status === "running" && event.job.status === "error") {
               toast("error", event.job.error ?? `${event.job.label} failed.`);
+            } else if (
+              prev?.status === "running" &&
+              event.job.status === "done" &&
+              event.job.kind === "export"
+            ) {
+              toast(
+                "success",
+                `Exported ${event.job.result ? basename(event.job.result) : "the video"}.`,
+              );
             }
           } else {
             s.applyChat(event.runId, event.event);
@@ -169,7 +194,16 @@ export function createController(deps: ControllerDeps): Controller {
         toast("error", r.error);
         return false;
       }
-      toast("success", clean.length === 1 ? "Video imported." : `${clean.length} videos imported.`);
+      const failed = failedImports(r);
+      if (failed.length === 0) {
+        toast(
+          "success",
+          clean.length === 1 ? "Video imported." : `${clean.length} videos imported.`,
+        );
+      } else {
+        // Some files were fine and some were not: say which, using the engine's own reason.
+        toast("error", `${r.summary} ${failed[0]?.error ?? ""}`.trim());
+      }
       return true;
     },
 
@@ -179,7 +213,9 @@ export function createController(deps: ControllerDeps): Controller {
         toast("error", r.error);
         return false;
       }
-      toast("success", r.summary);
+      // With a job id the end of the export is announced by its job events; without one it already ended.
+      const started = typeof r.data === "object" && r.data !== null && "jobId" in r.data;
+      if (!started) toast("success", r.summary);
       return true;
     },
 
@@ -245,10 +281,7 @@ export function createController(deps: ControllerDeps): Controller {
       else if (current) store.getState().applyState({ ...current, providers: r.value });
     },
 
-    async loadLocalModel() {
-      const r = await client.getLocalModel();
-      store.getState().setLocalModel(r.ok ? r.value : "unavailable");
-    },
+    loadLocalModel,
 
     async localModel(action) {
       const r = await client.localModel(action);
@@ -256,7 +289,8 @@ export function createController(deps: ControllerDeps): Controller {
         toast("error", r.error);
         return;
       }
-      store.getState().setLocalModel(r.value);
+      // None of the replies carries the new status (install and start only name a job), so ask for it.
+      await loadLocalModel();
     },
   };
 }

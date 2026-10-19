@@ -1,22 +1,21 @@
 // Looking at media: ffprobe metadata, silence and scene detection, and the pure parsers for FFmpeg's text output.
 
 import { basename, resolve } from "node:path";
-import { ffmpegBin, ffprobeBin, run } from "./exec.js";
+import { ffmpegBin, ffprobeBin, type RunOptions, run } from "./exec.js";
 import { newId } from "./ids.js";
 import type { Asset, Range } from "./schema.js";
 
-/** Inspect a media file with ffprobe and describe it as an Asset. */
-export async function probe(path: string): Promise<Asset> {
+/**
+ * Inspect a media file with ffprobe and describe it as an Asset. Gives up after a minute (a hung network mount, a
+ * damaged file) unless `opts.timeoutMs` says otherwise; `opts.signal` cancels it.
+ */
+export async function probe(path: string, opts: RunOptions = {}): Promise<Asset> {
   const abs = resolve(path);
-  const { stdout } = await run(ffprobeBin(), [
-    "-v",
-    "error",
-    "-print_format",
-    "json",
-    "-show_format",
-    "-show_streams",
-    abs,
-  ]);
+  const { stdout } = await run(
+    ffprobeBin(),
+    ["-v", "error", "-print_format", "json", "-show_format", "-show_streams", abs],
+    { timeoutMs: 60_000, ...(opts.signal ? { signal: opts.signal } : {}) },
+  );
   return parseProbe(JSON.parse(stdout), abs);
 }
 
@@ -74,6 +73,8 @@ function parseRate(rate?: string): number | undefined {
 
 /** Tuning for {@link detectSilence}. */
 export interface SilenceOptions {
+  /** Cancels the analysis; the call then rejects with an `AbortError`-named error. */
+  signal?: AbortSignal;
   /** Anything quieter than this is silence. Default -30 dB. */
   noiseDb?: number;
   /** Silences shorter than this (seconds) are ignored. Default 0.5. */
@@ -88,18 +89,26 @@ export async function detectSilence(
 ): Promise<Range[]> {
   const noise = opts.noiseDb ?? -30;
   const min = opts.minDuration ?? 0.5;
-  const { stderr } = await run(ffmpegBin(), [
-    "-hide_banner",
-    "-nostdin",
-    "-i",
-    resolve(path),
-    "-vn",
-    "-af",
-    `silencedetect=noise=${noise}dB:d=${min}`,
-    "-f",
-    "null",
-    "-",
-  ]);
+  // Decoding a whole file takes a fraction of its length; the limit only stops a process that has hung.
+  const { stderr } = await run(
+    ffmpegBin(),
+    [
+      "-hide_banner",
+      "-nostdin",
+      "-i",
+      resolve(path),
+      "-vn",
+      "-af",
+      `silencedetect=noise=${noise}dB:d=${min}`,
+      "-f",
+      "null",
+      "-",
+    ],
+    {
+      timeoutMs: Math.max(120_000, totalDuration * 20_000),
+      ...(opts.signal ? { signal: opts.signal } : {}),
+    },
+  );
   return parseSilenceDetect(stderr, totalDuration);
 }
 
@@ -148,19 +157,27 @@ export function padSilences(silences: Range[], pad: number): Range[] {
 }
 
 /** Timestamps (seconds) where the picture changes sharply. */
-export async function detectScenes(path: string, threshold = 0.4): Promise<number[]> {
-  const { stderr } = await run(ffmpegBin(), [
-    "-hide_banner",
-    "-nostdin",
-    "-i",
-    resolve(path),
-    "-an",
-    "-vf",
-    `select='gt(scene,${threshold})',showinfo`,
-    "-f",
-    "null",
-    "-",
-  ]);
+export async function detectScenes(
+  path: string,
+  threshold = 0.4,
+  opts: RunOptions = {},
+): Promise<number[]> {
+  const { stderr } = await run(
+    ffmpegBin(),
+    [
+      "-hide_banner",
+      "-nostdin",
+      "-i",
+      resolve(path),
+      "-an",
+      "-vf",
+      `select='gt(scene,${threshold})',showinfo`,
+      "-f",
+      "null",
+      "-",
+    ],
+    { timeoutMs: 15 * 60_000, ...(opts.signal ? { signal: opts.signal } : {}) },
+  );
   return parseSceneChanges(stderr);
 }
 

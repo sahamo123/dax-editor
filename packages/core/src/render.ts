@@ -1,49 +1,20 @@
 // Turning a project into a video file: encoder selection and the FFmpeg command for the main track and its overlays.
 
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import type { ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
+import { mkdtemp, rename, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { audioLayerFilters } from "./audio-layer.js";
 import { buildAss, captionLines } from "./captions.js";
-import { ffmpegBin, run, runFfmpeg } from "./exec.js";
+import { withEncoderFallback } from "./encoders.js";
+import { runFfmpeg } from "./exec.js";
 import { imageInputArgs, imageOverlayFilters, imagesOf } from "./image-overlays.js";
 import { type FontFiles, filterPath, overlayFilters, type TextFile } from "./overlay-filters.js";
 import type { Clip, Project } from "./schema.js";
-import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
+import { clipDuration, mainClips, ownAsset, timelineDuration } from "./timeline.js";
 import { zoomFilters, zoomsOf } from "./zoom.js";
-
-/**
- * Preferred H.264 encoders, best first. libx264 is GPL, so builds we ship
- * (LGPL) rely on the platform encoders and fall back to what is available.
- */
-const PREFERRED_ENCODERS = [
-  "libx264",
-  "h264_videotoolbox",
-  "h264_nvenc",
-  "h264_qsv",
-  "h264_amf",
-  "libopenh264",
-  "mpeg4",
-] as const;
-
-/** Names of the video encoders compiled into the FFmpeg binary in use. */
-export async function listEncoders(): Promise<Set<string>> {
-  const { stdout } = await run(ffmpegBin(), ["-hide_banner", "-encoders"]);
-  const names = new Set<string>();
-  for (const line of stdout.split("\n")) {
-    const name = /^\s*V\S*\s+(\S+)/.exec(line)?.[1];
-    if (name) names.add(name);
-  }
-  return names;
-}
-
-/** Pick the best available H.264 encoder from the preferred list. Throws if none is usable. */
-export function chooseEncoder(available: Set<string>): string {
-  const found = PREFERRED_ENCODERS.find((e) => available.has(e));
-  if (!found) throw new Error("No usable video encoder found in this FFmpeg build");
-  return found;
-}
 
 function encoderArgs(encoder: string): string[] {
   switch (encoder) {
@@ -90,9 +61,9 @@ export interface RenderContext {
 }
 
 /**
- * Turn the project into one FFmpeg command: trim each clip (with fades), normalise, concat, then
- * (in this order) zoom the joined picture, draw image overlays, draw text overlays and captions, and mix the
- * music and sound-effect layer under the main audio. Everything after the join works in timeline time.
+ * Turn the project into one FFmpeg command: trim each clip (with fades), normalise, concat, then (in this order)
+ * zoom the joined picture, draw image overlays, draw text overlays and captions, and mix the audio layer (music and
+ * sound effects) under the joined main audio. Everything after the join works in timeline time.
  */
 export function buildRenderPlan(
   project: Project,
@@ -191,7 +162,7 @@ export function buildRenderPlan(
 
   // Image overlays: each picture is its own looped input.
   imagesOf(project).forEach((img, i) => {
-    const asset = project.assets[img.assetId];
+    const asset = ownAsset(project, img.assetId);
     if (!asset) throw new Error(`Image overlay ${img.id} references missing asset ${img.assetId}`);
     if (asset.kind !== "image") {
       throw new Error(`Asset ${asset.path} is ${asset.kind}; an image overlay needs a picture`);
@@ -217,8 +188,9 @@ export function buildRenderPlan(
     }
     const fonts = ctx.fonts ?? bundledFonts();
     const chain: string[] = [];
-    for (const o of overlays) {
-      const built = overlayFilters(o, W, H, fonts, ctx.workDir);
+    for (const [i, o] of overlays.entries()) {
+      // Text files are named by position, never by id, so a hostile id cannot reach outside workDir or collide.
+      const built = overlayFilters(o, W, H, fonts, ctx.workDir, `ov${i}`);
       chain.push(...built.filters);
       files.push(...built.files);
     }
@@ -241,7 +213,7 @@ export function buildRenderPlan(
     inputFor: (assetId) => {
       const known = inputIndex.get(assetId);
       if (known !== undefined) return known;
-      const asset = project.assets[assetId];
+      const asset = ownAsset(project, assetId);
       if (!asset) throw new Error(`Audio clip references missing asset ${assetId}`);
       const k = addInput(asset.path);
       inputIndex.set(assetId, k);
@@ -276,27 +248,77 @@ export function buildRenderPlan(
 
 /** Options for {@link exportProject}. */
 export interface ExportOptions {
-  /** Override the automatically chosen encoder. */
+  /** Force one encoder and do not fall back to another if it fails. */
   encoder?: string;
   /** Called with a fraction between 0 and 1. */
   onProgress?: (fraction: number) => void;
+  /** Cancels the export: FFmpeg is killed, the partial file removed and the promise rejects with an `AbortError`-named error. */
+  signal?: AbortSignal;
+  /** Called with each FFmpeg process started, so the host can kill it on shutdown. */
+  onSpawn?: (child: ChildProcess) => void;
 }
 
-/** Render the main track to `outPath` and report which encoder was used. Progress is reported as a fraction from 0 to 1. */
+/**
+ * Throw if `outPath` is, or is another name for, one of the project's source files (same path, a symlink, a hard
+ * link, or a case alias on a case-insensitive disk). Exporting over a source would destroy the user's footage.
+ */
+async function assertNotASource(project: Project, outPath: string): Promise<void> {
+  const out = await stat(outPath).catch(() => undefined);
+  for (const asset of Object.values(project.assets)) {
+    let same = resolve(asset.path) === resolve(outPath);
+    if (!same && out) {
+      const src = await stat(asset.path).catch(() => undefined);
+      // The device and inode identify the file itself, whatever name, link or letter case was used to reach it.
+      same = src !== undefined && src.dev === out.dev && src.ino === out.ino && out.ino !== 0;
+    }
+    if (same) {
+      throw new Error(
+        `${outPath} is one of the project's source files. Choose another export path.`,
+      );
+    }
+  }
+}
+
+/**
+ * Render the main track to `outPath` and report which encoder was used. Progress is reported as a fraction from 0 to 1.
+ * If the preferred encoder cannot run on this machine (a listed hardware encoder with no hardware), the next one is tried;
+ * see {@link withEncoderFallback}. Progress restarts from 0 after a fallback.
+ */
 export async function exportProject(
   project: Project,
   outPath: string,
   opts: ExportOptions = {},
 ): Promise<{ encoder: string; duration: number }> {
-  const encoder = opts.encoder ?? chooseEncoder(await listEncoders());
+  await assertNotASource(project, outPath);
   const workDir = await mkdtemp(join(tmpdir(), "dax-render-"));
+  // FFmpeg writes to a hidden temp name beside the target (same folder, so the final rename is atomic and on one
+  // disk) and the file only appears under its real name once complete; a failure or cancel leaves nothing behind.
+  const ext = extname(outPath);
+  const partial = join(
+    dirname(outPath),
+    `.${basename(outPath, ext)}.${randomBytes(4).toString("hex")}.partial${ext}`,
+  );
   try {
-    const plan = buildRenderPlan(project, outPath, encoder, { workDir });
-    for (const f of plan.files) await writeFile(f.path, f.content, "utf8");
-    await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)));
-    opts.onProgress?.(1);
-    return { encoder, duration: plan.duration };
+    const { encoder, value: duration } = await withEncoderFallback(
+      async (enc) => {
+        const plan = buildRenderPlan(project, partial, enc, { workDir });
+        for (const f of plan.files) await writeFile(f.path, f.content, "utf8");
+        await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)), {
+          ...(opts.signal ? { signal: opts.signal } : {}),
+          ...(opts.onSpawn ? { onSpawn: opts.onSpawn } : {}),
+        });
+        opts.onProgress?.(1);
+        return plan.duration;
+      },
+      {
+        ...(opts.encoder ? { candidates: [opts.encoder] } : {}),
+        ...(opts.signal ? { signal: opts.signal } : {}),
+      },
+    );
+    await rename(partial, outPath);
+    return { encoder, duration };
   } finally {
+    await rm(partial, { force: true });
     await rm(workDir, { recursive: true, force: true });
   }
 }

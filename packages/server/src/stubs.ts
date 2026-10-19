@@ -2,12 +2,16 @@
 // None of these touches the network or starts a process.
 
 import { tryRunCommand } from "@dax/core";
-import { type AgentEvent, PROVIDER_KINDS, type ProviderStatus } from "@dax/protocol";
+import {
+  type AgentEvent,
+  type LocalModelStatus,
+  PROVIDER_KINDS,
+  type ProviderStatus,
+} from "@dax/protocol";
 import type {
   AgentRunContext,
   AgentRunner,
   LocalModelController,
-  LocalModelStatus,
   ProviderRegistry,
 } from "./interfaces.js";
 
@@ -30,6 +34,7 @@ export class NullLocalModelController implements LocalModelController {
     return {
       installed: false,
       running: false,
+      supported: false,
       detail: "Local model support is not available in this build",
     };
   }

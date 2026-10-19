@@ -6,7 +6,7 @@
 // (zoom) or the same file at the same time (audio, image) updates the existing item instead of adding a second one.
 
 import { existsSync } from "node:fs";
-import { basename, resolve } from "node:path";
+import { basename } from "node:path";
 import { type ZodTypeAny, z } from "zod";
 import {
   addAudioClip,
@@ -22,7 +22,7 @@ import {
   updateAudioClip,
 } from "./audio-layer.js";
 import type { CommandContext, CommandDef, CommandResult } from "./commands.js";
-import { isPathInside } from "./connector.js";
+import { checkAllowedPath } from "./connector.js";
 import { newId } from "./ids.js";
 import {
   addImageOverlay,
@@ -43,7 +43,7 @@ import {
   MAX_ZOOM,
   type Project,
 } from "./schema.js";
-import { addAsset, timelineDuration } from "./timeline.js";
+import { addAsset, ownAsset, timelineDuration } from "./timeline.js";
 import {
   addZoom,
   removeZoom,
@@ -114,13 +114,10 @@ export async function resolveMediaAsset(
   let asset: Asset | undefined;
   let isNew = false;
   if (args.assetId) {
-    asset = project.assets[args.assetId];
+    asset = ownAsset(project, args.assetId);
     if (!asset) throw new Error(`Unknown asset "${args.assetId}". Call get_project to see assets.`);
   } else if (args.path) {
-    const abs = resolve(args.path);
-    if (ctx.allowedRoots && !ctx.allowedRoots.some((r) => isPathInside(resolve(r), abs))) {
-      throw new Error(`Path is outside the allowed folders: ${abs}`);
-    }
+    const abs = await checkAllowedPath(args.path, ctx);
     asset = Object.values(project.assets).find((a) => a.path === abs);
     if (!asset) {
       if (!existsSync(abs)) throw new Error(`File not found: ${abs}`);
@@ -139,7 +136,7 @@ export async function resolveMediaAsset(
 
 /** Add `asset` to the project unless it is already there. */
 const withAsset = (p: Project, asset: Asset): Project =>
-  p.assets[asset.id] ? p : addAsset(p, asset);
+  ownAsset(p, asset.id) ? p : addAsset(p, asset);
 
 const startArg = (what: string) =>
   z.number().min(0).describe(`${what}, in seconds on the timeline`);
@@ -596,13 +593,21 @@ export const EFFECT_COMMANDS: readonly CommandDef[] = [
 ];
 
 /**
- * The zooms, audio clips, images and ducking of a project in the compact form `get_project` shows. Times are
- * rounded to milliseconds, and asset paths are reduced to file names.
+ * The zooms, audio clips, images and ducking of a project in the compact form `get_project` shows. Times are rounded
+ * to milliseconds and asset paths are reduced to file names. The lists are paged by `offset` and `limit` (like the
+ * clips and overlays), and the full counts are returned too so the caller can say what is left.
  */
-export function describeEffects(p: Project) {
+export function describeEffects(p: Project, offset = 0, limit = Number.POSITIVE_INFINITY) {
   const r = (x: number) => Number(x.toFixed(3));
+  const zooms = zoomsOf(p);
+  const audio = audioClips(p);
+  const images = imagesOf(p);
+  const page = <T>(xs: T[]): T[] => xs.slice(offset, offset + limit);
   return {
-    zooms: zoomsOf(p).map((z) => ({
+    zoomCount: zooms.length,
+    audioCount: audio.length,
+    imageCount: images.length,
+    zooms: page(zooms).map((z) => ({
       id: z.id,
       start: r(z.start),
       end: r(zoomEnd(z)),
@@ -612,7 +617,7 @@ export function describeEffects(p: Project) {
       x: z.x,
       y: z.y,
     })),
-    audio: audioClips(p).map((c) => ({
+    audio: page(audio).map((c) => ({
       id: c.id,
       assetId: c.assetId,
       file: basename(p.assets[c.assetId]?.path ?? ""),
@@ -624,7 +629,7 @@ export function describeEffects(p: Project) {
       fadeOut: c.fadeOut,
       loop: c.loop ?? false,
     })),
-    images: imagesOf(p).map((o) => ({
+    images: page(images).map((o) => ({
       id: o.id,
       assetId: o.assetId,
       file: basename(p.assets[o.assetId]?.path ?? ""),

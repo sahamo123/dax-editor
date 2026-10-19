@@ -4,7 +4,7 @@
 
 import type { CaptionSettings, CaptionStyle, Project } from "./schema.js";
 import { CaptionSettingsSchema } from "./schema.js";
-import { mainClips } from "./timeline.js";
+import { mainClips, ownAsset } from "./timeline.js";
 
 /** One spoken word placed on the timeline. */
 export interface CaptionWord {
@@ -32,7 +32,7 @@ export const CAPTION_STYLE_DEFAULTS: Record<CaptionStyle, Partial<CaptionSetting
 export function captionWords(p: Project): CaptionWord[] {
   const out: CaptionWord[] = [];
   for (const c of mainClips(p)) {
-    const transcript = p.assets[c.assetId]?.transcript;
+    const transcript = ownAsset(p, c.assetId)?.transcript;
     if (!transcript) continue;
     for (const w of transcript.words) {
       if (w.end <= c.in || w.start >= c.out) continue;

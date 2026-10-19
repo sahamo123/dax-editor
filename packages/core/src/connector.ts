@@ -1,7 +1,7 @@
 // Where media comes from and goes to: the Connector interface and the local-disk implementation. Cloud providers implement the same interface.
 
-import { copyFile, mkdir, readdir, stat } from "node:fs/promises";
-import { basename, isAbsolute, join, relative, resolve } from "node:path";
+import { copyFile, mkdir, readdir, realpath, stat } from "node:fs/promises";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 
 /**
  * True when `child` is `root` itself or lives somewhere beneath it.
@@ -11,6 +11,50 @@ import { basename, isAbsolute, join, relative, resolve } from "node:path";
 export function isPathInside(root: string, child: string): boolean {
   const rel = relative(root, child);
   return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+}
+
+/**
+ * The real location of `path`: symlinks resolved for the deepest part that exists, with the missing tail re-attached.
+ * Lets a file that does not exist yet (an export target) be checked against the folders it would land in.
+ */
+export async function realpathOfNearest(path: string): Promise<string> {
+  const missing: string[] = [];
+  let current = resolve(path);
+  for (;;) {
+    try {
+      return resolve(await realpath(current), ...missing.reverse());
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+      const parent = dirname(current);
+      if (parent === current) return resolve(path);
+      missing.push(current.slice(parent.length + 1));
+      current = parent;
+    }
+  }
+}
+
+/**
+ * The absolute form of `path` if a command may use it, otherwise an Error that names the rule. With folders allowed,
+ * the path must lie inside one of them after symlinks are resolved, so a link inside a folder cannot lead out of it.
+ * An assistant or template run with no folders allowed may not use any path at all.
+ */
+export async function checkAllowedPath(
+  path: string,
+  policy: { allowedRoots?: readonly string[]; source?: string },
+): Promise<string> {
+  const abs = resolve(path);
+  if (!policy.allowedRoots) {
+    if (policy.source === "ai" || policy.source === "template") {
+      throw new Error(`No folders are allowed for this action, so ${abs} cannot be used.`);
+    }
+    return abs;
+  }
+  const outside = () => new Error(`Path is outside the allowed folders: ${abs}`);
+  if (!policy.allowedRoots.some((root) => isPathInside(resolve(root), abs))) throw outside();
+  const real = await realpathOfNearest(abs);
+  const roots = await Promise.all(policy.allowedRoots.map((r) => realpathOfNearest(resolve(r))));
+  if (!roots.some((root) => isPathInside(root, real))) throw outside();
+  return abs;
 }
 
 /** A file or folder as listed by a {@link Connector}. */

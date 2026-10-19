@@ -1,0 +1,36 @@
+{
+  "name": "@dax/bridges",
+  "version": "0.0.1",
+  "description": "Chat backends that drive the user's own signed-in command-line agents (Claude Code today) against dax's MCP tools, without ever touching their credentials.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "vitest run",
+    "docs:check": "typedoc"
+  },
+  "dependencies": {
+    "@dax/core": "workspace:*",
+    "@dax/mcp": "workspace:*",
+    "@dax/protocol": "workspace:*",
+    "@dax/server": "workspace:*"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { audioClips } from "./audio-layer.js";
-import type { CommandContext, CommandDef } from "./commands.js";
+import { type CommandContext, type CommandDef, CommandError, getCommand } from "./commands.js";
 import { CUT_PRESET_NAMES } from "./cuts.js";
 import { probe } from "./media.js";
 import { getPreset, OVERLAY_PRESETS } from "./presets.js";
@@ -587,6 +587,27 @@ describe("applyTemplate behaviour", () => {
     const before = ctx.session.project.timeline.overlays.length;
     await applyTemplate(ctx, t, allVars(t));
     expect(ctx.session.project.timeline.overlays).toHaveLength(before);
+  });
+
+  it("keeps the earlier copy when its replacement cannot be added", async () => {
+    const t = get("hormozi-captions");
+    const ctx = ctxFor(fakeProject(30));
+    await applyTemplate(ctx, t, { title: "First" });
+    // Make add_overlay refuse for this one call, as it would for a bad style or a rejected text.
+    const add = getCommand("add_overlay");
+    if (!add) throw new Error("add_overlay is not registered");
+    const original = add.run;
+    add.run = async () => {
+      throw new CommandError("forced failure for the test");
+    };
+    try {
+      await applyTemplate(ctx, t, { title: "Second" });
+    } finally {
+      add.run = original;
+    }
+    const hooks = ctx.session.project.timeline.overlays.filter((o) => o.id.endsWith("-hook"));
+    // Before the fix the old copy was removed first, so nothing was left on the timeline.
+    expect(hooks.map((h) => h.text)).toEqual(["First"]);
   });
 
   it("re-applies with changed text by replacing, not stacking", async () => {

@@ -3,7 +3,7 @@
 import { shiftAudioForDelete } from "./audio-layer.js";
 import { newId } from "./ids.js";
 import { shiftImagesForDelete } from "./image-overlays.js";
-import { shiftOverlaysForDelete } from "./overlays.js";
+import { shiftOverlaysForDelete, type Timed } from "./overlays.js";
 import type { Asset, Clip, Fit, Project, Range, Transcript } from "./schema.js";
 import { shiftZoomsForDelete } from "./zoom.js";
 
@@ -14,6 +14,14 @@ import { shiftZoomsForDelete } from "./zoom.js";
  * v0.1 edits a single gapless "main" video track (id `v1`): every operation
  * ripples, i.e. later clips slide left to close any hole.
  */
+
+/**
+ * The asset with this id, or undefined. Only the project's own entries count: a plain index would answer for ids such as
+ * `__proto__` or `constructor` with something inherited from Object.
+ */
+export function ownAsset(p: Project, id: string): Asset | undefined {
+  return Object.hasOwn(p.assets, id) ? p.assets[id] : undefined;
+}
 
 /** Id of the single track that v0.1 edits. */
 export const MAIN_TRACK = "v1";
@@ -96,7 +104,7 @@ export function appendClip(
   assetId: string,
   slice: { in?: number; out?: number } = {},
 ): Project {
-  const asset = p.assets[assetId];
+  const asset = ownAsset(p, assetId);
   if (!asset) throw new Error(`Unknown asset "${assetId}"`);
   const inPoint = slice.in ?? 0;
   const outPoint = Math.min(slice.out ?? asset.duration, asset.duration);
@@ -160,26 +168,40 @@ export function deleteRange(p: Project, from: number, to: number): Project {
     if (e > to + EPS) out.push({ ...c, id: newId("clip"), in: c.in + (to - s), fadeIn: 0 });
   }
   const next = withClips(p, out);
-  // Overlays, images and zooms are placed in timeline time, so they must move with the footage they sit
-  // over. Music is anchored to the timeline instead and sound effects to their moment (see shiftAudioForDelete).
+  // Overlays are placed in timeline time, so they must move with the footage they sit over.
   next.timeline.overlays = shiftOverlaysForDelete(next.timeline.overlays, from, to);
+  // Image overlays and zooms are timeline-timed too, so they follow the footage in the same way.
   if (next.timeline.images)
     next.timeline.images = shiftImagesForDelete(next.timeline.images, from, to);
   if (next.timeline.zooms) next.timeline.zooms = shiftZoomsForDelete(next.timeline.zooms, from, to);
+  // Music is anchored to the timeline and sound effects to their moment: the audio layer's own rule applies.
   next.timeline.tracks = shiftAudioForDelete(next.timeline.tracks, from, to);
   return next;
 }
 
-/** Remove several timeline ranges at once (ranges refer to the *current* timeline). */
+/**
+ * Remove several timeline ranges at once (ranges refer to the *current* timeline). Overlapping or touching ranges
+ * are merged first, so the same footage is never cut twice; empty ranges are ignored.
+ */
 export function deleteRanges(p: Project, ranges: Range[]): Project {
-  const sorted = [...ranges].sort((a, b) => b.start - a.start);
-  return sorted.reduce((acc, r) => deleteRange(acc, r.start, r.end), p);
+  const merged = mergeRanges(ranges.filter((r) => r.end - r.start > EPS)).sort(
+    (a, b) => b.start - a.start,
+  );
+  return merged.reduce((acc, r) => deleteRange(acc, r.start, r.end), p);
 }
 
 /** Keep only the given timeline ranges, deleting everything between them. */
 export function keepRanges(p: Project, keep: Range[]): Project {
   const dur = timelineDuration(p);
-  const sorted = [...keep].sort((a, b) => a.start - b.start);
+  // Ranges are clamped to the timeline first. Without this a range past the end (or entirely outside it) left the
+  // whole timeline to be removed, which is never what was asked for.
+  const inside = keep
+    .map((r) => ({ start: Math.max(0, r.start), end: Math.min(dur, r.end) }))
+    .filter((r) => r.end - r.start > EPS);
+  if (inside.length === 0) {
+    throw new Error(`None of the kept ranges is inside the timeline (0 to ${dur.toFixed(2)}s)`);
+  }
+  const sorted = mergeRanges(inside);
   const remove: Range[] = [];
   let cursor = 0;
   for (const r of sorted) {
@@ -237,15 +259,19 @@ export function trimClip(p: Project, clipId: string, trim: { in?: number; out?: 
   const clips = mainClips(p);
   const c = clips.find((c) => c.id === clipId);
   if (!c) throw new Error(`Unknown clip "${clipId}"`);
-  const asset = p.assets[c.assetId];
+  const asset = ownAsset(p, c.assetId);
   if (!asset) throw new Error(`Clip "${clipId}" references missing asset "${c.assetId}"`);
   const inPoint = Math.max(0, trim.in ?? c.in);
   const outPoint = Math.min(asset.duration, trim.out ?? c.out);
   if (outPoint - inPoint <= EPS) throw new Error("Trim would make the clip empty");
-  return withClips(
+  const next = withClips(
     p,
     clips.map((x) => (x.id === clipId ? { ...x, in: inPoint, out: outPoint } : x)),
   );
+  next.timeline.overlays = remapTimed(p, next, p.timeline.overlays);
+  if (p.timeline.images) next.timeline.images = remapTimed(p, next, p.timeline.images);
+  if (p.timeline.zooms) next.timeline.zooms = remapTimed(p, next, p.timeline.zooms);
+  return next;
 }
 
 /** Move a clip to a new position in the main track's order (0-based). */
@@ -256,7 +282,46 @@ export function moveClip(p: Project, clipId: string, index: number): Project {
   const [moved] = clips.splice(from, 1);
   if (!moved) throw new Error(`Unknown clip "${clipId}"`);
   clips.splice(Math.max(0, Math.min(index, clips.length)), 0, moved);
-  return withClips(p, clips);
+  const next = withClips(p, clips);
+  next.timeline.overlays = remapTimed(p, next, p.timeline.overlays);
+  if (p.timeline.images) next.timeline.images = remapTimed(p, next, p.timeline.images);
+  if (p.timeline.zooms) next.timeline.zooms = remapTimed(p, next, p.timeline.zooms);
+  return next;
+}
+
+/**
+ * Carry timed items (text overlays, image overlays, zooms) of `before` over to the clip layout of `after`, for edits
+ * that keep every clip id but move or resize clips (trim, move). Each overlay time is mapped through the footage it sits on: the same source moment
+ * lands where that footage now is. Times in a trimmed-away part snap to the edge that remains. An overlay that is
+ * left with no length is dropped, as a ripple delete drops one it fully covers.
+ */
+function remapTimed<T extends Timed>(before: Project, after: Project, items: readonly T[]): T[] {
+  const oldClips = mainClips(before);
+  const newById = new Map(mainClips(after).map((c) => [c.id, c] as const));
+  const shiftAfterEnd = timelineDuration(after) - timelineDuration(before);
+  /** Map one timeline time. `isEnd` decides which clip owns a time that sits exactly on a clip boundary. */
+  const map = (t: number, isEnd: boolean): number => {
+    for (const c of oldClips) {
+      const s = c.start;
+      const e = clipEnd(c);
+      const owns = isEnd ? t > s + EPS && t <= e + EPS : t >= s - EPS && t < e - EPS;
+      if (!owns) continue;
+      const n = newById.get(c.id);
+      if (!n) break;
+      // Source moment this time shows, then where that source moment is in the new clip (clamped to it).
+      const src = c.in + (t - s);
+      return n.start + Math.min(clipDuration(n), Math.max(0, src - n.in));
+    }
+    // Past the last clip (or in a clip that vanished): keep the same distance from the end.
+    return t + shiftAfterEnd;
+  };
+  const out: T[] = [];
+  for (const o of items) {
+    const start = Math.max(0, map(o.start, false));
+    const end = map(o.start + o.duration, true);
+    if (end - start > EPS) out.push({ ...o, start, duration: end - start });
+  }
+  return out;
 }
 
 /** Set a clip's linear gain (1 = unchanged, 0 = muted). */
@@ -294,9 +359,9 @@ export function setClipFades(
 
 /** Attach (or replace) the speech transcript of an asset. Times are in the asset's own time. */
 export function setAssetTranscript(p: Project, assetId: string, transcript: Transcript): Project {
-  if (!p.assets[assetId]) throw new Error(`Unknown asset "${assetId}"`);
+  if (!ownAsset(p, assetId)) throw new Error(`Unknown asset "${assetId}"`);
   const next = structuredClone(p);
-  const asset = next.assets[assetId];
+  const asset = ownAsset(next, assetId);
   if (asset) asset.transcript = transcript;
   return next;
 }

@@ -48,6 +48,7 @@ import {
   clipDuration,
   FORMAT_PRESETS,
   mainClips,
+  ownAsset,
   shotRanges,
   timelineDuration,
 } from "./timeline.js";
@@ -684,8 +685,11 @@ export function defaultTemplatesDir(): string {
   if (fromEnv) return resolve(fromEnv);
   let dir = dirname(fileURLToPath(import.meta.url));
   for (let i = 0; i < 8; i++) {
+    // A README alone is not enough: any ancestor folder may have one. The shipped catalogue always has `styles/`.
     const candidate = join(dir, "templates");
-    if (existsSync(join(candidate, "README.md"))) return candidate;
+    if (existsSync(join(candidate, "README.md")) && existsSync(join(candidate, "styles"))) {
+      return candidate;
+    }
     dir = dirname(dir);
   }
   throw new TemplateError(
@@ -864,7 +868,13 @@ function planWindows(
       );
       continue;
     }
-    candidates.push({ ...it, position: positionOf(it.step), start: ms(w.start), end: ms(w.end) });
+    // Rounding to milliseconds can push an end past the video length (43.06667 becomes 43.067), so clamp it.
+    candidates.push({
+      ...it,
+      position: positionOf(it.step),
+      start: ms(w.start),
+      end: Math.min(ms(w.end), total),
+    });
   }
   const byPriority = candidates
     .map((c, i) => ({ c, i }))
@@ -947,6 +957,10 @@ function ownedBy(id: string, base: string): boolean {
 /** Give an overlay a chosen id. Template overlays carry a predictable id so a second run can find them. */
 function renameOverlay(p: Project, from: string, to: string): Project {
   const next = structuredClone(p);
+  // Overlay ids must stay unique; a rename onto an existing id would make two overlays answer to one name.
+  if (next.timeline.overlays.some((x: Overlay) => x.id === to)) {
+    throw new Error(`Overlay "${to}" already exists`);
+  }
   const o = next.timeline.overlays.find((x: Overlay) => x.id === from);
   if (!o) throw new Error(`Unknown overlay "${from}"`);
   o.id = to;
@@ -955,7 +969,7 @@ function renameOverlay(p: Project, from: string, to: string): Project {
 
 function pickMainAsset(p: Project) {
   const first = mainClips(p)[0];
-  const asset = first ? p.assets[first.assetId] : undefined;
+  const asset = first ? ownAsset(p, first.assetId) : undefined;
   if (!asset) throw new TemplateError("There is no video on the timeline. Import a video first.");
   return asset;
 }
@@ -1182,7 +1196,9 @@ async function cleanupStep(
   // smart_cut takes no overrides, so make the plan here and apply it with apply_cut_plan.
   const asset = pickMainAsset(sctx.session.project);
   const words = asset.transcript?.words;
-  const speech = words ? undefined : detectSpeechSpans(await analyzeAudio(asset.path));
+  const speech = words
+    ? undefined
+    : detectSpeechSpans(await analyzeAudio(asset.path, sctx.signal ? { signal: sctx.signal } : {}));
   const params: Partial<CutParams> = overrides;
   const plan = planCuts({
     assetId: asset.id,
@@ -1259,13 +1275,10 @@ async function overlaySteps(a: {
   for (const item of placed) {
     await a.guarded(item.step.id, "overlay", async () => {
       const base = overlayBaseId(template, item.step);
-      let replaced = 0;
-      if (mode === "replace") {
-        for (const id of existingIds().filter((x) => ownedBy(x, base))) {
-          await a.runCommand(sctx, "remove_overlay", { overlayId: id });
-          replaced++;
-        }
-      }
+      const before = existingIds();
+      // Old copies are only removed once the new ones exist, so a failed add leaves the earlier copy in place.
+      const oldCopies = mode === "replace" ? before.filter((x) => ownedBy(x, base)) : [];
+      const replaced = oldCopies.length;
       const preset = getPreset(item.step.preset);
       const fit = fitFontSize({
         base: item.step.style?.fontSize ?? preset?.style.fontSize ?? 64,
@@ -1281,21 +1294,44 @@ async function overlaySteps(a: {
         item.step.anchor === "full"
           ? pieces(item.start, item.end)
           : [{ start: item.start, end: item.end }];
-      const suffix =
-        mode === "add" ? `_a${existingIds().filter((x) => x.startsWith(base)).length + 1}` : "";
-      for (const [i, w] of parts.entries()) {
-        const r = await a.runCommand(sctx, "add_overlay", {
-          preset: item.step.preset,
-          start: w.start,
-          duration: ms(w.end - w.start),
-          text: item.text,
-          ...(item.subtitle ? { subtitle: item.subtitle } : {}),
-          fontSize: fit.size,
-          ...(item.step.style?.color ? { color: item.step.style.color } : {}),
-          ...(item.step.style?.position ? { position: item.step.style.position } : {}),
-        });
-        const made = (r.data as { overlayId?: string } | undefined)?.overlayId;
-        if (!made) throw new Error("add_overlay did not return an overlay id");
+      // Add mode: the first suffix no existing overlay starts with, so a new copy never reuses an id.
+      let suffix = "";
+      if (mode === "add") {
+        let k = 1;
+        while (before.some((x) => x.startsWith(`${base}_a${k}`))) k++;
+        suffix = `_a${k}`;
+      }
+      // New copies get generated ids first; they are renamed to their final names only after the old copies are
+      // gone, because a final name may equal an old one.
+      const added: string[] = [];
+      try {
+        for (const w of parts) {
+          const r = await a.runCommand(sctx, "add_overlay", {
+            preset: item.step.preset,
+            start: w.start,
+            // Round down against the video length, so start + duration never runs past it after rounding.
+            duration: Math.min(ms(w.end - w.start), Math.floor((total - w.start) * 1000) / 1000),
+            text: item.text,
+            ...(item.subtitle ? { subtitle: item.subtitle } : {}),
+            fontSize: fit.size,
+            ...(item.step.style?.color ? { color: item.step.style.color } : {}),
+            ...(item.step.style?.position ? { position: item.step.style.position } : {}),
+          });
+          const made = (r.data as { overlayId?: string } | undefined)?.overlayId;
+          if (!made) throw new Error("add_overlay did not return an overlay id");
+          added.push(made);
+        }
+      } catch (err) {
+        // Roll back the copies that were added, so the step leaves the timeline as it found it.
+        for (const id of added) {
+          await a.runCommand(sctx, "remove_overlay", { overlayId: id }).catch(() => undefined);
+        }
+        throw err;
+      }
+      for (const id of oldCopies) {
+        await a.runCommand(sctx, "remove_overlay", { overlayId: id });
+      }
+      for (const [i, made] of added.entries()) {
         const id = `${base}${suffix}${parts.length > 1 ? `_p${i + 1}` : ""}`;
         await sctx.session.apply((p) => renameOverlay(p, made, id), {
           label: "Name template overlay",

@@ -11,19 +11,18 @@ generated:
 
 # Research: FFmpeg animation recipes
 
-Scope: the Premiere-style highlight and motion effects that `packages/core/src/render.ts` cannot produce today. The renderer has per-clip `trim`, `scale`, `pad` or `boxblur` fit modes, `fade` and `afade` on clips, `concat`, `drawtext` overlays (`overlay-filters.ts`: fade, slide-up, slide-left, pop, typewriter, lower-third) and `subtitles` captions (`captions.ts`). It has no image or shape overlay, no second video layer, no music or sound-effect bus and no per-clip zoom. `oss-effects-and-transitions.md` already covers `xfade`, colour, box and circle callouts, freeze, step speed ramp and PIP. This note only adds what is new, and corrects two of its recipes (section "Corrections").
+Scope: Premiere-style highlight and motion effects that `packages/core/src/render.ts` cannot produce today. It has `trim`/`scale`/`pad` fit modes, clip `fade`s, `concat`, `drawtext` overlays (`overlay-filters.ts`) and `subtitles` captions (`captions.ts`). It has no image or shape overlay, second video layer, music or SFX bus, or per-clip zoom. `oss-effects-and-transitions.md` covers `xfade`, colour, callouts, freeze, step speed ramp and PIP; this note adds only what is new and corrects two of its recipes.
 
-Test conventions. **Tested** means the exact fragment below exited 0 on the local FFmpeg 6.1.1 build, and the stated property was checked. The checks were pixel values, RMS or peak levels, `ebur128`, `ffprobe` durations and frame counts, or a visual look at a 2x2 frame montage. Sources were synthetic: `testsrc2`, `gradients`, `aevalsrc` tones and clicks, flat grey `color` backgrounds, a white box drawn on flat grey, and PNGs made with `geq`. Everything ran in a scratch directory outside the repo. **Failed** means exit code not 0, with the error quoted. **Unverified** means not run, or run without the property being checked. Each fragment is the filter graph only, so `-i` inputs and `-map` are given in the lead-in. Replace `<font>` with the absolute path to `packages/core/assets/fonts/Inter-Bold.otf` or `Inter-Regular.otf`.
+Test conventions. **Tested**: the fragment exited 0 on the local FFmpeg 6.1.1 build and the stated property was checked (pixels, RMS or peak, `ebur128`, `ffprobe` durations or frame counts, or a 2x2 montage viewed by eye). Sources were synthetic (`testsrc2`, `gradients`, `aevalsrc`, flat grey `color`, a white box, `geq` PNGs) in a scratch directory outside the repo. **Failed**: exit code not 0, error quoted. **Unverified**: not run, or run without the property being checked. Fragments are filter graphs only; `-i` and `-map` are in the lead-in. Replace `<font>` with the absolute path to `packages/core/assets/fonts/Inter-Bold.otf` or `Inter-Regular.otf`.
 
 ## Recommendation: graph shape
 
 1. **Keep the primary track as it is.** Per-clip video and audio chains, then `concat`, give `[v_main]` and `[a_main]`. Nothing downstream changes primary timing.
 2. **Second video layer after the join.** Each B-roll insert is prepared as its own chain: `setpts=PTS-STARTPTS+T/TB` moves it to timeline time, `scale` fits it, and `fade` softens it. It is then applied with `overlay` and `enable='between(t,s,e)'`, always with `eof_action=pass` (G4). A full-screen cutaway is the same overlay at 0,0 on a full-size input. The B-roll's own audio is dropped, so the main audio is untouched.
-3. **Motion overlays after the video layers.** Each PNG is looped with `-loop 1 -t <duration>`, converted with `format=rgba`, and animated with `fade`, `scale` with `eval=frame`, or an `overlay` expression on `x` and `y`. Shapes that grow use a solid-colour source scaled per frame, not `drawbox` (G1).
-4. **Zoom as a per-frame filter on the primary track.** Use `zoompan` with `d=1` for keyframes, or `scale eval=frame` followed by a `crop` whose offset comes from the same zoom expression (G2). A large pre-scale is needed for smooth Ken Burns motion (G8).
-5. **Text and captions last,** as now, in timeline time.
-6. **Audio as buses that meet in one `amix`.** The voice is `[a_main]`. The music bus is trimmed or looped, faded, and ducked by `sidechaincompress` keyed on a copy of the voice. The SFX bus splits one decoded file with `asplit` into one branch per event, each delayed with `adelay`. One `amix` with `normalize=0` joins voice, ducked music and SFX. Then `alimiter` with `level=disabled`, then `loudnorm`, then `aresample=48000` (G5, G6, G7).
-7. **Keep graphs manageable.** Use `-filter_complex_script` for anything large, reuse one input through `split` or `asplit` instead of repeating `-i`, and generate expressions from typed parameters (section 8).
+3. **Motion overlays after the video layers.** PNGs are looped (`-loop 1 -t <duration>`), `format=rgba`, and animated with `fade`, `scale eval=frame` or an `overlay` expression. Growing shapes use a scaled colour source, not `drawbox` (G1).
+4. **Zoom on the primary track.** `zoompan` with `d=1` for keyframes, or `scale eval=frame` plus a `crop` whose offset comes from the zoom expression (G2). Ken Burns needs a pre-scale (G8).
+6. **Audio buses meeting in one `amix`.** Voice is `[a_main]`. Music is trimmed or looped, faded and ducked by `sidechaincompress` keyed on a copy of the voice. SFX splits one decode with `asplit` and delays each branch with `adelay`. One `amix normalize=0`, then `alimiter level=disabled`, `loudnorm`, `aresample=48000` (G5, G6, G9).
+7. **Keep graphs manageable** with `-filter_complex_script`, one `asplit` or `split` per asset, and typed parameters that generate the expressions (section 8).
 
 ## Corrections to the existing research
 
@@ -64,13 +63,11 @@ UI parameters: start, grow time, start scale, anchor.
 
 ### 1.4 Fixed opacity (tested, exit 0)
 
-`colorchannelmixer` takes no expressions, so this is a fixed 50% opacity. For a changing opacity use the `fade` form in 1.1.
+Inputs: `-i main.mp4 -loop 1 -i logo.png`. `colorchannelmixer` takes no expressions, so this is a fixed 50% opacity (use the `fade` form in 1.1 for a changing one).
 
 ```
 [1:v]format=rgba,colorchannelmixer=aa=0.5[lg];[0:v][lg]overlay=x=40:y=40:shortest=1[v]
 ```
-
-Inputs: `-i main.mp4 -loop 1 -i logo.png`.
 
 ### 1.5 Growing underline (tested, pixel-checked on flat grey)
 
@@ -100,10 +97,6 @@ Form B, per-pixel `geq` on the timeline variable `T` (no second input):
 
 Form A is cheaper. UI parameters: colour, height, position, start.
 
-### 1.7 Arrow and box callouts
-
-A box callout is already in the baseline (research 3.1). An arrow is an RGBA PNG with its own alpha, animated with 1.2 or 1.3. The test arrow was generated with `geq`. A shipped app would bundle arrow PNGs and check their licence when they are added, not generate them at render time.
-
 ### 1.8 Failed: animated `drawbox` geometry
 
 - `drawbox=x=0:y=ih-12:w='iw*t/6':h=12:color=0xff3366:t=fill` exits 0. The bar was **full width at every time tested**: pink fraction 1.000 at 0.83 s, 3.0 s and 5.0 s (tested on a `testsrc2` background, where the pink colour does not occur). Width is read once, so `t` is undefined inside it.
@@ -131,7 +124,7 @@ The `crop` offset must come from the same zoom expression, not from `in_w` or `i
 scale=w='trunc(1280*(if(lt(t,1),1,if(lt(t,2),1+0.3*(t-1),if(lt(t,3),1.3-0.3*(t-2),1))))/2)*2':h='trunc(720*(if(lt(t,1),1,if(lt(t,2),1+0.3*(t-1),if(lt(t,3),1.3-0.3*(t-2),1))))/2)*2':eval=frame,crop=w=1280:h=720:x='640*((if(lt(t,1),1,if(lt(t,2),1+0.3*(t-1),if(lt(t,3),1.3-0.3*(t-2),1))))-1)':y='360*((if(lt(t,1),1,if(lt(t,2),1+0.3*(t-1),if(lt(t,3),1.3-0.3*(t-2),1))))-1)'
 ```
 
-The offset is `640*(z-1)` horizontally and `360*(z-1)` vertically, which is half the extra size. Use this form when the crop must be exact, for example when the zoomed frame has to match another layer. Scale is computed with `eval=frame`, so the expression can use `t`.
+The offset is `640*(z-1)` horizontally and `360*(z-1)` vertically (half the extra size). Use it when the crop must be exact.
 
 ### 2.3 Ken Burns with a pre-scale (tested, jitter measured)
 
@@ -146,9 +139,9 @@ scale=5120:2880,zoompan=z='1+0.3*on/180':d=180:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/
 | none (`zoompan` only) | 136 | 1.6 s |
 | 5120x2880 (4x) | 32 | 11.0 s |
 | 10240x5760 (8x) | 8 | 42.5 s |
-| 20480x11520 (16x) | 0 | not timed (stopped after it ran over the time limit) |
+| 20480x11520 (16x) | 0 | not timed (the run completed in an earlier batch; the timing run was stopped as too slow) |
 
-Start and end edges are correct at every scale: 600 to 588. The wall times are single runs on the sandbox CPU. UI parameters: start zoom, end zoom, duration, anchor, smoothness (fast 1x or smooth 4x; 8x is too slow for a preview).
+End edge after 6 s: 590 at 1x, 589 at 4x, 588 at 8x and 16x (expected 588). The wall times are single runs on the sandbox CPU. UI parameters: start zoom, end zoom, duration, anchor, smoothness (fast 1x or smooth 4x; 8x is too slow for a preview).
 
 ### 2.4 Auto-zoom on beats (tested, edges within 3 px)
 
@@ -158,19 +151,21 @@ A sum of decaying terms, one per beat time. Six beats at 0.5, 1.2, 2.0, 3.1, 4.0
 zoompan=z='1+0.12*(gte(time,0.5)*exp(-8*(time-0.5))+gte(time,1.2)*exp(-8*(time-1.2))+gte(time,2.0)*exp(-8*(time-2.0))+gte(time,3.1)*exp(-8*(time-3.1))+gte(time,4.0)*exp(-8*(time-4.0))+gte(time,5.2)*exp(-8*(time-5.2)))':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1280x720:fps=30
 ```
 
-Each beat adds about 25 characters, and the same expression in the scale-and-crop form (2.2) was tested up to 1000 terms (8.3). UI parameters: beat times (from a beat detector or manual), amplitude, decay, anchor.
+Each beat adds about 35 characters, and the same expression in the scale-and-crop form (2.2) was tested up to 1000 terms (8.3). UI parameters: beat times (from a beat detector or manual), amplitude, decay, anchor.
 
-### 2.5 Failed: zoom with `scale` and no `eval=frame`
+### 2.5 Failed: time-based `scale` without `eval=frame`
 
-`scale=w='trunc(1280*(...t...)/2)*2':h=-2` **fails** with exit 234: `Expressions with frame variables 'n', 't', 'pos' are not valid in init eval_mode`. The failure is loud, which is good. Always set `eval=frame` on a time-based scale.
+```
+scale=w='trunc(1280*(if(lt(t,1),1,if(lt(t,2),1+0.3*(t-1),if(lt(t,3),1.3-0.3*(t-2),1))))/2)*2':h=-2,crop=1280:720:0:0
+```
+
+Exit 234: `Expressions with frame variables 'n', 't', 'pos' are not valid in init eval_mode`. The failure is loud.
 
 ## 3. Music layer
 
-Inputs for the ducking tests: `-i main.mp4 -stream_loop -1 -i music.wav`. The test music is a 220 Hz tone and the voice is a 300 Hz tone in bursts, 0.7 s on and 0.5 s off.
-
 ### 3.1 Ducking music under the voice (tested, RMS checked)
 
-Input 0 is the voice and input 1 is the music. `sidechaincompress` compresses its **first** input and takes its key from its **second**, so the music goes first and a copy of the voice goes second (G9).
+Inputs: `-i main.mp4 -stream_loop -1 -i music.wav` (voice: 300 Hz tone in 0.7 s bursts; music: 220 Hz tone). Input 0 is the voice and input 1 is the music. `sidechaincompress` compresses its **first** input and takes its key from its **second**, so the music goes first and a copy of the voice goes second (G9).
 
 ```
 [0:a]anull[vk];[1:a]atrim=0:6,asetpts=PTS-STARTPTS,volume=0.6[mus];[mus][vk]sidechaincompress=threshold=0.02:ratio=8:attack=20:release=300[duck]
@@ -194,7 +189,7 @@ UI parameters: target LUFS, true-peak ceiling, loudness range, music level, duck
 [0:a]atrim=start=0.5,asetpts=PTS-STARTPTS,aloop=loop=-1:size=2147483647,atrim=duration=6,afade=t=in:st=0:d=1,afade=t=out:st=5:d=1,adelay=2000:all=1[o]
 ```
 
-Input: `-i music.wav`. The output is 8.000 s long. Before the 2 s delay the level is -180 dBFS (silent). At 2.05 to 2.2 s the fade-in is at -31 dBFS. At 7.9 to 8.0 s the fade-out is at -38 dBFS. The file starts at 0.5 s into the music, and `aloop` repeats it to fill the 6 s. UI parameters: music start offset, length (trim to video), fade in, fade out, delay, loop on or off.
+Input: `-i music.wav`. The output is 8.000 s long. Before the 2 s delay the level is -180 dBFS (silent). At 2.05 to 2.2 s the fade-in is at -31 dBFS. At 7.9 to 8.0 s the fade-out is at -38 dBFS. UI parameters: music start offset, length (trim to video), fade in, fade out, delay, loop on or off.
 
 ## 4. Sound-effect one-shots
 
@@ -221,15 +216,11 @@ All with 12 events at the same instant, so the worst case:
 
 Use `normalize=0` with `alimiter` and `level=disabled`. The default `normalize` is safe but makes every effect quieter as more events overlap.
 
-### 4.3 Many inputs (tested, exit 0)
-
-Forty separate `-i sfx.wav` inputs, each delayed by `adelay` and joined with `amix=inputs=40:duration=longest:normalize=0,alimiter=limit=0.95:level=disabled`, exit 0 with a 0.3 s output. Prefer one `asplit` (4.1) to repeated `-i`, because each input is decoded separately.
-
 ## 5. Second video layer (B-roll and cutaways)
 
 ### 5.1 Picture-in-picture with a timed window (tested, pixel-checked)
 
-Inputs: `-i flatbg10.mp4 -i broll.mp4`. The B-roll is shifted to start at timeline 2 s and shown as a 426x240 window in the bottom-right until 6 s. The corner pixel was grey (31,31,31) at 1 s and 7 s, and red (253,0,0) at 3 s, which is the B-roll.
+Inputs: `-i flatbg10.mp4 -i broll.mp4`. The B-roll is shifted to start at timeline 2 s and shown as a 426x240 window in the bottom-right until 6 s. The corner pixel was grey (31,31,31) at 1 s and 7 s, and red (253,0,0) at 3 s, which is the B-roll. Whether the `+2/TB` shift is strictly required was not confirmed (**unverified**); keep it.
 
 ```
 [1:v]setpts=PTS-STARTPTS+2/TB,scale=426:240[pip];[0:v][pip]overlay=x=W-w-32:y=H-h-32:enable='between(t,2,6)'[v]
@@ -255,10 +246,6 @@ Same graph as 5.2 but with the window running to 8 s, past the 6 s end of the B-
 [1:v]setpts=PTS-STARTPTS+2/TB,scale=1280:720,setsar=1[bc];[0:v][bc]overlay=enable='between(t,2,8)'[v]
 ```
 
-### 5.4 Timeline shift is required (unverified in this run)
-
-The shift `setpts=PTS-STARTPTS+2/TB` is needed so the B-roll starts at 2 s. I expected that without it the window would show the B-roll's own 2 s frame at timeline 2 s. The test did not confirm this, because the B-roll's centre pixel is the same red at 0.1 s and at 2.1 s, so the check cannot tell the two cases apart. Treat it as **unverified**, and keep the shift regardless.
-
 ## 6. Speed ramps and freeze frames
 
 ### 6.1 Speed ramps: the timestamp unit (tested, frame counts checked)
@@ -271,21 +258,17 @@ Research form, unchanged (exits 0, **3 frames**, so broken):
 setpts='if(lt(T,2),T,2+(T-2)*2)'
 ```
 
-Corrected linear ramp, 1x for 2 s then 0.5x (**180 frames**, last timestamp 9.93 s, which is about the expected 10 s):
+Corrected linear ramp, 1x for 2 s then 0.5x, output with `-fps_mode passthrough` (**180 frames**, last timestamp 9.93 s, about the expected 10 s):
 
 ```
 setpts='(if(lt(T,2),T,2+(T-2)*2))/TB'
 ```
 
-Map as passthrough: `-fps_mode passthrough`.
-
-Smooth ramp, speed falling from 1x at 2 s to 0.5x at 4 s and held after, with a constant output frame rate (**263 frames**, last timestamp 8.73 s, against the expected 8.77 s from the integral of 1/speed):
+Smooth ramp, speed falling from 1x at 2 s to 0.5x at 4 s and held after, with a constant output frame rate (**263 frames**, last timestamp 8.73 s, against the expected 8.77 s; the log term is the integral of 1/speed; UI parameters: keyframes of time and speed):
 
 ```
 setpts='(if(lt(T,2),T,if(lt(T,4),2-4*log(1-0.25*(T-2)),4.7726+2*(T-4))))/TB',fps=30
 ```
-
-The log term is the integral of 1/speed, so output time is continuous. UI parameters: keyframes (time, speed), with the integral computed per segment in the typed layer.
 
 ### 6.2 Audio for a ramp (tested, duration checked)
 
@@ -294,8 +277,6 @@ The log term is the integral of 1/speed, so output time is continuous. UI parame
 ```
 [0:a]atrim=0:2,asetpts=PTS-STARTPTS[a0];[0:a]atrim=2:2.5,asetpts=PTS-STARTPTS,atempo=0.9375[a1];[0:a]atrim=2.5:3,asetpts=PTS-STARTPTS,atempo=0.8125[a2];[0:a]atrim=3:3.5,asetpts=PTS-STARTPTS,atempo=0.6875[a3];[0:a]atrim=3.5:4,asetpts=PTS-STARTPTS,atempo=0.5625[a4];[0:a]atrim=4:6,asetpts=PTS-STARTPTS,atempo=0.5[a5];[a0][a1][a2][a3][a4][a5]concat=n=6:v=0:a=1[o]
 ```
-
-`atempo` accepts 0.5 to 100 (research 6.1), so the slowest segment is 0.5.
 
 ### 6.3 Freeze a frame for 2 s (tested, identical frames checked)
 
@@ -371,59 +352,36 @@ Forty `drawtext` overlays on a 10 s, 1280x720 flat clip:
 | 40 overlays inline (`-vf`) | 880 ms |
 | 40 overlays with `-filter_complex_script overlays40.txt` | 780 ms |
 
-Both forms exit 0. Each overlay costs roughly 10 ms per 10 s of 720p output in this test. Use `-filter_complex_script <file>` so the graph is not on the command line. The graph text uses the same syntax as `-filter_complex`, with `[0:v]` and `[v]` labels. Command-line length is an issue on Windows (see 8.5).
+Both forms exit 0. In this test the 40 overlays added about 0.4 to 0.5 s to a 10 s, 720p run. Use `-filter_complex_script <file>` so the graph is not on the command line. The graph text uses the same syntax as `-filter_complex`, with `[0:v]` and `[v]` labels. Command-line length is an issue on Windows (8.3).
 
 ### 8.2 Long expressions (tested, up to 1000 terms)
 
-The beat expression in the scale-and-crop form (2.2) with 200 beats (5,610 characters) and with 1000 beats (28,811 characters) both exited 0. FFmpeg's expression parser did not reject them. Beyond 1000 terms was not tested. For beat zoom at a typical size (tens of beats per minute), a 60-second clip needs 60 to 120 terms, which is well inside the tested range.
+The beat sum in the scale-and-crop form (2.2) with 200 terms (5,610 characters) and 1000 terms (28,811 characters) both exited 0. Beyond 1000 terms was not tested.
 
-### 8.3 Input counts (tested, exit 0)
+### 8.3 Input counts and performance (tested, exit 0)
 
-Forty `-i sfx.wav` inputs with `amix` (4.3) exited 0. Repeated `-i` decodes the file each time, so prefer `split` or `asplit` on one input for many uses of the same asset.
-
-### 8.4 Performance summary
-
-- 40 overlays add about 10 ms per 10 s of 720p output (8.1).
-- Ken Burns at 1280x720 for 6 s: 1.6 s without pre-scale, 11.0 s with 4x, 42.5 s with 8x (2.3).
-- Pre-scale cost grows with area, so 8x is an offline quality setting, not a preview setting.
-- 4K, GPU and multi-core timings were not measured (unverified).
-
-### 8.5 Command-line length
-
-On Windows the command line has a limit of about 32,767 characters (**unverified** here; this sandbox runs Linux). `-filter_complex_script` avoids the limit by moving the graph into a file, so the renderer should always use it for large graphs.
-
-## Failed recipes (summary)
-
-| Recipe | Result | Section |
-|---|---|---|
-| `drawbox` with `w` depending on `t` | exit 0, static width (wrong) | 1.8 |
-| `drawbox` with `t` (thickness) depending on `t` | exit 234 | 1.8 |
-| `scale` with `t` and no `eval=frame` | exit 234 | 2.5 |
-| `scale` plus `crop` with `(in_w-1280)/2` after a per-frame zoom | exit 0, offset zero (wrong) | G2 |
-| Speed ramp `setpts='if(lt(T,2),T,2+(T-2)*2)'` (research form) | exit 0, 3 frames (wrong) | 6.1 |
-| `overlay` without `eof_action=pass` past the clip end | exit 0, last frame frozen (wrong) | 5.3 |
+Forty `-i sfx.wav` inputs with `amix=inputs=40:duration=longest:normalize=0,alimiter=limit=0.95:level=disabled` exited 0 (0.3 s output). Repeated `-i` decodes the file each time, so prefer `asplit` on one input. Forty `drawtext` overlays add about 0.4 to 0.5 s to a 10 s, 720p run (8.1). Ken Burns at 6 s of 720p takes 1.6 s without pre-scale, 11.0 s at 4x and 42.5 s at 8x (2.3), so 8x is an offline setting only. 4K, GPU and multi-core timings were not measured (**unverified**). On Windows the command line is limited to about 32,767 characters (**unverified** here), so large graphs always go through `-filter_complex_script`.
 
 ## Gotchas
 
 Measured here (each has a fix that was tested):
 
-- **G1. `drawbox` geometry is fixed at start.** Width, height, position and thickness are read once, and `t` is undefined in them. Use a scaled colour source (1.5, 1.6) for anything that changes.
-- **G2. A `crop` offset from `iw` or `in_w` is stale after a per-frame `scale`.** The filter reads its configured input size, so after `scale eval=frame` changes the frame size, the centring offset stays at zero. The zoomed box edge sits at 600z instead of 640-40z. Fix: compute the offset from the zoom expression (2.2). `crop` `x` and `y` do vary per frame when they use `t` or `n` (checked: the box moved 100 px per second with `x='t*100'`).
-- **G3. `scale` with a frame variable needs `eval=frame`.** Without it the filter fails at start-up with exit 234.
-- **G4. `overlay` repeats the last frame of a finished input by default.** `eof_action=repeat` freezes the B-roll past its end. Use `eof_action=pass` (5.3).
-- **G5. `alimiter` raises the level back to 0 dBFS by default.** Set `level=disabled` (4.2).
+- **G1. `drawbox` geometry is fixed at start.** Width, height, position and thickness are read once; `t` is undefined there. Use a scaled colour source (1.5, 1.6).
+- **G2. A `crop` offset from `iw` or `in_w` goes stale after a per-frame `scale`.** The crop keeps its configured input size, so the offset stays zero and the zoomed edge sits at 600z, not 640-40z. Fix: derive the offset from the zoom expression (2.2). `crop` `x` and `y` do vary per frame when they use `t` or `n` (checked).
+- **G3. Time-based `scale` needs `eval=frame`,** or it fails with exit 234 (2.5).
+- **G4. `overlay` repeats a finished input's last frame by default.** Use `eof_action=pass` (5.3).
+- **G5. `alimiter` auto-levels back to 0 dBFS by default.** Set `level=disabled` (4.2).
 - **G6. `loudnorm` outputs 192 kHz.** Add `aresample=48000` after it (3.2).
-- **G7. `setpts` with `T` needs `/TB`.** Without it the research's speed-ramp recipe keeps 3 frames and exits 0 (6.1). The same mistake looked like an `fps` failure: `setpts` plus `fps=30` produced an empty output until `/TB` was added.
-- **G8. `zoompan` with `x` or `y` set looks jittery.** A pre-scale reduced direction changes from 136 to 32 at 4x and 8 at 8x (2.3). Accept the cost for offline export, and use `zoompan` with `d=1` for keyframe zoom in preview.
-- **G9. `sidechaincompress` order.** The first input is compressed and the second is the key. Put music first and the voice copy second (3.1). The other order was not tested here.
+- **G7. `setpts` with `T` needs `/TB`.** Without it the research's speed-ramp recipe keeps 3 frames and exits 0 (6.1). It also looked like an `fps` failure, since `setpts` plus `fps=30` gave an empty output until `/TB` was added.
+- **G8. `zoompan` with `x` or `y` looks jittery.** A pre-scale cuts the jitter (2.3). Use it for export, and `zoompan` with `d=1` for preview.
+- **G9. `sidechaincompress` order.** The first input is compressed and the second is the key. Music first, voice copy second (3.1).
 
-Real-world reports (closest matches found; no Stack Overflow or Reddit thread matched these queries):
+Real-world reports (closest matches found; no Stack Overflow or Reddit thread matched):
 
-- **R1. `loudnorm` 192 kHz.** A developer reply on ffmpeg-devel says the output is upsampled to 192 kHz in some cases and recommends `aresample=48000` after it. That fix was confirmed here (3.2). The reply describes the condition as input loudness range above the target range, but the test used target LRA 11 and still got 192 kHz, so the trigger is not fully understood.
-- **R2. `zoompan` shake.** An FFmpeg trac comment reports the same shake with `x` or `y` set, and describes upscaling 2x before `zoompan` as a partial fix that is much slower. Measured here: 4x reduced jitter to 32 changes, and 8x to 8 (2.3).
-- **R3. `overlay` `eof_action`.** A 2020 patch proposed changing the default from `repeat` to `pass`. The reply rejected it, because existing scripts depend on `repeat`. So `eof_action=pass` must be set explicitly (5.3).
-- **R4. `amix` normalisation.** An FFmpeg trac ticket (#8033) covers mixing without volume renormalisation. The `normalize` option is on by default, and `normalize=0` disables the scaling. The result is clipping unless a limiter follows (4.2).
-- **R5. Freezes and speed ramps with `N` and `PTS`.** An ffmpeg-user thread from 2018 advises against mixing `N` and `PTS` in one `setpts` expression, and suggests scaling the inter-frame interval instead. The `/TB` fix in 6.1 keeps the expression time-based.
+- **R1. `loudnorm` 192 kHz.** An ffmpeg-devel reply recommends `aresample=48000` after it (confirmed, 3.2). Its stated trigger (input loudness range above the target range) does not match the test, which used target LRA 11 and still got 192 kHz.
+- **R2. `zoompan` shake.** An FFmpeg trac comment reports shaky output and calls 2x upscaling before `zoompan` a partial, slow fix. Measured here: 4x cut direction changes from 136 to 32 (2.3).
+- **R3. `overlay` `eof_action`.** A 2020 patch proposed changing the default to `pass`, and the reply rejected it because existing scripts rely on `repeat` (5.3).
+- **R4. `amix` normalisation.** FFmpeg trac ticket #8033 discusses mixing without renormalisation. `normalize` is on by default, and `normalize=0` clips unless a limiter follows (4.2).
 
 ## Sources
 
@@ -432,15 +390,10 @@ Fetched with WebFetch and read for this note:
 - https://ffmpeg.org/pipermail/ffmpeg-devel/2018-August/233445.html (loudnorm 192 kHz and the `aresample` fix, R1).
 - https://ffmpeg.org/pipermail/ffmpeg-trac/2025-March/072904.html (zoompan shake and the 2x upscale workaround, R2).
 - https://www.ffmpeg.org/pipermail/ffmpeg-devel/2020-March/258596.html (overlay `eof_action` default, R3).
-- https://ffmpeg.org/ffmpeg-filters.html (fetched, but the page is over 500,000 characters and the reader stopped before the filter sections. No facts were taken from it; the behaviour was checked by test instead).
 
 Seen in web search results only (not fetched; cited for pointers, not facts):
 
-- https://trac.ffmpeg.org/ticket/6570 (loudnorm changes the sample rate).
-- https://trac.ffmpeg.org/ticket/9352 (double resampling with loudnorm can overclip).
 - https://ffmpeg.org/pipermail/ffmpeg-trac/2021-May/058498.html (amix `normalize`, R4).
-- https://ffmpeg.org/pipermail/ffmpeg-user/2018-July/040632.html (freeze frames and mixing `N` with `PTS`, R5).
 - https://trac.ffmpeg.org/wiki/How%20to%20speed%20up%20/%20slow%20down%20a%20video (speed changes and dropped frames).
 - https://lists.ffmpeg.org/archives/list/ffmpeg-user@ffmpeg.org/thread/CJH2SEPGGFUCQ3YS4VXB7CKJS5OZAPCN/ (a `sidechaincompress` thread that reports a problem with the input order. Cause not confirmed. See G9).
 
-Local checks: the FFmpeg 6.1.1 build's `ffmpeg -filters` list (for the filter flags used here) and the repository files named in the lead.

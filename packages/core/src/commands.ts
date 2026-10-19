@@ -2,12 +2,13 @@
 // One definition per command (name, plain-language description, typed arguments, safety flags, implementation) so the
 // four front doors can never drift apart. Descriptions are written for a language model to read.
 
+import type { ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { basename, dirname } from "node:path";
 import { type ZodTypeAny, z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { captionLines, hasCaptionSource, setCaptions } from "./captions.js";
-import { isPathInside } from "./connector.js";
+import { checkAllowedPath } from "./connector.js";
 import {
   analyzeAudio,
   applyCutPlan,
@@ -49,6 +50,7 @@ import {
   keepRanges,
   mainClips,
   moveClip,
+  ownAsset,
   removeClip,
   setAssetTranscript,
   setClipFades,
@@ -71,6 +73,10 @@ export interface CommandContext {
   onProgress?: (fraction: number) => void;
   /** Speech-to-text engine used by `transcribe`. Absent when none is set up. */
   transcriber?: Transcriber;
+  /** Cancels the command. Long-running commands (export, transcription, analysis) stop and fail; edits are checked before they are applied. */
+  signal?: AbortSignal;
+  /** Called with each child process a command starts, so the host can kill it on shutdown. */
+  onProcess?: (child: ChildProcess) => void;
 }
 
 /** What a command returns. `summary` is short plain text meant to be read by a person or a model. */
@@ -128,38 +134,84 @@ function define<S extends ZodTypeAny>(def: {
 
 /** Apply an edit to the session with a label for the history. */
 async function edit(ctx: CommandContext, label: string, fn: (p: Project) => Project) {
+  // A cancelled command must not change the project after the user has stopped it: long commands reach this
+  // point only after their analysis, and that analysis may have been cut short.
+  if (ctx.signal?.aborted) throw new CommandError("Cancelled. Nothing was changed.");
   await ctx.session.apply(fn, { label, source: ctx.source ?? "manual" });
+}
+
+/** The cancel signal as an options fragment, for helpers that take `{ signal }` (absent when the command is not cancellable). */
+function cancellable(ctx: CommandContext): { signal: AbortSignal } | Record<string, never> {
+  return ctx.signal ? { signal: ctx.signal } : {};
 }
 
 /** The asset a command should work on: the one given, else the video on the timeline. */
 function pickAsset(p: Project, assetId?: string): Asset {
   if (assetId) {
-    const a = p.assets[assetId];
+    const a = ownAsset(p, assetId);
     if (!a) throw new CommandError(`Unknown asset "${assetId}". Call get_project to see assets.`);
     return a;
   }
   const used = mainClips(p)[0]?.assetId;
-  const fromTimeline = used ? p.assets[used] : undefined;
+  const fromTimeline = used ? ownAsset(p, used) : undefined;
   if (fromTimeline) return fromTimeline;
   const all = Object.values(p.assets);
   if (all.length === 1 && all[0]) return all[0];
   throw new CommandError("No video to work on. Import a video first (import_media).");
 }
 
-function checkPath(ctx: CommandContext, path: string): string {
-  const abs = resolve(path);
-  if (ctx.allowedRoots && !ctx.allowedRoots.some((root) => isPathInside(resolve(root), abs))) {
-    throw new CommandError(`Path is outside the allowed folders: ${abs}`);
+/**
+ * Check a path a command was given against the folders the caller allowed. Symlinks are resolved on both sides, so a
+ * link inside an allowed folder cannot lead outside it. Without any folders, commands started by the AI or a template
+ * refuse every path; the CLI and the desktop app pass no folders on purpose (they act in the user's own shell).
+ * @returns the absolute, normalised path.
+ * @throws CommandError when the path is not allowed.
+ */
+async function checkPath(ctx: CommandContext, path: string): Promise<string> {
+  try {
+    return await checkAllowedPath(path, ctx);
+  } catch (err) {
+    throw new CommandError(err instanceof Error ? err.message : String(err));
   }
-  return abs;
 }
 
-/** A compact description of the project for a person or a model. */
-function describeProject(p: Project) {
+/** Clips and overlays per page of `get_project`. Large projects are read in pages so one reply stays small. */
+const PROJECT_PAGE = 100;
+
+/**
+ * A compact description of the project for a person or a model. Clips and overlays are returned one page at a time
+ * (`offset`, `limit`); `nextOffset` says where the next page starts, or is null when the lists are complete.
+ */
+function describeProject(p: Project, offset = 0, limit = PROJECT_PAGE) {
+  const allClips = mainClips(p);
+  const allOverlays = p.timeline.overlays;
+  const clipsPage = allClips.slice(offset, offset + limit);
+  const overlaysPage = allOverlays.slice(offset, offset + limit);
+  const effects = describeEffects(p, offset, limit);
+  // The page holds the longest of the lists, so the next offset skips exactly what was shown.
+  const shown = Math.max(
+    clipsPage.length,
+    overlaysPage.length,
+    effects.zooms.length,
+    effects.audio.length,
+    effects.images.length,
+  );
+  const total = Math.max(
+    allClips.length,
+    allOverlays.length,
+    effects.zoomCount,
+    effects.audioCount,
+    effects.imageCount,
+  );
+  const more = offset + limit < total;
   return {
     name: p.name,
     format: `${p.timeline.width}x${p.timeline.height} @ ${p.timeline.fps} fps`,
     duration: Number(timelineDuration(p).toFixed(3)),
+    clipCount: allClips.length,
+    overlayCount: allOverlays.length,
+    offset,
+    nextOffset: more ? offset + shown : null,
     assets: Object.values(p.assets).map((a) => ({
       id: a.id,
       file: basename(a.path),
@@ -168,7 +220,7 @@ function describeProject(p: Project) {
       hasAudio: a.hasAudio,
       hasTranscript: Boolean(a.transcript),
     })),
-    clips: mainClips(p).map((c) => ({
+    clips: clipsPage.map((c) => ({
       id: c.id,
       assetId: c.assetId,
       start: Number(c.start.toFixed(3)),
@@ -182,7 +234,7 @@ function describeProject(p: Project) {
     captions: p.timeline.captions
       ? { ...p.timeline.captions, lines: captionLines(p, p.timeline.captions.maxWords).length }
       : null,
-    overlays: p.timeline.overlays.map((o) => ({
+    overlays: overlaysPage.map((o) => ({
       id: o.id,
       start: Number(o.start.toFixed(3)),
       end: Number((o.start + o.duration).toFixed(3)),
@@ -191,7 +243,7 @@ function describeProject(p: Project) {
       preset: o.preset,
       animation: o.animation,
     })),
-    ...describeEffects(p),
+    ...effects,
   };
 }
 
@@ -215,6 +267,11 @@ function styleFrom(a: { fontSize?: number; color?: string; position?: OverlaySty
   return s;
 }
 
+/** Seconds of a word's decaying tail kept after speech without a transcript. */
+const SPEECH_HANGOVER = 0.12;
+/** Seconds before a soft onset kept when speech comes from loudness alone. */
+const SPEECH_LOOKBACK = 0.06;
+
 /** Analyse an asset and build a cut plan, using its transcript when it has one. */
 async function buildPlan(
   ctx: CommandContext,
@@ -223,13 +280,32 @@ async function buildPlan(
 ) {
   const asset = pickAsset(ctx.session.project, assetId);
   const words = asset.transcript?.words;
-  const speech = words ? undefined : detectSpeechSpans(await analyzeAudio(asset.path));
+  // The loudness frames find speech when there is no transcript, and let the planner check that a pause is silent.
+  let levels: Awaited<ReturnType<typeof analyzeAudio>> | undefined;
+  const warnings: string[] = [];
+  if (!words || asset.hasAudio) {
+    try {
+      levels = await analyzeAudio(asset.path, cancellable(ctx));
+    } catch (err) {
+      if (!words) throw err;
+      warnings.push(
+        "The audio could not be read, so pauses were cut from the transcript timing alone (music or other sound in a pause would be cut too).",
+      );
+    }
+  }
+  // Without a transcript the speech spans set the edges: keep 120 ms of a decaying tail, and 60 ms before a soft onset.
+  const speech =
+    !words && levels
+      ? detectSpeechSpans(levels, { hangover: SPEECH_HANGOVER, lookback: SPEECH_LOOKBACK })
+      : undefined;
   return planCuts({
     assetId: asset.id,
     duration: asset.duration,
     preset,
     ...(words ? { words } : {}),
     ...(speech ? { speech } : {}),
+    ...(words && levels ? { levels } : {}),
+    warnings,
   });
 }
 
@@ -239,18 +315,36 @@ export const COMMANDS: readonly CommandDef[] = [
     name: "get_project",
     description:
       "Describe the current project: format, total duration, imported assets, the clips on the timeline (with ids and times in seconds), text overlays, zooms, music and sound effects, and image overlays. Call this first, and again after edits, to see the real state.",
-    schema: z.object({}),
+    schema: z.object({
+      offset: z
+        .number()
+        .int()
+        .min(0)
+        .default(0)
+        .describe(
+          "Skip this many clips, overlays and effects (use nextOffset from the last reply)",
+        ),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .default(PROJECT_PAGE)
+        .describe("Most clips, overlays and effects to return in one reply"),
+    }),
     readOnly: true,
-    async run(ctx) {
-      const d = describeProject(ctx.session.project);
+    async run(ctx, a) {
+      const d = describeProject(ctx.session.project, a.offset, a.limit);
+      const more =
+        d.nextOffset === null ? "" : ` Showing from ${d.offset}; more with offset ${d.nextOffset}.`;
       // Effects are mentioned only when there are some, so a plain project reads as before.
       const extras = [
-        d.zooms.length ? `${d.zooms.length} zoom(s)` : "",
-        d.audio.length ? `${d.audio.length} audio clip(s)` : "",
-        d.images.length ? `${d.images.length} image(s)` : "",
+        d.zoomCount ? `${d.zoomCount} zoom(s)` : "",
+        d.audioCount ? `${d.audioCount} audio clip(s)` : "",
+        d.imageCount ? `${d.imageCount} image(s)` : "",
       ].filter(Boolean);
       return {
-        summary: `${d.name}: ${fmt(d.duration)}, ${d.clips.length} clip(s), ${d.overlays.length} overlay(s), ${d.assets.length} asset(s)${extras.length ? `, ${extras.join(", ")}` : ""}.`,
+        summary: `${d.name}: ${fmt(d.duration)}, ${d.clipCount} clip(s), ${d.overlayCount} overlay(s), ${d.assets.length} asset(s)${extras.length ? `, ${extras.join(", ")}` : ""}.${more}`,
         data: d,
       };
     },
@@ -302,6 +396,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const ranges = await detectSilence(asset.path, asset.duration, {
         noiseDb: a.noiseDb,
         minDuration: a.minDuration,
+        ...cancellable(ctx),
       });
       const total = ranges.reduce((n, r) => n + (r.end - r.start), 0);
       return {
@@ -332,7 +427,7 @@ export const COMMANDS: readonly CommandDef[] = [
     readOnly: true,
     async run(ctx, a) {
       const asset = pickAsset(ctx.session.project, a.assetId);
-      const times = await detectScenes(asset.path, a.threshold);
+      const times = await detectScenes(asset.path, a.threshold, cancellable(ctx));
       return {
         summary: `${times.length} scene change(s) in ${basename(asset.path)}.`,
         data: { assetId: asset.id, count: times.length, times: times.slice(0, 200) },
@@ -348,6 +443,19 @@ export const COMMANDS: readonly CommandDef[] = [
       assetId: assetIdArg,
       from: seconds("Start of the window in the source file").optional(),
       to: seconds("End of the window in the source file").optional(),
+      offset: z
+        .number()
+        .int()
+        .min(0)
+        .default(0)
+        .describe("Skip this many words of the window (use nextOffset from the last reply)"),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(1000)
+        .default(300)
+        .describe("Most words to return in one reply"),
     }),
     readOnly: true,
     async run(ctx, a) {
@@ -360,9 +468,19 @@ export const COMMANDS: readonly CommandDef[] = [
       const from = a.from ?? 0;
       const to = a.to ?? Number.POSITIVE_INFINITY;
       const words = asset.transcript.words.filter((w) => w.end > from && w.start < to);
+      const page = words.slice(a.offset, a.offset + a.limit);
+      const next = a.offset + page.length < words.length ? a.offset + page.length : null;
+      const more = next === null ? "" : ` More with offset ${next}.`;
       return {
-        summary: `${words.length} word(s).`,
-        data: { assetId: asset.id, text: formatTranscript({ words }) },
+        summary: `Words ${page.length ? a.offset + 1 : 0}-${a.offset + page.length} of ${words.length}.${more}`,
+        data: {
+          assetId: asset.id,
+          totalWords: words.length,
+          offset: a.offset,
+          returned: page.length,
+          nextOffset: next,
+          text: formatTranscript({ words: page }),
+        },
       };
     },
   }),
@@ -387,10 +505,10 @@ export const COMMANDS: readonly CommandDef[] = [
         );
       }
       const asset = pickAsset(ctx.session.project, a.assetId);
-      const transcript = await ctx.transcriber.transcribe(
-        asset.path,
-        a.language ? { language: a.language } : {},
-      );
+      const transcript = await ctx.transcriber.transcribe(asset.path, {
+        ...(a.language ? { language: a.language } : {}),
+        ...cancellable(ctx),
+      });
       await edit(ctx, `Transcribe ${basename(asset.path)}`, (p) =>
         setAssetTranscript(p, asset.id, transcript),
       );
@@ -483,9 +601,9 @@ export const COMMANDS: readonly CommandDef[] = [
       "Import a video file from the user's computer and put it at the end of the timeline. Takes a full file path.",
     schema: z.object({ path: z.string().min(1).describe("Absolute path of a video file") }),
     async run(ctx, a) {
-      const abs = checkPath(ctx, a.path);
+      const abs = await checkPath(ctx, a.path);
       if (!existsSync(abs)) throw new CommandError(`File not found: ${abs}`);
-      const asset = await probe(abs);
+      const asset = await probe(abs, cancellable(ctx));
       if (asset.kind !== "video") {
         throw new CommandError(
           `${basename(abs)} is ${asset.kind}; only video files can be imported for now.`,
@@ -659,6 +777,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const found = await detectSilence(asset.path, asset.duration, {
         noiseDb: a.noiseDb,
         minDuration: a.minDuration,
+        ...cancellable(ctx),
       });
       // Silence is detected in the source file, so some of it may already be cut from the timeline.
       const cuts = assetRangesToTimeline(ctx.session.project, asset.id, padSilences(found, a.pad));
@@ -676,7 +795,7 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "plan_cuts",
     description:
-      "Analyse a video's speech and propose cuts (long pauses, filler words, silence at the start and end, false starts, repeated takes) WITHOUT changing anything. Returns a plan id and each proposed cut with its reason and confidence. Use apply_cut_plan to apply it, or smart_cut to do both at once. Presets: gentle, standard (default), tight, podcast, tutorial.",
+      "Analyse a video's speech and propose cuts (long pauses, filler words, silence at the start and end, false starts, repeated takes) WITHOUT changing anything. Returns a plan id and each proposed cut with its reason and confidence. Pauses with music or other sound in them are not cut, only listed. Use apply_cut_plan to apply it, or smart_cut to do both at once. Presets: gentle, standard (default), tight, podcast, tutorial.",
     schema: z.object({
       assetId: assetIdArg,
       preset: z.enum(CUT_PRESET_NAMES).default("standard").describe("How aggressively to cut"),
@@ -696,6 +815,7 @@ export const COMMANDS: readonly CommandDef[] = [
           preset: plan.preset,
           approvedSeconds: plan.approvedSeconds,
           proposedSeconds: plan.proposedSeconds,
+          ...(plan.warnings ? { warnings: plan.warnings } : {}),
           decisions: plan.decisions.slice(0, 60).map((d) => ({
             id: d.id,
             kind: d.kind,
@@ -759,7 +879,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const review = plan.decisions.filter((d) => d.status === "proposed");
       if (ranges.length === 0) {
         return {
-          summary: `No cuts needed.${review.length ? ` ${review.length} possible false start(s) or retake(s) to review (plan ${plan.id}).` : ""}`,
+          summary: `No cuts needed.${review.length ? ` ${review.length} possible cut(s) to review (false starts, retakes, or pauses with sound in them; plan ${plan.id}).` : ""}`,
           data: { planId: plan.id },
         };
       }
@@ -767,7 +887,12 @@ export const COMMANDS: readonly CommandDef[] = [
       const after = timelineDuration(ctx.session.project);
       return {
         summary: `Removed ${fmt(before - after)} (${plan.decisions.filter((d) => d.status === "approved").length} cut(s)). Timeline is now ${fmt(after)}.${review.length ? ` ${review.length} more for review: apply_cut_plan with planId ${plan.id} and includeProposed.` : ""}`,
-        data: { planId: plan.id, secondsRemoved: before - after, forReview: review.length },
+        data: {
+          planId: plan.id,
+          secondsRemoved: before - after,
+          forReview: review.length,
+          ...(plan.warnings ? { warnings: plan.warnings } : {}),
+        },
       };
     },
   }),
@@ -935,7 +1060,8 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "Name the current state so it is easy to return to later.",
     schema: z.object({ name: z.string().min(1).max(60) }),
     async run(ctx, a) {
-      ctx.session.checkpoint(a.name);
+      // Persisted too: a checkpoint is history-only, so no edit would otherwise write it to the history file.
+      await ctx.session.saveCheckpoint(a.name);
       return { summary: `Saved checkpoint "${a.name}".` };
     },
   }),
@@ -950,10 +1076,17 @@ export const COMMANDS: readonly CommandDef[] = [
     }),
     irreversible: true,
     async run(ctx, a) {
-      const out = checkPath(ctx, a.path);
-      checkPath(ctx, dirname(out));
+      const out = await checkPath(ctx, a.path);
+      await checkPath(ctx, dirname(out));
       if (!out.toLowerCase().endsWith(".mp4"))
         throw new CommandError("Export path must end in .mp4");
+      // The assistant may not replace a file: an overwrite cannot be undone from the history, and a chat
+      // transcript or file name must not be able to make it happen. The user can overwrite by hand.
+      if (existsSync(out) && a.overwrite && ctx.source === "ai") {
+        throw new CommandError(
+          `${out} already exists. The assistant cannot overwrite files. Choose another name.`,
+        );
+      }
       if (existsSync(out) && !a.overwrite) {
         throw new CommandError(
           `${out} already exists. Choose another name or set overwrite to true.`,
@@ -961,6 +1094,8 @@ export const COMMANDS: readonly CommandDef[] = [
       }
       const r = await exportProject(ctx.session.project, out, {
         ...(ctx.onProgress ? { onProgress: ctx.onProgress } : {}),
+        ...(ctx.signal ? { signal: ctx.signal } : {}),
+        ...(ctx.onProcess ? { onSpawn: ctx.onProcess } : {}),
       });
       return { summary: `Exported ${fmt(r.duration)} to ${out}.`, data: { path: out } };
     },
@@ -992,8 +1127,18 @@ export async function runCommand(
   if (!def) throw new CommandError(`Unknown command "${name}".`);
   const parsed = def.schema.safeParse(rawArgs ?? {});
   if (!parsed.success) throw new CommandError(formatIssues(name, parsed.error));
+  if (ctx.signal?.aborted)
+    throw new CommandError("Cancelled before it started. Nothing was changed.");
   try {
-    return await def.run(ctx, parsed.data as never);
+    const result = await def.run(ctx, parsed.data as never);
+    // The edit is applied even when autosave fails; say so, or the user and the model believe it is safely on disk.
+    const saveError = def.readOnly ? undefined : ctx.session.saveError;
+    return saveError
+      ? {
+          ...result,
+          summary: `${result.summary} Warning: the project could not be saved (${saveError}).`,
+        }
+      : result;
   } catch (err) {
     if (err instanceof CommandError) throw err;
     // Edit functions throw plain Errors with clear messages ("No clip can be split at 4s").

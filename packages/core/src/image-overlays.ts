@@ -142,7 +142,8 @@ export function imagesOf(p: Project): ImageOverlay[] {
 
 /** Throws unless `asset` is a picture the renderer can draw. */
 function requireImage(p: Project, assetId: string): Asset {
-  const asset = p.assets[assetId];
+  // Own-property check, as ownAsset in timeline.ts: an id such as `__proto__` must not find an inherited value.
+  const asset = Object.hasOwn(p.assets, assetId) ? p.assets[assetId] : undefined;
   if (!asset) throw new Error(`Unknown asset "${assetId}"`);
   if (asset.kind !== "image") {
     throw new Error(`Asset ${asset.path} is ${asset.kind}, not a picture (use a PNG or JPG).`);

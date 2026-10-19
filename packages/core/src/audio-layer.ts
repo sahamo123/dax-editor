@@ -89,7 +89,8 @@ function normalize(c: Clip, asset: Asset): Clip {
  */
 export function addAudioClip(p: Project, clip: Clip): Project {
   const valid = ClipSchema.parse(clip);
-  const asset = p.assets[valid.assetId];
+  // Own-property check, as ownAsset in timeline.ts: an id such as `__proto__` must not find an inherited value.
+  const asset = Object.hasOwn(p.assets, valid.assetId) ? p.assets[valid.assetId] : undefined;
   if (!asset) throw new Error(`Unknown asset "${valid.assetId}"`);
   if (audioClips(p).some((c) => c.id === valid.id)) {
     throw new Error(`Audio clip "${valid.id}" already exists`);
@@ -115,7 +116,7 @@ export function updateAudioClip(p: Project, id: string, patch: AudioPatch): Proj
   const all = audioClips(p);
   const current = all.find((c) => c.id === id);
   if (!current) throw new Error(`Unknown audio clip "${id}"`);
-  const asset = p.assets[current.assetId];
+  const asset = Object.hasOwn(p.assets, current.assetId) ? p.assets[current.assetId] : undefined;
   if (!asset) throw new Error(`Audio clip "${id}" references missing asset "${current.assetId}"`);
   const defined = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
   const merged = ClipSchema.parse({ ...current, ...defined });

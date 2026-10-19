@@ -8,14 +8,16 @@ Root rules in `/AGENTS.md` apply; this file adds package specifics.
 | File | Responsibility |
 |---|---|
 | `schema.ts` | zod schemas and types: `Asset`, `Clip` (audio clips add `role`, `loop`, `length`), `Track`, `Timeline` (with optional `zooms`, `images`, `ducking`), `Project`, `Range`, `Overlay`, `Zoom`, `ImageOverlay`, `Ducking`, caption settings, output format. |
-| `timeline.ts` | **Pure** edit operations (`splitAt`, `deleteRange`, `keepRanges`, `trimClip`, fades, ...). Take a `Project`, return a new one. `deleteRange` also moves overlays, images, zooms and the audio layer. `shotRanges` finds runs of clips with no cut between them. |
-| `commands.ts` | **The command registry.** `COMMANDS` is the only way a project changes. The UI, built-in AI, MCP and CLI all call it. Each command has typed arguments, a model-facing description, `readOnly` and `irreversible` flags. `commandTools()` gives JSON-schema tool specs. 45 commands today. |
-| `effect-commands.ts` | The ten effects commands, appended to `COMMANDS` (like `template-commands.ts`): `add_zoom`/`update_zoom`/`remove_zoom`, `add_audio`/`update_audio`/`remove_audio`/`set_ducking`, `add_image_overlay`/`update_image_overlay`/`remove_image_overlay`. The `add_*` ones update instead of duplicating when repeated. Also `describeEffects` (for `get_project`) and `resolveMediaAsset` (path or asset id to an asset). Imports only types from `commands.ts`. |
+| `timeline.ts` | **Pure** edit operations (`splitAt`, `deleteRange`, `keepRanges`, `trimClip`, fades, ...). Take a `Project`, return a new one. `deleteRange` also moves overlays, images, zooms and the audio layer; `trimClip` and `moveClip` remap them. `shotRanges` finds runs of clips with no cut between them. |
+| `commands.ts` | **The command registry.** `COMMANDS` is the only way a project changes. The UI, built-in AI, MCP and CLI all call it. Each command has typed arguments, a model-facing description, `readOnly` and `irreversible` flags. `commandTools()` gives JSON-schema tool specs. 45 commands today: 33 here, 10 effects (`effect-commands.ts`) and 2 template commands (`template-commands.ts`). |
+| `effect-commands.ts` | The ten effects commands, appended to `COMMANDS` (like `template-commands.ts`): `add_zoom`/`update_zoom`/`remove_zoom`, `add_audio`/`update_audio`/`remove_audio`/`set_ducking`, `add_image_overlay`/`update_image_overlay`/`remove_image_overlay`. The `add_*` ones update instead of duplicating when repeated. Also `describeEffects` (paged, for `get_project`) and `resolveMediaAsset` (path or asset id to an asset). Imports only types from `commands.ts`. |
 | `zoom.ts` | Punch-in and push-in zooms: pure ops (`addZoom`, `updateZoom`, `removeZoom`, `shiftZoomsForDelete`, `zoomScaleAt`) and `zoomFilters` (`scale eval=frame` + `crop` per zoom, laid over the untouched picture). |
 | `audio-layer.ts` | The music and sound-effect track `a1`: pure ops, `shiftAudioForDelete` (music is anchored to the timeline, effects to their moment), ducking settings, and `audioLayerFilters` (per-clip chains, music bus, `sidechaincompress` keyed by a levelled copy of the main audio, one `amix`, limiter). |
 | `image-overlays.ts` | Logos, watermarks and stickers: `IMAGE_PRESETS`, pure ops, and `imageOverlayFilters` (looped still, shifted to its start, scaled, faded, overlaid). |
-| `templates.ts`, `template-commands.ts` | Template packs and the applier behind `list_templates` / `apply_template`. A template's `effects` (zoom, music, logo) are applied; `deferred` lists what the engine still cannot do. Data lives in `/templates`. |
-| `session.ts` | `Session`: current project plus a history **tree** of labelled states (`manual`, `ai`, `template`). Jump to any state, save named checkpoints, optional save to a `.dax.json` file. |
+| `skills.ts` | Skills layer: loads the `SKILL.md` playbooks in `skills/` and picks the few that fit a request within a character budget. Pure and deterministic. |
+| `templates.ts` | Template packs (data in `templates/`) and the **deterministic applier**: it composes existing commands on a scratch session and commits the result as one history entry. No AI involved. A template's `effects` (zoom, music, logo) are applied; `deferred` lists what the engine still cannot do. |
+| `template-commands.ts` | The two template commands, `list_templates` and `apply_template`. |
+| `session.ts` | `Session`: current project plus a history **tree** of labelled states (`manual`, `ai`, `template`). Jump to any state, save named checkpoints, optional save to a `.dax.json` file. An edit is applied in memory first; a failed autosave never fails or undoes it, it sets `Session.saveError` (shown in the command summary and the server's `state.saveError`). |
 | `cuts.ts` | Cut engine: floor-relative speech detection with hysteresis, five cut presets, `planCuts` (a reviewable plan where every decision has a kind, reason, confidence and status), `applyCutPlan`. Design: `docs/research/cut-intelligence.md`. |
 | `captions.ts` | Word-timed captions computed from the timeline's transcripts at render time (so they follow every cut), three looks, ASS subtitle file for burn-in. |
 | `overlays.ts` | Pure edit operations for text overlays: add, update, move, remove, and `shiftOverlaysForDelete` for ripple deletes. |
@@ -23,7 +25,8 @@ Root rules in `/AGENTS.md` apply; this file adds package specifics.
 | `presets.ts` | Built-in text presets (`OVERLAY_PRESETS`, six animations: fade, slide-up, slide-left, pop, typewriter, none) and `overlayFromPreset`. Pure data. |
 | `ids.ts` | `newId(prefix)`, the id generator for clips, overlays and history items. |
 | `media.ts` | ffprobe (kinds `video`, `audio`, `image`), silence and scene detection, and the parsers for their output. |
-| `render.ts` | Build and run the FFmpeg command: main track, then zooms, image overlays, text overlays and captions, plus the audio layer mixed under the main audio; fit modes; pick an LGPL-safe encoder. |
+| `render.ts` | Build and run the FFmpeg command: main track, then zooms, image overlays, text overlays and captions, plus the audio layer mixed under the main audio; fit modes. Export falls back to the next encoder when one cannot run. |
+| `encoders.ts` | Encoder choice shared with the server: `rankEncoders`, `probeEncoder` (1-frame lavfi test, cached 10 min) and `withEncoderFallback` (retry next encoder only if a synthetic probe shows the encoder itself is dead). |
 | `transcript.ts` | Transcript types, `Transcriber` interface, filler-word ranges. (No speech-to-text adapter yet.) |
 | `connector.ts` | `Connector` interface for media sources/destinations; `LocalConnector`. |
 | `exec.ts` | Thin process runners. Honors `DAX_FFMPEG` / `DAX_FFPROBE`. |
@@ -43,6 +46,7 @@ Bundled font: `assets/fonts/` (Inter, OFL-1.1, see `LICENSE-Inter.txt`).
 - User text never enters an FFmpeg filter string. It goes through text files (`overlay-filters.ts`).
 - Cut decisions that judge content (false starts, repeated takes) are **proposals** until approved. Nothing applies them silently.
 - Commands must be safe to run twice. `remove_silences` and `remove_fillers` were once not idempotent; a regression test now guards this. Add one for any new command that removes material.
+- Templates and skills are **data**. They never carry file paths or FFmpeg arguments. A template application is one history entry, so one undo reverses it.
 - Parsers (`parseSilenceDetect`, `parseProbe`, ...) are separate from the functions that run FFmpeg so they are testable without it.
 
 ## Testing
