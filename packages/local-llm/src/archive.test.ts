@@ -108,6 +108,35 @@ describe.each([
     await expect(extract(archive, join(dir, "out"))).rejects.toBeInstanceOf(ArchiveError);
   });
 
+  it("keeps names that only start with two dots (..cfg is not a parent reference)", async () => {
+    const archive = join(dir, file);
+    writeFileSync(
+      archive,
+      make([
+        { path: "..cfg", content: "cfg" },
+        { path: "..notes/todo.txt", content: "notes" },
+      ]),
+    );
+    const out = join(dir, "out");
+    await extract(archive, out);
+    expect(readFileSync(join(out, "..cfg"), "utf8")).toBe("cfg");
+    expect(readFileSync(join(out, "..notes", "todo.txt"), "utf8")).toBe("notes");
+  });
+
+  it.skipIf(!posix)("accepts a symlink whose target name starts with two dots", async () => {
+    const archive = join(dir, file);
+    writeFileSync(
+      archive,
+      make([
+        { path: "..cfg", content: "cfg" },
+        { path: "link", symlink: "..cfg" },
+      ]),
+    );
+    const out = join(dir, "out");
+    await extract(archive, out);
+    expect(readlinkSync(join(out, "link"))).toBe("..cfg");
+  });
+
   it("handles empty files and many files", async () => {
     const archive = join(dir, file);
     const entries: TestEntry[] = [{ path: "r/empty", content: "" }];
