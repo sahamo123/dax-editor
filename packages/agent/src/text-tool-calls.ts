@@ -2,6 +2,7 @@
 // reasoning blocks. Small and local models do this often. Pure string processing; never runs anything.
 
 import { parseJsonLoose } from "./json-repair.js";
+import { setOwn } from "./own-property.js";
 
 /** A tool call recovered from text. `arguments` is an object, a JSON string, or raw text that could not be read. */
 export interface TextToolCall {
@@ -135,7 +136,7 @@ function parseXmlParameters(body: string): Record<string, unknown> | null {
     found = true;
     const raw = (m[2] ?? "").trim();
     const parsed = parseJsonLoose(raw);
-    out[m[1] ?? ""] = parsed.ok && !/^[A-Za-z]/.test(raw) ? parsed.value : raw;
+    setOwn(out, m[1] ?? "", parsed.ok && !/^[A-Za-z]/.test(raw) ? parsed.value : raw);
   }
   return found ? out : null;
 }

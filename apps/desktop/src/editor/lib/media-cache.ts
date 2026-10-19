@@ -1,29 +1,25 @@
 // Cached loading of per-asset timeline media: waveform peaks and filmstrip sprite sizes.
-// The server's formats are not fixed by @dax/protocol, so loaders are tolerant (see parseWaveform) and failures
-// degrade to "no picture" rather than errors.
+// The formats are defined by @dax/protocol (`WaveformSchema`, the filmstrip constants) and produced by @dax/server;
+// failures degrade to "no picture" rather than errors.
 
+import { FILMSTRIP_FRAME_WIDTH, WaveformSchema } from "@dax/protocol";
 import { useEffect, useState } from "react";
 
 /** Normalised audio peaks (each 0 to 1) spread evenly over the whole source file. */
 export type Peaks = readonly number[];
 
 /**
- * Read waveform JSON in any of the shapes a server might reasonably produce: a bare array of numbers, or an object
- * with `peaks` / `data` / `samples`. Values are folded to absolute magnitude and scaled so the largest is 1.
- * Returns null if nothing usable is found.
+ * Read the server's `waveform.json` (`{ version, duration, peaksPerSecond, peaks }`, see `WaveformSchema`) and scale the
+ * peaks so the largest is 1, so a quiet recording still draws a readable shape. Returns null for anything that is not
+ * that format or has no peaks.
  */
 export function parseWaveform(json: unknown): Peaks | null {
-  let arr: unknown = json;
-  if (arr && typeof arr === "object" && !Array.isArray(arr)) {
-    const o = arr as Record<string, unknown>;
-    arr = o.peaks ?? o.data ?? o.samples ?? null;
-  }
-  if (!Array.isArray(arr) || arr.length === 0) return null;
-  const nums = arr.map((v) => (typeof v === "number" && Number.isFinite(v) ? Math.abs(v) : 0));
+  const parsed = WaveformSchema.safeParse(json);
+  if (!parsed.success || parsed.data.peaks.length === 0) return null;
+  const { peaks } = parsed.data;
   let max = 0;
-  for (const v of nums) if (v > max) max = v;
-  // Always normalise: a quiet recording should still draw a readable shape.
-  return max === 0 ? nums : nums.map((v) => v / max);
+  for (const v of peaks) if (v > max) max = v;
+  return max === 0 ? peaks : peaks.map((v) => v / max);
 }
 
 /** Highest peak in the half-open source-time range [from, to) of an asset that lasts `assetDuration` seconds. */
@@ -132,10 +128,10 @@ export function useImageSize(url: string | null): ImageSize | null | undefined {
 }
 
 /**
- * How a filmstrip sprite is cut into frames. The server draws a single row of equally spaced frames covering the
- * whole asset; the count is inferred from the image size and the frame aspect ratio, so no extra metadata is needed.
+ * How many frames a filmstrip sprite holds. The server draws one row of equally spaced frames covering the whole asset,
+ * each exactly `FILMSTRIP_FRAME_WIDTH` pixels wide (it also sends the count in the `X-Dax-Frames` header, which an
+ * `<img>` cannot read), so the count follows from the image width.
  */
-export function filmstripFrames(sprite: ImageSize, aspect: number): number {
-  if (sprite.height <= 0 || aspect <= 0) return 1;
-  return Math.max(1, Math.round(sprite.width / (sprite.height * aspect)));
+export function filmstripFrames(sprite: ImageSize): number {
+  return Math.max(1, Math.round(sprite.width / FILMSTRIP_FRAME_WIDTH));
 }

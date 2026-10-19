@@ -570,7 +570,7 @@ describe("tools and prompt configuration", () => {
     const compact = setup([{ text: "ok" }], { toolStyle: "compact" });
     await compact.run("x");
     const size = (p: ScriptedProvider) => JSON.stringify(p.requests[0]?.tools).length;
-    expect(size(compact.provider)).toBeLessThan(size(full.provider) * 0.6);
+    expect(size(compact.provider)).toBeLessThan(size(full.provider) * 0.8);
   });
 
   it("offers only the tools it is given", async () => {

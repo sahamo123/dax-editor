@@ -1,5 +1,5 @@
-// Turns a PresetInfo (what the server lists) into an overlay sample for the animated chips. The protocol's PresetInfo
-// has no style, so look and position come from the preset's category unless the server provides a `style` field.
+// Turns a PresetInfo (what the server lists) into an overlay sample for the animated chips. The server sends each
+// preset's `style`; the category defaults below only fill in for an older engine that leaves it out.
 
 import type { Overlay, OverlayStyle } from "@dax/core";
 import type { PresetInfo } from "@dax/protocol";
@@ -34,8 +34,8 @@ const CATEGORY_STYLE: Record<string, Partial<OverlayStyle>> = {
   },
 };
 
-/** A preset as the server may send it: the protocol fields plus an optional `style`. */
-export type PresetWithStyle = PresetInfo & { style?: Partial<OverlayStyle> };
+/** A preset as the server sends it (kept as a name for callers; `style` is part of `PresetInfo`). */
+export type PresetWithStyle = PresetInfo;
 
 /** Resolve the style used to draw a preset's sample. */
 export function presetStyle(preset: PresetWithStyle): OverlayStyle {

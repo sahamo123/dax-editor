@@ -56,7 +56,7 @@ flowchart LR
 
 **Built today:** `@dax/core` (engine, registry, skills loader, templates and applier), `@dax/protocol`, `@dax/agent`, `@dax/server`, `@dax/engine`, the desktop app's browser build (app shell and editor), `@dax/evals`, the `dax` CLI and the `dax-mcp` MCP server. **In progress or planned:** the embedded local model runtime, speech-to-text, the Tauri shell, the MCP draft/approve flow and the plugin system. See [STATUS](../STATUS.md) and the [product v1 spec](../specs/product-v1.md).
 
-The CLI and MCP server run the registry in-process and share project files through `Session`; they do not go through the engine server. See [CLI and MCP server](cli-and-mcp.md). The desktop app talks to the engine server, which runs the agent and the registry. All of them use the same commands with the same validation and history.
+The CLI and MCP server run the registry in-process and share project files through `Session`; they do not go through the engine server. See [CLI and MCP server](cli-and-mcp.md). The engine's chat can also be answered by the user's own signed-in command-line agent through the bridges, which reuse the MCP endpoint on the live session. See [CLI bridges](cli-bridges.md). They use the same commands with the same validation and history as every other front door.
 
 ## The engine (`packages/core`)
 

@@ -1,0 +1,35 @@
+{
+  "name": "@dax/local-llm",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Manages the embedded open-weight model: hardware detection, model catalog, resumable downloads, llama.cpp runtime install and the llama-server process.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "docs:check": "typedoc",
+    "catalog:verify": "node dist/scripts/verify-catalog.js",
+    "live:bench": "node dist/scripts/live-bench.js"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

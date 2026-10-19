@@ -1,6 +1,7 @@
 // A Session holds the current project with a full edit history (undo, redo, jump to any earlier state, named checkpoints) and optional saving to disk.
 
-import { readFile, writeFile } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
+import { readFile, rename, writeFile } from "node:fs/promises";
 import type { CutPlan } from "./cuts.js";
 import { type Project, ProjectSchema } from "./schema.js";
 import { emptyProject, mainClips, timelineDuration } from "./timeline.js";
@@ -66,6 +67,7 @@ export class Session {
   private lastChild = new Map<number, number>();
   /** Cut plans waiting for review, by id. Kept in memory only; applying one is a normal edit in the history. */
   readonly plans = new Map<string, CutPlan>();
+  private lastSaveError: string | undefined;
 
   constructor(
     public project: Project,
@@ -96,15 +98,51 @@ export class Session {
     }
   }
 
-  /** Write the current project to disk. Does nothing for sessions without a backing file. */
+  /**
+   * Message of the most recent failed autosave, or undefined when the last save worked. An edit is applied in
+   * memory before it is saved, so a failed save (disk full, folder removed) does not fail or undo the edit;
+   * callers show this instead so the user knows their work is not on disk.
+   */
+  get saveError(): string | undefined {
+    return this.lastSaveError;
+  }
+
+  /** Record that a save worked, clearing {@link Session.saveError}. Subclasses that override `save` call this after writing. */
+  protected markSaved(): void {
+    this.lastSaveError = undefined;
+  }
+
+  /** Called when an autosave after an edit fails, with the error. Does nothing by default; subclasses may log it. */
+  protected onAutosaveFailed(_err: unknown): void {}
+
+  /** Write the current project to disk. Does nothing for sessions without a backing file. Throws if the write fails. */
   async save(): Promise<void> {
+    await this.writeProjectFile();
+    await this.saveHistory();
+    this.markSaved();
+  }
+
+  /**
+   * Write the project itself. Subclasses that save somewhere else override this; the base writes the file given to the constructor
+   * when there is one and does nothing otherwise.
+   */
+  protected async writeProjectFile(): Promise<void> {
     if (!this.file) return;
     await writeFile(this.file, JSON.stringify(this.project, null, 2));
-    await this.saveHistory();
+  }
+
+  /** Save after a change without letting a failure undo or hide the change: the error goes to {@link Session.saveError}. */
+  private async autosave(): Promise<void> {
+    try {
+      await this.save();
+    } catch (err) {
+      this.lastSaveError = err instanceof Error ? err.message : String(err);
+      this.onAutosaveFailed(err);
+    }
   }
 
   /** Where the history is kept: beside the project file. */
-  private get historyFile(): string | undefined {
+  protected get historyFile(): string | undefined {
     return this.file ? `${this.file}.history.json` : undefined;
   }
 
@@ -130,7 +168,8 @@ export class Session {
     }
   }
 
-  private async saveHistory(): Promise<void> {
+  /** Write the history beside the project (no-op without a history file). Prunes first. Throws if the write fails. */
+  protected async saveHistory(): Promise<void> {
     const file = this.historyFile;
     if (!file) return;
     this.prune();
@@ -141,11 +180,14 @@ export class Session {
       entries: [...this.entries.values()],
       lastChild: [...this.lastChild.entries()],
     };
-    await writeFile(file, JSON.stringify(data));
+    // Written to a temp name then renamed, so a crash mid-write cannot leave a truncated history file.
+    const tmp = `${file}.${randomBytes(4).toString("hex")}.tmp`;
+    await writeFile(tmp, JSON.stringify(data));
+    await rename(tmp, file);
   }
 
   /** Load a saved history if it belongs to the project on disk; otherwise start fresh. Never throws. */
-  private async loadHistory(): Promise<void> {
+  protected async loadHistory(): Promise<void> {
     const file = this.historyFile;
     if (!file) return;
     try {
@@ -183,7 +225,8 @@ export class Session {
     if (!e) throw new Error(`Unknown history state ${id}`);
     this.currentId = id;
     this.project = e.project;
-    await this.save();
+    // The state change is already real in memory; a failed save must not turn a done edit into a reported failure.
+    await this.autosave();
     return e.project;
   }
 
@@ -200,6 +243,9 @@ export class Session {
     };
     this.entries.set(entry.id, entry);
     this.lastChild.set(this.currentId, entry.id);
+    // Capped here, not only when the history is written: sessions without a history file (the server's
+    // in-memory copy) would otherwise grow without bound.
+    this.prune();
     return this.moveTo(entry.id);
   }
 
@@ -267,6 +313,12 @@ export class Session {
     if (!clean) throw new Error("Checkpoint name cannot be empty");
     for (const e of this.entries.values()) if (e.name === clean) delete e.name;
     this.current.name = clean;
+  }
+
+  /** {@link Session.checkpoint} followed by an autosave, so the name reaches the history file. A failed save is reported in {@link Session.saveError}, not thrown. */
+  async saveCheckpoint(name: string): Promise<void> {
+    this.checkpoint(name);
+    await this.autosave();
   }
 
   /** Jump back to a named version. Throws if no checkpoint has that name. */

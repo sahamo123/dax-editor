@@ -21,7 +21,6 @@ export interface ClipBlockProps {
   fadeIn: number;
   fadeOut: number;
   assetDuration: number;
-  aspect: number;
   spriteUrl: string | null;
   thumbUrl: string | null;
   waveformUrl: string | null;
@@ -96,7 +95,6 @@ export const ClipBlock = memo(function ClipBlock(p: ClipBlockProps) {
             spriteUrl={p.spriteUrl}
             thumbUrl={p.thumbUrl}
             assetDuration={p.assetDuration}
-            aspect={p.aspect}
             sourceIn={p.in}
             zoom={p.zoom}
             fromPx={fromPx}

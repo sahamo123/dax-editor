@@ -62,13 +62,16 @@ per frame (`volume` is capped at 1 in the preview, which uses `HTMLMediaElement.
 J plays in reverse by stepping the playhead (silent). Browsers that refuse `play()` without a gesture show a "Click to play"
 button (`onBlocked`).
 
-### Media URLs and formats (assumptions the protocol does not spell out)
+### Media URLs and formats (defined in `@dax/protocol`, produced by `@dax/server`)
 
 `mediaUrl(serverUrl, token, assetId, kind)`: `proxy.mp4` plays in `<video>`; `thumb.jpg` is one poster frame;
-`filmstrip.jpg` is **one row of equally spaced frames across the whole asset** (the frame count is inferred from the image
-size and the video's aspect ratio); `waveform.json` is a JSON array of peaks, or `{ "peaks": [...] }`, spread evenly over
-the whole asset (normalised on load). If any of these 404s the timeline degrades (thumb, then gradient; no waveform) and the
-preview shows "Preparing preview..." and reloads when a `proxy` job finishes.
+`filmstrip.jpg` is **one row of `N` frames, each exactly 96x54 px (`FILMSTRIP_FRAME_WIDTH` x `FILMSTRIP_FRAME_HEIGHT`),
+letterboxed whatever the video's shape**, covering the whole asset; `N = filmstripFrameCount(duration)` (1 per second, 4 to 120)
+and is also sent in the `X-Dax-Frames` header, but an `<img>` cannot read headers, so the editor uses `image width / 96`.
+`waveform.json` is `WaveformSchema` (`{ version: 1, duration, peaksPerSecond, peaks[] }`, peaks 0..1 spread evenly over the
+whole asset); anything else is rejected and the clip simply has no waveform (peaks are rescaled so the loudest is 1).
+The preset list carries each preset's `style` (`PresetInfo.style`). If any file 404s the timeline degrades (thumb, then gradient;
+no waveform) and the preview shows "Preparing preview..." and reloads when a `proxy` job finishes.
 
 ## Running and testing
 

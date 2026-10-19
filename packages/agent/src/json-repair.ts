@@ -1,6 +1,8 @@
 // Forgiving JSON parsing for the sloppy output of small models: code fences, single quotes, trailing commas,
 // comments, unquoted keys, Python literals and truncated text. Pure; never evaluates anything.
 
+import { setOwn } from "./own-property.js";
+
 /** Result of {@link parseJsonLoose}. */
 export type LooseParse =
   | {
@@ -104,10 +106,10 @@ class LooseParser {
       }
       this.skip();
       if (this.eof() || this.peek() === "}" || this.peek() === ",") {
-        out[key] = null; // `{"a": }` or truncated after the colon
+        setOwn(out, key, null); // `{"a": }` or truncated after the colon
         continue;
       }
-      out[key] = this.value(depth + 1);
+      setOwn(out, key, this.value(depth + 1));
     }
   }
 

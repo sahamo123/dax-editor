@@ -1,12 +1,15 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["ffmpeg", "ffprobe"],
+  "ignoreBinaries": ["ffmpeg", "ffprobe", "rustc"],
   "workspaces": {
     "apps/desktop": {
       "entry": ["e2e/*.spec.ts"],
       "project": ["src/**/*.{ts,tsx}", "e2e/**/*.{ts,mts,mjs}"]
     },
     "packages/agent": {
+      "project": ["src/**/*.ts"]
+    },
+    "packages/bridges": {
       "project": ["src/**/*.ts"]
     },
     "packages/cli": {
@@ -16,11 +19,18 @@
       "project": ["src/**/*.ts"]
     },
     "packages/engine": {
-      "entry": ["src/cli.ts", "src/index.ts"],
       "project": ["src/**/*.ts"]
     },
     "packages/evals": {
       "entry": ["src/cli.ts", "src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/local-llm": {
+      "entry": [
+        "src/scripts/*.ts",
+        "src/test-helpers/orphan-parent.mjs",
+        "src/test-helpers/fake-llama-server.mjs"
+      ],
       "project": ["src/**/*.ts"]
     },
     "packages/mcp": {

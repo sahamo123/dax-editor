@@ -7,6 +7,7 @@ import {
   ChatRequestSchema,
   CommandRequestSchema,
   ImportRequestSchema,
+  LocalModelInstallRequestSchema,
   type MediaKind,
   PROVIDER_KINDS,
   ProjectNewRequestSchema,
@@ -27,7 +28,6 @@ const MEDIA_KINDS: readonly MediaKind[] = [
   "waveform.json",
   "filmstrip.jpg",
 ];
-const LocalInstallSchema = z.object({ modelId: z.string().min(1).max(200).optional() });
 const ApiKeyQuerySchema = z.object({ kind: z.enum(PROVIDER_KINDS) });
 
 /** Turn an unexpected error from project operations into the right HTTP status: 403 for forbidden paths, 400 otherwise. */
@@ -107,22 +107,25 @@ export function buildRouter(engine: Engine): Router {
     await engine.removeApiKey(q.kind);
     json(200, await engine.providerStatuses(true));
   });
-  r.add("GET", API.providers, async ({ json }) => json(200, await engine.providerStatuses()));
+  // Always a fresh check: the UI's "Check again" button (after signing in to a CLI, say) must not get a cached answer.
+  r.add("GET", API.providers, async ({ json }) => json(200, await engine.providerStatuses(true)));
 
   // ----- local model (delegated to the injected controller) -----
   r.add("GET", API.localModel, async ({ json }) => json(200, await engine.localModelStatus()));
-  r.add("POST", `${API.localModel}/install`, async ({ body, json }) => {
-    const req = parseWith(LocalInstallSchema, await body());
+  r.add("POST", API.localModelInstall, async ({ body, json }) => {
+    const req = parseWith(LocalModelInstallRequestSchema, await body());
     json(202, { jobId: engine.installLocalModel(req.modelId) });
   });
-  r.add("POST", `${API.localModel}/start`, ({ json }) =>
-    json(202, { jobId: engine.startLocalModel() }),
-  );
-  r.add("POST", `${API.localModel}/stop`, async ({ json }) => {
+  r.add("POST", API.localModelStart, ({ json }) => json(202, { jobId: engine.startLocalModel() }));
+  r.add("POST", API.localModelStop, async ({ json }) => {
     await engine.stopLocalModel();
     json(200, { ok: true });
   });
-  r.add("POST", `${API.localModel}/cancel`, ({ json }) =>
+  r.add("POST", API.localModelUninstall, async ({ json }) => {
+    await engine.uninstallLocalModel();
+    json(200, { ok: true });
+  });
+  r.add("POST", API.localModelCancel, ({ json }) =>
     json(200, { cancelled: engine.cancelLocalTask() }),
   );
 

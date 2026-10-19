@@ -169,3 +169,61 @@ describe("Session history on disk", () => {
     expect(reopened.history().length).toBeLessThanOrEqual(400);
   }, 60_000);
 });
+
+describe("Session history cap without a file", () => {
+  it("keeps an in-memory session's history at 400 states", async () => {
+    // No backing file, so nothing writes the history: the cap must hold on apply itself.
+    const s = fresh();
+    for (let i = 0; i < 450; i++) {
+      await s.apply((p) => ({ ...p, name: `v${i}` }), { label: `edit ${i}` });
+    }
+    expect(s.history().length).toBeLessThanOrEqual(400);
+    expect(s.history().at(-1)).toMatchObject({ current: true, label: "edit 449" });
+    await s.undo();
+    expect(s.project.name).toBe("v448");
+  });
+});
+
+describe("Session autosave failures", () => {
+  it("keeps an edit whose autosave failed and reports it through saveError instead of throwing", async () => {
+    // The backing file lives in a folder that does not exist, so every write fails.
+    const dir = mkdtempSync(join(tmpdir(), "dax-sess-"));
+    try {
+      const s = new Session(addAsset(emptyProject("t"), asset), join(dir, "missing", "p.dax.json"));
+      // Before the fix apply() rejected here while the edit stayed applied, so a retry duplicated it.
+      await s.apply((p) => appendClip(p, "a1"), { label: "Add clip" });
+      expect(timelineDuration(s.project)).toBe(10);
+      expect(s.history().at(-1)).toMatchObject({ label: "Add clip", current: true });
+      expect(s.saveError).toBeTruthy();
+      // An explicit save still throws: the caller asked for the write itself.
+      await expect(s.save()).rejects.toThrow();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("persists a checkpoint name without needing another edit", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "dax-sess-"));
+    try {
+      const file = join(dir, "p.dax.json");
+      const s = await Session.open(file, "t");
+      await s.apply((p) => addAsset(p, asset));
+      await s.saveCheckpoint("before cuts");
+      const reopened = await Session.open(file);
+      expect(reopened.history().find((h) => h.name === "before cuts")).toBeDefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("has no saveError while saves work", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "dax-sess-"));
+    try {
+      const s = await Session.open(join(dir, "p.dax.json"), "t");
+      await s.apply((p) => addAsset(p, asset));
+      expect(s.saveError).toBeUndefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

@@ -15,6 +15,7 @@ import {
   type AgentEvent,
   type CommandResponse,
   type JobInfo,
+  type LocalModelStatus,
   PROVIDER_KINDS,
   type PresetInfo,
   type ProviderKind,
@@ -29,7 +30,6 @@ import type {
   AgentRunner,
   AgentRunnerFactory,
   LocalModelController,
-  LocalModelStatus,
   ProviderRegistry,
   RunnerEnv,
 } from "./interfaces.js";
@@ -43,6 +43,8 @@ import { SERVER_VERSION } from "./version.js";
 
 /** How long provider status is reused before the registry is asked again. */
 const PROVIDER_TTL_MS = 5000;
+/** Answer for a manual edit that arrives while an AI run is active. */
+const BUSY_MESSAGE = "An AI edit is in progress. Wait for it to finish or cancel it first.";
 /** After a cancel, how long to wait for a runner that ignores the abort signal before freeing the `busy` flag anyway. */
 const CANCEL_GRACE_MS = 5000;
 
@@ -78,6 +80,8 @@ export class Engine {
   private readonly processes = new ProcessRegistry();
   private chat: ChatRun | undefined;
   private localTask: AbortController | undefined;
+  /** Set from the moment an export is accepted until it ends; aborting it kills FFmpeg. */
+  private exportAbort: AbortController | undefined;
   private providerCache: { at: number; value: ProviderStatus[] } | undefined;
   private broadcastScheduled = false;
   private broadcastChain: Promise<void> = Promise.resolve();
@@ -166,6 +170,7 @@ export class Engine {
           defaultDuration: p.defaultDuration,
           defaultText: p.defaultText,
           ...(p.defaultSubtitle !== undefined ? { defaultSubtitle: p.defaultSubtitle } : {}),
+          style: p.style,
         }),
       ),
       jobs: this.jobs.list(),
@@ -176,6 +181,8 @@ export class Engine {
     };
     const path = this.projects.projectPath;
     if (path !== undefined) state.projectPath = path;
+    const saveError = session.saveError;
+    if (saveError !== undefined) state.saveError = this.cfg.log.redact(saveError);
     return state;
   }
 
@@ -272,9 +279,11 @@ export class Engine {
     }
     if (name === "export_video") return this.startExport(args);
     // Edits are applied one at a time so two requests cannot interleave their read-modify-write.
-    return this.serial(async () =>
-      toResponse(await tryRunCommand(this.commandContext(), name, args)),
-    );
+    return this.serial(async () => {
+      // Checked again here: an AI run may have started while this call waited for its turn (the check above ran earlier).
+      if (!def.readOnly && this.chat) return { ok: false, error: BUSY_MESSAGE };
+      return toResponse(await tryRunCommand(this.commandContext(), name, args));
+    });
   }
 
   /** Import files by path through `import_media`; each one becomes a history entry and gets a proxy job. */
@@ -285,6 +294,8 @@ export class Engine {
         error: "An AI edit is in progress. Wait for it to finish or cancel it first.",
       };
     return this.serial(async () => {
+      // Checked again inside the queue for the same reason as in runCommand.
+      if (this.chat) return { ok: false, error: BUSY_MESSAGE } as const;
       const assetIds: string[] = [];
       const failed: Array<{ path: string; error: string }> = [];
       for (const path of paths) {
@@ -330,9 +341,13 @@ export class Engine {
    * answered directly; once FFmpeg is running the HTTP response says "started" and the job reports progress.
    */
   private startExport(args: Record<string, unknown>): Promise<CommandResponse> {
-    if (this.jobs.isRunning("export")) {
+    // A synchronous flag, not the job list: the job is only created at the first progress tick, 1-2 s after the
+    // start, and two exports requested in that window would both pass an `isRunning` check.
+    if (this.exportAbort || this.jobs.isRunning("export")) {
       return Promise.resolve({ ok: false, error: "An export is already running." });
     }
+    const abort = new AbortController();
+    this.exportAbort = abort;
     return new Promise<CommandResponse>((resolve) => {
       let job: ReturnType<JobManager["create"]> | undefined;
       let responded = false;
@@ -349,6 +364,9 @@ export class Engine {
         return job;
       };
       const ctx = this.commandContext({
+        signal: abort.signal,
+        // FFmpeg is tracked so shutdown kills it instead of orphaning it.
+        onProcess: (child) => this.processes.add(child),
         onProgress: (fraction) => {
           const j = ensureJob();
           j.progress(fraction);
@@ -356,6 +374,7 @@ export class Engine {
         },
       });
       void tryRunCommand(ctx, "export_video", args).then((out) => {
+        if (this.exportAbort === abort) this.exportAbort = undefined;
         if (out.ok) {
           const j = ensureJob();
           const path = (out.data as { path?: unknown } | undefined)?.path;
@@ -406,6 +425,8 @@ export class Engine {
 
     void (async () => {
       try {
+        // Edits accepted before this run started finish first; new ones are refused while the run is busy.
+        await this.commandChain;
         const runner = await this.resolveRunner();
         await runner.run(message, {
           session: this.projects.session,
@@ -483,6 +504,19 @@ export class Engine {
     this.invalidateProviders();
   }
 
+  /**
+   * Stop the model and delete its downloaded files.
+   * @throws HttpError 409 while a download or start is running, 501 if the controller cannot uninstall.
+   */
+  async uninstallLocalModel(): Promise<void> {
+    const model = this.cfg.localModel;
+    if (!model.uninstall) throw new HttpError(501, "Removing the local model is not supported");
+    if (this.localTask) throw new HttpError(409, "A local model task is already running.");
+    await model.stop();
+    await model.uninstall();
+    this.invalidateProviders();
+  }
+
   /** Abort a running install or start. Returns false if nothing was running. */
   cancelLocalTask(): boolean {
     if (!this.localTask) return false;
@@ -516,6 +550,7 @@ export class Engine {
     this.closing = true;
     this.chat?.abort.abort();
     this.localTask?.abort();
+    this.exportAbort?.abort();
     this.media.shutdown();
     this.processes.killAll();
     await Promise.race([this.cfg.localModel.stop().catch(() => undefined), delay(5000)]);

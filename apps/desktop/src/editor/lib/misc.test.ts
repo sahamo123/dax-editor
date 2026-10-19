@@ -103,23 +103,19 @@ describe("fadeFactor", () => {
 });
 
 describe("waveform parsing", () => {
-  it("accepts a bare array, and objects with peaks, data or samples", () => {
-    expect(parseWaveform([0, 0.5, 1])).toEqual([0, 0.5, 1]);
-    expect(parseWaveform({ peaks: [0.5, 1] })).toEqual([0.5, 1]);
-    expect(parseWaveform({ data: [0.25, 0.5] })).toEqual([0.5, 1]);
-    expect(parseWaveform({ samples: [1, 1] })).toEqual([1, 1]);
+  it("reads the server's waveform format and scales the loudest peak to 1", () => {
+    const wave = (peaks: number[]) => ({ version: 1, duration: 2, peaksPerSecond: 50, peaks });
+    expect(parseWaveform(wave([0, 0.25, 0.5]))).toEqual([0, 0.5, 1]);
+    expect(parseWaveform(wave([0, 0]))).toEqual([0, 0]);
   });
 
-  it("folds negatives to magnitudes and normalises to 1", () => {
-    expect(parseWaveform([-2, 1, 0])).toEqual([1, 0.5, 0]);
-  });
-
-  it("rejects unusable data and keeps silence as zeros", () => {
+  it("rejects anything that is not the protocol's format", () => {
     expect(parseWaveform(null)).toBeNull();
     expect(parseWaveform({})).toBeNull();
-    expect(parseWaveform([])).toBeNull();
-    expect(parseWaveform([0, 0])).toEqual([0, 0]);
-    expect(parseWaveform(["a", 1])).toEqual([0, 1]);
+    // The shapes the editor used to guess at are not what the server sends.
+    expect(parseWaveform([0, 0.5, 1])).toBeNull();
+    expect(parseWaveform({ peaks: [0.5, 1] })).toBeNull();
+    expect(parseWaveform({ version: 1, duration: 1, peaksPerSecond: 50, peaks: [] })).toBeNull();
   });
 
   it("finds the highest peak in a source-time range", () => {
@@ -131,10 +127,10 @@ describe("waveform parsing", () => {
     expect(peakInRange([], 4, 0, 1)).toBe(0);
   });
 
-  it("infers filmstrip frame count from the sprite size and aspect ratio", () => {
-    expect(filmstripFrames({ width: 1920, height: 90 }, 16 / 9)).toBe(12);
-    expect(filmstripFrames({ width: 160, height: 90 }, 16 / 9)).toBe(1);
-    expect(filmstripFrames({ width: 0, height: 0 }, 16 / 9)).toBe(1);
+  it("counts filmstrip frames from the sprite width (the server's frames are 96 px wide)", () => {
+    expect(filmstripFrames({ width: 96 * 12, height: 54 })).toBe(12);
+    expect(filmstripFrames({ width: 96, height: 54 })).toBe(1);
+    expect(filmstripFrames({ width: 0, height: 0 })).toBe(1);
   });
 });
 

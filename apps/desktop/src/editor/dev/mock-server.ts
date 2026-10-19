@@ -124,13 +124,22 @@ export function makeDemoMedia(
     "-i",
     source,
     "-vf",
-    `fps=${FRAMES_PER_SECOND_STRIP},scale=160:90,tile=${frames}x1`,
+    `fps=${FRAMES_PER_SECOND_STRIP},scale=96:54,tile=${frames}x1`,
     "-frames:v",
     "1",
     filmstrip,
   ]);
   const pcm = ffmpeg(["-i", source, "-vn", "-ac", "1", "-ar", "8000", "-f", "s16le", "-"]);
-  writeFileSync(waveform, JSON.stringify({ peaks: computePeaks(pcm, 8000, 50) }));
+  // The real server's format (see WaveformSchema in @dax/protocol).
+  writeFileSync(
+    waveform,
+    JSON.stringify({
+      version: 1,
+      duration: opts.duration,
+      peaksPerSecond: 50,
+      peaks: computePeaks(pcm, 8000, 50),
+    }),
+  );
   return { source, proxy, thumb, filmstrip, waveform, duration: opts.duration };
 }
 

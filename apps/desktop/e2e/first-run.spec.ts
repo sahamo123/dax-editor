@@ -45,10 +45,13 @@ test("imports a video by typed path and shows it in the editor and the media bin
 
   await expect(page.getByText("Video imported.")).toBeVisible();
   await expect(page.getByText("Drop a video here or click Import")).toBeHidden();
-  expect(Object.keys(server.session.project.assets)).toHaveLength(1);
+  expect(Object.keys((await server.project()).assets)).toHaveLength(1);
 
   await page.getByRole("tab", { name: "Media" }).click();
-  await expect(page.getByText("interview.mp4", { exact: true })).toBeVisible();
+  // The timeline labels its clip with the same file name, so look inside the Media panel only.
+  await expect(
+    page.getByRole("tabpanel", { name: "Media" }).getByText("interview.mp4", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("On timeline")).toBeVisible();
   // The thumbnail comes from the server's media pipeline over the token-protected media URL.
   await expect

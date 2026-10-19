@@ -1,7 +1,8 @@
-// Thumbnails along the top of a clip block. Uses the asset's filmstrip sprite (one row of equally spaced frames)
-// as a CSS background, rendering only the tiles inside the visible window, so very long clips stay cheap.
+// Thumbnails along the top of a clip block. Uses the asset's filmstrip sprite (one row of equally spaced 96x54 frames,
+// letterboxed by the server whatever the video's shape) as a CSS background, rendering only the tiles inside the visible window, so very long clips stay cheap.
 // Falls back to the single `thumb.jpg` image, then to a plain gradient, if the server has not produced them yet.
 
+import { FILMSTRIP_FRAME_HEIGHT, FILMSTRIP_FRAME_WIDTH } from "@dax/protocol";
 import { memo } from "react";
 import { filmstripFrames, useImageSize } from "../lib/media-cache";
 import { clamp } from "../lib/time";
@@ -13,8 +14,6 @@ export interface FilmstripProps {
   thumbUrl: string | null;
   /** Length of the whole source file, in seconds, which the sprite spans. */
   assetDuration: number;
-  /** Width / height of the video frame. */
-  aspect: number;
   /** Source time at the left edge of the block. */
   sourceIn: number;
   zoom: number;
@@ -27,14 +26,18 @@ export interface FilmstripProps {
 export const Filmstrip = memo(function Filmstrip(p: FilmstripProps) {
   const sprite = useImageSize(p.spriteUrl);
   const thumbReady = useImageSize(sprite === null ? p.thumbUrl : null);
-  const tileW = Math.max(24, Math.round(THUMB_H * p.aspect));
+  // Frames in the sprite are always 96x54, so tiles keep that shape.
+  const tileW = Math.max(
+    24,
+    Math.round((THUMB_H * FILMSTRIP_FRAME_WIDTH) / FILMSTRIP_FRAME_HEIGHT),
+  );
   const first = Math.max(0, Math.floor(p.fromPx / tileW));
   const last = Math.max(first, Math.ceil(p.toPx / tileW));
   const tiles: number[] = [];
   for (let k = first; k <= last && tiles.length < 80; k++) tiles.push(k);
 
   if (sprite) {
-    const n = filmstripFrames(sprite, p.aspect);
+    const n = filmstripFrames(sprite);
     return (
       <div className="dx-film" aria-hidden="true">
         {tiles.map((k) => {
