@@ -35,6 +35,8 @@ export interface ToolRunnerContext {
   transcriber?: Transcriber | undefined;
   /** The tools offered to the model, by name. Calls to anything else are refused. */
   available: ReadonlyMap<string, ToolSpec>;
+  /** Cancels the call: a cancelled run's command stops (or never starts) instead of changing the project later. */
+  signal?: AbortSignal | undefined;
 }
 
 /** Result of {@link interpretArguments}. */
@@ -144,6 +146,7 @@ export async function runToolCall(
   const commandCtx: CommandContext = { session: ctx.session, source: "ai" };
   if (ctx.allowedRoots) commandCtx.allowedRoots = ctx.allowedRoots;
   if (ctx.transcriber) commandCtx.transcriber = ctx.transcriber;
+  if (ctx.signal) commandCtx.signal = ctx.signal;
   const result = await tryRunCommand(commandCtx, name, args);
   if (!result.ok) return { kind: "failed", error: result.error, args, repaired };
   return { kind: "ok", summary: result.summary, data: result.data, args, repaired };

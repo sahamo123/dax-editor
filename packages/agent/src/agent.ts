@@ -11,6 +11,7 @@ import {
   type Transcriber,
 } from "@dax/core";
 import type { AgentEvent } from "@dax/protocol";
+import { type ContextBudget, contextBudget } from "./budget.js";
 import { buildSystemPrompt } from "./prompt.js";
 import { extractTextToolCalls, stripThinking } from "./text-tool-calls.js";
 import { interpretArguments, registryNames, runToolCall, type ToolOutcome } from "./tool-runner.js";
@@ -23,8 +24,16 @@ export interface CreateAgentOptions {
   provider: AgentProvider;
   /** Commands offered to the model. Default: every command from `commandTools()`. Each must exist in the registry. */
   tools?: ToolSpec[];
-  /** How tools are described to the model. Default `"full"`; use `"compact"` for small local models. */
+  /**
+   * How tools are described to the model. Default: `"compact"` when `contextTokens` is small (see {@link contextBudget}),
+   * otherwise `"full"`. Set it explicitly to override.
+   */
   toolStyle?: ToolStyle;
+  /**
+   * The model's context window in tokens. Sets the defaults for the tool style, the conversation budget and the size of
+   * tool results (see {@link contextBudget}). Explicit `maxToolResultChars` or `maxContextChars` still win.
+   */
+  contextTokens?: number;
   /** Replaces the default system prompt ({@link DEFAULT_SYSTEM_PROMPT}). The notes about export and per-request guidance are still appended. */
   systemPrompt?: string;
   /** Model round trips allowed per run. Default 8. */
@@ -45,9 +54,9 @@ export interface CreateAgentOptions {
   contextProvider?: (message: string) => string | undefined | Promise<string | undefined>;
   /** Stream the model's text as it arrives (many small `text` events) instead of one event per reply. Default false. */
   streamText?: boolean;
-  /** A tool result longer than this many characters is cut. Default 6000. */
+  /** A tool result longer than this many characters is cut. Default from `contextTokens`, else 6000. */
   maxToolResultChars?: number;
-  /** When the conversation is longer than this many characters, results of older tool calls are shortened. Default 60000. */
+  /** When the conversation is longer than this many characters, results of older tool calls are shortened. Default from `contextTokens`, else 60000. */
   maxContextChars?: number;
 }
 
@@ -121,8 +130,6 @@ const DEFAULTS = {
   maxTurns: 8,
   maxToolCallsPerTurn: 8,
   maxRepeatedFailures: 3,
-  maxToolResultChars: 6000,
-  maxContextChars: 60_000,
 } as const;
 
 const NUDGE = "Please tell the user, in one or two short sentences, what you did.";
@@ -139,7 +146,9 @@ export function createAgent(options: CreateAgentOptions): Agent {
     }
   }
   const available = new Map(specs.map((s) => [s.name, s]));
-  const definitions: ToolDefinition[] = specs.map((s) => toToolDefinition(s, options.toolStyle));
+  const style =
+    options.toolStyle ?? (contextBudget(options.contextTokens).compact ? "compact" : "full");
+  const definitions: ToolDefinition[] = specs.map((s) => toToolDefinition(s, style));
   const knownNames = [...new Set([...registryNames(), ...available.keys()])];
 
   return {
@@ -182,6 +191,8 @@ class Loop {
   private readonly maxTurns: number;
   private readonly cap: number;
   private readonly repeatLimit: number;
+  /** Limits derived from the model's context window; explicit options override them. */
+  private readonly budget: ContextBudget;
 
   constructor(
     private readonly options: CreateAgentOptions,
@@ -191,6 +202,7 @@ class Loop {
     this.maxTurns = run.maxTurns ?? options.maxTurns ?? DEFAULTS.maxTurns;
     this.cap = options.maxToolCallsPerTurn ?? DEFAULTS.maxToolCallsPerTurn;
     this.repeatLimit = options.maxRepeatedFailures ?? DEFAULTS.maxRepeatedFailures;
+    this.budget = contextBudget(options.contextTokens);
   }
 
   private emit(event: AgentEvent): void {
@@ -241,6 +253,12 @@ class Loop {
           calls = found.calls;
           text = found.text;
           this.stats.fromText += found.calls.length;
+          // Calls read out of the reply text (common with small local models) are acted on, but the user is told so:
+          // a call quoted from a document would look the same as one the model meant.
+          this.emit({
+            type: "status",
+            text: `Ran ${found.calls.length} tool call(s) that were written as text in the reply.`,
+          });
         }
       }
       const toolCalls = this.withIds(calls);
@@ -334,6 +352,7 @@ class Loop {
           allowedRoots: this.run.allowedRoots,
           transcriber: this.run.transcriber,
           available: this.prepared.available,
+          signal: this.run.signal,
         },
         call,
         truncated,
@@ -347,7 +366,7 @@ class Loop {
       ) {
         call.arguments = outcome.args;
       }
-      const { content, ok, summary } = this.describe(outcome);
+      const { content, ok, summary } = this.describe(outcome, call.name);
       this.count(outcome);
 
       let toModel = content;
@@ -384,22 +403,40 @@ class Loop {
   }
 
   /** The text for the model, whether it counts as success, and the short summary for the UI. */
-  private describe(outcome: ToolOutcome): { content: string; ok: boolean; summary: string } {
+  private describe(
+    outcome: ToolOutcome,
+    name: string,
+  ): { content: string; ok: boolean; summary: string } {
     if (outcome.kind === "ok") {
-      return { content: this.resultText(outcome), ok: true, summary: outcome.summary };
+      return { content: this.resultText(name, outcome), ok: true, summary: outcome.summary };
     }
     return { content: outcome.error, ok: false, summary: outcome.error };
   }
 
-  private resultText(r: CommandResult): string {
+  /**
+   * The result as the model reads it: the summary, then the data as JSON, cut to the budget. A page of a longer list says
+   * where the next page starts, and a cut result says how to ask for less, so the model can read the rest (M8).
+   */
+  private resultText(name: string, r: CommandResult): string {
     if (r.data === undefined) return r.summary;
-    const max = this.options.maxToolResultChars ?? DEFAULTS.maxToolResultChars;
+    const max = this.options.maxToolResultChars ?? this.budget.maxToolResultChars;
     const json = JSON.stringify(r.data);
-    const body =
-      json.length > max
-        ? `${json.slice(0, max)}... [${json.length - max} more characters cut]`
-        : json;
-    return `${r.summary}\n${body}`;
+    const next = pagingOffset(r.data);
+    const nextLine =
+      next === undefined ? "" : `\nMore: call ${name} again with offset ${next} for the rest.`;
+    if (json.length <= max) return `${r.summary}\n${json}${nextLine}`;
+    const how = this.pagingHint(name);
+    return `${r.summary}\n${json.slice(0, max)}... [${json.length - max} more characters cut. ${how}]${nextLine}`;
+  }
+
+  /** How to ask a tool for less at a time, from the parameters it takes. */
+  private pagingHint(name: string): string {
+    const props = this.prepared.available.get(name)?.parameters.properties;
+    const has = (key: string) => isRecord(props) && Object.hasOwn(props, key);
+    if (has("offset"))
+      return `Call ${name} again with a smaller limit, or with offset to read further.`;
+    if (has("from") || has("to")) return `Call ${name} again with a narrower from and to.`;
+    return `Ask ${name} for a smaller part.`;
   }
 
   private addResult(call: ToolCall, content: string, isError: boolean): void {
@@ -411,7 +448,7 @@ class Loop {
    * model replies are shortened (the project can always be re-read with get_project).
    */
   private shortenOldResults(): ChatMessage[] {
-    const limit = this.options.maxContextChars ?? DEFAULTS.maxContextChars;
+    const limit = this.options.maxContextChars ?? this.budget.maxContextChars;
     const size = this.messages.reduce(
       (n, m) =>
         n +
@@ -532,4 +569,15 @@ class TextStreamer {
     if (rest !== "") this.send(rest);
     else if (this.emitted === "" && finalText !== "") this.send(finalText);
   }
+}
+
+/** The `nextOffset` of a paged result, when there is another page. */
+function pagingOffset(data: unknown): number | undefined {
+  if (!isRecord(data)) return undefined;
+  const next = data.nextOffset;
+  return typeof next === "number" && Number.isFinite(next) ? next : undefined;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

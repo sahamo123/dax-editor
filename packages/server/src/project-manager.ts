@@ -28,6 +28,8 @@ export class EngineSession extends Session {
   userSaved: boolean;
   /** Set by the server; called after each change. */
   onChange: () => void = () => undefined;
+  /** Set by the server; called with the error when an autosave after a change fails (the change itself is kept). */
+  onSaveFailed: (err: unknown) => void = () => undefined;
 
   constructor(project: Project, savePath: string, userSaved: boolean) {
     super(project);
@@ -36,8 +38,25 @@ export class EngineSession extends Session {
   }
 
   /** Write the current project to {@link EngineSession.savePath} atomically. */
-  override async save(): Promise<void> {
+  protected override async writeProjectFile(): Promise<void> {
     await writeFileAtomic(this.savePath, JSON.stringify(this.project, null, 2));
+  }
+
+  /**
+   * "Save as": write the project to `path` and only then make it the autosave location. If the write fails
+   * (read-only folder, name taken by a directory) the session keeps saving to where it was before.
+   */
+  async saveAs(path: string): Promise<void> {
+    await writeFileAtomic(path, JSON.stringify(this.project, null, 2));
+    this.savePath = path;
+    this.userSaved = true;
+    // The history follows the project to its new home.
+    await this.saveHistory();
+    this.markSaved();
+  }
+
+  protected override onAutosaveFailed(err: unknown): void {
+    this.onSaveFailed(err);
   }
 
   /** See {@link Session.apply}; also notifies the server. */
@@ -74,6 +93,16 @@ export class EngineSession extends Session {
     } finally {
       this.onChange();
     }
+  }
+
+  /** History is kept beside the project file the user chose or the scratch file, so it follows the project. */
+  protected override get historyFile(): string {
+    return `${this.savePath}.history.json`;
+  }
+
+  /** Load the saved history for this project (ignored if it does not match the project on disk). Call once after construction. */
+  async restoreHistory(): Promise<void> {
+    await this.loadHistory();
   }
 
   /** See {@link Session.checkpoint}; also notifies the server (checkpoint names appear in the history list). */
@@ -160,11 +189,12 @@ export class ProjectManager {
   async save(path?: string): Promise<void> {
     if (path !== undefined) {
       const abs = await this.checkProjectPath(path);
-      this.session.savePath = abs;
-      this.session.userSaved = true;
+      // Commit the new location only after the file is really there, so a failed save-as changes nothing.
+      await this.session.saveAs(abs);
       await this.cfg.appState.setLastProject(abs);
+    } else {
+      await this.session.save();
     }
-    await this.session.save();
     this.cfg.onChange();
   }
 
@@ -205,12 +235,15 @@ export class ProjectManager {
         );
       });
     }
-    return new EngineSession(result.data, file, userSaved);
+    const session = new EngineSession(result.data, file, userSaved);
+    await session.restoreHistory();
+    return session;
   }
 
   private async adopt(session: EngineSession): Promise<void> {
     if (this.opened) await this.opened.save().catch(() => undefined);
     session.onChange = this.cfg.onChange;
+    session.onSaveFailed = (err) => this.cfg.log.warn(`autosave failed: ${String(err)}`);
     this.opened = session;
     await this.cfg.appState.setLastProject(session.savePath);
     this.cfg.onChange();

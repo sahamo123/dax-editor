@@ -150,6 +150,11 @@ export const ProviderConfigSchema = z.object({
   baseUrl: z.string().url().optional(),
   /** Model name to request. */
   model: z.string().min(1).optional(),
+  /**
+   * The model's context window in tokens. Small windows get a compact tool list, fewer skills, smaller tool results and a
+   * shorter conversation. Default: 8192 for the built-in model, 32768 for the others.
+   */
+  contextTokens: z.number().int().min(2048).max(1_000_000).optional(),
 });
 /** A validated {@link ProviderConfigSchema} value. */
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
@@ -308,6 +313,8 @@ export interface StateResponse {
   serverVersion: string;
   /** Path of the open project file, if it has been saved. */
   projectPath?: string;
+  /** Set while the last autosave failed: edits are kept in memory but are not on disk. The UI should warn the user. */
+  saveError?: string;
 }
 
 /** Something that happened during an AI run. The UI renders these as the chat transcript. */

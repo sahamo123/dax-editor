@@ -6,7 +6,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, rename, rm, stat, writeFile } from "node:fs/promises";
 import { basename, join } from "node:path";
-import { type Asset, chooseEncoder, listEncoders, type Project } from "@dax/core";
+import { type Asset, type Project, withEncoderFallback } from "@dax/core";
 import {
   FILMSTRIP_FRAME_HEIGHT,
   FILMSTRIP_FRAME_WIDTH,
@@ -100,11 +100,11 @@ export class PeakAccumulator {
 export class MediaPipeline {
   private readonly entries = new Map<string, Entry>();
   private readonly inflight = new Map<string, Promise<void>>();
-  private readonly blockedEncoders = new Set<string>();
-  private encoders: Promise<Set<string>> | undefined;
   private readonly proxySlots = new Limiter(MAX_PROXY_JOBS);
   private readonly derivedSlots = new Limiter(MAX_DERIVED_TASKS);
   private readonly started = new Set<string>();
+  /** Last setup failure reported per asset id, so retries that fail the same way do not add a job each time. */
+  private readonly setupErrors = new Map<string, string>();
   private readonly abort = new AbortController();
 
   constructor(
@@ -131,12 +131,24 @@ export class MediaPipeline {
       if (this.started.has(asset.id) || this.entries.has(asset.id) || asset.kind === "image")
         continue;
       this.started.add(asset.id);
-      this.start(asset).catch((err) => {
-        // Typically the source file is missing or outside the allowed folders. Show it to the user as a failed job.
-        const msg = isAbortError(err) ? "Cancelled" : message(err);
-        this.cfg.log.warn(`media setup failed for ${asset.id}: ${msg}`);
-        this.cfg.jobs.create("proxy", `Preparing ${basename(asset.path)}`).fail(msg);
-      });
+      this.start(asset).then(
+        () => this.setupErrors.delete(asset.id),
+        (err) => this.setupFailed(asset, err),
+      );
+    }
+  }
+
+  /** Record a setup failure: the attempt is forgotten so a later change retries it, and the user sees the failure once. */
+  private setupFailed(asset: Asset, err: unknown): void {
+    // Typically the source file is missing or outside the allowed folders. Show it to the user as a failed job.
+    const msg = isAbortError(err) ? "Cancelled" : message(err);
+    // Forget the attempt so the next change tries again: the file may be back (a drive remounted, a file restored).
+    this.started.delete(asset.id);
+    this.cfg.log.warn(`media setup failed for ${asset.id}: ${msg}`);
+    // Every change retries, so report a failure once per distinct message rather than once per change.
+    if (this.setupErrors.get(asset.id) !== msg) {
+      this.setupErrors.set(asset.id, msg);
+      this.cfg.jobs.create("proxy", `Preparing ${basename(asset.path)}`).fail(msg);
     }
   }
 
@@ -193,47 +205,39 @@ export class MediaPipeline {
     const gop = String(Math.min(30, Math.max(5, Math.round(fps / 2))));
     const out = join(entry.dir, "proxy.mp4");
     const tmp = join(entry.dir, `proxy.${randomBytes(4).toString("hex")}.tmp.mp4`);
-    const available = new Set(await this.availableEncoders());
-    for (const bad of this.blockedEncoders) available.delete(bad);
-
-    let lastError: unknown = new Error("No usable video encoder found in this FFmpeg build");
-    while (available.size > 0) {
-      const encoder = chooseEncoder(available);
-      try {
-        await runFfmpegProcess({
-          registry: this.cfg.registry,
-          signal: this.abort.signal,
-          args: [
-            ...["-y", "-loglevel", "error", "-nostats", "-progress", "pipe:1"],
-            ...["-i", source, "-map", "0:v:0", "-map", "0:a:0?"],
-            ...["-vf", `scale=-2:'min(${PROXY_HEIGHT},ih)',setsar=1,format=yuv420p`],
-            ...encoderArgs(encoder),
-            ...["-g", gop, "-keyint_min", gop],
-            ...["-c:a", "aac", "-b:a", "96k", "-ac", "2", "-ar", "48000"],
-            ...["-movflags", "+faststart", "-f", "mp4", tmp],
-          ],
-          onOutSeconds: (sec) =>
-            job.progress(0.8 * Math.min(1, sec / Math.max(0.001, entry.asset.duration))),
-        });
-        await rename(tmp, out);
-        this.cfg.log.info(`proxy for ${entry.asset.id} made with ${encoder}`);
-        return;
-      } catch (err) {
-        await rm(tmp, { force: true });
-        if (isAbortError(err)) throw err;
-        // A listed encoder can still fail at run time (for example NVENC without a GPU): try the next one.
-        lastError = err;
-        this.blockedEncoders.add(encoder);
-        available.delete(encoder);
-        this.cfg.log.warn(`encoder ${encoder} failed, trying the next: ${message(err)}`);
-      }
-    }
-    throw lastError;
-  }
-
-  private availableEncoders(): Promise<Set<string>> {
-    this.encoders ??= listEncoders();
-    return this.encoders;
+    // The shared fallback probes a failing encoder with a synthetic frame, so a corrupt source file can never
+    // get an encoder blocked; only an encoder that cannot even encode a generated picture is given up on.
+    const { encoder } = await withEncoderFallback(
+      async (enc) => {
+        try {
+          await runFfmpegProcess({
+            registry: this.cfg.registry,
+            signal: this.abort.signal,
+            args: [
+              ...["-y", "-loglevel", "error", "-nostats", "-progress", "pipe:1"],
+              ...["-i", source, "-map", "0:v:0", "-map", "0:a:0?"],
+              ...["-vf", `scale=-2:'min(${PROXY_HEIGHT},ih)',setsar=1,format=yuv420p`],
+              ...encoderArgs(enc),
+              ...["-g", gop, "-keyint_min", gop],
+              ...["-c:a", "aac", "-b:a", "96k", "-ac", "2", "-ar", "48000"],
+              ...["-movflags", "+faststart", "-f", "mp4", tmp],
+            ],
+            onOutSeconds: (sec) =>
+              job.progress(0.8 * Math.min(1, sec / Math.max(0.001, entry.asset.duration))),
+          });
+          await rename(tmp, out);
+        } catch (err) {
+          await rm(tmp, { force: true });
+          throw err;
+        }
+      },
+      {
+        signal: this.abort.signal,
+        onFallback: (enc, err) =>
+          this.cfg.log.warn(`encoder ${enc} is unusable, trying the next: ${message(err)}`),
+      },
+    );
+    this.cfg.log.info(`proxy for ${entry.asset.id} made with ${encoder}`);
   }
 
   private async bestEffort(fn: () => Promise<unknown>, asset: Asset, what: string): Promise<void> {

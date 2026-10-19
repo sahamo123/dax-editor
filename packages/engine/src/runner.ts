@@ -4,9 +4,12 @@
 import {
   type AgentProvider,
   type ChatMessage,
+  contextBudget,
   createAgent,
   createAnthropicProvider,
   createOpenAiProvider,
+  smallModelTools,
+  trimHistory,
 } from "@dax/agent";
 import {
   loadSkills,
@@ -19,12 +22,24 @@ import {
 import type { ProviderKind } from "@dax/protocol";
 import type { AgentRunner, AgentRunnerFactory, RunnerEnv } from "@dax/server";
 
+/** Context window assumed for the built-in model when Settings says nothing (it is a small model). */
+const BUILT_IN_CONTEXT_TOKENS = 8192;
+
 /** Default model names per hosted provider; users can override them in Settings. */
 export const DEFAULT_MODELS: Partial<Record<ProviderKind, string>> = {
   anthropic: "claude-sonnet-5-5",
   "openai-compatible": "gpt-5-mini",
   local: "local",
 };
+
+/** The host part of a URL for messages, or a placeholder when it does not parse. */
+function safeHost(baseUrl: string): string {
+  try {
+    return new URL(baseUrl).host || "the configured address";
+  } catch {
+    return "the configured address";
+  }
+}
 
 /** Where the embedded model's OpenAI-compatible endpoint is, or undefined when it is not running. */
 export type LocalEndpoint = () => Promise<string | undefined>;
@@ -43,6 +58,24 @@ export interface RunnerFactoryOptions {
    */
   extraProviders?: (kind: ProviderKind, env: RunnerEnv) => Promise<AgentRunner | undefined>;
 }
+
+/**
+ * True when an API key may be sent to `baseUrl`: an https address, or plain http to this machine only. A key sent in
+ * clear text over the network could be read by anyone on the path, so such a configuration is refused (L3).
+ */
+export function keyMayGoTo(baseUrl: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    return false;
+  }
+  if (url.protocol === "https:") return true;
+  return url.protocol === "http:" && LOOPBACK_HOSTS.has(url.hostname);
+}
+
+/** Host names that always mean this machine. */
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 /** A runner that only explains why nothing happened. */
 function unavailable(message: string): AgentRunner {
@@ -71,31 +104,41 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
   const skills = safeLoadSkills(options.skillsDir);
   let historySession: Session | undefined;
   let history: ChatMessage[] = [];
+  /** Incremented for every run. Only the newest run may store its conversation, so an old run that outlives its cancel cannot overwrite it. */
+  let generation = 0;
 
   /** Make a provider for `kind`, or an explanation of what is missing. */
   async function makeProvider(
     kind: ProviderKind,
     env: RunnerEnv,
-  ): Promise<{ provider: AgentProvider; compact: boolean } | string> {
+  ): Promise<{ provider: AgentProvider; contextTokens?: number } | string> {
     const cfg = env.settings.providers[kind] ?? {};
     const model = cfg.model ?? DEFAULT_MODELS[kind];
     if (kind === "anthropic") {
       const apiKey = await env.getApiKey(kind);
       if (!apiKey) return "Add an Anthropic API key in Settings to use Claude.";
-      return { provider: createAnthropicProvider({ apiKey, model: model ?? "" }), compact: false };
+      return {
+        provider: createAnthropicProvider({ apiKey, model: model ?? "" }),
+        ...(cfg.contextTokens ? { contextTokens: cfg.contextTokens } : {}),
+      };
     }
     if (kind === "openai-compatible") {
       if (!cfg.baseUrl)
         return "Set the server address (base URL) for your OpenAI-compatible provider in Settings.";
       const apiKey = await env.getApiKey(kind);
+      if (apiKey && !keyMayGoTo(cfg.baseUrl)) {
+        // Name the host only: the address may carry credentials or a path that should not be echoed.
+        const host = safeHost(cfg.baseUrl);
+        return `Your API key would be sent over an unencrypted connection to ${host}. Use an https:// address, or remove the key.`;
+      }
       return {
         provider: createOpenAiProvider({
           baseUrl: cfg.baseUrl,
           model: model ?? "",
           ...(apiKey ? { apiKey } : {}),
         }),
-        // Hosted models cope with full tool descriptions; compact is for small local ones.
-        compact: false,
+        // Unset means a large hosted model; set a smaller window in Settings for a small model behind this address.
+        ...(cfg.contextTokens ? { contextTokens: cfg.contextTokens } : {}),
       };
     }
     if (kind === "local") {
@@ -103,7 +146,8 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       if (!baseUrl) return "The built-in model is not running. Download and start it in Settings.";
       return {
         provider: createOpenAiProvider({ baseUrl, model: model ?? "local" }),
-        compact: true,
+        // The built-in model is small; its window is what the Settings value says, else the built-in default.
+        contextTokens: cfg.contextTokens ?? BUILT_IN_CONTEXT_TOKENS,
       };
     }
     return `The ${kind} provider is not available in this build.`;
@@ -115,29 +159,37 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
     if (typeof made === "string") {
       return (await options.extraProviders?.(kind, env)) ?? unavailable(made);
     }
+    // Everything small-model related follows from the window size: tool style, which tools are offered, how many skills
+    // fit and how much conversation is kept.
+    const budget = contextBudget(made.contextTokens);
     const agent = createAgent({
       provider: made.provider,
-      toolStyle: made.compact ? "compact" : "full",
+      contextTokens: budget.contextTokens,
+      toolStyle: budget.compact ? "compact" : "full",
+      ...(budget.compact ? { tools: smallModelTools() } : {}),
       contextProvider: (message) =>
         skills.length > 0
-          ? skillContext(selectSkills(message, skills, { maxChars: made.compact ? 3000 : 6000 }))
+          ? skillContext(selectSkills(message, skills, { maxChars: budget.skillChars }))
           : undefined,
     });
     return {
       async run(message, ctx) {
+        const mine = ++generation;
         if (historySession !== ctx.session) {
           historySession = ctx.session;
           history = [];
         }
+        // The run gets its own copy, so nothing it does to its array reaches the stored conversation.
         const result = await agent.run(message, {
           session: ctx.session,
-          history,
+          history: [...history],
           onEvent: ctx.onEvent,
           signal: ctx.signal,
           allowedRoots: [...ctx.allowedRoots],
           ...(options.transcriber ? { transcriber: options.transcriber } : {}),
         });
-        history = result.messages;
+        // Only the newest run's conversation is kept, and only its most recent part (about the window the model can see).
+        if (mine === generation) history = trimHistory(result.messages, budget.maxContextChars);
       },
     };
   };

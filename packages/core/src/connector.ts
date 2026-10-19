@@ -1,7 +1,7 @@
 // Where media comes from and goes to: the Connector interface and the local-disk implementation. Cloud providers implement the same interface.
 
-import { copyFile, mkdir, readdir, stat } from "node:fs/promises";
-import { basename, isAbsolute, join, relative, resolve } from "node:path";
+import { copyFile, mkdir, readdir, realpath, stat } from "node:fs/promises";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 
 /**
  * True when `child` is `root` itself or lives somewhere beneath it.
@@ -11,6 +11,26 @@ import { basename, isAbsolute, join, relative, resolve } from "node:path";
 export function isPathInside(root: string, child: string): boolean {
   const rel = relative(root, child);
   return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
+}
+
+/**
+ * The real location of `path`: symlinks resolved for the deepest part that exists, with the missing tail re-attached.
+ * Lets a file that does not exist yet (an export target) be checked against the folders it would land in.
+ */
+export async function realpathOfNearest(path: string): Promise<string> {
+  const missing: string[] = [];
+  let current = resolve(path);
+  for (;;) {
+    try {
+      return resolve(await realpath(current), ...missing.reverse());
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+      const parent = dirname(current);
+      if (parent === current) return resolve(path);
+      missing.push(current.slice(parent.length + 1));
+      current = parent;
+    }
+  }
 }
 
 /** A file or folder as listed by a {@link Connector}. */

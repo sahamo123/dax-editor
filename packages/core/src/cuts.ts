@@ -5,7 +5,7 @@
 
 import { spawn } from "node:child_process";
 import { resolve } from "node:path";
-import { ffmpegBin } from "./exec.js";
+import { abortError, ffmpegBin, type RunOptions } from "./exec.js";
 import { newId } from "./ids.js";
 import type { Project, Range, Transcript, Word } from "./schema.js";
 import { assetRangesToTimeline, deleteRanges, mergeRanges } from "./timeline.js";
@@ -26,8 +26,9 @@ const FRAME_SAMPLES = 320; // 20 ms
  * Measure the loudness of a file's audio in 20 ms frames (RMS in dBFS). Decodes to mono 16 kHz and
  * streams the result, so memory stays small for long files. Silence reads as -100.
  */
-export function analyzeAudio(path: string): Promise<AudioLevels> {
+export function analyzeAudio(path: string, opts: RunOptions = {}): Promise<AudioLevels> {
   return new Promise((res, rej) => {
+    if (opts.signal?.aborted) return rej(abortError());
     const child = spawn(
       ffmpegBin(),
       [
@@ -47,6 +48,9 @@ export function analyzeAudio(path: string): Promise<AudioLevels> {
       ],
       { stdio: ["ignore", "pipe", "pipe"] },
     );
+    // Cancelling kills the decoder; the close handler then reports the cancel rather than a failed read.
+    const onAbort = () => child.kill("SIGKILL");
+    opts.signal?.addEventListener("abort", onAbort, { once: true });
     const db: number[] = [];
     let carry: Buffer = Buffer.alloc(0);
     let stderr = "";
@@ -69,9 +73,14 @@ export function analyzeAudio(path: string): Promise<AudioLevels> {
       }
       carry = buf.subarray(offset);
     });
-    child.on("error", rej);
+    child.on("error", (err) => {
+      opts.signal?.removeEventListener("abort", onAbort);
+      rej(err);
+    });
     child.on("close", (code) => {
-      if (code === 0) res({ frameSeconds: FRAME_SAMPLES / SAMPLE_RATE, db });
+      opts.signal?.removeEventListener("abort", onAbort);
+      if (opts.signal?.aborted) rej(abortError());
+      else if (code === 0) res({ frameSeconds: FRAME_SAMPLES / SAMPLE_RATE, db });
       else
         rej(
           new Error(
