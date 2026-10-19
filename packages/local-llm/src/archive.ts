@@ -6,8 +6,20 @@
  * need (`libllama.so -> libllama.so.0`). Does no network I/O.
  */
 import { createReadStream } from "node:fs";
-import { chmod, copyFile, mkdir, open, rename, rm, symlink, writeFile } from "node:fs/promises";
-import { dirname, isAbsolute, normalize, relative, resolve, sep } from "node:path";
+import {
+  chmod,
+  copyFile,
+  lstat,
+  mkdir,
+  open,
+  readlink,
+  realpath,
+  rename,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import { dirname, isAbsolute, join, normalize, parse, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 import { createGunzip, inflateRaw } from "node:zlib";
 import { ArchiveError } from "./errors.js";
@@ -64,6 +76,75 @@ function insideRoot(root: string, entryPath: string): string {
   return full;
 }
 
+/** True for the errors that mean "this path does not exist (yet)". */
+function isMissing(error: unknown): boolean {
+  const code = (error as NodeJS.ErrnoException).code;
+  return code === "ENOENT" || code === "ENOTDIR";
+}
+
+/**
+ * Throw if any existing component of `target` below `absRoot` is a symbolic link. The last
+ * component is not checked: removing or replacing a link does not write through it. Writing
+ * through a link would let an archive redirect the write outside the destination, so the
+ * extractor refuses rather than follows.
+ */
+async function refuseSymlinkAncestors(absRoot: string, target: string): Promise<void> {
+  const parts = relative(absRoot, target).split(sep);
+  let current = absRoot;
+  for (const part of parts.slice(0, -1)) {
+    current = join(current, part);
+    let info: Awaited<ReturnType<typeof lstat>>;
+    try {
+      info = await lstat(current);
+    } catch (error) {
+      // Nothing below a missing component can exist, so there is nothing left to check.
+      if (isMissing(error)) return;
+      throw error;
+    }
+    if (info.isSymbolicLink()) {
+      throw new ArchiveError(`Refusing to write through the symbolic link ${current}`);
+    }
+  }
+}
+
+/**
+ * The real location of `path` as the kernel would resolve it, judged against the file system
+ * right now. Every symbolic link is followed, including a link whose target does not exist yet,
+ * and `..` is applied after the links before it, so `s1/../x` with `s1 -> sub/..` ends up beside
+ * the root, not inside it. `base` must already be a real path; `path` may be absolute.
+ *
+ * @throws ArchiveError when links nest deeper than 40 levels (a loop).
+ */
+async function resolveThroughLinks(base: string, path: string, depth = 0): Promise<string> {
+  if (depth > 40) throw new ArchiveError(`Too many levels of symbolic links: ${path}`);
+  let current = isAbsolute(path) ? parse(path).root : base;
+  for (const part of path.split(/[\\/]+/)) {
+    if (part === "" || part === ".") continue;
+    if (part === "..") {
+      // Only reached with a real `current`, so the parent is the kernel's answer too.
+      current = dirname(current);
+      continue;
+    }
+    const next = join(current, part);
+    let info: Awaited<ReturnType<typeof lstat>>;
+    try {
+      info = await lstat(next);
+    } catch (error) {
+      // Missing: everything after this point is lexical, as no links can exist below it.
+      if (!isMissing(error)) throw error;
+      current = next;
+      continue;
+    }
+    if (info.isSymbolicLink()) {
+      // The link's target is resolved relative to the directory that holds the link.
+      current = await resolveThroughLinks(current, await readlink(next), depth + 1);
+    } else {
+      current = next;
+    }
+  }
+  return current;
+}
+
 /** If every entry lives under the same top-level directory, return its name. */
 function commonRoot(entries: Entry[]): string | undefined {
   let root: string | undefined;
@@ -95,11 +176,13 @@ async function writeEntries(entries: Entry[], destDir: string, options: ExtractO
     if (rel === "" || rel === root) continue;
     const target = insideRoot(absRoot, rel);
     if (entry.kind === "dir") {
+      await refuseSymlinkAncestors(absRoot, target);
       await mkdir(target, { recursive: true });
     } else if (entry.kind === "symlink") {
       // Created after the regular files so a link can never be used to redirect a later write.
       symlinks.push({ ...entry, path: rel });
     } else {
+      await refuseSymlinkAncestors(absRoot, target);
       await mkdir(dirname(target), { recursive: true });
       const data = await (entry.read?.() ?? Promise.resolve(Buffer.alloc(0)));
       total += data.length;
@@ -111,27 +194,54 @@ async function writeEntries(entries: Entry[], destDir: string, options: ExtractO
     }
   }
 
-  for (const link of symlinks) {
-    const target = insideRoot(absRoot, link.path);
-    const linkTarget = link.linkTarget ?? "";
-    // The link must resolve to somewhere inside the destination, otherwise it could be used to
-    // overwrite files elsewhere when something later writes through it.
-    const resolved = resolve(dirname(target), linkTarget);
-    const rel = relative(absRoot, resolved);
-    if (isAbsolute(linkTarget) || !isWithin(rel)) {
-      throw new ArchiveError(
-        `Archive symlink ${link.path} points outside the target: ${linkTarget}`,
-      );
+  // Links are judged against the real file system, not by string arithmetic: a link can point
+  // through another link, and only the kernel's answer says where it really leads.
+  const rootReal = await realpath(absRoot);
+  const created: string[] = [];
+  try {
+    for (const link of symlinks) {
+      const target = insideRoot(absRoot, link.path);
+      const linkTarget = link.linkTarget ?? "";
+      if (isAbsolute(linkTarget)) {
+        throw new ArchiveError(
+          `Archive symlink ${link.path} points outside the target: ${linkTarget}`,
+        );
+      }
+      await refuseSymlinkAncestors(absRoot, target);
+      await mkdir(dirname(target), { recursive: true });
+      // Where the link would lead, from the real parent directory. Checked before creating it.
+      const parentReal = await resolveThroughLinks(rootReal, relative(absRoot, dirname(target)));
+      const dest = await resolveThroughLinks(parentReal, linkTarget);
+      if (!isWithin(relative(rootReal, dest))) {
+        throw new ArchiveError(
+          `Archive symlink ${link.path} points outside the target: ${linkTarget}`,
+        );
+      }
+      await rm(target, { force: true });
+      try {
+        await symlink(linkTarget, target);
+      } catch (error) {
+        // Windows without symlink privilege: fall back to a copy of the target when it exists.
+        if (process.platform !== "win32") throw error;
+        await copyFile(dest, target);
+      }
+      created.push(target);
     }
-    await mkdir(dirname(target), { recursive: true });
-    await rm(target, { force: true });
-    try {
-      await symlink(linkTarget, target);
-    } catch (error) {
-      // Windows without symlink privilege: fall back to a copy of the target when it exists.
-      if (process.platform !== "win32") throw error;
-      await copyFile(resolved, target);
+    // Links created later can change where an earlier link leads, so check every link once more
+    // now that all of them exist.
+    for (const target of created) {
+      const real = await resolveThroughLinks(rootReal, relative(absRoot, target));
+      if (!isWithin(relative(rootReal, real))) {
+        throw new ArchiveError(
+          `Archive symlink ${relative(absRoot, target)} points outside the target`,
+        );
+      }
     }
+  } catch (error) {
+    // Do not leave links behind that point outside the destination, even when the caller
+    // extracts straight into a directory instead of a staging folder.
+    for (const target of created) await rm(target, { force: true });
+    throw error;
   }
 }
 

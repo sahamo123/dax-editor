@@ -27,6 +27,16 @@ afterEach(() => {
 
 const posix = process.platform !== "win32";
 
+/** True when something (a file, a directory or a link, even a dangling one) sits at `path`. */
+function linkExists(path: string): boolean {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const release: TestEntry[] = [
   { path: "llama-b1/" },
   { path: "llama-b1/llama-server", content: "#!/bin/sh\necho hi\n", mode: 0o755 },
@@ -135,6 +145,40 @@ describe.each([
     const out = join(dir, "out");
     await extract(archive, out);
     expect(readlinkSync(join(out, "link"))).toBe("..cfg");
+  });
+
+  it.skipIf(!posix)(
+    "refuses a chain of symlinks that only escapes once the links are followed",
+    async () => {
+      const archive = join(dir, file);
+      writeFileSync(
+        archive,
+        make([
+          { path: "sub/" },
+          // s1 is the destination itself: sub/.. resolves to the root.
+          { path: "s1", symlink: "sub/.." },
+          // Lexically this stays inside, but s1/.. is the parent of the root.
+          { path: "s2", symlink: "s1/../escaped" },
+          // A later entry writes through s2 into the parent directory.
+          { path: "s2/planted", symlink: "x" },
+        ]),
+      );
+      // The escape target exists so that a write through the chain would succeed silently.
+      mkdirSync(join(dir, "escaped"));
+      await expect(extract(archive, join(dir, "out"))).rejects.toBeInstanceOf(ArchiveError);
+      expect(linkExists(join(dir, "escaped", "planted"))).toBe(false);
+    },
+  );
+
+  it.skipIf(!posix)("refuses to write through a symlink that stays inside the target", async () => {
+    const archive = join(dir, file);
+    writeFileSync(
+      archive,
+      make([{ path: "sub/" }, { path: "ln", symlink: "sub" }, { path: "ln/x", symlink: "y" }]),
+    );
+    const out = join(dir, "out");
+    await expect(extract(archive, out)).rejects.toBeInstanceOf(ArchiveError);
+    expect(linkExists(join(out, "sub", "x"))).toBe(false);
   });
 
   it("handles empty files and many files", async () => {
