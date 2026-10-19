@@ -16,3 +16,4 @@ export {
   localProviderSettings,
   type RunnerFactoryOptions,
 } from "./runner.js";
+export { createSpeechTranscriber, unavailableReason, withUnavailableMessages } from "./speech.js";

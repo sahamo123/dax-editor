@@ -12,9 +12,11 @@ import {
   type ServerOptions,
   startServer,
 } from "@dax/server";
+import type { CreateTranscriberOptions } from "@dax/stt";
 import { createLocalModelController, localConnection } from "./local-model.js";
 import { createProviderRegistry } from "./providers.js";
 import { createRunnerFactory, type RunnerFactoryOptions } from "./runner.js";
+import { createSpeechTranscriber } from "./speech.js";
 
 /** Options for {@link launch}. */
 export interface LaunchOptions
@@ -24,8 +26,16 @@ export interface LaunchOptions
   > {
   /** Skills folder. Default: `$DAX_SKILLS_DIR`, else the nearest `skills/` above this package. */
   skillsDir?: string;
-  /** Speech-to-text engine. */
-  transcriber?: Transcriber;
+  /**
+   * Speech-to-text engine used by the `transcribe` command. Default: whisper.cpp through `@dax/stt` (see
+   * {@link speechOptions}). Pass an instance to inject one (tests use fakes); pass `false` to have no speech-to-text.
+   */
+  transcriber?: Transcriber | false;
+  /**
+   * Options for the default speech engine (for example a `binaryPath`, a model id, or `autoInstall` to allow the first
+   * use to download the runtime and model). The data folder is always the server's. Ignored when `transcriber` is given.
+   */
+  speechOptions?: Omit<CreateTranscriberOptions, "dataDir">;
   /**
    * Embedded model controller; its endpoint is used by the `local` provider. Default: a controller over a
    * `LocalModelManager` in the data folder (nothing is downloaded or started until the user asks). Pass an instance to
@@ -79,13 +89,19 @@ function hasSkillFolder(dir: string): boolean {
 export async function launch(options: LaunchOptions): Promise<RunningServer> {
   const {
     skillsDir,
-    transcriber,
+    transcriber: transcriberOption,
+    speechOptions,
     localModelController,
     localModelOptions,
     extraProviders,
     cliBridges,
     ...server
   } = options;
+  // Speech-to-text is on by default. It sets itself up only on first use and reports what is missing instead of failing.
+  const transcriber: Transcriber | undefined =
+    transcriberOption === false
+      ? undefined
+      : (transcriberOption ?? createSpeechTranscriber(server.dataDir, speechOptions));
   // The built-in model is on by default; `false` leaves the server's own "not supported in this build" controller in place.
   const local: LocalModelController | undefined =
     localModelController === false

@@ -31,7 +31,8 @@
     "@dax/core": "workspace:*",
     "@dax/local-llm": "workspace:*",
     "@dax/protocol": "workspace:*",
-    "@dax/server": "workspace:*"
+    "@dax/server": "workspace:*",
+    "@dax/stt": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

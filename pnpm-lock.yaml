@@ -208,6 +208,9 @@ importers:
       '@dax/server':
         specifier: workspace:*
         version: link:../server
+      '@dax/stt':
+        specifier: workspace:*
+        version: link:../stt
     devDependencies:
       '@types/node':
         specifier: ^22.0.0

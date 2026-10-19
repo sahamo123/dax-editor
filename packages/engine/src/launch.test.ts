@@ -70,6 +70,20 @@ async function providers(info: { url: string; token: string }): Promise<Provider
   return (await res.json()) as ProviderStatus[];
 }
 
+/** Run a registry command on a started engine and return its reply, the way the desktop app does. */
+async function runCommand(
+  info: { url: string; token: string },
+  name: string,
+  args: Record<string, unknown>,
+): Promise<{ ok: boolean; error?: string }> {
+  const res = await fetch(`${info.url}${API.command}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${info.token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ name, args }),
+  });
+  return (await res.json()) as { ok: boolean; error?: string };
+}
+
 /** Headers for a JSON call to a started engine, with its token. */
 function authed(info: { token: string }): Record<string, string> {
   return { Authorization: `Bearer ${info.token}`, "Content-Type": "application/json" };
@@ -109,6 +123,37 @@ describe("launch and the CLI bridges", () => {
       available: false,
       detail: "Sign-in bridge not installed in this build",
     });
+  });
+});
+
+describe("launch and speech-to-text", () => {
+  it("hands the default speech engine to the server, so transcribe gets past the 'not set up' check", async () => {
+    dataDir = mkdtempSync(join(tmpdir(), "dax-launch-"));
+    const server = await launch({
+      dataDir,
+      port: 0,
+      cliBridges: false,
+      localModelController: false,
+    });
+    running = server;
+    // With no such asset the command stops at the asset lookup, which is only reached when a transcriber is wired in.
+    const reply = await runCommand(server.info, "transcribe", { assetId: "no-such-asset" });
+    expect(reply.ok).toBe(false);
+    expect(reply.error).not.toContain("not set up");
+  });
+
+  it("has no speech-to-text when it is turned off", async () => {
+    dataDir = mkdtempSync(join(tmpdir(), "dax-launch-"));
+    const server = await launch({
+      dataDir,
+      port: 0,
+      cliBridges: false,
+      localModelController: false,
+      transcriber: false,
+    });
+    running = server;
+    const reply = await runCommand(server.info, "transcribe", { assetId: "no-such-asset" });
+    expect(reply).toMatchObject({ ok: false, error: expect.stringContaining("not set up") });
   });
 });
 
