@@ -19,6 +19,36 @@ Experiment scripts live in `/tmp/claude-0/cuts/` (not committed). Fixtures are s
 
 ---
 
+## Implementation status
+
+Checked against the code on 2026-10-19: branch `claude/exciting-lamport-1k91fh`, after commits `f51f16f` (breaths) and `9524c80` (eval tasks). "Built" means the behaviour is in `packages/core` or `packages/evals` and a test measures its output, not only the plan it returns.
+
+| Part of the design | Status | Where, and how it is tested |
+|---|---|---|
+| Floor-relative speech detection, hysteresis, the five presets | Built | `cuts.ts` (`detectSpeechSpans`, `CUT_PRESETS`); `cuts.test.ts` |
+| A pause is cut only where the audio is silent; music and laughter stay as proposals | Built | `planCuts` with `levels` (`non_silent_gap`); `cut-quality.test.ts` |
+| Word tails and soft onsets kept at the cut edges | Built | `growPastTail`, `growBeforeOnset`, `clippedTailRatio`; `cut-quality.test.ts` |
+| Breaths kept and attenuated inside a shortened pause (section 2) | Built, with the deviations below | `findBreaths`, `applyCutPlan`, `setAssetRangesGain`; `breath.test.ts`. Measured on a generated recording: breath band level -12.05 dB, speech changed by 0.01 dB, second run changes nothing |
+| Retakes and false starts as proposals only | Built as proposals only | `planCuts` (kinds `retake`, `false_start`, status `proposed`); `cut-quality.test.ts` |
+| Cuts on the frame grid, one fps pass per source (A/V sync) | Built | `timeline.ts` (`snapToFrame`), `render.ts`; `av-sync-render.test.ts`; see [A/V sync and breath recipes](av-sync-and-breath-recipes.md) |
+| Eval: music bed kept | Built as an eval task | `music-bed-gap-preserved`, check `toneSeconds` |
+| Eval: clipped-tail share under a threshold (section 5) | Built as an eval task | `word-tails-kept`, check `clippedTail` (`clippedTailRatio`) |
+| Eval: drift over 60 joins, end times within one frame | Built as an eval task | `drift-sixty-joins`, check `avSync` (the measurement is also tested on a file with audio past its picture) |
+| Eval: a retake is a proposal, never applied silently | Built as an eval task | `retake-proposal-only`, check `sourceKept` |
+| Section 5 metrics: words truncated, join discontinuity and level step, pad adequacy, filler precision and recall, retake choice accuracy, plan validity, over-cut guard | Not built | No check yet |
+| Visual idle detection for screen recordings (section 6) | Not built | |
+| Off-topic proposals and model choice among plan items (section 4) | Not built | |
+| Breath detection by spectral flatness (section 2) | Not built | Breaths are found by level, length and distance from the words only |
+
+**Deviations from the design, and why:**
+
+- **Breath depth is the same in every preset:** -12 dB. The preset table gives `gentle` "keep" (no attenuation), `tight` "remove if longer than 0.25 s", and `podcast` -10 dB. Only the standard value is built. The per-preset values need a setting and a decision on `gentle`.
+- **A kept breath lengthens its pause.** Silence before the breath is kept with it, and the cut resumes 0.1 s after the breath. The output gap is therefore longer than `keep_pause` + 0.05 s when a breath is kept (section 5.3, step 4 of the A/V note; a product choice still open there).
+- **The breath gain is a step, not a ramp.** It changes the clip volume at the breath edges, so the gain moves in one sample. The step is up to about three quarters of the breath's amplitude at that instant. The split there is inside one source, so no picture join is added. The "no click" test is a guard against a larger step, not a proof that no click is audible.
+- **Retakes are never applied automatically.** The table allows auto-apply at confidence 0.9 or more for `standard` and `tight`. That is not built: a repeated take stays a proposal until a person approves it.
+
+---
+
 ## Recommendation: the cut engine
 
 **Core idea.** The cut engine is deterministic. Signal analysis and transcript timing propose and validate every cut. A language model, if used, only chooses among candidates the engine already validated, by id, never by timestamp. Every decision is a reviewable item with a reason, a confidence and a kind, so the user can approve, reject or undo each one.
