@@ -21,6 +21,7 @@ Hard constraints, in priority order:
 | `packages/evals` | Harness that scores how well a model edits video. See its `AGENTS.md`. |
 | `packages/cli` | The `dax` command line over the command registry. See its `AGENTS.md`. |
 | `packages/mcp` | The MCP server (`dax-mcp`): every command as a tool, stdio and loopback HTTP. See its `AGENTS.md`. |
+| `packages/bridges` | Chat backends that drive the user's own signed-in CLI (Claude Code first). Never reads credentials. See its `AGENTS.md`. |
 | `docs/` | The knowledge base, an Open Knowledge Format bundle. Start at `docs/index.md`; current state is `docs/STATUS.md`; history is `docs/log.md`. |
 | `.github/` | CI, issue/PR templates, CODEOWNERS. |
 | `scripts/`, `.githooks/` | Bootstrap script and git hooks. |

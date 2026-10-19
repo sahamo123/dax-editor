@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@dax/agent": "workspace:*",
+    "@dax/bridges": "workspace:*",
     "@dax/core": "workspace:*",
     "@dax/protocol": "workspace:*",
     "@dax/server": "workspace:*"

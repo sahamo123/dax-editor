@@ -36,6 +36,7 @@ The engine, command registry, skills, templates, agent, engine server and launch
 - **Core engine basics**: FFmpeg probe, silence detection and scene detection; transcript helpers; `Connector` interface (local).
 - **Shared contract** (`packages/protocol`, `@dax/protocol`): request, response and event types for the server, desktop UI and agent, including the local-model, job, chat and import reply shapes as zod schemas. The server is the source of truth; the desktop client checks the shapes it cannot guess.
 - **Desktop e2e against the real engine** (`apps/desktop/e2e`): Playwright runs the app against the real `@dax/server` in-process (fake assistant and local model only) and against the real `dax-engine` process (`pnpm --filter @dax/desktop test:e2e`).
+- **CLI bridges** (`packages/bridges`, `@dax/bridges`, see [CLI bridges](architecture/cli-bridges.md)): Claude Code runs as a chat backend through the user's own signed-in `claude` binary. dax exposes its editing tools over a per-run loopback MCP endpoint on the live project session, and edits are credited to `ai`. The CLI may use only those tools. Settings shows not installed, not signed in, or ready. Codex is detected and reported as not supported yet. Gemini is deliberately not supported. Tested with a fake CLI, plus a recorded real run. Credentials are never read.
 - **Evals harness** (`packages/evals`): oracle adapter passes 3/3 starter tasks.
 - **Tooling**: `pnpm check` runs lint, typecheck, knowledge-base validation, doc coverage, dead-code check and tests across all packages. Test totals, all passing: core 365, desktop 292, agent 157, server 116, MCP 52, CLI 25, evals 21, protocol 5, engine 3, scripts 14.
 - **Dev environment**: Biome lint and format, TypeDoc doc-coverage gate, knip dead-code check, git hooks (the pre-commit hook blocks commits that fail lint), AGENTS.md and contributor docs.
@@ -52,8 +53,8 @@ Built in separate git worktrees under `.claude/worktrees`. None of these is merg
 - Tauri shell (`apps/desktop/src-tauri`).
 - Reconciling the desktop client with the engine server API.
 - Core engine: zoom keyframes, music ducking and image overlays.
-- CLI sign-in bridges to the user's own subscriptions: Claude Code first, Codex second. No Gemini consumer bridge.
 - Scouts on cut-quality field notes, audio enhancement and screen recording.
+- CLI bridges, open items: Codex needs a confirmed per-run MCP setup before it can run (API key first, subscription sign-in opt-in). The Claude bridge still needs a live end-to-end check on each supported Claude Code version, and a written answer from Anthropic on the bridge (the compliance page suggests asking sales).
 
 ## Next up (in priority order)
 

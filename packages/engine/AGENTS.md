@@ -10,9 +10,9 @@ The launcher: starts `@dax/server` with the AI agent, skills, provider registry 
 
 | File | Responsibility |
 |---|---|
-| `launch.ts` | `launch()`: builds the runner factory, provider registry and injects everything into `startServer`. `defaultSkillsDir()` finds the shipped `skills/` folder. |
+| `launch.ts` | `launch()`: builds the runner factory, provider registry and injects everything into `startServer`. Bridges are on by default (`createCliBridges`); inject `cliBridges` in tests or pass `false`. They close with the server. `defaultSkillsDir()` finds the shipped `skills/` folder. |
 | `runner.ts` | `createRunnerFactory()`: per chat message picks the provider from settings, attaches the skills matching the request, keeps conversation history per project session. |
-| `providers.ts` | `createProviderRegistry()`: availability and hints shown in Settings. |
+| `providers.ts` | `createProviderRegistry()`: availability and hints shown in Settings. The `cli-*` rows come from `cliStatuses` (the bridges). |
 | `cli.ts` | The `dax-engine` executable (same flags and startup JSON line as `dax-server`). |
 
 ## Rules
@@ -21,3 +21,4 @@ The launcher: starts `@dax/server` with the AI agent, skills, provider registry 
 - API keys come only from `RunnerEnv.getApiKey`; never log them.
 - A broken skills folder must not stop the editor starting.
 - Adding a provider: extend `makeProvider` (HTTP providers) or pass `extraProviders` (processes such as signed-in CLIs), then report its status in `providers.ts`.
+- The `cli-*` providers are served by `@dax/bridges`. Do not spawn CLIs from this package. Their credentials are never read (see the bridges AGENTS.md).
