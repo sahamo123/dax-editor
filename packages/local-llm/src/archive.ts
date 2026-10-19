@@ -7,7 +7,7 @@
  */
 import { createReadStream } from "node:fs";
 import { chmod, copyFile, mkdir, open, rename, rm, symlink, writeFile } from "node:fs/promises";
-import { dirname, isAbsolute, normalize, relative, resolve } from "node:path";
+import { dirname, isAbsolute, normalize, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 import { createGunzip, inflateRaw } from "node:zlib";
 import { ArchiveError } from "./errors.js";
@@ -46,11 +46,19 @@ function cleanEntryPath(raw: string): string {
   return parts.join("/");
 }
 
+/**
+ * True when a `relative()` result stays at or below its base. Only a path whose first segment is
+ * exactly `..` climbs out; names such as `..cfg` are ordinary names.
+ */
+function isWithin(rel: string): boolean {
+  return rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+}
+
 /** Resolve `entryPath` inside `root` and make sure the result stays inside it. */
 function insideRoot(root: string, entryPath: string): string {
   const full = resolve(root, entryPath);
   const rel = relative(root, full);
-  if (rel === "" || rel.startsWith("..") || isAbsolute(rel)) {
+  if (rel === "" || !isWithin(rel)) {
     throw new ArchiveError(`Archive entry escapes the target directory: ${entryPath}`);
   }
   return full;
@@ -110,7 +118,7 @@ async function writeEntries(entries: Entry[], destDir: string, options: ExtractO
     // overwrite files elsewhere when something later writes through it.
     const resolved = resolve(dirname(target), linkTarget);
     const rel = relative(absRoot, resolved);
-    if (isAbsolute(linkTarget) || rel.startsWith("..") || isAbsolute(rel)) {
+    if (isAbsolute(linkTarget) || !isWithin(rel)) {
       throw new ArchiveError(
         `Archive symlink ${link.path} points outside the target: ${linkTarget}`,
       );
