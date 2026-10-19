@@ -1,6 +1,6 @@
 // Starts the server with everything wired: agent, skills, providers, and (when supplied) local model and speech-to-text.
 
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Transcriber } from "@dax/core";
@@ -34,14 +34,27 @@ export function defaultSkillsDir(
   env: NodeJS.ProcessEnv = process.env,
   from = fileURLToPath(import.meta.url),
 ): string | undefined {
+  // An explicit setting always wins; the search below is only the fallback for a source checkout or an install.
   if (env.DAX_SKILLS_DIR) return resolve(env.DAX_SKILLS_DIR);
   let dir = dirname(from);
   for (let i = 0; i < 6; i++) {
     const candidate = join(dir, "skills");
-    if (existsSync(join(candidate, "README.md"))) return candidate;
+    // A README alone is not enough: an ancestor folder may have one. A skills folder holds `<name>/SKILL.md` entries.
+    if (existsSync(join(candidate, "README.md")) && hasSkillFolder(candidate)) return candidate;
     dir = dirname(dir);
   }
   return undefined;
+}
+
+/** True if `dir` has at least one child folder that holds a `SKILL.md`. */
+function hasSkillFolder(dir: string): boolean {
+  try {
+    return readdirSync(dir, { withFileTypes: true }).some(
+      (e) => e.isDirectory() && existsSync(join(dir, e.name, "SKILL.md")),
+    );
+  } catch {
+    return false;
+  }
 }
 
 /** Start the full engine. */

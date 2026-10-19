@@ -26,6 +26,15 @@ export const DEFAULT_MODELS: Partial<Record<ProviderKind, string>> = {
   local: "local",
 };
 
+/** The host part of a URL for messages, or a placeholder when it does not parse. */
+function safeHost(baseUrl: string): string {
+  try {
+    return new URL(baseUrl).host || "the configured address";
+  } catch {
+    return "the configured address";
+  }
+}
+
 /** Where the embedded model's OpenAI-compatible endpoint is, or undefined when it is not running. */
 export type LocalEndpoint = () => Promise<string | undefined>;
 
@@ -43,6 +52,24 @@ export interface RunnerFactoryOptions {
    */
   extraProviders?: (kind: ProviderKind, env: RunnerEnv) => Promise<AgentRunner | undefined>;
 }
+
+/**
+ * True when an API key may be sent to `baseUrl`: an https address, or plain http to this machine only. A key sent in
+ * clear text over the network could be read by anyone on the path, so such a configuration is refused (L3).
+ */
+export function keyMayGoTo(baseUrl: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    return false;
+  }
+  if (url.protocol === "https:") return true;
+  return url.protocol === "http:" && LOOPBACK_HOSTS.has(url.hostname);
+}
+
+/** Host names that always mean this machine. */
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 /** A runner that only explains why nothing happened. */
 function unavailable(message: string): AgentRunner {
@@ -90,6 +117,11 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       if (!cfg.baseUrl)
         return "Set the server address (base URL) for your OpenAI-compatible provider in Settings.";
       const apiKey = await env.getApiKey(kind);
+      if (apiKey && !keyMayGoTo(cfg.baseUrl)) {
+        // Name the host only: the address may carry credentials or a path that should not be echoed.
+        const host = safeHost(cfg.baseUrl);
+        return `Your API key would be sent over an unencrypted connection to ${host}. Use an https:// address, or remove the key.`;
+      }
       return {
         provider: createOpenAiProvider({
           baseUrl: cfg.baseUrl,
