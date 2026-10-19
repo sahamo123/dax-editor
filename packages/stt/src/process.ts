@@ -1,7 +1,7 @@
 // Runs one child process with cancellation, a timeout and line-by-line output callbacks.
 // Never builds shell strings: the binary and its arguments are always passed separately.
 
-import { spawn } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import { SttError } from "./errors.js";
 
 /** Options for {@link runProcess}. */
@@ -32,6 +32,21 @@ export interface RunProcessResult {
 
 const TAIL_LINES = 40;
 
+// Children still running. If Node exits (crash, Ctrl+C in a CLI) they are killed rather than left
+// decoding for minutes with nobody listening.
+const running = new Set<ChildProcess>();
+let exitHookInstalled = false;
+function trackChild(child: ChildProcess): void {
+  if (!exitHookInstalled) {
+    exitHookInstalled = true;
+    process.on("exit", () => {
+      for (const c of running) c.kill("SIGKILL");
+    });
+  }
+  running.add(child);
+  child.once("close", () => running.delete(child));
+}
+
 /**
  * Run `bin` with `args` to completion and resolve with its exit status (a non-zero exit is a normal
  * result, not a rejection). Rejects with {@link SttError} when the binary cannot be started
@@ -54,6 +69,7 @@ export function runProcess(
       env: opts.env ? { ...process.env, ...opts.env } : process.env,
       cwd: opts.cwd,
     });
+    trackChild(child);
     const tail: string[] = [];
     let settled = false;
     let timer: NodeJS.Timeout | undefined;

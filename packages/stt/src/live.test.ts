@@ -4,7 +4,7 @@
 // Optional: DAX_WHISPER_CLI (use this binary instead of downloading), DAX_STT_MODEL (default base.en-q5_1),
 // DAX_LIVE_DIR (cache folder, default ~/.cache/dax/live/stt).
 
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
@@ -95,11 +95,10 @@ describe.skipIf(!live)("live: real whisper.cpp", () => {
       if (process.env.DAX_WHISPER_CLI) return; // user supplied their own
       const found = await ensureBinary({ dataDir: cacheDir });
       expect(existsSync(found.path)).toBe(true);
-      const out = execFileSync(found.path, ["--help"], {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "pipe"],
-      });
-      expect(out).toMatch(/usage/i);
+      // whisper-cli prints its usage text on stderr.
+      const res = spawnSync(found.path, ["--help"], { encoding: "utf8" });
+      expect(res.status).toBe(0);
+      expect(`${res.stdout}${res.stderr}`).toMatch(/usage/i);
     },
     600_000,
   );

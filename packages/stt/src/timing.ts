@@ -130,15 +130,22 @@ export interface TrimOptions {
   minTrimSec?: number;
   /** A pause this long inside a word's span ends the word (it cannot be one word). Default 0.25. */
   maxInnerGapSec?: number;
+  /** Words shorter than this are treated as collapsed by the engine and re-placed on audible speech. Default 0.06. */
+  minWordSec?: number;
 }
 
 /**
- * Shrink each word's [start, end] to the first voiced run inside its span.
+ * Tighten word times with the audio.
  *
- * Start moves to the first voiced frame; end stops at the first pause longer than `maxInnerGapSec`
- * after that (so a word stretched across a silence loses the silence), or at the last voiced frame.
- * A word with no voiced frame inside its span is left untouched, and no time is ever moved outside
- * the span the engine gave, so word order is preserved. Returns new objects.
+ * 1. Shrink each word to the first voiced run inside its span: start moves to the first voiced frame;
+ *    end stops at the first pause longer than `maxInnerGapSec` after that (so a word stretched across
+ *    a silence loses the silence). A word with no voiced frame inside its span is left alone.
+ * 2. Words the engine collapsed to (almost) zero length, as it does for short interjections like "um"
+ *    and for the last words of a window, are moved onto the nearest voiced run between their
+ *    neighbours (several collapsed words at one instant share that run in proportion to length).
+ *
+ * Boundaries only move inside the span the engine gave (step 1) or the gap between neighbours
+ * (step 2), so word order is preserved. Returns new objects.
  */
 export function trimWordsToSpeech(
   words: RawWord[],
@@ -152,7 +159,7 @@ export function trimWordsToSpeech(
   const f = env.frameSec;
   const maxGap = Math.round((opts.maxInnerGapSec ?? 0.25) / f);
   const voiced = (i: number) => (env.db[i] ?? -Infinity) > thr;
-  return words.map((w) => {
+  const shrunk = words.map((w) => {
     const from = Math.max(0, Math.floor(w.start / f));
     const to = Math.min(n, Math.ceil(w.end / f));
     let a = from;
@@ -171,4 +178,80 @@ export function trimWordsToSpeech(
     const end = (to - 1 - b) * f >= minTrim ? (b + 1) * f : w.end;
     return { ...w, start, end: Math.max(start, end) };
   });
+  return placeCollapsedWords(shrunk, voiced, n, f, opts.minWordSec ?? 0.06);
+}
+
+/** Voiced runs inside [fromSec, toSec], bridging dips shorter than `bridgeSec`. */
+function voicedRuns(
+  voiced: (i: number) => boolean,
+  frames: number,
+  f: number,
+  fromSec: number,
+  toSec: number,
+  bridgeSec: number,
+): Range[] {
+  const a = Math.max(0, Math.floor(fromSec / f));
+  const b = Math.min(frames, Math.ceil(toSec / f));
+  const bridge = Math.round(bridgeSec / f);
+  const runs: Range[] = [];
+  let start = -1;
+  let last = -1;
+  for (let i = a; i < b; i++) {
+    if (!voiced(i)) continue;
+    if (start >= 0 && i - last > bridge) {
+      runs.push({ start: start * f, end: (last + 1) * f });
+      start = -1;
+    }
+    if (start < 0) start = i;
+    last = i;
+  }
+  if (start >= 0) runs.push({ start: start * f, end: (last + 1) * f });
+  return runs;
+}
+
+function placeCollapsedWords(
+  words: RawWord[],
+  voiced: (i: number) => boolean,
+  frames: number,
+  f: number,
+  minWordSec: number,
+): RawWord[] {
+  const out = words.slice();
+  const short = (w: RawWord | undefined) => w !== undefined && w.end - w.start < minWordSec;
+  let i = 0;
+  while (i < out.length) {
+    const first = out[i];
+    if (!first || !short(first)) {
+      i++;
+      continue;
+    }
+    // A group: collapsed words stamped at the same instant.
+    let j = i;
+    while (short(out[j + 1]) && Math.abs((out[j + 1]?.start ?? 0) - first.start) < 0.05) j++;
+    const gapStart = i > 0 ? (out[i - 1]?.end ?? 0) : 0;
+    const gapEnd = out[j + 1]?.start ?? frames * f;
+    const runs = voicedRuns(voiced, frames, f, gapStart, gapEnd, 0.1);
+    const at = first.start;
+    // The run that contains the instant, else the nearest one.
+    const dist = (r: Range) => (at < r.start ? r.start - at : at > r.end ? at - r.end : 0);
+    const pick = runs.reduce<Range | undefined>(
+      (best, r) => (!best || dist(r) < dist(best) ? r : best),
+      undefined,
+    );
+    const count = j - i + 1;
+    if (pick && pick.end - pick.start >= 0.04 * count) {
+      const end = Math.min(pick.end, pick.start + count * 0.7);
+      const chars = out.slice(i, j + 1).reduce((sum, w) => sum + Math.max(1, w.text.length), 0);
+      let cursor = pick.start;
+      for (let k = i; k <= j; k++) {
+        const w = out[k];
+        if (!w) continue;
+        const share = (Math.max(1, w.text.length) / chars) * (end - pick.start);
+        out[k] = { ...w, start: cursor, end: cursor + share };
+        cursor += share;
+      }
+    }
+    i = j + 1;
+  }
+  return out;
 }
