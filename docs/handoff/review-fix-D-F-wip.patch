@@ -1,0 +1,486 @@
+diff --git a/packages/core/src/commands.ts b/packages/core/src/commands.ts
+index d38268c..2474f6f 100644
+--- a/packages/core/src/commands.ts
++++ b/packages/core/src/commands.ts
+@@ -105,7 +105,7 @@ export interface CommandDef {
+ /** Thrown for bad arguments or a command that cannot do what was asked. The message is safe to show to a model. */
+ export class CommandError extends Error {}
+ 
+-const seconds = (what: string) => z.number().min(0).describe(`${what}, in seconds`);
++const seconds = (what: string) => z.number().finite().min(0).describe(`${what}, in seconds`);
+ const assetIdArg = z
+   .string()
+   .optional()
+@@ -250,7 +250,13 @@ function describeProject(p: Project, offset = 0, limit = PROJECT_PAGE) {
+ const presetIds = OVERLAY_PRESETS.map((p) => p.id) as [string, ...string[]];
+ 
+ const styleFields = {
+-  fontSize: z.number().min(8).max(400).optional().describe("Text size in pixels on a 1080p frame"),
++  fontSize: z
++    .number()
++    .finite()
++    .min(8)
++    .max(400)
++    .optional()
++    .describe("Text size in pixels on a 1080p frame"),
+   color: z
+     .string()
+     .regex(/^#[0-9a-fA-F]{6}$/)
+@@ -532,9 +538,9 @@ export const COMMANDS: readonly CommandDef[] = [
+           ],
+         )
+         .optional(),
+-      width: z.number().int().min(16).max(8192).optional(),
+-      height: z.number().int().min(16).max(8192).optional(),
+-      fps: z.number().min(1).max(120).optional(),
++      width: z.number().finite().int().min(16).max(8192).optional(),
++      height: z.number().finite().int().min(16).max(8192).optional(),
++      fps: z.number().finite().min(1).max(120).optional(),
+       fit: z.enum(FITS).optional(),
+     }),
+     async run(ctx, a) {
+@@ -562,7 +568,14 @@ export const COMMANDS: readonly CommandDef[] = [
+     schema: z.object({
+       enabled: z.boolean().default(true).describe("false turns captions off"),
+       style: z.enum(CAPTION_STYLES).optional(),
+-      maxWords: z.number().int().min(1).max(8).optional().describe("Most words on screen at once"),
++      maxWords: z
++        .number()
++        .finite()
++        .int()
++        .min(1)
++        .max(8)
++        .optional()
++        .describe("Most words on screen at once"),
+       uppercase: z.boolean().optional(),
+       color: z
+         .string()
+@@ -700,7 +713,7 @@ export const COMMANDS: readonly CommandDef[] = [
+   define({
+     name: "move_clip",
+     description: "Move a clip to a new position in the order of clips (0 = first).",
+-    schema: z.object({ clipId: z.string(), index: z.number().int().min(0) }),
++    schema: z.object({ clipId: z.string(), index: z.number().finite().int().min(0) }),
+     async run(ctx, a) {
+       await edit(ctx, "Move clip", (p) => moveClip(p, a.clipId, a.index));
+       return { summary: `Moved clip to position ${a.index}.` };
+@@ -722,7 +735,7 @@ export const COMMANDS: readonly CommandDef[] = [
+   define({
+     name: "set_volume",
+     description: "Set a clip's loudness: 1 is unchanged, 0 is muted, 2 is twice as loud.",
+-    schema: z.object({ clipId: z.string(), volume: z.number().min(0).max(4) }),
++    schema: z.object({ clipId: z.string(), volume: z.number().finite().min(0).max(4) }),
+     async run(ctx, a) {
+       await edit(ctx, "Set volume", (p) => setClipVolume(p, a.clipId, a.volume));
+       return { summary: `Volume set to ${a.volume}.` };
+@@ -972,7 +985,7 @@ export const COMMANDS: readonly CommandDef[] = [
+       text: z.string().min(1).max(280).optional(),
+       subtitle: z.string().max(280).nullable().optional().describe("null removes the second line"),
+       start: seconds("New start").optional(),
+-      duration: z.number().min(0.2).max(120).optional(),
++      duration: z.number().finite().min(0.2).max(120).optional(),
+       animation: z.enum(ANIMATIONS).optional(),
+       ...styleFields,
+     }),
+@@ -1046,7 +1059,7 @@ export const COMMANDS: readonly CommandDef[] = [
+     name: "restore_state",
+     description:
+       "Jump back (or forward) to any state from get_history by its id. Nothing is lost; you can jump again.",
+-    schema: z.object({ id: z.number().int().min(0) }),
++    schema: z.object({ id: z.number().finite().int().min(0) }),
+     async run(ctx, a) {
+       await ctx.session.restore(a.id);
+       return {
+diff --git a/packages/core/src/effect-commands.ts b/packages/core/src/effect-commands.ts
+index 88e22a6..a8368d8 100644
+--- a/packages/core/src/effect-commands.ts
++++ b/packages/core/src/effect-commands.ts
+@@ -139,7 +139,7 @@ const withAsset = (p: Project, asset: Asset): Project =>
+   ownAsset(p, asset.id) ? p : addAsset(p, asset);
+ 
+ const startArg = (what: string) =>
+-  z.number().min(0).describe(`${what}, in seconds on the timeline`);
++  z.number().finite().min(0).describe(`${what}, in seconds on the timeline`);
+ 
+ // ---------------------------------------------------------------------------------------------
+ // Zoom
+@@ -187,7 +187,7 @@ const updateZoomSchema = z.object({
+   zoomId: z.string().describe("Zoom id from get_project"),
+   start: startArg("New start").optional(),
+   end: startArg("New end").optional(),
+-  scale: z.number().min(1.02).max(MAX_ZOOM).optional().describe("New zoom amount"),
++  scale: z.number().finite().min(1.02).max(MAX_ZOOM).optional().describe("New zoom amount"),
+   startScale: z
+     .number()
+     .min(1)
+@@ -314,22 +314,39 @@ const addAudioSchema = z.object({
+       "How long it plays, in seconds. Default: the whole file, or the rest of the video when loop is true.",
+     ),
+   loop: z.boolean().default(false).describe("Repeat the file to fill length (music beds)"),
+-  sourceStart: z.number().min(0).optional().describe("Start this far into the file, in seconds"),
++  sourceStart: z
++    .number()
++    .finite()
++    .min(0)
++    .optional()
++    .describe("Start this far into the file, in seconds"),
+   volume: volumeArg,
+-  fadeIn: z.number().min(0).max(60).optional().describe("Fade in, seconds (music default 1)"),
+-  fadeOut: z.number().min(0).max(60).optional().describe("Fade out, seconds (music default 2)"),
++  fadeIn: z
++    .number()
++    .finite()
++    .min(0)
++    .max(60)
++    .optional()
++    .describe("Fade in, seconds (music default 1)"),
++  fadeOut: z
++    .number()
++    .finite()
++    .min(0)
++    .max(60)
++    .optional()
++    .describe("Fade out, seconds (music default 2)"),
+ });
+ 
+ const updateAudioSchema = z.object({
+   audioId: z.string().describe("Audio clip id from get_project"),
+   start: startArg("New start").optional(),
+-  length: z.number().positive().optional().describe("New length in seconds"),
+-  sourceStart: z.number().min(0).optional().describe("Start this far into the file"),
++  length: z.number().finite().positive().optional().describe("New length in seconds"),
++  sourceStart: z.number().finite().min(0).optional().describe("Start this far into the file"),
+   loop: z.boolean().optional().describe("Repeat the file to fill the length"),
+   role: z.enum(AUDIO_ROLES).optional().describe("music ducks under speech; sfx does not"),
+   volume: volumeArg,
+-  fadeIn: z.number().min(0).max(60).optional().describe("Fade in, seconds"),
+-  fadeOut: z.number().min(0).max(60).optional().describe("Fade out, seconds"),
++  fadeIn: z.number().finite().min(0).max(60).optional().describe("Fade in, seconds"),
++  fadeOut: z.number().finite().min(0).max(60).optional().describe("Fade out, seconds"),
+ });
+ 
+ const duckingSchema = z.object({
+@@ -484,7 +501,7 @@ const imageFields = {
+     .max(1)
+     .optional()
+     .describe("Width as a fraction of the frame, e.g. 0.15 = 15%"),
+-  opacity: z.number().min(0).max(1).optional().describe("0 clear to 1 solid"),
++  opacity: z.number().finite().min(0).max(1).optional().describe("0 clear to 1 solid"),
+   animation: z.enum(IMAGE_ANIMATIONS).optional().describe("How it enters and leaves"),
+ };
+ 
+@@ -563,7 +580,13 @@ const imageCommands: CommandDef[] = [
+     schema: z.object({
+       imageId: z.string().describe("Image overlay id from get_project"),
+       start: startArg("New start").optional(),
+-      duration: z.number().min(0.2).max(3600).optional().describe("New length, in seconds"),
++      duration: z
++        .number()
++        .finite()
++        .min(0.2)
++        .max(3600)
++        .optional()
++        .describe("New length, in seconds"),
+       ...imageFields,
+     }),
+     async run(ctx, a) {
+diff --git a/packages/core/src/schema.ts b/packages/core/src/schema.ts
+index 552443b..9636f70 100644
+--- a/packages/core/src/schema.ts
++++ b/packages/core/src/schema.ts
+@@ -13,8 +13,8 @@ export const IdSchema = z
+ /** One recognised word, timed in the source file's own time (seconds). */
+ export const WordSchema = z.object({
+   text: z.string(),
+-  start: z.number().nonnegative(),
+-  end: z.number().nonnegative(),
++  start: z.number().finite().nonnegative(),
++  end: z.number().finite().nonnegative(),
+ });
+ /** A validated {@link WordSchema} value. */
+ export type Word = z.infer<typeof WordSchema>;
+@@ -33,10 +33,10 @@ export const AssetSchema = z.object({
+   id: IdSchema,
+   path: z.string(),
+   kind: z.enum(["video", "audio", "image"]),
+-  duration: z.number().nonnegative(),
+-  width: z.number().int().positive().optional(),
+-  height: z.number().int().positive().optional(),
+-  fps: z.number().positive().optional(),
++  duration: z.number().finite().nonnegative(),
++  width: z.number().finite().int().positive().optional(),
++  height: z.number().finite().int().positive().optional(),
++  fps: z.number().finite().positive().optional(),
+   hasAudio: z.boolean(),
+   /** Speech transcript, once one has been made. Times are in the asset's own time. */
+   transcript: TranscriptSchema.optional(),
+@@ -61,15 +61,15 @@ export type AudioRole = (typeof AUDIO_ROLES)[number];
+ export const ClipSchema = z.object({
+   id: IdSchema,
+   assetId: IdSchema,
+-  start: z.number().nonnegative(),
+-  in: z.number().nonnegative(),
+-  out: z.number().positive(),
+-  volume: z.number().nonnegative().default(1),
+-  fadeIn: z.number().nonnegative().default(0),
+-  fadeOut: z.number().nonnegative().default(0),
++  start: z.number().finite().nonnegative(),
++  in: z.number().finite().nonnegative(),
++  out: z.number().finite().positive(),
++  volume: z.number().finite().nonnegative().default(1),
++  fadeIn: z.number().finite().nonnegative().default(0),
++  fadeOut: z.number().finite().nonnegative().default(0),
+   role: z.enum(AUDIO_ROLES).optional(),
+   loop: z.boolean().optional(),
+-  length: z.number().positive().optional(),
++  length: z.number().finite().positive().optional(),
+ });
+ /** A validated {@link ClipSchema} value. */
+ export type Clip = z.infer<typeof ClipSchema>;
+@@ -98,11 +98,11 @@ export const HexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, "expected #R
+ 
+ /** Look of a text overlay. `fontSize` is in pixels for a 1080-pixel-high frame and scales with the project height. */
+ export const OverlayStyleSchema = z.object({
+-  fontSize: z.number().min(8).max(400).default(64),
++  fontSize: z.number().finite().min(8).max(400).default(64),
+   color: HexColorSchema.default("#ffffff"),
+   bold: z.boolean().default(false),
+   /** Optional background box behind the text; `opacity` runs from 0 (clear) to 1 (solid). */
+-  box: z.object({ color: HexColorSchema, opacity: z.number().min(0).max(1) }).optional(),
++  box: z.object({ color: HexColorSchema, opacity: z.number().finite().min(0).max(1) }).optional(),
+   /** Accent colour for the bar on lower-thirds. */
+   accent: HexColorSchema.default("#3b82f6"),
+   position: z.enum(POSITIONS).default("center"),
+@@ -118,15 +118,15 @@ export type OverlayStyle = z.infer<typeof OverlayStyleSchema>;
+ export const OverlaySchema = z.object({
+   id: IdSchema,
+   kind: z.literal("text"),
+-  start: z.number().nonnegative(),
+-  duration: z.number().positive(),
++  start: z.number().finite().nonnegative(),
++  duration: z.number().finite().positive(),
+   text: z.string().min(1).max(280),
+   /** Optional second, smaller line (used by lower-thirds). */
+   subtitle: z.string().max(280).optional(),
+   preset: z.string().default("custom"),
+   animation: z.enum(ANIMATIONS).default("fade"),
+   style: OverlayStyleSchema.default({}),
+-  lane: z.number().int().nonnegative().default(0),
++  lane: z.number().finite().int().nonnegative().default(0),
+ });
+ /** A validated {@link OverlaySchema} value. */
+ export type Overlay = z.infer<typeof OverlaySchema>;
+@@ -147,13 +147,13 @@ export const MAX_ZOOM = 3;
+  */
+ export const ZoomSchema = z.object({
+   id: z.string(),
+-  start: z.number().nonnegative(),
+-  duration: z.number().positive(),
+-  fromScale: z.number().min(1).max(MAX_ZOOM),
+-  toScale: z.number().min(1).max(MAX_ZOOM),
++  start: z.number().finite().nonnegative(),
++  duration: z.number().finite().positive(),
++  fromScale: z.number().finite().min(1).max(MAX_ZOOM),
++  toScale: z.number().finite().min(1).max(MAX_ZOOM),
+   ease: z.enum(EASES).default("ease-in-out"),
+-  x: z.number().min(0).max(1).default(0.5),
+-  y: z.number().min(0).max(1).default(0.5),
++  x: z.number().finite().min(0).max(1).default(0.5),
++  y: z.number().finite().min(0).max(1).default(0.5),
+ });
+ /** A validated {@link ZoomSchema} value. */
+ export type Zoom = z.infer<typeof ZoomSchema>;
+@@ -185,11 +185,11 @@ export const ImageOverlaySchema = z.object({
+   id: z.string(),
+   kind: z.literal("image"),
+   assetId: z.string(),
+-  start: z.number().nonnegative(),
+-  duration: z.number().positive(),
++  start: z.number().finite().nonnegative(),
++  duration: z.number().finite().positive(),
+   position: z.enum(IMAGE_POSITIONS).default("top-right"),
+-  width: z.number().min(0.02).max(1).default(0.15),
+-  opacity: z.number().min(0).max(1).default(1),
++  width: z.number().finite().min(0.02).max(1).default(0.15),
++  opacity: z.number().finite().min(0).max(1).default(1),
+   animation: z.enum(IMAGE_ANIMATIONS).default("fade"),
+   preset: z.string().default("custom"),
+ });
+@@ -202,8 +202,8 @@ export type ImageOverlay = z.infer<typeof ImageOverlaySchema>;
+  */
+ export const DuckingSchema = z.object({
+   enabled: z.boolean().default(true),
+-  amountDb: z.number().min(3).max(30).default(12),
+-  releaseSeconds: z.number().min(0.05).max(3).default(0.4),
++  amountDb: z.number().finite().min(3).max(30).default(12),
++  releaseSeconds: z.number().finite().min(0.05).max(3).default(0.4),
+ });
+ /** A validated {@link DuckingSchema} value. */
+ export type Ducking = z.infer<typeof DuckingSchema>;
+@@ -225,7 +225,7 @@ export type CaptionStyle = (typeof CAPTION_STYLES)[number];
+ export const CaptionSettingsSchema = z.object({
+   style: z.enum(CAPTION_STYLES).default("classic"),
+   /** Most words shown at once. */
+-  maxWords: z.number().int().min(1).max(8).default(4),
++  maxWords: z.number().finite().int().min(1).max(8).default(4),
+   uppercase: z.boolean().default(false),
+   color: HexColorSchema.default("#ffffff"),
+   /** Colour of the word being spoken (`bold-pop` style). */
+@@ -238,10 +238,10 @@ export type CaptionSettings = z.infer<typeof CaptionSettingsSchema>;
+ /** Output format (`width`, `height`, `fps`) plus the tracks and overlays that make up the edit. */
+ export const TimelineSchema = z.object({
+   /** Frame size in pixels, 16 to 8192: a hostile project file must not ask FFmpeg for a billion-pixel frame. */
+-  width: z.number().int().min(16).max(8192),
+-  height: z.number().int().min(16).max(8192),
++  width: z.number().finite().int().min(16).max(8192),
++  height: z.number().finite().int().min(16).max(8192),
+   /** Frames per second, 1 to 240. */
+-  fps: z.number().min(1).max(240),
++  fps: z.number().finite().min(1).max(240),
+   /** How clips are fitted into the frame. `contain` leaves bars, `cover` crops to fill, `blur` puts a blurred copy behind. */
+   fit: z.enum(FITS).default("contain"),
+   tracks: z.array(TrackSchema),
+diff --git a/packages/core/src/template-commands.ts b/packages/core/src/template-commands.ts
+index ae0b4e6..211bb05 100644
+--- a/packages/core/src/template-commands.ts
++++ b/packages/core/src/template-commands.ts
+@@ -35,7 +35,7 @@ const listSchema = z.object({
+ const applySchema = z.object({
+   templateId: z.string().min(1).max(80).describe("A template id from list_templates"),
+   variables: z
+-    .record(z.string().max(32), z.union([z.string().max(300), z.number()]))
++    .record(z.string().max(32), z.union([z.string().max(300), z.number().finite()]))
+     .default({})
+     .describe(
+       "Values for the template's variables, by name (title, speaker_name, cta_text, phone, url, ...). Leave out what you do not know; the matching overlay is skipped. Never invent a phone number, price or licence number.",
+diff --git a/packages/core/src/templates.ts b/packages/core/src/templates.ts
+index 23d533c..50b4652 100644
+--- a/packages/core/src/templates.ts
++++ b/packages/core/src/templates.ts
+@@ -160,7 +160,7 @@ const Kebab = z.string().regex(KEBAB, "expected kebab-case such as my-template")
+ const VarName = z.string().regex(VAR_NAME, "expected snake_case such as speaker_name");
+ 
+ const SecRange = z
+-  .object({ min: z.number().min(0).max(7200), max: z.number().min(0).max(7200) })
++  .object({ min: z.number().finite().min(0).max(7200), max: z.number().finite().min(0).max(7200) })
+   .strict()
+   .refine((r) => r.min <= r.max, "min must not be more than max");
+ 
+@@ -178,7 +178,7 @@ const VariableSchema = z
+     /** Used when the caller gives no value. Must itself pass the variable's validation. */
+     default: z.string().optional(),
+     /** Longest accepted value in characters. Longer values are rejected, never silently cut. */
+-    maxLength: z.number().int().min(1).max(140).optional(),
++    maxLength: z.number().finite().int().min(1).max(140).optional(),
+     /** A realistic sample value; shown to users and used by the tests. */
+     example: z.string().min(1),
+   })
+@@ -196,7 +196,7 @@ const PlatformSchema = z
+ const FormatSchema = z
+   .object({
+     aspect: z.enum(ASPECT_KEYS),
+-    fps: z.number().min(1).max(120).optional(),
++    fps: z.number().finite().min(1).max(120).optional(),
+     /** Target length of the finished video in seconds. */
+     lengthSec: SecRange,
+     platforms: z.array(PlatformSchema).min(1),
+@@ -205,10 +205,10 @@ const FormatSchema = z
+ 
+ const CleanupOverridesSchema = z
+   .object({
+-    pauseMin: z.number().min(0.1).max(5),
+-    keepPause: z.number().min(0).max(3),
+-    padPre: z.number().min(0).max(1),
+-    padPost: z.number().min(0).max(1),
++    pauseMin: z.number().finite().min(0.1).max(5),
++    keepPause: z.number().finite().min(0).max(3),
++    padPre: z.number().finite().min(0).max(1),
++    padPost: z.number().finite().min(0).max(1),
+     fillers: z.enum(["off", "standalone", "isolated"]),
+     retakes: z.boolean(),
+   })
+@@ -259,17 +259,17 @@ const OverlayStepSchema = z
+      * `full`: covers from `offset` to the end, split into pieces the add_overlay command accepts.
+      */
+     anchor: z.enum(["start", "end", "full"]),
+-    offset: z.number().min(0).max(600).default(0),
+-    duration: z.number().min(0.2).max(3600).optional(),
++    offset: z.number().finite().min(0).max(600).default(0),
++    duration: z.number().finite().min(0.2).max(3600).optional(),
+     /** Shorter than this and the overlay is skipped instead of squeezed. */
+-    minDuration: z.number().min(0.2).max(60).default(1),
++    minDuration: z.number().finite().min(0.2).max(60).default(1),
+     /** The overlay never takes more than this fraction of the video. */
+-    maxFraction: z.number().min(0.05).max(1).default(1),
++    maxFraction: z.number().finite().min(0.05).max(1).default(1),
+     /** On a clash between overlays at the same position, the higher priority keeps its time. */
+-    priority: z.number().int().min(0).max(10).default(0),
++    priority: z.number().finite().int().min(0).max(10).default(0),
+     style: z
+       .object({
+-        fontSize: z.number().min(8).max(400).optional(),
++        fontSize: z.number().finite().min(8).max(400).optional(),
+         color: HexColorSchema.optional(),
+         position: z.enum(POSITIONS).optional(),
+       })
+@@ -306,9 +306,9 @@ const ZoomEffectSchema = z
+     ...effectBase,
+     kind: z.literal("zoom"),
+     mode: z.enum(["alternate-cuts", "push-in"]),
+-    scale: z.number().min(1.02).max(TEMPLATE_MAX_ZOOM),
+-    every: z.number().int().min(2).max(6).default(2),
+-    minShotSec: z.number().min(0.5).max(60).default(1.5),
++    scale: z.number().finite().min(1.02).max(TEMPLATE_MAX_ZOOM),
++    every: z.number().finite().int().min(2).max(6).default(2),
++    minShotSec: z.number().finite().min(0.5).max(60).default(1.5),
+   })
+   .strict();
+ 
+@@ -321,10 +321,10 @@ const MusicEffectSchema = z
+   .object({
+     ...effectBase,
+     kind: z.literal("music"),
+-    level: z.number().min(0.03).max(1).default(0.2),
++    level: z.number().finite().min(0.03).max(1).default(0.2),
+     scope: z.enum(["full", "intro"]).default("full"),
+-    introSec: z.number().min(3).max(60).default(10),
+-    duckAmountDb: z.number().min(3).max(30).optional(),
++    introSec: z.number().finite().min(3).max(60).default(10),
++    duckAmountDb: z.number().finite().min(3).max(30).optional(),
+   })
+   .strict();
+ 
+@@ -342,9 +342,9 @@ const LogoEffectSchema = z
+     ),
+     position: z.enum(IMAGE_POSITIONS).optional(),
+     anchor: z.enum(["start", "end"]),
+-    offset: z.number().min(0).max(600).default(0),
+-    duration: z.number().min(0.5).max(600),
+-    minDuration: z.number().min(0.5).max(60).default(1.5),
++    offset: z.number().finite().min(0).max(600).default(0),
++    duration: z.number().finite().min(0.5).max(600),
++    minDuration: z.number().finite().min(0.5).max(60).default(1.5),
+   })
+   .strict();
+ 
+@@ -368,7 +368,7 @@ const ConfirmationSchema = z.object({ id: Kebab, ask: z.string().min(1).max(300)
+ export const TemplateSchema = z
+   .object({
+     id: Kebab,
+-    version: z.number().int().min(1),
++    version: z.number().finite().int().min(1),
+     kind: z.enum(["style", "industry"]),
+     name: z.string().min(1).max(80),
+     description: z.string().min(1).max(500),
+@@ -385,7 +385,10 @@ export const TemplateSchema = z
+     overlays: z.array(OverlayStepSchema).max(10),
+     /** Seconds of fade from black at the start and to black at the end. */
+     fades: z
+-      .object({ in: z.number().min(0).max(3).optional(), out: z.number().min(0).max(3).optional() })
++      .object({
++        in: z.number().finite().min(0).max(3).optional(),
++        out: z.number().finite().min(0).max(3).optional(),
++      })
+       .strict()
+       .optional(),
+     /**

@@ -13,6 +13,9 @@ generated:
 
 ## Where we are
 
+Resuming from another agent or machine: start with [the handoff guide](engineering/handoff.md).
+
+
 The engine, command registry, skills, templates, agent, engine server and launcher, the desktop app's browser build, the `dax` CLI and the `dax-mcp` MCP server are merged on branch `claude/exciting-lamport-1k91fh`. There is no installed product yet: the Tauri shell is still in progress, the embedded local model and speech-to-text are wired into the engine (not yet merged, and not yet installed by any user action), and an independent review has open findings that a hardening pass is fixing. The plan and its checklists are in [ROADMAP](ROADMAP.md).
 
 ## Works today

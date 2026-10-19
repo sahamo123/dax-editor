@@ -13,6 +13,10 @@ Hard constraints, in priority order:
 2. **Agent-agnostic.** The repo must be workable by any agent or human using only what is committed here. Never rely on chat history or one vendor's memory.
 3. **GitHub is the source of truth.** Work items live in GitHub Issues, decisions in `docs/adr/`, current state in `docs/STATUS.md`.
 
+## Resuming the build
+
+If you are continuing work started by another agent, read `docs/engineering/handoff.md` first. It says where the build stopped, what is unfinished (and where its patch is), and the order of the remaining work. Then `docs/STATUS.md`.
+
 ## Repository map
 
 | Path | What it is |

@@ -1,75 +1,81 @@
 ---
 type: Guide
 title: "Handoff: how another agent resumes dax-editor"
-description: "How to pick up the build from the repository alone, what is merged, what is in flight, and the order of the remaining work."
+description: "Where the build stopped, what is merged, what is unfinished and where its patch is, and the order of the remaining work. Read this first when resuming from the repository alone."
 tags: [handoff, process, agents]
 status: stable
 generated:
   by: process:implementer
-  at: 2026-10-19T05:30:00Z
+  at: 2026-10-19T06:30:00Z
 ---
 
 # Handoff: resuming dax-editor
 
-The repository is the only source of truth. Nothing needed to continue lives in an agent's chat or in a local worktree.
+The repository is the only source of truth. Everything needed to continue is on branch `claude/exciting-lamport-1k91fh`. Nothing lives in a chat, a local worktree or `/tmp`.
 
-## Start here (any agent, any machine)
+## 1. Start (any agent, any machine)
 
-1. Check out branch `claude/exciting-lamport-1k91fh`. Never work on `main` or another branch.
-2. Read `AGENTS.md`, then `docs/STATUS.md` (current state and "Needs a human"), then this file.
-3. `flock /tmp/claude-0/pnpm.lock pnpm install` (or plain `pnpm install`), then `pnpm check`. It must pass before you change anything.
-4. Work in small steps. Each step: tests first, `pnpm check` green, one Conventional Commit, push to the same branch.
+1. `git checkout claude/exciting-lamport-1k91fh` (never `main`, never another branch).
+2. Read `AGENTS.md`, then this file, then `docs/STATUS.md` (current state and "Needs a human").
+3. `corepack enable && pnpm bootstrap` (Node 22+, FFmpeg on PATH).
+4. `pnpm check`. It must pass before you change anything. If it fails, fix that first.
+5. Work in small steps: test first, `pnpm check` green, one Conventional Commit, push to this branch. Use the trailer `Co-Authored-By: Claude <noreply@anthropic.com>`, or your own agent name, but never a model name.
 
-## What is merged and pushed
+## 2. Where we stopped (head: `git log -1`)
 
-Engine (`@dax/core`), agent, skills, templates, server, launcher (`@dax/engine`), MCP server and `dax` CLI, desktop shell and editor, embedded local model runtime (`@dax/local-llm`), speech-to-text (`@dax/stt`), Claude Code sign-in bridge (`@dax/bridges`), Tauri shell (Linux build only), zoom/music/image overlays (engine commands only), cut-quality fixes (energy-gated word gaps, word tails), and the first review-fix pass (symlink containment, `..` names). Latest head: see `git log -1`.
+The product is not finished. The goal (a shippable desktop video editor with an embedded model, bring-your-own API key and two sign-in options) is about 55% done. Estimates by area are in `docs/STATUS.md`.
 
-## Known state, in short
+Done and merged:
+- Video engine: timeline model, about 45 commands, cuts with energy-gated word gaps and word tails, captions, text overlays with animations, zoom, music ducking, image overlays (engine only), templates, undo and history.
+- Render: FFmpeg export, atomic and cancellable. Picture and sound now stay in step after cuts (measured within 1 ms over 60 joins, `packages/core/src/av-sync-render.test.ts`).
+- Agent loop, skills, server, launcher (`@dax/engine`), MCP server and `dax` CLI.
+- Desktop shell and editor (browser build), Tauri 2 shell (Linux build only).
+- Embedded local model runtime (`@dax/local-llm`) and speech-to-text (`@dax/stt`), both wired into the launcher. Verified on Linux CPU only.
+- Claude Code sign-in bridge (`@dax/bridges`), Linux only.
+- Review-fix items done: symlink containment and declared-size and inflate bounds in the archive reader; `..`-prefixed names are ordinary names.
 
-- Usable only by a technical tester on Linux. No installer exists. Nothing has been run on macOS or Windows.
-- Sign-in: Claude Code works (Linux, tested). Codex is detection only. Gemini has no bridge, by decision.
-- Plugin system (task 14): not started.
+Known flaky tests: `packages/bridges` ("reports a slow sign-in check") and `packages/stt` ("kills whisper-cli when the signal fires") fail only under full-suite load and pass alone. Make them deterministic (wait for an explicit ready signal instead of a timer) before relying on `pnpm check` in CI.
 
-## In-flight work that is NOT on the branch yet
+## 3. Unfinished work, in priority order
 
-These exist only in local worktrees under `.claude/worktrees/` on the machine that ran the builders. A new machine will not have them. Recover them from the branch or ask the lead to push them:
+Each item needs a regression test that fails before and passes after, one commit per item, and `pnpm check` green.
 
-- Review-fix pass, remaining items: archive size limits and bounded inflate (committed locally, not pushed); pinned runtime digests and the opt-in for unverified installs; health-check identity for the llama.cpp server; start/stop races in the model manager; non-finite numbers in schemas; asset paths reaching FFmpeg unvalidated (`-protocol_whitelist file`). Each needs a regression test.
-- A/V drift fix in `render.ts` (convert each source to the project frame rate once before trimming; quantise cut points to the frame grid). Recipe: `docs/research/av-sync-and-breath-recipes.md`, section 4.2. Uncommitted.
+1. **Review-fix items D and F** (partly written, not applied). Patch: `docs/handoff/review-fix-D-F-wip.patch`. Scope:
+   - D: pin SHA-256 digests for the pinned llama.cpp tag in source (the digests are in the patch and in `docs/research`), verify before running a binary, and refuse unverified installs unless an explicit `allowUnverified` option (default false) is passed.
+   - F: model manager start and stop races. Key in-flight starts by model id; use a generation counter checked after each await; `stop()` during a start must prevent the server from launching.
+2. **Review-fix item E**: the llama.cpp health check trusts any HTTP 200 on the port, then sends the bearer key. Verify the listener is the spawned process before sending the key.
+3. **Review-fix item G**: `z.number()` accepts `Infinity` in core schemas and command arguments. Add `.finite()` where project or command data is accepted.
+4. **Review-fix item H**: asset paths reach FFmpeg unvalidated. Refuse URL schemes and relative paths in `asset.path`, and add `-protocol_whitelist file` before every `-i` (core `render.ts`, `media.ts`, `cuts.ts`, and `packages/stt/src/audio.ts`).
+5. **Breath attenuation** (-12 dB instead of delete), per `docs/research/av-sync-and-breath-recipes.md`. Open decision: whether a kept breath may lengthen the pause.
+6. **Eval tasks for cut quality**: music-bed gap preserved, clipped-tail metric under threshold, drift under threshold, retake handled as a proposal only.
+7. **Expose zoom, music and image overlays** in the server protocol and the desktop timeline. Today they are engine commands only.
+8. **Plugin system** (task 14). Not started. Design: `docs/research/plugin-architecture.md`.
+9. **Codex sign-in bridge.** Blocked on a confirmed per-run MCP setup. Do not edit `~/.codex/config.toml`. Detection only until confirmed.
+10. **Gemini**: no consumer bridge, by decision. Use the bring-your-own API key path.
+11. **Installers and real-platform verification.** Needs a person with macOS and Windows machines. Signing secrets and the release workflow are described in `docs/maintainers/desktop-release.md`.
 
-## Remaining work, in priority order
+## 4. Decisions a human must make
 
-1. Finish the drift fix and verify end-to-end sync on 60 joins (cutting quality is the top priority).
-2. Finish the review-fix pass listed above, one commit per item.
-3. Breath attenuation (-12 dB instead of deleting), per the same recipe.
-4. Eval tasks for cut quality (music-bed gap, clipped-tail metric, drift, retake proposal-only).
-5. Expose zoom, music and image overlays in the server protocol and the desktop timeline.
-6. Plugin system (task 14).
-7. Codex sign-in bridge (needs a confirmed per-run MCP setup first).
-8. Installers and real macOS/Windows verification (needs a human with those machines).
+- Make the timeline frame grid a model invariant? (spec under `docs/specs/`). Partly implemented: cuts snap to the grid at render.
+- May a kept breath lengthen the surrounding pause?
+- Default for an unverified runtime install (proposed: refuse unless opted in).
+- Speech install path: a consent-based setup button (recommended) or download on first use.
+- Old projects: re-quantise cut points on open, or only at render (current behaviour).
+- Trailer history: older commits carry model names. Rewriting pushed history needs explicit approval.
 
-## Decisions a human must make (see also `docs/STATUS.md`)
-
-- Whether to make the timeline frame grid a model invariant (spec under `docs/specs/`).
-- Whether a kept breath may lengthen the surrounding pause.
-- Default for the unverified runtime install (proposed: refuse unless opted in).
-- Speech install path: consent-based setup button, or download on first use.
-- Trailer policy: the repo rules forbid model names in commits; some older commits still carry them.
-
-## Rules that apply to every agent
+## 5. Rules for every agent
 
 - Develop and push only on `claude/exciting-lamport-1k91fh`.
 - Never name a model or vendor as an author or in a commit message.
-- Never weaken security checks to get a test green.
-- Run the scribe step (log, status, indexes) when you finish a milestone: `pnpm docs:index && pnpm docs:okf`.
+- Never weaken a security check to get a test green.
+- Never disable git hooks to commit. If a hook fails, fix the cause.
+- Run the scribe step when a milestone lands: `docs/log.md`, `docs/STATUS.md`, then `pnpm docs:index && pnpm docs:okf`.
 
-## Before leaving a machine: nothing may live only there
+## 6. Before you stop: nothing may live only on this machine
 
 Dependencies are not a concern: `pnpm install` rebuilds `node_modules` from the lockfile, and the runtime installers fetch llama.cpp, whisper.cpp and model files on demand, verified against pinned hashes. Do not commit them.
 
-What must be on the branch before you stop:
-
-1. `git status` is clean, and `git log origin/claude/exciting-lamport-1k91fh..HEAD` is empty (everything is pushed).
-2. No worktree holds commits or edits the branch lacks. Check with `git worktree list` and, for each, `git -C <worktree> status --short` and `git rev-list --count claude/exciting-lamport-1k91fh..HEAD`. Merge or copy the work to the branch first.
-3. Scratch, logs and downloads under `/tmp`, `scratchpad` or `/root/.cache` are not needed. Keep only what a commit needs.
-4. Plans and findings go in `docs/` (status, log, research), not in a chat or a file outside the repo.
+1. `git status` is clean and `git log origin/claude/exciting-lamport-1k91fh..HEAD` is empty.
+2. No worktree holds commits or edits the branch lacks: check with `git worktree list`, then for each `git -C <worktree> status --short` and `git rev-list --count claude/exciting-lamport-1k91fh..HEAD`.
+3. Unfinished edits go to `docs/handoff/` as a patch (see its README), not into a chat or a local folder.
+4. Scratch, logs and downloads under `/tmp`, `scratchpad` or `/root/.cache` are not needed. Keep only what a commit needs.
