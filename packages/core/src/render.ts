@@ -1,8 +1,10 @@
 // Turning a project into a video file: encoder selection and the FFmpeg command for the main track and its overlays.
 
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import type { ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
+import { mkdtemp, rename, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { basename, dirname, extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildAss, captionLines } from "./captions.js";
 import { withEncoderFallback } from "./encoders.js";
@@ -196,6 +198,31 @@ export interface ExportOptions {
   encoder?: string;
   /** Called with a fraction between 0 and 1. */
   onProgress?: (fraction: number) => void;
+  /** Cancels the export: FFmpeg is killed, the partial file removed and the promise rejects with an `AbortError`-named error. */
+  signal?: AbortSignal;
+  /** Called with each FFmpeg process started, so the host can kill it on shutdown. */
+  onSpawn?: (child: ChildProcess) => void;
+}
+
+/**
+ * Throw if `outPath` is, or is another name for, one of the project's source files (same path, a symlink, a hard
+ * link, or a case alias on a case-insensitive disk). Exporting over a source would destroy the user's footage.
+ */
+async function assertNotASource(project: Project, outPath: string): Promise<void> {
+  const out = await stat(outPath).catch(() => undefined);
+  for (const asset of Object.values(project.assets)) {
+    let same = resolve(asset.path) === resolve(outPath);
+    if (!same && out) {
+      const src = await stat(asset.path).catch(() => undefined);
+      // The device and inode identify the file itself, whatever name, link or letter case was used to reach it.
+      same = src !== undefined && src.dev === out.dev && src.ino === out.ino && out.ino !== 0;
+    }
+    if (same) {
+      throw new Error(
+        `${outPath} is one of the project's source files. Choose another export path.`,
+      );
+    }
+  }
 }
 
 /**
@@ -208,20 +235,36 @@ export async function exportProject(
   outPath: string,
   opts: ExportOptions = {},
 ): Promise<{ encoder: string; duration: number }> {
+  await assertNotASource(project, outPath);
   const workDir = await mkdtemp(join(tmpdir(), "dax-render-"));
+  // FFmpeg writes to a hidden temp name beside the target (same folder, so the final rename is atomic and on one
+  // disk) and the file only appears under its real name once complete; a failure or cancel leaves nothing behind.
+  const ext = extname(outPath);
+  const partial = join(
+    dirname(outPath),
+    `.${basename(outPath, ext)}.${randomBytes(4).toString("hex")}.partial${ext}`,
+  );
   try {
     const { encoder, value: duration } = await withEncoderFallback(
       async (enc) => {
-        const plan = buildRenderPlan(project, outPath, enc, { workDir });
+        const plan = buildRenderPlan(project, partial, enc, { workDir });
         for (const f of plan.files) await writeFile(f.path, f.content, "utf8");
-        await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)));
+        await runFfmpeg(plan.args, (sec) => opts.onProgress?.(Math.min(1, sec / plan.duration)), {
+          ...(opts.signal ? { signal: opts.signal } : {}),
+          ...(opts.onSpawn ? { onSpawn: opts.onSpawn } : {}),
+        });
         opts.onProgress?.(1);
         return plan.duration;
       },
-      opts.encoder ? { candidates: [opts.encoder] } : {},
+      {
+        ...(opts.encoder ? { candidates: [opts.encoder] } : {}),
+        ...(opts.signal ? { signal: opts.signal } : {}),
+      },
     );
+    await rename(partial, outPath);
     return { encoder, duration };
   } finally {
+    await rm(partial, { force: true });
     await rm(workDir, { recursive: true, force: true });
   }
 }

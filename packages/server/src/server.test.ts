@@ -170,6 +170,30 @@ describe.skipIf(!HAS_FFMPEG)("commands, history and WebSocket state events", () 
     });
   });
 
+  it("lets only one of two simultaneous exports start, and refuses to export over a source file", async () => {
+    await withServer({}, async (h) => {
+      const clip = await makeVideo(h.workDir, "long.mp4", { seconds: 4, size: "320x240" });
+      await h.command("import_media", { path: clip });
+      // Both requests arrive before the first export has reported any progress (when its job used to be created).
+      const [a, b] = await Promise.all([
+        h.command("export_video", { path: join(h.workDir, "one.mp4") }),
+        h.command("export_video", { path: join(h.workDir, "two.mp4") }),
+      ]);
+      expect([a.ok, b.ok].filter(Boolean)).toHaveLength(1);
+      const refused = a.ok ? b : a;
+      expect(String(refused.error)).toContain("already running");
+
+      // Wait until the running export has finished (the busy answer stops coming back).
+      let over = await h.command("export_video", { path: clip, overwrite: true });
+      for (let i = 0; i < 300 && String(over.error).includes("already running"); i++) {
+        await new Promise((r) => setTimeout(r, 100));
+        over = await h.command("export_video", { path: clip, overwrite: true });
+      }
+      expect(over.ok).toBe(false);
+      expect(String(over.error)).toContain("source file");
+    });
+  });
+
   it("autosaves the project file after every change and reopens it on the next launch", async () => {
     const first = await startHarness();
     try {

@@ -78,6 +78,8 @@ export class Engine {
   private readonly processes = new ProcessRegistry();
   private chat: ChatRun | undefined;
   private localTask: AbortController | undefined;
+  /** Set from the moment an export is accepted until it ends; aborting it kills FFmpeg. */
+  private exportAbort: AbortController | undefined;
   private providerCache: { at: number; value: ProviderStatus[] } | undefined;
   private broadcastScheduled = false;
   private broadcastChain: Promise<void> = Promise.resolve();
@@ -332,9 +334,13 @@ export class Engine {
    * answered directly; once FFmpeg is running the HTTP response says "started" and the job reports progress.
    */
   private startExport(args: Record<string, unknown>): Promise<CommandResponse> {
-    if (this.jobs.isRunning("export")) {
+    // A synchronous flag, not the job list: the job is only created at the first progress tick, 1-2 s after the
+    // start, and two exports requested in that window would both pass an `isRunning` check.
+    if (this.exportAbort || this.jobs.isRunning("export")) {
       return Promise.resolve({ ok: false, error: "An export is already running." });
     }
+    const abort = new AbortController();
+    this.exportAbort = abort;
     return new Promise<CommandResponse>((resolve) => {
       let job: ReturnType<JobManager["create"]> | undefined;
       let responded = false;
@@ -351,6 +357,9 @@ export class Engine {
         return job;
       };
       const ctx = this.commandContext({
+        signal: abort.signal,
+        // FFmpeg is tracked so shutdown kills it instead of orphaning it.
+        onProcess: (child) => this.processes.add(child),
         onProgress: (fraction) => {
           const j = ensureJob();
           j.progress(fraction);
@@ -358,6 +367,7 @@ export class Engine {
         },
       });
       void tryRunCommand(ctx, "export_video", args).then((out) => {
+        if (this.exportAbort === abort) this.exportAbort = undefined;
         if (out.ok) {
           const j = ensureJob();
           const path = (out.data as { path?: unknown } | undefined)?.path;
@@ -518,6 +528,7 @@ export class Engine {
     this.closing = true;
     this.chat?.abort.abort();
     this.localTask?.abort();
+    this.exportAbort?.abort();
     this.media.shutdown();
     this.processes.killAll();
     await Promise.race([this.cfg.localModel.stop().catch(() => undefined), delay(5000)]);

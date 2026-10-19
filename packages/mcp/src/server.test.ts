@@ -1,7 +1,7 @@
 // Tests for createMcpServer over the SDK's in-memory transport, against the real core registry.
 // Tool-listing tests need no FFmpeg; the end-to-end block generates a clip with FFmpeg and is skipped without it.
 
-import { existsSync, readFileSync, symlinkSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
 import { commandTools, Session } from "@dax/core";
 import { Client } from "@modelcontextprotocol/client";
@@ -247,18 +247,16 @@ describe.skipIf(!hasFfmpeg())("end to end against real core and FFmpeg", () => {
     );
     setTimeout(() => ac.abort(), 20);
     await expect(call).rejects.toBeDefined();
-    // The render cannot be interrupted: the file appears while it runs, then the server deletes it.
-    const waitFor = async (want: boolean, ms: number) => {
-      const deadline = Date.now() + ms;
-      while (Date.now() < deadline) {
-        if (existsSync(out) === want) return true;
-        await new Promise((r) => setTimeout(r, 50));
-      }
-      return false;
-    };
-    expect(await waitFor(true, 10_000)).toBe(true);
-    const removed = await waitFor(false, 60_000);
-    expect(removed).toBe(true);
+    // The render is interrupted and writes under a hidden temp name, so the target never appears and nothing is left over.
+    await new Promise((r) => setTimeout(r, 1500));
+    expect(existsSync(out)).toBe(false);
+    const deadline = Date.now() + 10_000;
+    let leftovers = readdirSync(dir).filter((f) => f.includes("partial"));
+    while (leftovers.length > 0 && Date.now() < deadline) {
+      await new Promise((r) => setTimeout(r, 100));
+      leftovers = readdirSync(dir).filter((f) => f.includes("partial"));
+    }
+    expect(leftovers).toEqual([]);
   }, 120_000);
 
   it("refuses paths outside the allowed roots, including through a symlink", async () => {

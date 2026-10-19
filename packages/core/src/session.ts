@@ -299,6 +299,12 @@ export class Session {
     this.current.name = clean;
   }
 
+  /** {@link Session.checkpoint} followed by an autosave, so the name reaches the history file. A failed save is reported in {@link Session.saveError}, not thrown. */
+  async saveCheckpoint(name: string): Promise<void> {
+    this.checkpoint(name);
+    await this.autosave();
+  }
+
   /** Jump back to a named version. Throws if no checkpoint has that name. */
   async restoreCheckpoint(name: string): Promise<Project> {
     const e = [...this.entries.values()].find((x) => x.name === name.trim());

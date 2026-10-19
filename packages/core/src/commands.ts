@@ -2,6 +2,7 @@
 // One definition per command (name, plain-language description, typed arguments, safety flags, implementation) so the
 // four front doors can never drift apart. Descriptions are written for a language model to read.
 
+import type { ChildProcess } from "node:child_process";
 import { existsSync } from "node:fs";
 import { basename, dirname, resolve } from "node:path";
 import { type ZodTypeAny, z } from "zod";
@@ -70,6 +71,10 @@ export interface CommandContext {
   onProgress?: (fraction: number) => void;
   /** Speech-to-text engine used by `transcribe`. Absent when none is set up. */
   transcriber?: Transcriber;
+  /** Cancels the command. Long-running commands (export, transcription, analysis) stop and fail; edits are checked before they are applied. */
+  signal?: AbortSignal;
+  /** Called with each child process a command starts, so the host can kill it on shutdown. */
+  onProcess?: (child: ChildProcess) => void;
 }
 
 /** What a command returns. `summary` is short plain text meant to be read by a person or a model. */
@@ -927,7 +932,8 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "Name the current state so it is easy to return to later.",
     schema: z.object({ name: z.string().min(1).max(60) }),
     async run(ctx, a) {
-      ctx.session.checkpoint(a.name);
+      // Persisted too: a checkpoint is history-only, so no edit would otherwise write it to the history file.
+      await ctx.session.saveCheckpoint(a.name);
       return { summary: `Saved checkpoint "${a.name}".` };
     },
   }),
@@ -953,6 +959,8 @@ export const COMMANDS: readonly CommandDef[] = [
       }
       const r = await exportProject(ctx.session.project, out, {
         ...(ctx.onProgress ? { onProgress: ctx.onProgress } : {}),
+        ...(ctx.signal ? { signal: ctx.signal } : {}),
+        ...(ctx.onProcess ? { onSpawn: ctx.onProcess } : {}),
       });
       return { summary: `Exported ${fmt(r.duration)} to ${out}.`, data: { path: out } };
     },

@@ -203,7 +203,7 @@ interface Runtime {
  * Editing commands run one at a time per session and always to completion: they apply atomically at the end and are
  * undoable, so honouring a late cancel would only leave a half-known state. Read-only and irreversible commands run
  * outside the queue (they work on an immutable project snapshot) and stop waiting as soon as the client cancels.
- * Core cannot interrupt an FFmpeg render yet, so a cancelled export finishes in the background and its file is deleted.
+ * A cancelled export is interrupted in core (FFmpeg is killed and the partial file removed).
  */
 async function runCommandTool(
   rt: Runtime,
@@ -230,6 +230,8 @@ async function runCommandTool(
     ...(rt.options.allowedRoots ? { allowedRoots: rt.options.allowedRoots } : {}),
     ...(rt.options.transcriber ? { transcriber: rt.options.transcriber } : {}),
     ...(progress.report ? { onProgress: progress.report } : {}),
+    // Core stops an export (and kills FFmpeg, removing the partial file) as soon as the client cancels.
+    signal,
   };
   const exec = async () => {
     const outcome = await tryRunCommand(cmdCtx, spec.name, rawArgs);
@@ -258,7 +260,7 @@ async function runCommandTool(
       }
       return failure(
         spec.irreversible
-          ? "Cancelled. The render cannot be interrupted, so it finishes in the background and its output file is then deleted."
+          ? "Cancelled. The render was stopped and its output file removed."
           : "Cancelled.",
       );
     }

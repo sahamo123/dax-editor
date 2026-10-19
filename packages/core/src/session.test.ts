@@ -188,6 +188,20 @@ describe("Session autosave failures", () => {
     }
   });
 
+  it("persists a checkpoint name without needing another edit", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "dax-sess-"));
+    try {
+      const file = join(dir, "p.dax.json");
+      const s = await Session.open(file, "t");
+      await s.apply((p) => addAsset(p, asset));
+      await s.saveCheckpoint("before cuts");
+      const reopened = await Session.open(file);
+      expect(reopened.history().find((h) => h.name === "before cuts")).toBeDefined();
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("has no saveError while saves work", async () => {
     const dir = mkdtempSync(join(tmpdir(), "dax-sess-"));
     try {
