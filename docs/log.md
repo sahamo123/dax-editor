@@ -1,5 +1,13 @@
 # Project log
 
+
+## 2026-10-19
+
+* **Creation**: Tauri 2 desktop shell in `apps/desktop/src-tauri`, with the `@dax/desktop` package. It starts the engine server as a sidecar with a random per-launch token, parses its `ServerInfo` line, health-checks it, and shuts it down on window close, app exit and app crash (stdin protocol, process group, `PR_SET_PDEATHSIG` on Linux, kill-on-close job object on Windows). Native open dialog and drag-and-drop paths, strict CSP, least-privilege capability. 29 Rust unit and integration tests. See [AGENTS.md of the shell](../apps/desktop/src-tauri/AGENTS.md).
+* **Verified** under Xvfb on Linux: the `.deb` starts the sidecar and the page gets its info; window close, SIGTERM and SIGKILL of the app leave no orphan server or child; SIGKILL of the server is noticed and shown as a failed status; H.264/AAC MP4, VP9/WebM and MPEG-4 MP4 play in `<video>` under WebKitGTK with the GStreamer plugins installed; drag-and-drop delivers a real path. macOS and Windows were only compiled (`cargo check`, Windows-gnu target), not run.
+* **Decision**: sidecar packaging. The Node runtime and FFmpeg ship as Tauri `externalBin` sidecars, the engine as one bundled file, all pinned and checksummed in `apps/desktop/sidecars.lock.json`, and nothing binary is committed. FFmpeg is LGPL-only and the build refuses GPL flags. See [ADR 0009](/adr/0009-desktop-sidecar-packaging.md).
+* **Creation**: release workflow `.github/workflows/desktop-release.yml` for macOS (both architectures), Linux and Windows, with pinned actions and draft releases on `desktop-v*` tags. Not run. Signing, notarization and the updater need maintainer steps, see [desktop release guide](/maintainers/desktop-release.md).
+
 ## 2026-10-18
 
 * **Milestone**: the first full `pnpm check` passes with exit code 0. It covers lint, typecheck, the knowledge-base validation (`pnpm docs:okf`), doc coverage, dead-code check and tests (28 core, 6 evals and 14 script tests). The evals oracle run passes 3/3.

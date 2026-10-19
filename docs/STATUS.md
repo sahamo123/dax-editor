@@ -21,13 +21,15 @@ The engine core (`packages/core`) and the developer tooling are built, and the e
 - **Evals harness** (`packages/evals`): oracle adapter passes 3/3 starter tasks.
 - **Tooling**: `pnpm check` exits 0 on Linux: lint, typecheck, knowledge-base validation, doc coverage, dead-code check and tests (28 core, 6 evals and 14 script tests).
 - **Dev environment**: Biome lint and format, TypeDoc doc-coverage gate, knip dead-code check, git hooks, AGENTS.md and contributor docs.
-- **Knowledge base**: OKF validator and index generator (`pnpm docs:okf`, `pnpm docs:index`); ADRs 0001-0008 (0006 is a draft proposal); engineering docs; architecture overview; evals docs; spec template; maintainer checklist.
+- **Knowledge base**: OKF validator and index generator (`pnpm docs:okf`, `pnpm docs:index`); ADRs 0001-0009 (0006 is a draft proposal); engineering docs; architecture overview; evals docs; spec template; maintainer checklist.
 - **Scribe step**: a scribe subagent definition, and the routine documented in the knowledge protocol.
 - **CI workflow**: written in `.github/workflows/ci.yml`, with Linux required and macOS and Windows non-blocking. It has not yet run on GitHub.
+- **Desktop shell** (`apps/desktop`, `src-tauri`): Tauri 2 window with a strict CSP and a least-privilege capability, a sidecar supervisor for the engine server (random token, `ServerInfo` handshake, health check, shutdown on close, exit and crash), native open-file dialog and drag-and-drop paths. Verified on Linux under Xvfb: no orphan processes after window close, SIGTERM, or SIGKILL of the app; H.264, VP9/WebM and MPEG-4 `<video>` playback. Packaging: pinned, checksummed Node and LGPL FFmpeg as sidecars ([ADR 0009](adr/0009-desktop-sidecar-packaging.md)). Uses a stand-in server and a placeholder page until the real UI and `packages/server` land.
 
 ## In progress
 
-- Nothing in flight. Next is the first pull request merge and enabling repo settings.
+- Desktop shell follow-ups before the first installer: replace the stand-in server with `packages/server/dist/cli.js`; replace the placeholder page with the real UI; macOS and Windows builds are untested; signing and the updater need maintainer steps (see [desktop release guide](maintainers/desktop-release.md)).
+- Nothing else in flight. Next is the first pull request merge and enabling repo settings.
 
 ## Next up (in order)
 
@@ -53,7 +55,8 @@ The engine core (`packages/core`) and the developer tooling are built, and the e
 - CI has not yet run on GitHub.
 - Windows and macOS are untested.
 - The whisper adapter is missing, so filler-word removal cannot run end to end.
-- The Tauri shell cannot be compiled in the cloud sandbox because the Linux WebKitGTK libraries are missing.
+- The Tauri shell needs the Linux WebKitGTK libraries to build (`libwebkit2gtk-4.1-dev`, `libgtk-3-dev`); it does not build in the cloud sandbox without them. macOS and Windows builds have not been run.
+- The FFmpeg shipped in the Linux and Windows installers is BtbN's prebuilt LGPL build, which is large (about 140 MB each); a minimal LGPL build is planned.
 
 ## How to resume
 

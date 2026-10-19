@@ -28,7 +28,7 @@ The version number comes from `apps/desktop/package.json` (`tauri.conf.json` rea
 |---|---|---|
 | Linux x64/arm64 | BtbN/FFmpeg-Builds static `lgpl` build, pinned to a dated release tag | SHA-256 in `sidecars.lock.json` (copied from the release's `checksums.sha256`) plus the flag scan |
 | Windows x64/arm64 | BtbN/FFmpeg-Builds static `lgpl` build, same tag | same |
-| macOS arm64/x64 | Built in CI from `ffmpeg.org/releases/ffmpeg-<ver>.tar.xz` by `scripts/build-ffmpeg-lgpl.sh` (VideoToolbox, no GPL) | Source SHA-256 pinned in the script (also checked against the FFmpeg release signing key `FCF9 86EA 15E6 E293 A564 4F10 B432 2F04 D676 58D8`), plus the flag scan |
+| macOS arm64/x64 | Built in CI from `ffmpeg.org/releases/ffmpeg-<ver>.tar.xz` by `scripts/build-ffmpeg-lgpl.sh` (VideoToolbox, FreeType and HarfBuzz for the `drawtext` filter, no GPL) | Source SHA-256 pinned in the script (also checked against the FFmpeg release signing key `FCF9 86EA 15E6 E293 A564 4F10 B432 2F04 D676 58D8`), plus the flag scan |
 
 To upgrade FFmpeg or Node: change the version/tag and the hashes in `sidecars.lock.json` (and the version/hash in `build-ffmpeg-lgpl.sh` for macOS), run `pnpm --filter @dax/desktop shell:test`, then a manual workflow run. Never point the lock file at a `gpl` build; the test suite and the build both reject it.
 
