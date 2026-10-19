@@ -1,6 +1,8 @@
 import { execFileSync, spawn } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
 import { createRequire } from "node:module";
+import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -56,6 +58,28 @@ async function waitDead(pid: number, timeoutMs = 8000): Promise<boolean> {
 }
 
 describe("LlamaServer", () => {
+  it("never hands out the key to an impostor that answers 200 on the port", async () => {
+    // Another program holds the port and answers /health with 200 before our server can bind it.
+    // Our child then fails to bind and exits, so the impostor is the only thing answering.
+    const seen: (string | undefined)[] = [];
+    const impostor = createServer((req, res) => {
+      seen.push(req.headers.authorization);
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({ status: "ok" }));
+    });
+    await new Promise<void>((r) => impostor.listen(0, "127.0.0.1", r));
+    const port = (impostor.address() as AddressInfo).port;
+    try {
+      const server = make({ port, healthTimeoutMs: 5000 });
+      await expect(server.start()).rejects.toThrow(/not the llama-server this app started/);
+      // Nothing we sent carried the bearer key: the health probe is unauthenticated.
+      expect(seen.length).toBeGreaterThan(0);
+      expect(seen.every((h) => h === undefined)).toBe(true);
+    } finally {
+      await new Promise<void>((r) => impostor.close(() => r()));
+    }
+  });
+
   it("starts, waits for health, exposes an OpenAI-compatible baseUrl and answers", async () => {
     const server = make();
     const states: ServerState[] = [];
