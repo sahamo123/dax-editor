@@ -100,6 +100,15 @@ const mcpConfigPath = flagValue("--mcp-config");
 const systemPromptPath = flagValue("--append-system-prompt-file");
 const configText =
   mcpConfigPath && existsSync(mcpConfigPath) ? readFileSync(mcpConfigPath, "utf8") : undefined;
+// Install the handler before announcing the run: a caller that waits for this record may send SIGTERM at once.
+if (scenario.ignoreSigterm) process.on("SIGTERM", () => undefined);
+else if (scenario.sigtermMarker) {
+  // Leave proof that SIGTERM (and not something harsher) is what ended the process.
+  process.on("SIGTERM", () => {
+    writeFileSync(scenario.sigtermMarker, "SIGTERM");
+    process.exit(143);
+  });
+}
 record({
   mode: "run",
   args,
@@ -116,14 +125,6 @@ record({
       : undefined,
 });
 
-if (scenario.ignoreSigterm) process.on("SIGTERM", () => undefined);
-else if (scenario.sigtermMarker) {
-  // Leave proof that SIGTERM (and not something harsher) is what ended the process.
-  process.on("SIGTERM", () => {
-    writeFileSync(scenario.sigtermMarker, "SIGTERM");
-    process.exit(143);
-  });
-}
 if (scenario.exitBeforeInit !== undefined) process.exit(scenario.exitBeforeInit);
 if (scenario.resumeFails && flagValue("--resume")) {
   emit({
