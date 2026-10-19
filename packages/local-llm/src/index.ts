@@ -34,6 +34,7 @@ export {
   LocalLlmError,
   ServerError,
   UnsupportedError,
+  UnverifiedRuntimeError,
 } from "./errors.js";
 export {
   type DetectHardwareOptions,
@@ -56,6 +57,7 @@ export {
   ensureRuntime,
   type FindRuntimeOptions,
   findInstalledRuntime,
+  PINNED_RUNTIME_DIGESTS,
   PINNED_RUNTIME_TAG,
   type ResolvedRuntimeAsset,
   type ResolveRuntimeOptions,

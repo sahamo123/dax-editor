@@ -5,10 +5,11 @@ import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
-import { HashMismatchError, UnsupportedError } from "./errors.js";
+import { HashMismatchError, UnsupportedError, UnverifiedRuntimeError } from "./errors.js";
 import {
   ensureRuntime,
   findInstalledRuntime,
+  PINNED_RUNTIME_DIGESTS,
   PINNED_RUNTIME_TAG,
   type RuntimeProgress,
   type RuntimeTarget,
@@ -136,7 +137,8 @@ beforeAll(async () => {
       );
       return;
     }
-    if (url.startsWith("/download/")) {
+    // Both the API's browser_download_url and the direct fallback URL land here.
+    if (url.startsWith("/download/") || url.includes("/releases/download/")) {
       downloads++;
       res.writeHead(200, { "content-length": archive.length });
       res.end(archive);
@@ -192,7 +194,19 @@ describe("resolveRuntimeAsset", () => {
     expect(asset.url).toBe(
       `${base}/ggml-org/llama.cpp/releases/download/${PINNED_RUNTIME_TAG}/${runtimeAssetCandidates(PINNED_RUNTIME_TAG, target)[0]}`,
     );
+    // The fallback has no API digest, so the pinned SHA-256 for that asset is what verifies it.
+    expect(asset.sha256).toBe(PINNED_RUNTIME_DIGESTS[asset.assetName]);
+    expect(asset.sha256).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("gives an unpinned tag no digest when the API is unavailable", async () => {
+    apiStatus = 403;
+    const asset = await resolveRuntimeAsset({ target, tag: "b100", ...mock() });
     expect(asset.sha256).toBeUndefined();
+  });
+
+  it.each(Object.entries(PINNED_RUNTIME_DIGESTS))("pins a well-formed SHA-256 for %s", (_, d) => {
+    expect(d).toMatch(/^[0-9a-f]{64}$/);
   });
 
   it("throws when the release exists but has no asset for the platform", async () => {
@@ -242,10 +256,42 @@ describe("ensureRuntime", () => {
     expect(await findInstalledRuntime({ dataDir: dir })).toBeUndefined();
   });
 
-  it("installs unverified (and says so) when no digest is published", async () => {
+  it("installs unverified (and says so) when the caller opts in and no digest is published", async () => {
     digest = null;
-    const info = await ensureRuntime({ dataDir: dir, ...mock() });
+    const info = await ensureRuntime({ dataDir: dir, ...mock(), allowUnverified: true });
     expect(info.verified).toBe(false);
+    expect((await findInstalledRuntime({ dataDir: dir }))?.verified).toBe(false);
+  });
+
+  it("refuses to install an unverified runtime without the opt-in, and downloads nothing", async () => {
+    digest = null;
+    await expect(ensureRuntime({ dataDir: dir, ...mock() })).rejects.toBeInstanceOf(
+      UnverifiedRuntimeError,
+    );
+    expect(downloads).toBe(0);
+    expect(await findInstalledRuntime({ dataDir: dir })).toBeUndefined();
+  });
+
+  it("does not reuse an unverified cached install unless the caller opts in", async () => {
+    digest = null;
+    await ensureRuntime({ dataDir: dir, ...mock(), allowUnverified: true });
+    await expect(ensureRuntime({ dataDir: dir, ...mock() })).rejects.toBeInstanceOf(
+      UnverifiedRuntimeError,
+    );
+    // The opt-in still reuses it, and status keeps telling the truth about it.
+    const again = await ensureRuntime({ dataDir: dir, ...mock(), allowUnverified: true });
+    expect(again.source).toBe("cached");
+    expect(again.verified).toBe(false);
+  });
+
+  it("verifies the direct-download fallback against the pinned digest and refuses a mismatch", async () => {
+    // The API is down, so the pinned digest for this host's asset is the only check, and the fake
+    // archive does not match it.
+    apiStatus = 403;
+    await expect(ensureRuntime({ dataDir: dir, ...mock() })).rejects.toBeInstanceOf(
+      HashMismatchError,
+    );
+    expect(await findInstalledRuntime({ dataDir: dir })).toBeUndefined();
   });
 
   it("uses an explicit binary path without touching the network", async () => {

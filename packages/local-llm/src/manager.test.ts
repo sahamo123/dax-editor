@@ -276,7 +276,9 @@ describe("LocalModelManager", () => {
     const used: string[] = [];
     const m = make({
       detect: async () => gpuMachine,
-      runtime: { apiBase: files.url, downloadBase: files.url },
+      // The fake API publishes no digest, so this test opts in to an unverified install; the test
+      // is about choosing between builds, not about verification.
+      runtime: { apiBase: files.url, downloadBase: files.url, allowUnverified: true },
       // The "binary" is a data file; the launcher runs the fake server and we record which build was asked for.
       server: {
         launcher: { command: process.execPath, args: [fake] },

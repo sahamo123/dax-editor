@@ -97,3 +97,9 @@ export class ServerError extends LocalLlmError {
 
 /** The requested catalog model, runtime asset or platform is not known or not supported. */
 export class UnsupportedError extends LocalLlmError {}
+
+/**
+ * A runtime build has no SHA-256 to check it against (no digest from the release API and no pinned
+ * digest), and the caller did not opt in to unverified installs. Nothing was downloaded.
+ */
+export class UnverifiedRuntimeError extends LocalLlmError {}

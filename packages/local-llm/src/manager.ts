@@ -52,7 +52,14 @@ export interface InstallProgress {
 /** Everything the UI needs to draw the local-model card. */
 export interface LocalModelStatus {
   /** Whether a llama.cpp runtime is installed (or provided through `DAX_LLAMA_SERVER`). */
-  runtime: { installed: boolean; tag?: string; backend?: string; source?: RuntimeInfo["source"] };
+  runtime: {
+    installed: boolean;
+    tag?: string;
+    backend?: string;
+    source?: RuntimeInfo["source"];
+    /** True when the installed build's SHA-256 was checked against a digest (see {@link RuntimeInfo.verified}). */
+    verified?: boolean;
+  };
   /** Models that are completely downloaded. */
   installedModels: { id: string; sizeBytes: number }[];
   /** The model recommended for this machine and the machine facts behind it. */
@@ -237,7 +244,13 @@ export class LocalModelManager {
       ...(this.o.runtime?.binaryPath ? { binaryPath: this.o.runtime.binaryPath } : {}),
     });
     return info
-      ? { installed: true, tag: info.tag, backend: info.backend, source: info.source }
+      ? {
+          installed: true,
+          tag: info.tag,
+          backend: info.backend,
+          source: info.source,
+          verified: info.verified,
+        }
       : { installed: false };
   }
 
