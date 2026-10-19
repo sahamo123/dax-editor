@@ -1,0 +1,54 @@
+[package]
+name = "dax-editor"
+version = "0.0.1"
+description = "Tauri 2 desktop shell for dax-editor: window, native dialogs, and the engine-server sidecar."
+authors = ["dax-editor contributors"]
+license = "Apache-2.0"
+edition = "2021"
+rust-version = "1.82"
+publish = false
+
+# A standalone Cargo workspace: the Rust crate does not belong to the pnpm/TypeScript workspace
+# and must not accidentally join a parent Cargo workspace.
+[workspace]
+
+[lib]
+name = "dax_desktop_lib"
+# cdylib/staticlib are required by Tauri for mobile targets; rlib is what the desktop binary and
+# `cargo test` use.
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+
+[dependencies]
+tauri = { version = "2.12", features = [] }
+tauri-plugin-dialog = "2.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Operating-system random numbers for the per-launch token.
+getrandom = "0.3"
+# Only the `sync` primitives (watch channel); no async runtime of our own.
+tokio = { version = "1", default-features = false, features = ["sync", "time"] }
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_System_JobObjects",
+  "Win32_System_Threading",
+] }
+
+[dev-dependencies]
+tokio = { version = "1", default-features = false, features = ["rt", "time"] }
+
+[profile.release]
+# Small, fast shell. The engine does the heavy lifting in the sidecar.
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

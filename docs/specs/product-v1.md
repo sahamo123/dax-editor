@@ -6,7 +6,7 @@ tags: [spec, architecture, v1, desktop, agent]
 status: draft
 generated:
   by: process:implementer
-  at: 2026-10-18T20:00:00Z
+  at: 2026-10-18T21:30:00Z
 ---
 
 # Product v1 specification
@@ -98,9 +98,9 @@ React 18 + TypeScript + Vite. Light dependencies (React, one small state library
 - **Presets panel:** the built-in animated text presets (from `state.presets`); **drag one onto the timeline** to add it at that time (`add_overlay`). Selecting an overlay opens an inspector (text, subtitle, animation, colour, size, position, duration).
 - **History:** panel listing every state with its label and who made it (manual / AI / template); click to restore (`restore_state`); named checkpoints; Undo/Redo buttons and `Ctrl/Cmd+Z`, `Shift+Ctrl/Cmd+Z`.
 - **Chat:** streaming transcript from `chat` events; tool calls shown as compact steps with a check or cross; an **Undo this change** button after an AI run; suggestion chips ("Remove silences", "Add a title", "Cut to 30 seconds"); cancel button; provider selector (Local model, API key, CLI sign-in) with status from `state.providers`.
-- **Settings:** provider choice and fields (base URL, model, API key box that never shows the key again); local model card with download/start/stop and progress (`/api/local-model`, to be wired by the lead).
+- **Settings:** provider choice and fields (base URL, model, API key box that never shows the key again); local model card with download/start/stop/cancel/remove and progress. The API is `GET /api/local-model` (status) plus `POST /api/local-model/install|start|stop|cancel|uninstall`; its shapes are in `@dax/protocol` and the server is the source of truth.
 - **Platform layer** (`src/platform.ts`): `pickFiles()`, `onFileDrop()`, `getServerInfo()`. Web build reads `?server=&token=` and offers a typed-path box for importing; the Tauri build uses the native dialog, drag-and-drop paths and a `get_server_info` command. Keep Tauri imports lazy so the web build works without them.
-- **Testing:** component tests (Vitest + Testing Library) and Playwright end-to-end tests using the preinstalled Chromium (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; launch with `executablePath: '/opt/pw-browsers/chromium'` if needed) against a **mock server** in `apps/desktop/e2e/` that implements `@dax/protocol` using the real `@dax/core` session and `runCommand` (so behaviour is realistic without waiting for `@dax/server`). Take screenshots and look at them; fix what looks wrong.
+- **Testing:** component tests (Vitest + Testing Library) and Playwright end-to-end tests using the preinstalled Chromium (`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`; launch with `executablePath: '/opt/pw-browsers/chromium'` if needed) against the **real `@dax/server`** run in-process by `apps/desktop/e2e/mock-server.mjs` (only the assistant, the local model and CLI sign-in are faked, through the server's own interfaces), plus `e2e/real-engine.spec.ts`, which starts the real `dax-engine` process with nothing faked. A hand-written stand-in for the API is not used: it drifted from the server once. Take screenshots and look at them; fix what looks wrong.
 - Accessibility basics: keyboard operable, labelled controls, visible focus.
 
 ### UI split: two builders, one interface

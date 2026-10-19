@@ -1,0 +1,239 @@
+{
+  "id": "podcast-clip-audiogram",
+  "version": 1,
+  "kind": "style",
+  "name": "Podcast clip",
+  "description": "Turns a podcast moment into a short vertical clip: dead air and crosstalk trimmed (pauses over half a second shortened to 0.2 seconds), an episode context card, a speaker lower-third and a listen-now end card. Word captions, a waveform and a speaker reframe are listed as not available yet.",
+  "tags": ["podcast", "clip", "short-form", "audiogram", "interview"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.10",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Episode title",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "Why most startups fail"
+    },
+    {
+      "name": "podcast_name",
+      "label": "Podcast name",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "The Founder Hour"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Speaker name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Speaker role or company",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Listen to the full episode",
+      "example": "Listen to the full episode"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "youtube-shorts",
+          "lengthSec": {
+            "min": 15,
+            "max": 180
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "1:1",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "instagram-feed"
+        },
+        {
+          "platform": "linkedin"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "standard",
+    "overrides": {
+      "pauseMin": 0.5,
+      "keepPause": 0.2
+    }
+  },
+  "beats": [
+    {
+      "id": "line",
+      "name": "Strongest line",
+      "durationSec": {
+        "min": 0,
+        "max": 3
+      },
+      "guidance": "Open on the best line, word for word.",
+      "overlay": "context"
+    },
+    {
+      "id": "context",
+      "name": "Context",
+      "durationSec": {
+        "min": 3,
+        "max": 8
+      },
+      "guidance": "One sentence that tells the viewer what the clip is about."
+    },
+    {
+      "id": "exchange",
+      "name": "The exchange",
+      "durationSec": {
+        "min": 15,
+        "max": 40
+      },
+      "guidance": "A complete moment with hook, context and payoff; never cut mid-sentence."
+    },
+    {
+      "id": "punch",
+      "name": "Punch line",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "End on the point."
+    },
+    {
+      "id": "episode",
+      "name": "Episode card",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Name the episode and where to listen.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "context",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "subtitle": "{{podcast_name}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.3,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.35,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 0.8,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.3
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Word captions with speaker labels",
+      "description": "Word-timed captions, with the speaker named when it changes.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "waveform",
+      "title": "Waveform visual",
+      "description": "An audiogram waveform over a background.",
+      "requires": ["waveform", "image-overlays"]
+    },
+    {
+      "id": "speaker-reframe",
+      "title": "Reframe to the speaker",
+      "description": "Crop and re-frame onto whoever is talking.",
+      "requires": ["reframe"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "privacy",
+      "text": "Check that every speaker agreed to clips being published; the guest contract may say."
+    },
+    {
+      "category": "copyright",
+      "text": "Footage, images, memes, logos and music from other people need permission or a licence that covers your use. Fair use depends on the country and is not automatic."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "general",
+      "text": "Keep quotes accurate. Do not trim a sentence so that it changes the meaning."
+    }
+  ],
+  "confirmations": []
+}

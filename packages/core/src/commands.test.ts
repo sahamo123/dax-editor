@@ -311,3 +311,17 @@ describe("transcribe and set_format", () => {
     );
   });
 });
+
+describe("set_format fit", () => {
+  it("defaults vertical presets to a blurred background and landscape back to bars", async () => {
+    const ctx = ctxWithClip();
+    await runCommand(ctx, "set_format", { preset: "portrait-1080x1920" });
+    expect(ctx.session.project.timeline.fit).toBe("blur");
+    await runCommand(ctx, "set_format", { fit: "cover" });
+    expect(ctx.session.project.timeline.fit).toBe("cover");
+    await runCommand(ctx, "set_format", { preset: "square-1080" });
+    expect(ctx.session.project.timeline.fit).toBe("cover"); // an explicit choice is kept
+    await runCommand(ctx, "set_format", { preset: "landscape-1080p" });
+    expect(ctx.session.project.timeline.fit).toBe("contain");
+  });
+});

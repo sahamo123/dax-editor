@@ -1,0 +1,206 @@
+{
+  "id": "internal-training",
+  "version": 1,
+  "kind": "industry",
+  "name": "Internal training",
+  "description": "One objective per video: objective title, a version-and-date label across the whole clip and a where-to-ask end card. Step callouts, captions and music are listed as not available yet.",
+  "tags": ["training", "internal", "hr", "learning", "compliance"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 17",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Objective",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "Reset your password safely"
+    },
+    {
+      "name": "version_text",
+      "label": "Policy version and date",
+      "type": "text",
+      "required": false,
+      "maxLength": 100,
+      "default": "Policy v1.2, 1 October 2026",
+      "example": "Policy v1.2, 1 October 2026"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Questions? Ask your team lead",
+      "example": "Questions? Ask your team lead"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 120,
+        "max": 300
+      },
+      "platforms": [
+        {
+          "platform": "learning-platform",
+          "lengthSec": {
+            "min": 120,
+            "max": 300
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "learning-platform"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "tutorial"
+  },
+  "beats": [
+    {
+      "id": "objective",
+      "name": "Objective",
+      "durationSec": {
+        "min": 0,
+        "max": 5
+      },
+      "guidance": "State what the learner will do.",
+      "overlay": "title"
+    },
+    {
+      "id": "why",
+      "name": "Why it matters",
+      "durationSec": {
+        "min": 10,
+        "max": 20
+      },
+      "guidance": "One reason."
+    },
+    {
+      "id": "steps",
+      "name": "Steps",
+      "durationSec": {
+        "min": 30,
+        "max": 90
+      },
+      "guidance": "One to three steps with a demo; keep sections separable so one can be re-recorded."
+    },
+    {
+      "id": "check",
+      "name": "Check question",
+      "durationSec": {
+        "min": 10,
+        "max": 10
+      },
+      "guidance": "A question to confirm understanding."
+    },
+    {
+      "id": "resources",
+      "name": "Resources",
+      "durationSec": {
+        "min": 5,
+        "max": 5
+      },
+      "guidance": "Where to ask or read more.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "version",
+      "preset": "caption-bottom",
+      "text": "{{version_text}}",
+      "when": "version_text",
+      "anchor": "full",
+      "offset": 0,
+      "minDuration": 1,
+      "priority": 0
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.3,
+    "out": 0.5
+  },
+  "deferred": [
+    {
+      "id": "step-callouts",
+      "title": "Step number callouts",
+      "description": "Step 1, 2, 3 callouts timed to the steps.",
+      "requires": ["beat-matching"]
+    },
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Captions for compliance training.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "intro-bed",
+      "title": "Intro music",
+      "description": "A light bed on the intro only.",
+      "requires": ["music-bed"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "privacy",
+      "text": "Employees must agree to be recorded and to reuse of the recording; some countries have extra rules for staff representatives."
+    },
+    {
+      "category": "privacy",
+      "text": "Do not show client or customer data on screen."
+    },
+    {
+      "category": "general",
+      "text": "Training records may have retention rules."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "client-data",
+      "ask": "Is any client or customer data visible on screen?"
+    }
+  ]
+}

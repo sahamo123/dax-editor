@@ -1,0 +1,38 @@
+{
+  "name": "@dax/cli",
+  "version": "0.0.1",
+  "description": "The dax command line: run any core command on a project file, list commands, start the MCP server or the engine server.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "dax": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "vitest run",
+    "docs:check": "typedoc",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@dax/core": "workspace:*",
+    "@dax/mcp": "workspace:*"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

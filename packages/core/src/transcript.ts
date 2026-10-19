@@ -4,8 +4,11 @@ import type { Range, Transcript } from "./schema.js";
 
 /** Anything that can turn a media file into a word-timed transcript (whisper.cpp, Parakeet, ...). */
 export interface Transcriber {
-  /** Transcribe `path`; `language` is an ISO code such as `en`, or omitted to auto-detect. */
-  transcribe(path: string, opts?: { language?: string }): Promise<Transcript>;
+  /**
+   * Transcribe `path`; `language` is an ISO code such as `en`, or omitted to auto-detect. An implementation should
+   * stop and reject with an `AbortError`-named error when `signal` fires.
+   */
+  transcribe(path: string, opts?: { language?: string; signal?: AbortSignal }): Promise<Transcript>;
 }
 
 /** Filler words removed by default. Matching ignores case and punctuation. */

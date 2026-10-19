@@ -1,0 +1,182 @@
+/* Styles for the temporary shell placeholder page. */
+:root {
+  color-scheme: dark;
+  --bg: #14131f;
+  --panel: #1d1c2e;
+  --line: #34325a;
+  --text: #ecebff;
+  --muted: #9c9ac2;
+  --accent: #7c6cff;
+  --ok: #3ecf8e;
+  --bad: #ff6b6b;
+  --wait: #e6b450;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 20px 28px 40px;
+  background: var(--bg);
+  color: var(--text);
+  font:
+    14px / 1.45 system-ui,
+    sans-serif;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 0 0 4px;
+}
+
+h2 {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+.tag {
+  font-size: 11px;
+  vertical-align: middle;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+  margin: 6px 0;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+section:nth-child(2) {
+  grid-row: span 2;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 6px 10px;
+  margin: 0;
+}
+
+dt {
+  color: var(--muted);
+}
+
+dd {
+  margin: 0;
+  word-break: break-all;
+  font-family: ui-monospace, monospace;
+}
+
+.pill {
+  display: inline-block;
+  width: fit-content;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-family: system-ui, sans-serif;
+}
+
+.pill.ok {
+  background: color-mix(in srgb, var(--ok) 25%, transparent);
+  color: var(--ok);
+}
+
+.pill.bad {
+  background: color-mix(in srgb, var(--bad) 25%, transparent);
+  color: var(--bad);
+}
+
+.pill.wait {
+  background: color-mix(in srgb, var(--wait) 25%, transparent);
+  color: var(--wait);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: white;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+.drop:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.drop {
+  border: 2px dashed var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.drop.over {
+  border-color: var(--accent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+video {
+  width: 100%;
+  max-height: 260px;
+  background: black;
+  border-radius: 6px;
+}
+
+ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+pre {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+  font:
+    12px / 1.4 ui-monospace,
+    monospace;
+  color: var(--muted);
+  white-space: pre-wrap;
+}

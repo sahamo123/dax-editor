@@ -2,6 +2,14 @@
 
 import { z } from "zod";
 
+/**
+ * An id used for assets, clips, tracks and overlays. Restricted to letters, digits, `_` and `-` (at most 64) because
+ * ids end up in file names and URLs, and project files are untrusted input: `../x` must never be a valid id.
+ */
+export const IdSchema = z
+  .string()
+  .regex(/^[\w-]{1,64}$/, "ids use letters, digits, _ and - (max 64)");
+
 /** One recognised word, timed in the source file's own time (seconds). */
 export const WordSchema = z.object({
   text: z.string(),
@@ -22,7 +30,7 @@ export type Transcript = z.infer<typeof TranscriptSchema>;
 
 /** A source media file known to the project. `duration` is in seconds; `hasAudio` lets the renderer synthesise silence for clips without an audio stream. */
 export const AssetSchema = z.object({
-  id: z.string(),
+  id: IdSchema,
   path: z.string(),
   kind: z.enum(["video", "audio", "image"]),
   duration: z.number().nonnegative(),
@@ -42,8 +50,8 @@ export type Asset = z.infer<typeof AssetSchema>;
  * in seconds, of a fade from/to black (and silence) at the clip's edges.
  */
 export const ClipSchema = z.object({
-  id: z.string(),
-  assetId: z.string(),
+  id: IdSchema,
+  assetId: IdSchema,
   start: z.number().nonnegative(),
   in: z.number().nonnegative(),
   out: z.number().positive(),
@@ -56,7 +64,7 @@ export type Clip = z.infer<typeof ClipSchema>;
 
 /** An ordered lane of clips. v0.1 only edits the single main video track ({@link MAIN_TRACK}). */
 export const TrackSchema = z.object({
-  id: z.string(),
+  id: IdSchema,
   kind: z.enum(["video", "audio"]),
   clips: z.array(ClipSchema),
 });
@@ -96,7 +104,7 @@ export type OverlayStyle = z.infer<typeof OverlayStyleSchema>;
  * built-in preset created it (informational); `animation` is what the renderer uses.
  */
 export const OverlaySchema = z.object({
-  id: z.string(),
+  id: IdSchema,
   kind: z.literal("text"),
   start: z.number().nonnegative(),
   duration: z.number().positive(),
@@ -111,24 +119,72 @@ export const OverlaySchema = z.object({
 /** A validated {@link OverlaySchema} value. */
 export type Overlay = z.infer<typeof OverlaySchema>;
 
+/** How footage that does not match the output shape is fitted: bars, crop to fill, or a blurred copy behind. */
+export const FITS = ["contain", "cover", "blur"] as const;
+/** One of {@link FITS}. */
+export type Fit = (typeof FITS)[number];
+
+/** Built-in caption looks. */
+export const CAPTION_STYLES = ["classic", "bold-pop", "minimal"] as const;
+/** One of {@link CAPTION_STYLES}. */
+export type CaptionStyle = (typeof CAPTION_STYLES)[number];
+
+/**
+ * Captions made from the speech transcripts of the clips on the timeline. Their presence turns captions
+ * on. Lines are computed when needed, so they follow every edit automatically.
+ */
+export const CaptionSettingsSchema = z.object({
+  style: z.enum(CAPTION_STYLES).default("classic"),
+  /** Most words shown at once. */
+  maxWords: z.number().int().min(1).max(8).default(4),
+  uppercase: z.boolean().default(false),
+  color: HexColorSchema.default("#ffffff"),
+  /** Colour of the word being spoken (`bold-pop` style). */
+  highlight: HexColorSchema.default("#facc15"),
+  position: z.enum(["bottom", "center", "top"]).default("bottom"),
+});
+/** A validated {@link CaptionSettingsSchema} value. */
+export type CaptionSettings = z.infer<typeof CaptionSettingsSchema>;
+
 /** Output format (`width`, `height`, `fps`) plus the tracks and overlays that make up the edit. */
 export const TimelineSchema = z.object({
-  width: z.number().int().positive(),
-  height: z.number().int().positive(),
-  fps: z.number().positive(),
+  /** Frame size in pixels, 16 to 8192: a hostile project file must not ask FFmpeg for a billion-pixel frame. */
+  width: z.number().int().min(16).max(8192),
+  height: z.number().int().min(16).max(8192),
+  /** Frames per second, 1 to 240. */
+  fps: z.number().min(1).max(240),
+  /** How clips are fitted into the frame. `contain` leaves bars, `cover` crops to fill, `blur` puts a blurred copy behind. */
+  fit: z.enum(FITS).default("contain"),
   tracks: z.array(TrackSchema),
   overlays: z.array(OverlaySchema).default([]),
+  /** Present when captions are on. */
+  captions: CaptionSettingsSchema.optional(),
 });
 /** A validated {@link TimelineSchema} value. */
 export type Timeline = z.infer<typeof TimelineSchema>;
 
 /** The saved project file: assets plus a timeline. `version` lets future releases migrate old files. */
-export const ProjectSchema = z.object({
-  version: z.literal(1),
-  name: z.string(),
-  assets: z.record(z.string(), AssetSchema),
-  timeline: TimelineSchema,
-});
+export const ProjectSchema = z
+  .object({
+    version: z.literal(1),
+    name: z.string(),
+    assets: z.record(z.string(), AssetSchema),
+    timeline: TimelineSchema,
+  })
+  .superRefine((project, ctx) => {
+    // Overlay ids must be unique: they name things in the UI and commands, and a duplicate would make edits hit the wrong overlay.
+    const seen = new Set<string>();
+    project.timeline.overlays.forEach((o, i) => {
+      if (seen.has(o.id)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["timeline", "overlays", i, "id"],
+          message: `duplicate overlay id "${o.id}"`,
+        });
+      }
+      seen.add(o.id);
+    });
+  });
 /** A validated {@link ProjectSchema} value. Treated as immutable: edits return a new project. */
 export type Project = z.infer<typeof ProjectSchema>;
 

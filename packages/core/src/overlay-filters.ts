@@ -38,6 +38,61 @@ export function filterPath(path: string): string {
   return quoteFilterValue(path.replace(/\\/g, "/"));
 }
 
+const NARROW = new Set("iIlj.,;:'!|()[]` ");
+const WIDE = new Set("mwMW@%&");
+
+/** Rough width of one character in em, good enough to decide where to wrap. Inter's average is about 0.55 em. */
+function charWidth(ch: string, bold: boolean): number {
+  const code = ch.codePointAt(0) ?? 0;
+  let w = 0.55;
+  if (code >= 0x2e80)
+    w = 1; // CJK and similar full-width scripts
+  else if (NARROW.has(ch)) w = 0.3;
+  else if (WIDE.has(ch)) w = 0.85;
+  else if (/[A-Z]/.test(ch)) w = 0.68;
+  else if (/\d/.test(ch)) w = 0.58;
+  return bold ? w * 1.05 : w;
+}
+
+/** Estimated width in pixels of `text` at `fontPx`. */
+export function estimateWidth(text: string, fontPx: number, bold: boolean): number {
+  let em = 0;
+  for (const ch of text) em += charWidth(ch, bold);
+  return em * fontPx;
+}
+
+/**
+ * Wrap `text` to fit `maxPx` and, if a single word is still too wide, shrink the font so it fits.
+ * FFmpeg's drawtext cannot measure text, so this uses an estimate (it errs slightly wide).
+ * Existing line breaks are kept. Returns the text with `\n` inserted and the font size to use.
+ */
+export function fitText(
+  text: string,
+  fontPx: number,
+  maxPx: number,
+  bold: boolean,
+): { text: string; fontPx: number } {
+  const words = text.split(/\s+/).filter(Boolean);
+  const widest = Math.max(0, ...words.map((w) => estimateWidth(w, fontPx, bold)));
+  let size = fontPx;
+  if (widest > maxPx) size = Math.max(8, Math.floor((fontPx * maxPx) / widest));
+  const lines: string[] = [];
+  for (const paragraph of text.split("\n")) {
+    let line = "";
+    for (const word of paragraph.split(/\s+/).filter(Boolean)) {
+      const next = line ? `${line} ${word}` : word;
+      if (line && estimateWidth(next, size, bold) > maxPx) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = next;
+      }
+    }
+    lines.push(line);
+  }
+  return { text: lines.join("\n"), fontPx: size };
+}
+
 const n = (x: number) => Number(x.toFixed(4)).toString();
 const hex = (c: string) => `0x${c.slice(1).toUpperCase()}`;
 
@@ -107,7 +162,9 @@ function drawtext(opts: {
 /**
  * Build the filters for one overlay on a `W`x`H` frame. Times are timeline seconds, which is what
  * FFmpeg's `t` is when these filters run after the clips have been concatenated.
- * `dir` is where this overlay's text files will live (they are named from the overlay id).
+ * `dir` is where this overlay's text files will live. They are named from `stem`, which the renderer sets to the
+ * overlay's position (`ov0`, `ov1`, ...) so that no id from a project file ever becomes part of a path and two overlays
+ * can never share a file. Without `stem`, the id is reduced to letters, digits, `_` and `-`.
  */
 export function overlayFilters(
   o: Overlay,
@@ -115,17 +172,24 @@ export function overlayFilters(
   H: number,
   fonts: FontFiles,
   dir: string,
+  stem: string = o.id.replace(/[^\w-]/g, "_"),
 ): OverlayFilters {
   const s = o.start;
   const e = o.start + o.duration;
   const edge = Math.min(EDGE, o.duration / 3);
   const enable = `between(t,${n(s)},${n(e)})`;
-  const g = geometry(o.style, W, H);
+  const g0 = geometry(o.style, W, H);
   const font = o.style.bold ? fonts.bold : fonts.regular;
+  // Keep text inside the frame: wrap to the usable width and shrink only if one word is too wide.
+  const usable =
+    W * (o.animation === "typewriter" ? 0.78 : o.style.position === "lower-third" ? 0.84 : 0.88);
+  const fitted = fitText(o.text, g0.size, usable, o.style.bold);
+  const g = { ...g0, size: fitted.fontPx };
+  const mainText = fitted.text;
   const boxBorder = Math.round(g.size * 0.3);
   const files: TextFile[] = [];
   const filters: string[] = [];
-  const base = `${dir.replace(/\\/g, "/")}/${o.id}`;
+  const base = `${dir.replace(/\\/g, "/")}/${stem}`;
 
   const alpha = o.animation === "none" ? "1" : fadeEnvelope(s, e, edge, edge);
   const entrance = progress(s, edge + 0.1);
@@ -162,7 +226,7 @@ export function overlayFilters(
 
   if (o.animation === "typewriter" && [...o.text].length <= TYPEWRITER_MAX_CHARS) {
     // One drawtext per prefix, each live for a short slice; left aligned so letters do not jump.
-    const chars = [...o.text];
+    const chars = [...mainText];
     const step = Math.min(0.08, (o.duration * 0.6) / chars.length);
     const left = n(W * 0.1);
     chars.forEach((_, i) => {
@@ -185,9 +249,9 @@ export function overlayFilters(
     const subSize = Math.max(8, Math.round(g.size * 0.6));
     const titleY = H * 0.72;
     const plateH = g.size * 1.25 + boxBorder * 2;
-    addText(o.text, "title", { y: n(titleY), box: { color: o.style.accent, opacity: 1 } });
+    addText(mainText, "title", { y: n(titleY), box: { color: o.style.accent, opacity: 1 } });
     if (o.subtitle) {
-      addText(o.subtitle, "sub", {
+      addText(fitText(o.subtitle, subSize, usable, false).text, "sub", {
         y: n(titleY + plateH),
         size: `${subSize}`,
         font: fonts.regular,
@@ -197,10 +261,12 @@ export function overlayFilters(
     return { filters, files };
   }
 
-  addText(o.text, "main");
+  addText(mainText, "main");
   if (o.subtitle) {
-    addText(o.subtitle, "sub", {
-      y: `${g.y}+${n(g.size * 1.4)}`,
+    // The second line sits below a (possibly wrapped) main text, so offset by its line count.
+    const lines = mainText.split("\n").length;
+    addText(fitText(o.subtitle, Math.round(g.size * 0.55), usable, false).text, "sub", {
+      y: `${g.y}+${n(g.size * (1.2 * lines + 0.2))}`,
       size: `${Math.round(g.size * 0.55)}`,
       font: fonts.regular,
     });

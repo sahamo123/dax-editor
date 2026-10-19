@@ -6,7 +6,7 @@ tags: [roadmap, planning]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T19:30:00Z
+  at: 2026-10-18T21:00:00Z
 ---
 
 # Roadmap
@@ -31,33 +31,51 @@ Decisions so far:
 - [x] Probe, silence detection, scene detection
 - [x] FFmpeg renderer with encoder selection and progress
 - [x] Transcript types, filler-word ranges, `Connector` interface (local)
+- [x] Command registry: 35 commands (33 in the registry and 2 template commands), one definition for the UI, built-in AI, MCP and CLI
+- [x] Cut engine: floor-relative speech detection, five presets, reviewable cut plans (false starts and retakes are proposals)
+- [x] Word-timed captions burned in, in three looks, following every cut
+- [x] Fit modes (contain, cover, blur) and output format presets
+- [x] Text overlays with six animation presets, following ripple deletes
+- [x] Clip fades and 8 ms audio fades at real cuts
+- [x] Session history tree with named checkpoints and restore
+- [x] Shared contract package `@dax/protocol`
+- [x] Templates: 34 style and industry recipes with a deterministic applier
+- [x] Skills layer: 24 playbooks and a router, with budgeted selection
 - [x] Dev environment: lint/format (Biome), doc-coverage gate (TypeDoc), dead-code check (knip), git hooks, AGENTS.md, contributor docs, OKF knowledge base
 - [x] Evals harness with deterministic oracle adapter and 3 starter tasks
 - [ ] CI workflow (Linux required; macOS and Windows experimental until verified) (written, awaiting first run)
 - [x] OKF validator + index generator scripts
-- [x] [ADRs 0001-0008](adr/index.md)
-- [ ] First real model adapter (OpenAI-compatible endpoint, covers Ollama and llama.cpp)
+- [x] [ADRs 0001-0009](adr/index.md)
+- [x] First real model adapter: an OpenAI-compatible and Anthropic provider in `@dax/agent`, plus an eval adapter. No real-model run is recorded yet.
 - [ ] Model evaluation study per [model-evaluation-plan](evals/model-evaluation-plan.md)
-- [ ] whisper.cpp transcriber adapter
+- [ ] whisper.cpp transcriber adapter (in progress: `@dax/stt`)
 - [ ] Proxy generation for preview, thumbnails, waveforms
-- [ ] Captions burn-in and SRT export
+- [ ] Captions SRT export (burn-in is done)
 - [ ] Hardware-encoder matrix tested on macOS, Windows, Linux
 - [ ] Eval runs against real models: fixed footage + prompts -> assertions on the resulting timeline (the oracle-only harness is done, see above)
 
 ## Phase 1: usable v0.1
 
-- [ ] CLI (`dax`): probe, silences, remove-silences, transcribe, export, mcp
-- [ ] MCP server: perceive tools (transcript, silences, scenes, frames) and edit tools, with a draft/approve flow for external agents and import-path allowlists
-- [ ] Agent loop for the built-in chat with the four backends, constrained tool calls, and model recommendation by RAM
-- [ ] Tauri app: chat panel, preview, timeline, drag-and-drop import
+- [x] Engine server: HTTP and WebSocket API on 127.0.0.1 (`@dax/server`, bin `dax-server`), with the `@dax/engine` launcher (`dax-engine`)
+- [x] Desktop app, browser build: app shell (chat, settings, history, media bin) and editor (preview, timeline, presets, inspector) in `apps/desktop`
+- [x] CLI (`dax`): list and run any command, project new/show, import, cut, export, mcp, serve (`packages/cli`). Dedicated probe/silences/transcribe verbs are `dax run detect_silence` etc.; transcribe waits for a speech engine
+- [x] MCP server: perceive tools (transcript, silences, scenes, frames) and edit tools, with import-path allowlists (`packages/mcp`)
+- [ ] MCP draft/approve flow for external agents ([ADR 0006](adr/0006-draft-approve-for-external-agents.md))
+- [ ] Agent loop for the built-in chat with the four backends, constrained tool calls, and model recommendation by RAM (loop and the Anthropic and OpenAI-compatible providers merged; embedded local model in progress: `@dax/local-llm`)
+- [ ] Tauri app: chat panel, preview, timeline, drag-and-drop import (browser build merged; Tauri shell in progress)
 - [ ] Screen and mic recording
-- [ ] Format recipes (tutorial, explainer, short-form) as data files
+- [x] Format recipes (tutorial, explainer, short-form) as data files: skills and templates merged
+- [ ] Engine gap: music and sound-effect audio layers with ducking (in progress: music ducking)
+- [ ] Engine gap: punch-in and zoom keyframes (in progress)
+- [ ] Engine gap: image, shape and card overlays (in progress)
+- [ ] Engine gap: a second video layer for B-roll
 - [ ] CI on macOS, Windows, Linux; installers
 
 ## Phase 2
 
 - [ ] Connectors: Google Drive (direct API, resumable transfer) and rclone
 - [ ] Action adapters (publishing) backed by MCP servers
+- [ ] Plugin system ([plugin architecture research](research/plugin-architecture.md))
 - [ ] HyperFrames motion-graphics plugin
 - [ ] OTIO / FCPXML / EDL export
 - [ ] Blender plugin
