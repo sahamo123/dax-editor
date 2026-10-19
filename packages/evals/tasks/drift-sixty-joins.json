@@ -1,0 +1,8 @@
+{
+  "id": "drift-sixty-joins",
+  "description": "Remove every pause from 61 words (60 joins) and keep the picture and sound ending together.",
+  "fixture": "sixty-joins",
+  "prompt": "Remove all the silent parts of this video.",
+  "tags": ["silence", "sync"],
+  "checks": [{ "type": "clipCount", "min": 61 }, { "type": "avSync", "maxFrames": 1 }]
+}

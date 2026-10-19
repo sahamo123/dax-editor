@@ -1,0 +1,8 @@
+{
+  "id": "music-bed-gap-preserved",
+  "description": "Remove the dead air, but keep the music bed playing where a pause holds only music.",
+  "fixture": "music-bed",
+  "prompt": "Remove the dead air from this video, but keep the music playing under it.",
+  "tags": ["music", "audio"],
+  "checks": [{ "type": "toneSeconds", "hz": 220, "min": 7.8 }]
+}
