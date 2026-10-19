@@ -131,6 +131,40 @@ describe("createRunnerFactory conversation history", () => {
   });
 });
 
+describe("createRunnerFactory context size", () => {
+  it("offers a small model only the everyday tools, and the full list to a large one", async () => {
+    const m = await mockModel();
+    open = m.server;
+    const session = new Session();
+    const ctx = {
+      session,
+      onEvent: () => undefined,
+      signal: new AbortController().signal,
+      allowedRoots: [],
+    };
+    const small = settings({
+      providers: { "openai-compatible": { baseUrl: m.url, model: "m", contextTokens: 8192 } },
+    });
+    await (await createRunnerFactory()(env(small))).run("first", ctx);
+    const large = settings({
+      providers: { "openai-compatible": { baseUrl: m.url, model: "m", contextTokens: 131072 } },
+    });
+    await (await createRunnerFactory()(env(large))).run("second", {
+      ...ctx,
+      session: new Session(),
+    });
+    const toolNames = (body: string) =>
+      (JSON.parse(body) as { tools?: Array<{ function: { name: string } }> }).tools?.map(
+        (t) => t.function.name,
+      ) ?? [];
+    const smallTools = toolNames(m.bodies[0] ?? "");
+    const largeTools = toolNames(m.bodies[1] ?? "");
+    expect(smallTools).toEqual(expect.arrayContaining(["get_project", "split"]));
+    expect(smallTools.length).toBeLessThan(largeTools.length);
+    expect(largeTools).toContain("get_history");
+  });
+});
+
 describe("createProviderRegistry", () => {
   it("lists every provider with a hint for what is missing", async () => {
     const list = await createProviderRegistry().list(env(settings()));

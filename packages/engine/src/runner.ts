@@ -4,9 +4,12 @@
 import {
   type AgentProvider,
   type ChatMessage,
+  contextBudget,
   createAgent,
   createAnthropicProvider,
   createOpenAiProvider,
+  smallModelTools,
+  trimHistory,
 } from "@dax/agent";
 import {
   loadSkills,
@@ -18,6 +21,9 @@ import {
 } from "@dax/core";
 import type { ProviderKind } from "@dax/protocol";
 import type { AgentRunner, AgentRunnerFactory, RunnerEnv } from "@dax/server";
+
+/** Context window assumed for the built-in model when Settings says nothing (it is a small model). */
+const BUILT_IN_CONTEXT_TOKENS = 8192;
 
 /** Default model names per hosted provider; users can override them in Settings. */
 export const DEFAULT_MODELS: Partial<Record<ProviderKind, string>> = {
@@ -105,13 +111,16 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
   async function makeProvider(
     kind: ProviderKind,
     env: RunnerEnv,
-  ): Promise<{ provider: AgentProvider; compact: boolean } | string> {
+  ): Promise<{ provider: AgentProvider; contextTokens?: number } | string> {
     const cfg = env.settings.providers[kind] ?? {};
     const model = cfg.model ?? DEFAULT_MODELS[kind];
     if (kind === "anthropic") {
       const apiKey = await env.getApiKey(kind);
       if (!apiKey) return "Add an Anthropic API key in Settings to use Claude.";
-      return { provider: createAnthropicProvider({ apiKey, model: model ?? "" }), compact: false };
+      return {
+        provider: createAnthropicProvider({ apiKey, model: model ?? "" }),
+        ...(cfg.contextTokens ? { contextTokens: cfg.contextTokens } : {}),
+      };
     }
     if (kind === "openai-compatible") {
       if (!cfg.baseUrl)
@@ -128,8 +137,8 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
           model: model ?? "",
           ...(apiKey ? { apiKey } : {}),
         }),
-        // Hosted models cope with full tool descriptions; compact is for small local ones.
-        compact: false,
+        // Unset means a large hosted model; set a smaller window in Settings for a small model behind this address.
+        ...(cfg.contextTokens ? { contextTokens: cfg.contextTokens } : {}),
       };
     }
     if (kind === "local") {
@@ -137,7 +146,8 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       if (!baseUrl) return "The built-in model is not running. Download and start it in Settings.";
       return {
         provider: createOpenAiProvider({ baseUrl, model: model ?? "local" }),
-        compact: true,
+        // The built-in model is small; its window is what the Settings value says, else the built-in default.
+        contextTokens: cfg.contextTokens ?? BUILT_IN_CONTEXT_TOKENS,
       };
     }
     return `The ${kind} provider is not available in this build.`;
@@ -149,12 +159,17 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
     if (typeof made === "string") {
       return (await options.extraProviders?.(kind, env)) ?? unavailable(made);
     }
+    // Everything small-model related follows from the window size: tool style, which tools are offered, how many skills
+    // fit and how much conversation is kept.
+    const budget = contextBudget(made.contextTokens);
     const agent = createAgent({
       provider: made.provider,
-      toolStyle: made.compact ? "compact" : "full",
+      contextTokens: budget.contextTokens,
+      toolStyle: budget.compact ? "compact" : "full",
+      ...(budget.compact ? { tools: smallModelTools() } : {}),
       contextProvider: (message) =>
         skills.length > 0
-          ? skillContext(selectSkills(message, skills, { maxChars: made.compact ? 3000 : 6000 }))
+          ? skillContext(selectSkills(message, skills, { maxChars: budget.skillChars }))
           : undefined,
     });
     return {
@@ -173,7 +188,8 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
           allowedRoots: [...ctx.allowedRoots],
           ...(options.transcriber ? { transcriber: options.transcriber } : {}),
         });
-        if (mine === generation) history = result.messages;
+        // Only the newest run's conversation is kept, and only its most recent part (about the window the model can see).
+        if (mine === generation) history = trimHistory(result.messages, budget.maxContextChars);
       },
     };
   };
