@@ -1,5 +1,5 @@
-// The "Local model" part of Settings: what model is recommended, its size, and Download / Start / Stop / Remove
-// with live progress from the server's `model-download` and `model-start` jobs.
+// The "Local model" part of Settings: which model the engine offers, its size, and Download / Start / Stop / Remove
+// with live progress (and Cancel) from the server's `model-download` and `model-start` jobs.
 
 import type { JobInfo } from "@dax/protocol";
 import { type ReactElement, useEffect, useMemo } from "react";
@@ -41,23 +41,29 @@ export function LocalModelCard(): ReactElement {
   if (model === "unavailable") {
     return (
       <p className="note note--info">
-        The local model isn't available from this engine yet. You can still use an API key or a
+        The engine did not report the local model's status. You can still use an API key or a
         signed-in command-line tool.
+      </p>
+    );
+  }
+  // A build without a model runtime says so in `detail`; offering a download would only fail.
+  if (model.supported === false) {
+    return (
+      <p className="note note--info" data-testid="local-model-unsupported">
+        {model.detail} You can still use an API key or a signed-in command-line tool.
       </p>
     );
   }
 
   const working = job?.status === "running";
-  const rec = model.recommended;
-  const verb = job?.kind === "model-start" ? "Starting" : "Downloading";
 
   return (
     <div className="stack">
       <div className="model-card">
         <div className="model-card__head">
           <div>
-            <div className="model-card__name">{rec?.label ?? "Local model"}</div>
-            {rec?.description ? <div className="muted">{rec.description}</div> : null}
+            <div className="model-card__name">{model.label ?? "Local model"}</div>
+            {model.description ? <div className="muted">{model.description}</div> : null}
           </div>
           <span
             className={`status-pill ${model.running ? "is-ready" : "is-idle"}`}
@@ -72,13 +78,10 @@ export function LocalModelCard(): ReactElement {
         {working && job ? (
           <div className="model-card__progress">
             <div className="model-card__progress-row">
-              <span>
-                {verb}
-                {job.label ? ` ${job.label}` : ""}
-              </span>
+              <span>{job.label}</span>
               <span>{Math.round(job.progress * 100)}%</span>
             </div>
-            <ProgressBar value={job.progress} label={`${verb} the local model`} />
+            <ProgressBar value={job.progress} label={job.label} />
           </div>
         ) : null}
         {job?.status === "error" ? (
@@ -86,16 +89,28 @@ export function LocalModelCard(): ReactElement {
         ) : null}
 
         <div className="model-card__actions">
+          {working ? (
+            <button
+              type="button"
+              className="btn"
+              disabled={!online}
+              onClick={() => void controller.localModel({ action: "cancel" })}
+            >
+              {job?.kind === "model-start" ? "Cancel start" : "Cancel download"}
+            </button>
+          ) : null}
           {!model.installed ? (
             <button
               type="button"
               className="btn btn--primary"
               disabled={!online || working}
-              onClick={() => void controller.localModel({ action: "install", modelId: rec?.id })}
+              onClick={() =>
+                void controller.localModel({ action: "install", modelId: model.modelId })
+              }
             >
               {working
                 ? "Downloading..."
-                : `Download${rec ? ` (${formatBytes(rec.sizeBytes)})` : ""}`}
+                : `Download${model.sizeBytes ? ` (${formatBytes(model.sizeBytes)})` : ""}`}
             </button>
           ) : model.running ? (
             <button

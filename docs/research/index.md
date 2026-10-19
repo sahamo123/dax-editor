@@ -2,6 +2,7 @@
 
 ## Documents
 
+* [Audio enhancement candidates (denoise, de-reverb, de-ess, leveling, loudness, voice isolation)](audio-enhancement-candidates.md) - Verdicts with licence, maintenance and weight-format evidence for speech denoisers, de-reverb, de-essers, auto-leveling, loudness and voice-isolation tools, with local CPU timings and the FFmpeg wrapper design for the ADOPT items.
 * [CLI subscription bridges](cli-subscription-bridges.md) - Whether dax-editor can let users drive their own ChatGPT, Claude or Gemini subscriptions through the official CLIs, which flags make that possible, and where the vendor terms draw the line.
 * [Creator editing styles as engine templates](creator-editing-styles.md) - Sixteen creator and format editing styles reduced to measurable parameters, mapped onto the engine's presets, with the engine gaps ranked by how many styles need them.
 * [Cut intelligence](cut-intelligence.md) - Open-source state of the art for making good automatic cuts, with a recommended cut-engine design, default parameters, cut-quality metrics and the pitfalls behind each rule.

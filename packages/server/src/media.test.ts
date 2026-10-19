@@ -3,7 +3,7 @@
 
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import type { JobInfo, StateResponse, WsEvent } from "@dax/protocol";
+import { type JobInfo, type StateResponse, WaveformSchema, type WsEvent } from "@dax/protocol";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   ffprobeJson,
@@ -256,6 +256,8 @@ describe.skipIf(!HAS_FFMPEG)("media pipeline", () => {
       peaksPerSecond: number;
       peaks: number[];
     }>();
+    // The desktop editor parses this with the protocol's schema, so the file must satisfy it exactly.
+    expect(WaveformSchema.safeParse(w).success).toBe(true);
     expect(w.version).toBe(1);
     expect(w.peaksPerSecond).toBe(50);
     expect(w.peaks.length).toBeGreaterThan(130);

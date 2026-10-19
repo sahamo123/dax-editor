@@ -2,9 +2,14 @@
 // connection status, chat transcript, toasts and which dialogs/tabs are open. Holds data and small synchronous
 // updates only; anything that talks to the server lives in controller.ts.
 
-import type { AgentEvent, JobInfo, ProviderKind, StateResponse } from "@dax/protocol";
+import type {
+  AgentEvent,
+  JobInfo,
+  LocalModelStatus,
+  ProviderKind,
+  StateResponse,
+} from "@dax/protocol";
 import { createStore, type StoreApi } from "zustand/vanilla";
-import type { LocalModelStatus } from "../api";
 import type { ServerConnection } from "../platform";
 import {
   applyChatEvent,
@@ -62,6 +67,7 @@ export interface AppStore {
   pendingStartId: number | null;
   /** True between sending a message and its first event, so the composer locks right away. */
   chatSending: boolean;
+  /** Last `GET /api/local-model`; `"unavailable"` when that request failed, `null` before the first answer. */
   localModel: LocalModelStatus | "unavailable" | null;
   toasts: Toast[];
   ui: UiState;

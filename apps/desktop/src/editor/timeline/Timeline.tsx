@@ -65,7 +65,6 @@ export function Timeline({ className }: TimelineProps) {
 
   const placed = useMemo(() => placeClips(mainClips(project)), [project]);
   const fps = project.timeline.fps;
-  const aspect = project.timeline.width / project.timeline.height;
 
   // Handlers read the latest values through a ref so they can be stable (keeps memoised blocks from re-rendering).
   const live = useRef<LiveValues>({ project, placed, zoom, snapping, revision, fps });
@@ -298,7 +297,6 @@ export function Timeline({ className }: TimelineProps) {
               }
               reorder={reorder}
               api={api}
-              aspect={aspect}
               zoom={zoom}
               win={win}
               top={videoTop}
@@ -337,7 +335,6 @@ function ClipItem(props: {
   start: number;
   reorder: Extract<Drag, { type: "reorder" }> | null;
   api: ReturnType<typeof useEditorApi>;
-  aspect: number;
   zoom: number;
   win: { from: number; to: number };
   top: number;
@@ -369,7 +366,6 @@ function ClipItem(props: {
       fadeIn={c.fadeIn}
       fadeOut={c.fadeOut}
       assetDuration={asset?.duration ?? c.out}
-      aspect={asset?.width && asset.height ? asset.width / asset.height : props.aspect}
       spriteUrl={url("filmstrip.jpg")}
       thumbUrl={url("thumb.jpg")}
       waveformUrl={url("waveform.json")}
