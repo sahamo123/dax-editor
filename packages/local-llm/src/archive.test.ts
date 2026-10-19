@@ -12,10 +12,22 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { gunzipSync, gzipSync } from "node:zlib";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { extractArchive, extractTarGz, extractZip } from "./archive.js";
 import { ArchiveError } from "./errors.js";
 import { makeTarGz, makeZip, type TestEntry } from "./test-helpers/archives.js";
+
+/**
+ * Overwrite the uncompressed size recorded in the central directory of a one-entry zip built by
+ * `makeZip`, so a test can make an archive whose declared size disagrees with its data.
+ */
+function withDeclaredZipSize(zip: Buffer, declared: number): Buffer {
+  const out = Buffer.from(zip);
+  const central = out.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02])); // central header signature
+  out.writeUInt32LE(declared, central + 24);
+  return out;
+}
 
 let dir: string;
 beforeEach(() => {
@@ -148,6 +160,33 @@ describe("tar specifics", () => {
     );
   });
 
+  it("refuses an entry whose declared size is over the limit before reading its body", async () => {
+    // A 2 MiB entry cut down to a header plus a fragment: a reader that buffers the body first
+    // would report a truncated archive; the declared size must be refused before that.
+    const raw = gunzipSync(
+      makeTarGz([{ path: "r/huge.bin", content: Buffer.alloc(2 * 1024 * 1024, 7) }]),
+    );
+    const archive = join(dir, "a.tar.gz");
+    writeFileSync(archive, gzipSync(raw.subarray(0, 512 + 1000)));
+    await expect(
+      extractTarGz(archive, join(dir, "out"), { maxTotalBytes: 1024 * 1024 }),
+    ).rejects.toThrow(/declares/);
+  });
+
+  it("refuses entries whose declared sizes add up past the limit, before reading them", async () => {
+    const archive = join(dir, "a.tar.gz");
+    writeFileSync(
+      archive,
+      makeTarGz([
+        { path: "r/one.bin", content: Buffer.alloc(600 * 1024, 1) },
+        { path: "r/two.bin", content: Buffer.alloc(600 * 1024, 2) },
+      ]),
+    );
+    await expect(
+      extractTarGz(archive, join(dir, "out"), { maxTotalBytes: 1024 * 1024 }),
+    ).rejects.toThrow(/declares/);
+  });
+
   it("rejects a truncated archive", async () => {
     const full = makeTarGz([{ path: "r/big", content: Buffer.alloc(100_000, 7) }]);
     const archive = join(dir, "a.tar.gz");
@@ -181,6 +220,32 @@ describe("zip specifics", () => {
     const archive = join(dir, "a.zip");
     writeFileSync(archive, "this is not a zip file at all");
     await expect(extractZip(archive, join(dir, "out"))).rejects.toBeInstanceOf(ArchiveError);
+  });
+
+  it("refuses an entry whose declared size is over the limit before reading its data", async () => {
+    // The directory declares 2 MiB; the data is four bytes. Only the declaration can trip the limit.
+    const archive = join(dir, "a.zip");
+    writeFileSync(
+      archive,
+      withDeclaredZipSize(makeZip([{ path: "r/x.bin", content: "tiny" }]), 2 * 1024 * 1024),
+    );
+    await expect(
+      extractZip(archive, join(dir, "out"), { maxTotalBytes: 1024 * 1024 }),
+    ).rejects.toThrow(/declares/);
+  });
+
+  it("bounds inflate output by the declared size", async () => {
+    // 5 MiB of zeros deflates to a few KiB; the directory declares 16 bytes, so inflating must stop
+    // at 16 bytes instead of expanding the whole entry first.
+    const archive = join(dir, "bomb.zip");
+    writeFileSync(
+      archive,
+      withDeclaredZipSize(
+        makeZip([{ path: "r/zeros.bin", content: Buffer.alloc(5 * 1024 * 1024) }]),
+        16,
+      ),
+    );
+    await expect(extractZip(archive, join(dir, "out"))).rejects.toThrow(/past its declared size/);
   });
 });
 

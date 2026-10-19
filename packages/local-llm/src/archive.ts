@@ -8,11 +8,44 @@
 import { createReadStream } from "node:fs";
 import { chmod, copyFile, mkdir, open, rename, rm, symlink, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, normalize, relative, resolve } from "node:path";
-import { promisify } from "node:util";
 import { createGunzip, inflateRaw } from "node:zlib";
 import { ArchiveError } from "./errors.js";
 
-const inflateRawAsync = promisify(inflateRaw);
+/**
+ * Inflate raw deflate data, refusing to produce more than `maxLength` bytes. The bound stops a
+ * small entry that expands enormously from filling memory before the size check sees it.
+ */
+function inflateBounded(data: Buffer, maxLength: number): Promise<Buffer> {
+  return new Promise((resolvePromise, reject) => {
+    inflateRaw(data, { maxOutputLength: maxLength }, (error, out) =>
+      error ? reject(error) : resolvePromise(out),
+    );
+  });
+}
+
+/** The byte cap for one extraction: the caller's `maxTotalBytes`, or 4 GiB. */
+function sizeLimit(options: ExtractOptions): number {
+  return options.maxTotalBytes ?? 4 * 1024 ** 3;
+}
+
+/**
+ * Account for one entry's declared size before any of its data is read. Refuses a single entry
+ * over the limit, or a running total that would pass it, so a hostile header cannot make us hold
+ * more than the limit in memory.
+ *
+ * @returns the new running total of declared sizes.
+ * @throws ArchiveError when the declaration is over the limit.
+ */
+function checkDeclaredSize(name: string, size: number, total: number, limit: number): number {
+  if (size > limit) {
+    throw new ArchiveError(
+      `Archive entry ${name} declares ${size} bytes, over the ${limit} byte limit`,
+    );
+  }
+  const sum = total + size;
+  if (sum > limit) throw new ArchiveError(`Archive declares more than ${limit} bytes in total`);
+  return sum;
+}
 
 /** Options shared by the extractors. */
 export interface ExtractOptions {
@@ -79,7 +112,7 @@ async function writeEntries(entries: Entry[], destDir: string, options: ExtractO
   await mkdir(absRoot, { recursive: true });
   const symlinks: Entry[] = [];
   let total = 0;
-  const limit = options.maxTotalBytes ?? 4 * 1024 ** 3;
+  const limit = sizeLimit(options);
 
   for (const entry of entries) {
     const rel =
@@ -168,8 +201,9 @@ function parsePax(data: Buffer): Record<string, string> {
 }
 
 /** Collect a gunzipped tar stream into entries, holding file contents in memory one at a time. */
-async function readTarGz(archive: string): Promise<Entry[]> {
+async function readTarGz(archive: string, limit: number): Promise<Entry[]> {
   const entries: Entry[] = [];
+  let declaredTotal = 0;
   const stream = createReadStream(archive).pipe(createGunzip());
   let buffer: Buffer = Buffer.alloc(0);
   let pending: { entry: Entry; remaining: number; chunks: Buffer[]; padding: number } | undefined;
@@ -250,6 +284,7 @@ async function readTarGz(archive: string): Promise<Entry[]> {
       } else if (type === "2") {
         entries.push({ path: cleaned, kind: "symlink", mode, linkTarget: linkName });
       } else if (type === "0" || type === "\0" || type === "7") {
+        declaredTotal = checkDeclaredSize(cleaned, realSize, declaredTotal, limit);
         const entry: Entry = { path: cleaned, kind: "file", mode };
         entries.push(entry);
         const pad = (512 - (realSize % 512)) % 512;
@@ -289,7 +324,7 @@ export async function extractTarGz(
   destDir: string,
   options: ExtractOptions = {},
 ): Promise<void> {
-  const entries = await readTarGz(archive);
+  const entries = await readTarGz(archive, sizeLimit(options));
   await writeEntries(entries, destDir, options);
 }
 
@@ -298,7 +333,7 @@ export async function extractTarGz(
 // ---------------------------------------------------------------------------------------------
 
 /** Read the central directory of a zip file and return its entries (content is read lazily). */
-async function readZip(archive: string): Promise<Entry[]> {
+async function readZip(archive: string, limit: number): Promise<Entry[]> {
   const handle = await open(archive, "r");
   try {
     const { size } = await handle.stat();
@@ -323,6 +358,7 @@ async function readZip(archive: string): Promise<Entry[]> {
     const cd = Buffer.alloc(cdSize);
     await handle.read(cd, 0, cdSize, cdOffset);
     const entries: Entry[] = [];
+    let declaredTotal = 0;
     let pos = 0;
     for (let n = 0; n < count; n++) {
       if (cd.readUInt32LE(pos) !== 0x02014b50)
@@ -338,6 +374,8 @@ async function readZip(archive: string): Promise<Entry[]> {
       const externalAttrs = cd.readUInt32LE(pos + 38);
       const localOffset = cd.readUInt32LE(pos + 42);
       const rawName = cd.toString("utf8", pos + 46, pos + 46 + nameLen);
+      // Checked on the directory alone, before any entry's data is read.
+      declaredTotal = checkDeclaredSize(rawName, uncompressedSize, declaredTotal, limit);
       pos += 46 + nameLen + extraLen + commentLen;
       if (flags & 1) throw new ArchiveError(`Encrypted zip entries are not supported: ${rawName}`);
       const isDir = rawName.endsWith("/");
@@ -357,7 +395,18 @@ async function readZip(archive: string): Promise<Entry[]> {
           await h.read(compressed, 0, compressedSize, dataStart);
           if (method === 0) return compressed;
           if (method === 8) {
-            const out = await inflateRawAsync(compressed);
+            let out: Buffer;
+            try {
+              // The declared size is the bound: inflating stops there, not after the whole entry.
+              out = await inflateBounded(compressed, Math.max(1, uncompressedSize));
+            } catch (error) {
+              if ((error as NodeJS.ErrnoException).code === "ERR_BUFFER_TOO_LARGE") {
+                throw new ArchiveError(
+                  `Zip entry ${rawName} inflates past its declared size of ${uncompressedSize} bytes`,
+                );
+              }
+              throw error;
+            }
             if (out.length !== uncompressedSize) {
               throw new ArchiveError(`Zip entry ${rawName} has the wrong size after inflating`);
             }
@@ -399,7 +448,7 @@ export async function extractZip(
   destDir: string,
   options: ExtractOptions = {},
 ): Promise<void> {
-  const entries = await readZip(archive);
+  const entries = await readZip(archive, sizeLimit(options));
   await writeEntries(entries, destDir, options);
 }
 
