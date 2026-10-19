@@ -1056,7 +1056,9 @@ async function cleanupStep(
   // smart_cut takes no overrides, so make the plan here and apply it with apply_cut_plan.
   const asset = pickMainAsset(sctx.session.project);
   const words = asset.transcript?.words;
-  const speech = words ? undefined : detectSpeechSpans(await analyzeAudio(asset.path));
+  const speech = words
+    ? undefined
+    : detectSpeechSpans(await analyzeAudio(asset.path, sctx.signal ? { signal: sctx.signal } : {}));
   const params: Partial<CutParams> = overrides;
   const plan = planCuts({
     assetId: asset.id,

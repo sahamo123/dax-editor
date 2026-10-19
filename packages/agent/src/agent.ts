@@ -334,6 +334,7 @@ class Loop {
           allowedRoots: this.run.allowedRoots,
           transcriber: this.run.transcriber,
           available: this.prepared.available,
+          signal: this.run.signal,
         },
         call,
         truncated,

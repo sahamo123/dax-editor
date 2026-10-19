@@ -132,7 +132,15 @@ function define<S extends ZodTypeAny>(def: {
 
 /** Apply an edit to the session with a label for the history. */
 async function edit(ctx: CommandContext, label: string, fn: (p: Project) => Project) {
+  // A cancelled command must not change the project after the user has stopped it: long commands reach this
+  // point only after their analysis, and that analysis may have been cut short.
+  if (ctx.signal?.aborted) throw new CommandError("Cancelled. Nothing was changed.");
   await ctx.session.apply(fn, { label, source: ctx.source ?? "manual" });
+}
+
+/** The cancel signal as an options fragment, for helpers that take `{ signal }` (absent when the command is not cancellable). */
+function cancellable(ctx: CommandContext): { signal: AbortSignal } | Record<string, never> {
+  return ctx.signal ? { signal: ctx.signal } : {};
 }
 
 /** The asset a command should work on: the one given, else the video on the timeline. */
@@ -226,7 +234,9 @@ async function buildPlan(
 ) {
   const asset = pickAsset(ctx.session.project, assetId);
   const words = asset.transcript?.words;
-  const speech = words ? undefined : detectSpeechSpans(await analyzeAudio(asset.path));
+  const speech = words
+    ? undefined
+    : detectSpeechSpans(await analyzeAudio(asset.path, cancellable(ctx)));
   return planCuts({
     assetId: asset.id,
     duration: asset.duration,
@@ -299,6 +309,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const ranges = await detectSilence(asset.path, asset.duration, {
         noiseDb: a.noiseDb,
         minDuration: a.minDuration,
+        ...cancellable(ctx),
       });
       const total = ranges.reduce((n, r) => n + (r.end - r.start), 0);
       return {
@@ -329,7 +340,7 @@ export const COMMANDS: readonly CommandDef[] = [
     readOnly: true,
     async run(ctx, a) {
       const asset = pickAsset(ctx.session.project, a.assetId);
-      const times = await detectScenes(asset.path, a.threshold);
+      const times = await detectScenes(asset.path, a.threshold, cancellable(ctx));
       return {
         summary: `${times.length} scene change(s) in ${basename(asset.path)}.`,
         data: { assetId: asset.id, count: times.length, times: times.slice(0, 200) },
@@ -384,10 +395,10 @@ export const COMMANDS: readonly CommandDef[] = [
         );
       }
       const asset = pickAsset(ctx.session.project, a.assetId);
-      const transcript = await ctx.transcriber.transcribe(
-        asset.path,
-        a.language ? { language: a.language } : {},
-      );
+      const transcript = await ctx.transcriber.transcribe(asset.path, {
+        ...(a.language ? { language: a.language } : {}),
+        ...cancellable(ctx),
+      });
       await edit(ctx, `Transcribe ${basename(asset.path)}`, (p) =>
         setAssetTranscript(p, asset.id, transcript),
       );
@@ -482,7 +493,7 @@ export const COMMANDS: readonly CommandDef[] = [
     async run(ctx, a) {
       const abs = checkPath(ctx, a.path);
       if (!existsSync(abs)) throw new CommandError(`File not found: ${abs}`);
-      const asset = await probe(abs);
+      const asset = await probe(abs, cancellable(ctx));
       if (asset.kind !== "video") {
         throw new CommandError(
           `${basename(abs)} is ${asset.kind}; only video files can be imported for now.`,
@@ -656,6 +667,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const found = await detectSilence(asset.path, asset.duration, {
         noiseDb: a.noiseDb,
         minDuration: a.minDuration,
+        ...cancellable(ctx),
       });
       // Silence is detected in the source file, so some of it may already be cut from the timeline.
       const cuts = assetRangesToTimeline(ctx.session.project, asset.id, padSilences(found, a.pad));
@@ -991,6 +1003,8 @@ export async function runCommand(
   if (!def) throw new CommandError(`Unknown command "${name}".`);
   const parsed = def.schema.safeParse(rawArgs ?? {});
   if (!parsed.success) throw new CommandError(formatIssues(name, parsed.error));
+  if (ctx.signal?.aborted)
+    throw new CommandError("Cancelled before it started. Nothing was changed.");
   try {
     const result = await def.run(ctx, parsed.data as never);
     // The edit is applied even when autosave fails; say so, or the user and the model believe it is safely on disk.

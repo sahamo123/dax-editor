@@ -78,6 +78,59 @@ describe("createRunnerFactory", () => {
   });
 });
 
+describe("createRunnerFactory conversation history", () => {
+  it("lets only the newest run store the conversation, so a late old run cannot overwrite it", async () => {
+    // A model that answers the message containing "SLOW" only after a delay, like a provider that ignores cancel.
+    const bodies: string[] = [];
+    const server = createServer((req, res) => {
+      let body = "";
+      req.on("data", (c) => {
+        body += c;
+      });
+      req.on("end", () => {
+        bodies.push(body);
+        setTimeout(
+          () => {
+            res.setHeader("content-type", "application/json");
+            res.end(
+              JSON.stringify({
+                choices: [
+                  { message: { role: "assistant", content: "Done." }, finish_reason: "stop" },
+                ],
+              }),
+            );
+          },
+          body.includes("SLOW") ? 400 : 0,
+        );
+      });
+    });
+    await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+    open = server;
+    const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/v1`;
+    const runner = await createRunnerFactory()(
+      env(settings({ providers: { "openai-compatible": { baseUrl: url, model: "m" } } })),
+    );
+    const session = new Session();
+    const quiet = (message: string) =>
+      runner.run(message, {
+        session,
+        onEvent: () => undefined,
+        signal: new AbortController().signal,
+        allowedRoots: [],
+      });
+
+    const slow = quiet("SLOW first request");
+    await quiet("fast second request");
+    await slow;
+    await quiet("third request");
+
+    // Before the fix the slow run finished last and replaced the conversation, so "third" did not see "second".
+    const last = bodies.at(-1) ?? "";
+    expect(last).toContain("fast second request");
+    expect(last).not.toContain("SLOW first request");
+  });
+});
+
 describe("createProviderRegistry", () => {
   it("lists every provider with a hint for what is missing", async () => {
     const list = await createProviderRegistry().list(env(settings()));

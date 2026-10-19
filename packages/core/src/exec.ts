@@ -18,7 +18,7 @@ export interface ExecResult {
   stderr: string;
 }
 
-/** Options for {@link run}. */
+/** Options for running an external program (the `run` helper in this file). */
 export interface RunOptions {
   /** Kill the process and reject with an `AbortError`-named error when aborted. */
   signal?: AbortSignal;

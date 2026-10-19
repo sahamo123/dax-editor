@@ -71,6 +71,8 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
   const skills = safeLoadSkills(options.skillsDir);
   let historySession: Session | undefined;
   let history: ChatMessage[] = [];
+  /** Incremented for every run. Only the newest run may store its conversation, so an old run that outlives its cancel cannot overwrite it. */
+  let generation = 0;
 
   /** Make a provider for `kind`, or an explanation of what is missing. */
   async function makeProvider(
@@ -125,19 +127,21 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
     });
     return {
       async run(message, ctx) {
+        const mine = ++generation;
         if (historySession !== ctx.session) {
           historySession = ctx.session;
           history = [];
         }
+        // The run gets its own copy, so nothing it does to its array reaches the stored conversation.
         const result = await agent.run(message, {
           session: ctx.session,
-          history,
+          history: [...history],
           onEvent: ctx.onEvent,
           signal: ctx.signal,
           allowedRoots: [...ctx.allowedRoots],
           ...(options.transcriber ? { transcriber: options.transcriber } : {}),
         });
-        history = result.messages;
+        if (mine === generation) history = result.messages;
       },
     };
   };
