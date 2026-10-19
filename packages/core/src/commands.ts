@@ -1035,6 +1035,13 @@ export const COMMANDS: readonly CommandDef[] = [
       await checkPath(ctx, dirname(out));
       if (!out.toLowerCase().endsWith(".mp4"))
         throw new CommandError("Export path must end in .mp4");
+      // The assistant may not replace a file: an overwrite cannot be undone from the history, and a chat
+      // transcript or file name must not be able to make it happen. The user can overwrite by hand.
+      if (existsSync(out) && a.overwrite && ctx.source === "ai") {
+        throw new CommandError(
+          `${out} already exists. The assistant cannot overwrite files. Choose another name.`,
+        );
+      }
       if (existsSync(out) && !a.overwrite) {
         throw new CommandError(
           `${out} already exists. Choose another name or set overwrite to true.`,
