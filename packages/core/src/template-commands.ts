@@ -35,7 +35,7 @@ const listSchema = z.object({
 const applySchema = z.object({
   templateId: z.string().min(1).max(80).describe("A template id from list_templates"),
   variables: z
-    .record(z.string().max(32), z.union([z.string().max(300), z.number()]))
+    .record(z.string().max(32), z.union([z.string().max(300), z.number().finite()]))
     .default({})
     .describe(
       "Values for the template's variables, by name (title, speaker_name, cta_text, phone, url, ...). Leave out what you do not know; the matching overlay is skipped. Never invent a phone number, price or licence number.",

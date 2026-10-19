@@ -160,7 +160,7 @@ const Kebab = z.string().regex(KEBAB, "expected kebab-case such as my-template")
 const VarName = z.string().regex(VAR_NAME, "expected snake_case such as speaker_name");
 
 const SecRange = z
-  .object({ min: z.number().min(0).max(7200), max: z.number().min(0).max(7200) })
+  .object({ min: z.number().finite().min(0).max(7200), max: z.number().finite().min(0).max(7200) })
   .strict()
   .refine((r) => r.min <= r.max, "min must not be more than max");
 
@@ -178,7 +178,7 @@ const VariableSchema = z
     /** Used when the caller gives no value. Must itself pass the variable's validation. */
     default: z.string().optional(),
     /** Longest accepted value in characters. Longer values are rejected, never silently cut. */
-    maxLength: z.number().int().min(1).max(140).optional(),
+    maxLength: z.number().finite().int().min(1).max(140).optional(),
     /** A realistic sample value; shown to users and used by the tests. */
     example: z.string().min(1),
   })
@@ -196,7 +196,7 @@ const PlatformSchema = z
 const FormatSchema = z
   .object({
     aspect: z.enum(ASPECT_KEYS),
-    fps: z.number().min(1).max(120).optional(),
+    fps: z.number().finite().min(1).max(120).optional(),
     /** Target length of the finished video in seconds. */
     lengthSec: SecRange,
     platforms: z.array(PlatformSchema).min(1),
@@ -205,10 +205,10 @@ const FormatSchema = z
 
 const CleanupOverridesSchema = z
   .object({
-    pauseMin: z.number().min(0.1).max(5),
-    keepPause: z.number().min(0).max(3),
-    padPre: z.number().min(0).max(1),
-    padPost: z.number().min(0).max(1),
+    pauseMin: z.number().finite().min(0.1).max(5),
+    keepPause: z.number().finite().min(0).max(3),
+    padPre: z.number().finite().min(0).max(1),
+    padPost: z.number().finite().min(0).max(1),
     fillers: z.enum(["off", "standalone", "isolated"]),
     retakes: z.boolean(),
   })
@@ -259,17 +259,17 @@ const OverlayStepSchema = z
      * `full`: covers from `offset` to the end, split into pieces the add_overlay command accepts.
      */
     anchor: z.enum(["start", "end", "full"]),
-    offset: z.number().min(0).max(600).default(0),
-    duration: z.number().min(0.2).max(3600).optional(),
+    offset: z.number().finite().min(0).max(600).default(0),
+    duration: z.number().finite().min(0.2).max(3600).optional(),
     /** Shorter than this and the overlay is skipped instead of squeezed. */
-    minDuration: z.number().min(0.2).max(60).default(1),
+    minDuration: z.number().finite().min(0.2).max(60).default(1),
     /** The overlay never takes more than this fraction of the video. */
-    maxFraction: z.number().min(0.05).max(1).default(1),
+    maxFraction: z.number().finite().min(0.05).max(1).default(1),
     /** On a clash between overlays at the same position, the higher priority keeps its time. */
-    priority: z.number().int().min(0).max(10).default(0),
+    priority: z.number().finite().int().min(0).max(10).default(0),
     style: z
       .object({
-        fontSize: z.number().min(8).max(400).optional(),
+        fontSize: z.number().finite().min(8).max(400).optional(),
         color: HexColorSchema.optional(),
         position: z.enum(POSITIONS).optional(),
       })
@@ -306,9 +306,9 @@ const ZoomEffectSchema = z
     ...effectBase,
     kind: z.literal("zoom"),
     mode: z.enum(["alternate-cuts", "push-in"]),
-    scale: z.number().min(1.02).max(TEMPLATE_MAX_ZOOM),
-    every: z.number().int().min(2).max(6).default(2),
-    minShotSec: z.number().min(0.5).max(60).default(1.5),
+    scale: z.number().finite().min(1.02).max(TEMPLATE_MAX_ZOOM),
+    every: z.number().finite().int().min(2).max(6).default(2),
+    minShotSec: z.number().finite().min(0.5).max(60).default(1.5),
   })
   .strict();
 
@@ -321,10 +321,10 @@ const MusicEffectSchema = z
   .object({
     ...effectBase,
     kind: z.literal("music"),
-    level: z.number().min(0.03).max(1).default(0.2),
+    level: z.number().finite().min(0.03).max(1).default(0.2),
     scope: z.enum(["full", "intro"]).default("full"),
-    introSec: z.number().min(3).max(60).default(10),
-    duckAmountDb: z.number().min(3).max(30).optional(),
+    introSec: z.number().finite().min(3).max(60).default(10),
+    duckAmountDb: z.number().finite().min(3).max(30).optional(),
   })
   .strict();
 
@@ -342,9 +342,9 @@ const LogoEffectSchema = z
     ),
     position: z.enum(IMAGE_POSITIONS).optional(),
     anchor: z.enum(["start", "end"]),
-    offset: z.number().min(0).max(600).default(0),
-    duration: z.number().min(0.5).max(600),
-    minDuration: z.number().min(0.5).max(60).default(1.5),
+    offset: z.number().finite().min(0).max(600).default(0),
+    duration: z.number().finite().min(0.5).max(600),
+    minDuration: z.number().finite().min(0.5).max(60).default(1.5),
   })
   .strict();
 
@@ -368,7 +368,7 @@ const ConfirmationSchema = z.object({ id: Kebab, ask: z.string().min(1).max(300)
 export const TemplateSchema = z
   .object({
     id: Kebab,
-    version: z.number().int().min(1),
+    version: z.number().finite().int().min(1),
     kind: z.enum(["style", "industry"]),
     name: z.string().min(1).max(80),
     description: z.string().min(1).max(500),
@@ -385,7 +385,10 @@ export const TemplateSchema = z
     overlays: z.array(OverlayStepSchema).max(10),
     /** Seconds of fade from black at the start and to black at the end. */
     fades: z
-      .object({ in: z.number().min(0).max(3).optional(), out: z.number().min(0).max(3).optional() })
+      .object({
+        in: z.number().finite().min(0).max(3).optional(),
+        out: z.number().finite().min(0).max(3).optional(),
+      })
       .strict()
       .optional(),
     /**

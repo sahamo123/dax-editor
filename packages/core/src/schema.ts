@@ -13,8 +13,8 @@ export const IdSchema = z
 /** One recognised word, timed in the source file's own time (seconds). */
 export const WordSchema = z.object({
   text: z.string(),
-  start: z.number().nonnegative(),
-  end: z.number().nonnegative(),
+  start: z.number().finite().nonnegative(),
+  end: z.number().finite().nonnegative(),
 });
 /** A validated {@link WordSchema} value. */
 export type Word = z.infer<typeof WordSchema>;
@@ -33,10 +33,10 @@ export const AssetSchema = z.object({
   id: IdSchema,
   path: z.string(),
   kind: z.enum(["video", "audio", "image"]),
-  duration: z.number().nonnegative(),
-  width: z.number().int().positive().optional(),
-  height: z.number().int().positive().optional(),
-  fps: z.number().positive().optional(),
+  duration: z.number().finite().nonnegative(),
+  width: z.number().finite().int().positive().optional(),
+  height: z.number().finite().int().positive().optional(),
+  fps: z.number().finite().positive().optional(),
   hasAudio: z.boolean(),
   /** Speech transcript, once one has been made. Times are in the asset's own time. */
   transcript: TranscriptSchema.optional(),
@@ -61,15 +61,15 @@ export type AudioRole = (typeof AUDIO_ROLES)[number];
 export const ClipSchema = z.object({
   id: IdSchema,
   assetId: IdSchema,
-  start: z.number().nonnegative(),
-  in: z.number().nonnegative(),
-  out: z.number().positive(),
-  volume: z.number().nonnegative().default(1),
-  fadeIn: z.number().nonnegative().default(0),
-  fadeOut: z.number().nonnegative().default(0),
+  start: z.number().finite().nonnegative(),
+  in: z.number().finite().nonnegative(),
+  out: z.number().finite().positive(),
+  volume: z.number().finite().nonnegative().default(1),
+  fadeIn: z.number().finite().nonnegative().default(0),
+  fadeOut: z.number().finite().nonnegative().default(0),
   role: z.enum(AUDIO_ROLES).optional(),
   loop: z.boolean().optional(),
-  length: z.number().positive().optional(),
+  length: z.number().finite().positive().optional(),
 });
 /** A validated {@link ClipSchema} value. */
 export type Clip = z.infer<typeof ClipSchema>;
@@ -98,11 +98,11 @@ export const HexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, "expected #R
 
 /** Look of a text overlay. `fontSize` is in pixels for a 1080-pixel-high frame and scales with the project height. */
 export const OverlayStyleSchema = z.object({
-  fontSize: z.number().min(8).max(400).default(64),
+  fontSize: z.number().finite().min(8).max(400).default(64),
   color: HexColorSchema.default("#ffffff"),
   bold: z.boolean().default(false),
   /** Optional background box behind the text; `opacity` runs from 0 (clear) to 1 (solid). */
-  box: z.object({ color: HexColorSchema, opacity: z.number().min(0).max(1) }).optional(),
+  box: z.object({ color: HexColorSchema, opacity: z.number().finite().min(0).max(1) }).optional(),
   /** Accent colour for the bar on lower-thirds. */
   accent: HexColorSchema.default("#3b82f6"),
   position: z.enum(POSITIONS).default("center"),
@@ -118,15 +118,15 @@ export type OverlayStyle = z.infer<typeof OverlayStyleSchema>;
 export const OverlaySchema = z.object({
   id: IdSchema,
   kind: z.literal("text"),
-  start: z.number().nonnegative(),
-  duration: z.number().positive(),
+  start: z.number().finite().nonnegative(),
+  duration: z.number().finite().positive(),
   text: z.string().min(1).max(280),
   /** Optional second, smaller line (used by lower-thirds). */
   subtitle: z.string().max(280).optional(),
   preset: z.string().default("custom"),
   animation: z.enum(ANIMATIONS).default("fade"),
   style: OverlayStyleSchema.default({}),
-  lane: z.number().int().nonnegative().default(0),
+  lane: z.number().finite().int().nonnegative().default(0),
 });
 /** A validated {@link OverlaySchema} value. */
 export type Overlay = z.infer<typeof OverlaySchema>;
@@ -147,13 +147,13 @@ export const MAX_ZOOM = 3;
  */
 export const ZoomSchema = z.object({
   id: z.string(),
-  start: z.number().nonnegative(),
-  duration: z.number().positive(),
-  fromScale: z.number().min(1).max(MAX_ZOOM),
-  toScale: z.number().min(1).max(MAX_ZOOM),
+  start: z.number().finite().nonnegative(),
+  duration: z.number().finite().positive(),
+  fromScale: z.number().finite().min(1).max(MAX_ZOOM),
+  toScale: z.number().finite().min(1).max(MAX_ZOOM),
   ease: z.enum(EASES).default("ease-in-out"),
-  x: z.number().min(0).max(1).default(0.5),
-  y: z.number().min(0).max(1).default(0.5),
+  x: z.number().finite().min(0).max(1).default(0.5),
+  y: z.number().finite().min(0).max(1).default(0.5),
 });
 /** A validated {@link ZoomSchema} value. */
 export type Zoom = z.infer<typeof ZoomSchema>;
@@ -185,11 +185,11 @@ export const ImageOverlaySchema = z.object({
   id: z.string(),
   kind: z.literal("image"),
   assetId: z.string(),
-  start: z.number().nonnegative(),
-  duration: z.number().positive(),
+  start: z.number().finite().nonnegative(),
+  duration: z.number().finite().positive(),
   position: z.enum(IMAGE_POSITIONS).default("top-right"),
-  width: z.number().min(0.02).max(1).default(0.15),
-  opacity: z.number().min(0).max(1).default(1),
+  width: z.number().finite().min(0.02).max(1).default(0.15),
+  opacity: z.number().finite().min(0).max(1).default(1),
   animation: z.enum(IMAGE_ANIMATIONS).default("fade"),
   preset: z.string().default("custom"),
 });
@@ -202,8 +202,8 @@ export type ImageOverlay = z.infer<typeof ImageOverlaySchema>;
  */
 export const DuckingSchema = z.object({
   enabled: z.boolean().default(true),
-  amountDb: z.number().min(3).max(30).default(12),
-  releaseSeconds: z.number().min(0.05).max(3).default(0.4),
+  amountDb: z.number().finite().min(3).max(30).default(12),
+  releaseSeconds: z.number().finite().min(0.05).max(3).default(0.4),
 });
 /** A validated {@link DuckingSchema} value. */
 export type Ducking = z.infer<typeof DuckingSchema>;
@@ -225,7 +225,7 @@ export type CaptionStyle = (typeof CAPTION_STYLES)[number];
 export const CaptionSettingsSchema = z.object({
   style: z.enum(CAPTION_STYLES).default("classic"),
   /** Most words shown at once. */
-  maxWords: z.number().int().min(1).max(8).default(4),
+  maxWords: z.number().finite().int().min(1).max(8).default(4),
   uppercase: z.boolean().default(false),
   color: HexColorSchema.default("#ffffff"),
   /** Colour of the word being spoken (`bold-pop` style). */
@@ -238,10 +238,10 @@ export type CaptionSettings = z.infer<typeof CaptionSettingsSchema>;
 /** Output format (`width`, `height`, `fps`) plus the tracks and overlays that make up the edit. */
 export const TimelineSchema = z.object({
   /** Frame size in pixels, 16 to 8192: a hostile project file must not ask FFmpeg for a billion-pixel frame. */
-  width: z.number().int().min(16).max(8192),
-  height: z.number().int().min(16).max(8192),
+  width: z.number().finite().int().min(16).max(8192),
+  height: z.number().finite().int().min(16).max(8192),
   /** Frames per second, 1 to 240. */
-  fps: z.number().min(1).max(240),
+  fps: z.number().finite().min(1).max(240),
   /** How clips are fitted into the frame. `contain` leaves bars, `cover` crops to fill, `blur` puts a blurred copy behind. */
   fit: z.enum(FITS).default("contain"),
   tracks: z.array(TrackSchema),

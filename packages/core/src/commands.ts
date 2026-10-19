@@ -105,7 +105,7 @@ export interface CommandDef {
 /** Thrown for bad arguments or a command that cannot do what was asked. The message is safe to show to a model. */
 export class CommandError extends Error {}
 
-const seconds = (what: string) => z.number().min(0).describe(`${what}, in seconds`);
+const seconds = (what: string) => z.number().finite().min(0).describe(`${what}, in seconds`);
 const assetIdArg = z
   .string()
   .optional()
@@ -250,7 +250,13 @@ function describeProject(p: Project, offset = 0, limit = PROJECT_PAGE) {
 const presetIds = OVERLAY_PRESETS.map((p) => p.id) as [string, ...string[]];
 
 const styleFields = {
-  fontSize: z.number().min(8).max(400).optional().describe("Text size in pixels on a 1080p frame"),
+  fontSize: z
+    .number()
+    .finite()
+    .min(8)
+    .max(400)
+    .optional()
+    .describe("Text size in pixels on a 1080p frame"),
   color: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/)
@@ -532,9 +538,9 @@ export const COMMANDS: readonly CommandDef[] = [
           ],
         )
         .optional(),
-      width: z.number().int().min(16).max(8192).optional(),
-      height: z.number().int().min(16).max(8192).optional(),
-      fps: z.number().min(1).max(120).optional(),
+      width: z.number().finite().int().min(16).max(8192).optional(),
+      height: z.number().finite().int().min(16).max(8192).optional(),
+      fps: z.number().finite().min(1).max(120).optional(),
       fit: z.enum(FITS).optional(),
     }),
     async run(ctx, a) {
@@ -562,7 +568,14 @@ export const COMMANDS: readonly CommandDef[] = [
     schema: z.object({
       enabled: z.boolean().default(true).describe("false turns captions off"),
       style: z.enum(CAPTION_STYLES).optional(),
-      maxWords: z.number().int().min(1).max(8).optional().describe("Most words on screen at once"),
+      maxWords: z
+        .number()
+        .finite()
+        .int()
+        .min(1)
+        .max(8)
+        .optional()
+        .describe("Most words on screen at once"),
       uppercase: z.boolean().optional(),
       color: z
         .string()
@@ -700,7 +713,7 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "move_clip",
     description: "Move a clip to a new position in the order of clips (0 = first).",
-    schema: z.object({ clipId: z.string(), index: z.number().int().min(0) }),
+    schema: z.object({ clipId: z.string(), index: z.number().finite().int().min(0) }),
     async run(ctx, a) {
       await edit(ctx, "Move clip", (p) => moveClip(p, a.clipId, a.index));
       return { summary: `Moved clip to position ${a.index}.` };
@@ -722,7 +735,7 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "set_volume",
     description: "Set a clip's loudness: 1 is unchanged, 0 is muted, 2 is twice as loud.",
-    schema: z.object({ clipId: z.string(), volume: z.number().min(0).max(4) }),
+    schema: z.object({ clipId: z.string(), volume: z.number().finite().min(0).max(4) }),
     async run(ctx, a) {
       await edit(ctx, "Set volume", (p) => setClipVolume(p, a.clipId, a.volume));
       return { summary: `Volume set to ${a.volume}.` };
@@ -972,7 +985,7 @@ export const COMMANDS: readonly CommandDef[] = [
       text: z.string().min(1).max(280).optional(),
       subtitle: z.string().max(280).nullable().optional().describe("null removes the second line"),
       start: seconds("New start").optional(),
-      duration: z.number().min(0.2).max(120).optional(),
+      duration: z.number().finite().min(0.2).max(120).optional(),
       animation: z.enum(ANIMATIONS).optional(),
       ...styleFields,
     }),
@@ -1046,7 +1059,7 @@ export const COMMANDS: readonly CommandDef[] = [
     name: "restore_state",
     description:
       "Jump back (or forward) to any state from get_history by its id. Nothing is lost; you can jump again.",
-    schema: z.object({ id: z.number().int().min(0) }),
+    schema: z.object({ id: z.number().finite().int().min(0) }),
     async run(ctx, a) {
       await ctx.session.restore(a.id);
       return {

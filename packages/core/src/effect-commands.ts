@@ -139,7 +139,7 @@ const withAsset = (p: Project, asset: Asset): Project =>
   ownAsset(p, asset.id) ? p : addAsset(p, asset);
 
 const startArg = (what: string) =>
-  z.number().min(0).describe(`${what}, in seconds on the timeline`);
+  z.number().finite().min(0).describe(`${what}, in seconds on the timeline`);
 
 // ---------------------------------------------------------------------------------------------
 // Zoom
@@ -187,7 +187,7 @@ const updateZoomSchema = z.object({
   zoomId: z.string().describe("Zoom id from get_project"),
   start: startArg("New start").optional(),
   end: startArg("New end").optional(),
-  scale: z.number().min(1.02).max(MAX_ZOOM).optional().describe("New zoom amount"),
+  scale: z.number().finite().min(1.02).max(MAX_ZOOM).optional().describe("New zoom amount"),
   startScale: z
     .number()
     .min(1)
@@ -314,22 +314,39 @@ const addAudioSchema = z.object({
       "How long it plays, in seconds. Default: the whole file, or the rest of the video when loop is true.",
     ),
   loop: z.boolean().default(false).describe("Repeat the file to fill length (music beds)"),
-  sourceStart: z.number().min(0).optional().describe("Start this far into the file, in seconds"),
+  sourceStart: z
+    .number()
+    .finite()
+    .min(0)
+    .optional()
+    .describe("Start this far into the file, in seconds"),
   volume: volumeArg,
-  fadeIn: z.number().min(0).max(60).optional().describe("Fade in, seconds (music default 1)"),
-  fadeOut: z.number().min(0).max(60).optional().describe("Fade out, seconds (music default 2)"),
+  fadeIn: z
+    .number()
+    .finite()
+    .min(0)
+    .max(60)
+    .optional()
+    .describe("Fade in, seconds (music default 1)"),
+  fadeOut: z
+    .number()
+    .finite()
+    .min(0)
+    .max(60)
+    .optional()
+    .describe("Fade out, seconds (music default 2)"),
 });
 
 const updateAudioSchema = z.object({
   audioId: z.string().describe("Audio clip id from get_project"),
   start: startArg("New start").optional(),
-  length: z.number().positive().optional().describe("New length in seconds"),
-  sourceStart: z.number().min(0).optional().describe("Start this far into the file"),
+  length: z.number().finite().positive().optional().describe("New length in seconds"),
+  sourceStart: z.number().finite().min(0).optional().describe("Start this far into the file"),
   loop: z.boolean().optional().describe("Repeat the file to fill the length"),
   role: z.enum(AUDIO_ROLES).optional().describe("music ducks under speech; sfx does not"),
   volume: volumeArg,
-  fadeIn: z.number().min(0).max(60).optional().describe("Fade in, seconds"),
-  fadeOut: z.number().min(0).max(60).optional().describe("Fade out, seconds"),
+  fadeIn: z.number().finite().min(0).max(60).optional().describe("Fade in, seconds"),
+  fadeOut: z.number().finite().min(0).max(60).optional().describe("Fade out, seconds"),
 });
 
 const duckingSchema = z.object({
@@ -484,7 +501,7 @@ const imageFields = {
     .max(1)
     .optional()
     .describe("Width as a fraction of the frame, e.g. 0.15 = 15%"),
-  opacity: z.number().min(0).max(1).optional().describe("0 clear to 1 solid"),
+  opacity: z.number().finite().min(0).max(1).optional().describe("0 clear to 1 solid"),
   animation: z.enum(IMAGE_ANIMATIONS).optional().describe("How it enters and leaves"),
 };
 
@@ -563,7 +580,13 @@ const imageCommands: CommandDef[] = [
     schema: z.object({
       imageId: z.string().describe("Image overlay id from get_project"),
       start: startArg("New start").optional(),
-      duration: z.number().min(0.2).max(3600).optional().describe("New length, in seconds"),
+      duration: z
+        .number()
+        .finite()
+        .min(0.2)
+        .max(3600)
+        .optional()
+        .describe("New length, in seconds"),
       ...imageFields,
     }),
     async run(ctx, a) {
