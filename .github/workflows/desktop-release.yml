@@ -88,8 +88,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build the engine server bundle input
-        # `packages/server` must exist and build; prepare-sidecars fails the job if it does not.
-        run: pnpm --filter "@dax/server..." build
+        # Builds packages/server and what it depends on. If the package is missing, skip here;
+        # prepare-sidecars then fails the job with a clear message (no stand-in in releases).
+        run: |
+          if [ -f packages/server/package.json ]; then
+            pnpm --filter "@dax/server..." build
+          fi
 
       # ---- macOS: no prebuilt LGPL FFmpeg exists, so build it from the pinned source.
       - name: Cache LGPL FFmpeg (macOS)
