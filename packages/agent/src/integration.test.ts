@@ -106,8 +106,13 @@ describe("agent over the OpenAI-compatible API", () => {
       provider: createOpenAiProvider({ baseUrl: server.url, model: "small" }),
     });
     const session = newSession();
-    const result = await agent.run("split at 5", { session });
+    const events: AgentEvent[] = [];
+    const result = await agent.run("split at 5", { session, onEvent: (e) => events.push(e) });
     expect(mainClips(session.project)).toHaveLength(2);
+    // The user is told that the call came from the reply text, not from a structured tool call.
+    expect(events).toContainEqual(
+      expect.objectContaining({ type: "status", text: expect.stringContaining("written as text") }),
+    );
     expect(result.toolCalls).toMatchObject({ total: 1, fromText: 1 });
   });
 

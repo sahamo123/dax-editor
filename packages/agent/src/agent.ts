@@ -241,6 +241,12 @@ class Loop {
           calls = found.calls;
           text = found.text;
           this.stats.fromText += found.calls.length;
+          // Calls read out of the reply text (common with small local models) are acted on, but the user is told so:
+          // a call quoted from a document would look the same as one the model meant.
+          this.emit({
+            type: "status",
+            text: `Ran ${found.calls.length} tool call(s) that were written as text in the reply.`,
+          });
         }
       }
       const toolCalls = this.withIds(calls);

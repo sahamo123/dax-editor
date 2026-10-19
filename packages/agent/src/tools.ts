@@ -3,6 +3,7 @@
 
 import type { ToolSpec } from "@dax/core";
 import { parseJsonLoose } from "./json-repair.js";
+import { getOwn, setOwn } from "./own-property.js";
 import type { ToolDefinition } from "./types.js";
 
 /**
@@ -177,8 +178,8 @@ function coerceValue(value: unknown, schema: unknown, state: { changed: boolean 
     const props = schema.properties;
     const out: Json = {};
     for (const [k, v] of Object.entries(value)) {
-      const c = coerceValue(v, props[k], state);
-      if (c !== REMOVE) out[k] = c;
+      const c = coerceValue(v, getOwn(props, k), state);
+      if (c !== REMOVE) setOwn(out, k, c);
     }
     return out;
   }
