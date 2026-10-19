@@ -50,6 +50,8 @@ export class EngineSession extends Session {
     await writeFileAtomic(path, JSON.stringify(this.project, null, 2));
     this.savePath = path;
     this.userSaved = true;
+    // The history follows the project to its new home.
+    await this.saveHistory();
     this.markSaved();
   }
 
@@ -91,6 +93,16 @@ export class EngineSession extends Session {
     } finally {
       this.onChange();
     }
+  }
+
+  /** History is kept beside the project file the user chose or the scratch file, so it follows the project. */
+  protected override get historyFile(): string {
+    return `${this.savePath}.history.json`;
+  }
+
+  /** Load the saved history for this project (ignored if it does not match the project on disk). Call once after construction. */
+  async restoreHistory(): Promise<void> {
+    await this.loadHistory();
   }
 
   /** See {@link Session.checkpoint}; also notifies the server (checkpoint names appear in the history list). */
@@ -223,7 +235,9 @@ export class ProjectManager {
         );
       });
     }
-    return new EngineSession(result.data, file, userSaved);
+    const session = new EngineSession(result.data, file, userSaved);
+    await session.restoreHistory();
+    return session;
   }
 
   private async adopt(session: EngineSession): Promise<void> {

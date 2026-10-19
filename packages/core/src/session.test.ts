@@ -170,6 +170,20 @@ describe("Session history on disk", () => {
   }, 60_000);
 });
 
+describe("Session history cap without a file", () => {
+  it("keeps an in-memory session's history at 400 states", async () => {
+    // No backing file, so nothing writes the history: the cap must hold on apply itself.
+    const s = fresh();
+    for (let i = 0; i < 450; i++) {
+      await s.apply((p) => ({ ...p, name: `v${i}` }), { label: `edit ${i}` });
+    }
+    expect(s.history().length).toBeLessThanOrEqual(400);
+    expect(s.history().at(-1)).toMatchObject({ current: true, label: "edit 449" });
+    await s.undo();
+    expect(s.project.name).toBe("v448");
+  });
+});
+
 describe("Session autosave failures", () => {
   it("keeps an edit whose autosave failed and reports it through saveError instead of throwing", async () => {
     // The backing file lives in a folder that does not exist, so every write fails.

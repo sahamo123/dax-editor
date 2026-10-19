@@ -331,6 +331,30 @@ describe("projects", () => {
     });
   });
 
+  it("keeps named checkpoints across a restart, because the history is saved beside the project", async () => {
+    const first = await startHarness();
+    try {
+      await first.command("set_format", { preset: "square-1080" });
+      const r = await first.command("save_checkpoint", { name: "square cut" });
+      expect(r.ok).toBe(true);
+      await first.server.close();
+      const second = await startHarness({
+        dataDir: first.dataDir,
+        allowRoots: [first.workDir, first.dataDir],
+      });
+      try {
+        const s = await stateOf(second);
+        // Before the fix the history file was never written for server projects, so the name was lost here.
+        expect(s.history.find((x) => x.name === "square cut")).toBeDefined();
+        expect(s.project.timeline.width).toBe(1080);
+      } finally {
+        await second.cleanup();
+      }
+    } finally {
+      await first.cleanup();
+    }
+  });
+
   it("does not move the project to a new location when save-as fails", async () => {
     await withServer({}, async (h) => {
       await h.post("/api/project/new", { name: "Stay put" });

@@ -1,6 +1,7 @@
 // A Session holds the current project with a full edit history (undo, redo, jump to any earlier state, named checkpoints) and optional saving to disk.
 
-import { readFile, writeFile } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
+import { readFile, rename, writeFile } from "node:fs/promises";
 import type { CutPlan } from "./cuts.js";
 import { type Project, ProjectSchema } from "./schema.js";
 import { emptyProject, mainClips, timelineDuration } from "./timeline.js";
@@ -122,7 +123,7 @@ export class Session {
   }
 
   /**
-   * Write the project itself. Subclasses that save somewhere else override this; the base writes {@link Session.file}
+   * Write the project itself. Subclasses that save somewhere else override this; the base writes the file given to the constructor
    * when there is one and does nothing otherwise.
    */
   protected async writeProjectFile(): Promise<void> {
@@ -167,6 +168,7 @@ export class Session {
     }
   }
 
+  /** Write the history beside the project (no-op without a history file). Prunes first. Throws if the write fails. */
   protected async saveHistory(): Promise<void> {
     const file = this.historyFile;
     if (!file) return;
@@ -178,7 +180,10 @@ export class Session {
       entries: [...this.entries.values()],
       lastChild: [...this.lastChild.entries()],
     };
-    await writeFile(file, JSON.stringify(data));
+    // Written to a temp name then renamed, so a crash mid-write cannot leave a truncated history file.
+    const tmp = `${file}.${randomBytes(4).toString("hex")}.tmp`;
+    await writeFile(tmp, JSON.stringify(data));
+    await rename(tmp, file);
   }
 
   /** Load a saved history if it belongs to the project on disk; otherwise start fresh. Never throws. */
@@ -238,6 +243,9 @@ export class Session {
     };
     this.entries.set(entry.id, entry);
     this.lastChild.set(this.currentId, entry.id);
+    // Capped here, not only when the history is written: sessions without a history file (the server's
+    // in-memory copy) would otherwise grow without bound.
+    this.prune();
     return this.moveTo(entry.id);
   }
 
