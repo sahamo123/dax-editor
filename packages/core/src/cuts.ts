@@ -188,8 +188,18 @@ export const CUT_PRESETS: Record<CutPresetName, CutParams> = {
 
 // ---------- the plan ----------
 
-/** Why a stretch is proposed for removal. */
-export type CutKind = "pause" | "filler" | "head" | "tail" | "false_start" | "retake";
+/**
+ * Why a stretch is proposed for removal. `non_silent_gap` is a pause the engine did NOT cut because the audio in it
+ * is not silence (music, laughter, other sound); it is listed as a proposal so a person can still choose to cut it.
+ */
+export type CutKind =
+  | "pause"
+  | "filler"
+  | "head"
+  | "tail"
+  | "false_start"
+  | "retake"
+  | "non_silent_gap";
 
 /** One proposed removal. `range` is in the source file's time. */
 export interface CutDecision {
@@ -215,6 +225,8 @@ export interface CutPlan {
   duration: number;
   approvedSeconds: number;
   proposedSeconds: number;
+  /** Things the user should know about how the plan was made, e.g. that the audio could not be checked. */
+  warnings?: string[];
 }
 
 /** Input to {@link planCuts}. Give `words` for the best result; otherwise `speech` spans are used. */
@@ -226,6 +238,14 @@ export interface PlanInput {
   overrides?: Partial<CutParams>;
   words?: Word[];
   speech?: Range[];
+  /**
+   * The asset's loudness frames (from {@link analyzeAudio}). With `words`, every pause is checked against them and
+   * is only cut if the audio in it really is silence; music, laughter and other sound are kept and listed as `non_silent_gap` proposals.
+   * Without it the pauses are cut from the word timings alone.
+   */
+  levels?: AudioLevels;
+  /** Notes to carry onto the plan, e.g. that the audio could not be read. */
+  warnings?: string[];
 }
 
 const norm = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}']/gu, "");
@@ -261,6 +281,97 @@ function similarity(a: string[], b: string[]): number {
   return inter / (A.size + B.size - inter);
 }
 
+// ---------- is this gap really silent? ----------
+
+/** What the planner knows about the sound of one asset: its loudness frames, room-tone floor and speech level. */
+interface Acoustics {
+  levels: AudioLevels;
+  /** Room-tone level in dBFS ({@link estimateFloor}). */
+  floor: number;
+  /** Typical level of the spoken words in dBFS (median of the frames inside words). */
+  speechDb: number;
+}
+
+/** A sound event is a run of frames above `floor + EVENT_ON_DB` (it ends when a frame falls below `floor + EVENT_OFF_DB`). */
+const EVENT_ON_DB = 10;
+const EVENT_OFF_DB = 6;
+/** Events shorter than this are clicks and lip smacks. They do not make a gap "not silent". */
+const EVENT_MIN_SECONDS = 0.15;
+/** A short event touching the edge of a cut that is at least this close to speech level is a cropped word, not noise. */
+const EDGE_LOUD_BELOW_SPEECH_DB = 20;
+
+/** What the gap check found in a stretch the planner wants to cut. */
+interface GapVerdict {
+  /** Set when the stretch holds a sound that should not be cut away: its loudest level (dBFS) and when it starts (source seconds). */
+  content?: { peakDb: number; at: number };
+}
+
+/** Median of a list; -100 for an empty one. */
+function medianOf(xs: number[]): number {
+  if (xs.length === 0) return -100;
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)] ?? -100;
+}
+
+/** Build the {@link Acoustics} for a transcript's words, or undefined when there are no levels to look at. */
+function acousticsOf(levels: AudioLevels | undefined, words: Word[]): Acoustics | undefined {
+  if (!levels || levels.db.length === 0) return undefined;
+  const floor = estimateFloor(levels);
+  const f = levels.frameSeconds;
+  const inWords: number[] = [];
+  for (const w of words) {
+    const first = Math.max(0, Math.ceil(w.start / f - 0.5));
+    const last = Math.min(levels.db.length - 1, Math.floor(w.end / f - 0.5));
+    for (let i = first; i <= last; i++) inWords.push(levels.db[i] ?? -100);
+  }
+  // Without usable words, assume speech is far above the room tone so only clearly loud sound counts as content.
+  const speechDb = inWords.length > 0 ? medianOf(inWords) : floor + 30;
+  return { levels, floor, speechDb };
+}
+
+/**
+ * Decide whether `range` (source seconds) is silent enough to cut. It looks at the 20 ms loudness frames inside it and
+ * finds sound events: runs above `floor + 10 dB`. A gap is NOT silent if it holds an event that lasts 150 ms or more
+ * (music, laughter, a long noise), or a shorter one at the very edge of the range that is near speech level (a word
+ * the transcript timed too early or late). Shorter events inside the range are clicks and are ignored. Frames inside
+ * `ignore` (filler words the plan is removing on purpose) are not counted.
+ */
+function judgeGap(ac: Acoustics, range: Range, ignore: Range[] = []): GapVerdict {
+  const { levels, floor, speechDb } = ac;
+  const f = levels.frameSeconds;
+  // A frame belongs to the range when its centre does.
+  const i0 = Math.max(0, Math.ceil(range.start / f - 0.5));
+  const i1 = Math.min(levels.db.length - 1, Math.floor(range.end / f - 0.5));
+  const level = (i: number) => {
+    const t = (i + 0.5) * f;
+    return ignore.some((r) => t >= r.start && t <= r.end) ? -100 : (levels.db[i] ?? -100);
+  };
+  let verdict: GapVerdict = {};
+  let from = -1;
+  let peak = -100;
+  const close = (last: number) => {
+    const seconds = (last - from + 1) * f;
+    const touchesEdge = from === i0 || last === i1;
+    const loudEdge = touchesEdge && peak >= speechDb - EDGE_LOUD_BELOW_SPEECH_DB;
+    if (
+      (seconds >= EVENT_MIN_SECONDS || loudEdge) &&
+      (!verdict.content || peak > verdict.content.peakDb)
+    ) {
+      verdict = { content: { peakDb: peak, at: from * f } };
+    }
+    from = -1;
+    peak = -100;
+  };
+  for (let i = i0; i <= i1; i++) {
+    const v = level(i);
+    if (from < 0 && v >= floor + EVENT_ON_DB) from = i;
+    else if (from >= 0 && v < floor + EVENT_OFF_DB) close(i - 1);
+    if (from >= 0) peak = Math.max(peak, v);
+  }
+  if (from >= 0) close(i1);
+  return verdict;
+}
+
 /**
  * Propose cuts for one asset. Works from word timings when given (best), else from speech spans.
  * The plan only describes cuts; nothing changes until {@link applyCutPlan}.
@@ -272,6 +383,7 @@ export function planCuts(input: PlanInput): CutPlan {
   const right = Math.max(p.padPre, p.keepPause / 2);
   const fillerSet = new Set(DEFAULT_FILLERS);
   const decisions: CutDecision[] = [];
+  const warnings = [...(input.warnings ?? [])];
   const add = (d: Omit<CutDecision, "id">) => {
     if (d.range.end - d.range.start >= 0.05) decisions.push({ id: newId("cut"), ...d });
   };
@@ -284,29 +396,53 @@ export function planCuts(input: PlanInput): CutPlan {
   const fillers = removeFillers ? allWords.filter((w) => isFiller(w, fillerSet)) : [];
 
   if (items.length === 0) {
-    return finish(input, presetName, p, decisions);
+    return finish(input, presetName, p, decisions, warnings);
   }
+
+  // With the audio levels and a transcript, every cut of "silence" is checked against the sound inside it.
+  const ac = allWords.length > 0 ? acousticsOf(input.levels, allWords) : undefined;
+  /** Add `kind` over `range` if the range is silent; otherwise record a proposal that explains why it was left. */
+  const addIfSilent = (
+    kind: "pause" | "head" | "tail",
+    range: Range,
+    d: Omit<CutDecision, "id" | "kind" | "range">,
+    ignore: Range[] = [],
+  ) => {
+    const verdict = ac ? judgeGap(ac, range, ignore) : {};
+    if (!verdict.content) return add({ kind, range, ...d });
+    add({
+      kind: "non_silent_gap",
+      range,
+      reason: `${(range.end - range.start).toFixed(1)}s ${kind === "pause" ? "gap" : kind} is not silent (sound at ${verdict.content.at.toFixed(1)}s, ${verdict.content.peakDb.toFixed(0)} dB: music, laughter or other noise), so it was not cut`,
+      confidence: 0.3,
+      status: "proposed",
+    });
+  };
 
   // Head and tail silence.
   const first = items[0] as Range;
   const last = items[items.length - 1] as Range;
   if (first.start - p.padPre > 0.25) {
-    add({
-      kind: "head",
-      range: { start: 0, end: first.start - p.padPre },
-      reason: `${(first.start).toFixed(1)}s of silence before the first word`,
-      confidence: 0.95,
-      status: "approved",
-    });
+    addIfSilent(
+      "head",
+      { start: 0, end: first.start - p.padPre },
+      {
+        reason: `${first.start.toFixed(1)}s of silence before the first word`,
+        confidence: 0.95,
+        status: "approved",
+      },
+    );
   }
   if (input.duration - last.end - p.padPost > 0.25) {
-    add({
-      kind: "tail",
-      range: { start: last.end + p.padPost, end: input.duration },
-      reason: `${(input.duration - last.end).toFixed(1)}s of silence after the last word`,
-      confidence: 0.95,
-      status: "approved",
-    });
+    addIfSilent(
+      "tail",
+      { start: last.end + p.padPost, end: input.duration },
+      {
+        reason: `${(input.duration - last.end).toFixed(1)}s of silence after the last word`,
+        confidence: 0.95,
+        status: "approved",
+      },
+    );
   }
 
   // Gaps between consecutive voiced items: shorten long pauses, and clear out filler words.
@@ -333,13 +469,17 @@ export function planCuts(input: PlanInput): CutPlan {
         status: "approved",
       });
     } else if (gap > p.pauseMin && end - start >= 0.05) {
-      add({
-        kind: "pause",
-        range: { start, end },
-        reason: `${gap.toFixed(1)}s pause shortened to ${(left + right).toFixed(2)}s`,
-        confidence: 0.95,
-        status: "approved",
-      });
+      // Filler words left in this gap (not removable under the preset) are part of the cut, so they are not "sound".
+      addIfSilent(
+        "pause",
+        { start, end },
+        {
+          reason: `${gap.toFixed(1)}s pause shortened to ${(left + right).toFixed(2)}s`,
+          confidence: 0.95,
+          status: "approved",
+        },
+        inside,
+      );
     }
   }
 
@@ -401,7 +541,7 @@ export function planCuts(input: PlanInput): CutPlan {
     }
   }
 
-  return finish(input, presetName, p, decisions);
+  return finish(input, presetName, p, decisions, warnings);
 }
 
 function finish(
@@ -409,6 +549,7 @@ function finish(
   preset: CutPresetName,
   params: CutParams,
   decisions: CutDecision[],
+  warnings: string[],
 ): CutPlan {
   decisions.sort((a, b) => a.range.start - b.range.start);
   const sum = (status: CutDecision["status"]) =>
@@ -416,7 +557,7 @@ function finish(
       (n, r) => n + (r.end - r.start),
       0,
     );
-  return {
+  const plan: CutPlan = {
     id: newId("plan"),
     assetId: input.assetId,
     preset,
@@ -426,6 +567,8 @@ function finish(
     approvedSeconds: sum("approved"),
     proposedSeconds: sum("proposed"),
   };
+  if (warnings.length > 0) plan.warnings = warnings;
+  return plan;
 }
 
 /** Which decisions {@link applyCutPlan} should apply. */

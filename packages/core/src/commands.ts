@@ -221,13 +221,28 @@ async function buildPlan(
 ) {
   const asset = pickAsset(ctx.session.project, assetId);
   const words = asset.transcript?.words;
-  const speech = words ? undefined : detectSpeechSpans(await analyzeAudio(asset.path));
+  // The loudness frames find speech when there is no transcript, and let the planner check that a pause is silent.
+  let levels: Awaited<ReturnType<typeof analyzeAudio>> | undefined;
+  const warnings: string[] = [];
+  if (!words || asset.hasAudio) {
+    try {
+      levels = await analyzeAudio(asset.path);
+    } catch (err) {
+      if (!words) throw err;
+      warnings.push(
+        "The audio could not be read, so pauses were cut from the transcript timing alone (music or other sound in a pause would be cut too).",
+      );
+    }
+  }
+  const speech = !words && levels ? detectSpeechSpans(levels) : undefined;
   return planCuts({
     assetId: asset.id,
     duration: asset.duration,
     preset,
     ...(words ? { words } : {}),
     ...(speech ? { speech } : {}),
+    ...(words && levels ? { levels } : {}),
+    warnings,
   });
 }
 
@@ -668,7 +683,7 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "plan_cuts",
     description:
-      "Analyse a video's speech and propose cuts (long pauses, filler words, silence at the start and end, false starts, repeated takes) WITHOUT changing anything. Returns a plan id and each proposed cut with its reason and confidence. Use apply_cut_plan to apply it, or smart_cut to do both at once. Presets: gentle, standard (default), tight, podcast, tutorial.",
+      "Analyse a video's speech and propose cuts (long pauses, filler words, silence at the start and end, false starts, repeated takes) WITHOUT changing anything. Returns a plan id and each proposed cut with its reason and confidence. Pauses with music or other sound in them are not cut, only listed. Use apply_cut_plan to apply it, or smart_cut to do both at once. Presets: gentle, standard (default), tight, podcast, tutorial.",
     schema: z.object({
       assetId: assetIdArg,
       preset: z.enum(CUT_PRESET_NAMES).default("standard").describe("How aggressively to cut"),
@@ -688,6 +703,7 @@ export const COMMANDS: readonly CommandDef[] = [
           preset: plan.preset,
           approvedSeconds: plan.approvedSeconds,
           proposedSeconds: plan.proposedSeconds,
+          ...(plan.warnings ? { warnings: plan.warnings } : {}),
           decisions: plan.decisions.slice(0, 60).map((d) => ({
             id: d.id,
             kind: d.kind,
@@ -751,7 +767,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const review = plan.decisions.filter((d) => d.status === "proposed");
       if (ranges.length === 0) {
         return {
-          summary: `No cuts needed.${review.length ? ` ${review.length} possible false start(s) or retake(s) to review (plan ${plan.id}).` : ""}`,
+          summary: `No cuts needed.${review.length ? ` ${review.length} possible cut(s) to review (false starts, retakes, or pauses with sound in them; plan ${plan.id}).` : ""}`,
           data: { planId: plan.id },
         };
       }
@@ -759,7 +775,12 @@ export const COMMANDS: readonly CommandDef[] = [
       const after = timelineDuration(ctx.session.project);
       return {
         summary: `Removed ${fmt(before - after)} (${plan.decisions.filter((d) => d.status === "approved").length} cut(s)). Timeline is now ${fmt(after)}.${review.length ? ` ${review.length} more for review: apply_cut_plan with planId ${plan.id} and includeProposed.` : ""}`,
-        data: { planId: plan.id, secondsRemoved: before - after, forReview: review.length },
+        data: {
+          planId: plan.id,
+          secondsRemoved: before - after,
+          forReview: review.length,
+          ...(plan.warnings ? { warnings: plan.warnings } : {}),
+        },
       };
     },
   }),
