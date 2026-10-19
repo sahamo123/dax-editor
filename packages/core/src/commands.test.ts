@@ -172,7 +172,12 @@ describe("running commands", () => {
     });
     const r = await runCommand(ctx, "remove_fillers", {});
     expect(r.summary).toMatch(/1 filler/);
-    expect(timelineDuration(ctx.session.project)).toBeCloseTo(10 - 0.54, 2);
+    // Cut edges sit on the project's frame grid, so the removed length is within one frame of the requested 0.54 s.
+    const frame = 1 / ctx.session.project.timeline.fps;
+    expect(
+      Math.abs(timelineDuration(ctx.session.project) - (10 - 0.54)),
+      "removed length is within one frame",
+    ).toBeLessThanOrEqual(frame);
     const t = await runCommand(ctx, "get_transcript", { from: 0, to: 3 });
     expect((t.data as { text: string }).text).toContain("[00:00] So um yes");
   });

@@ -57,6 +57,37 @@ export function clipEnd(c: Clip): number {
   return c.start + clipDuration(c);
 }
 
+/**
+ * The exact frame rate for a project rate, as FFmpeg should read it, with its numeric value. NTSC rates are stored as
+ * decimals (29.97, 59.94), but their true rates are 30000/1001 and 60000/1001; the decimal would move the frame grid
+ * by about 0.36 frame per hour. Any other rate is used as it is. Throws if `fps` is not positive and finite.
+ */
+export function frameRate(fps: number): { filter: string; value: number } {
+  if (!(fps > 0) || !Number.isFinite(fps))
+    throw new Error(`Frame rate must be positive, got ${fps}`);
+  for (const [num, den] of [
+    [24000, 1001],
+    [30000, 1001],
+    [60000, 1001],
+  ] as const) {
+    if (Math.abs(fps - num / den) < 0.01) return { filter: `${num}/${den}`, value: num / den };
+  }
+  return { filter: String(fps), value: fps };
+}
+
+/**
+ * Put a time, in seconds, on the frame grid of a project rate. `round` takes the nearest frame boundary (used for cut
+ * points); `floor` takes the last boundary at or before the time (used for the end of a source, so a clip never
+ * runs past its last whole frame). Cuts placed on this grid make every trimmed stream an exact number of frames, so
+ * picture and sound end together (docs/research/av-sync-and-breath-recipes.md).
+ */
+export function snapToFrame(t: number, fps: number, mode: "round" | "floor" = "round"): number {
+  const { value } = frameRate(fps);
+  // The small tolerance in `floor` stops a time that is one frame less a rounding error from losing its last frame.
+  const frames = mode === "floor" ? Math.floor(t * value + 1e-6) : Math.round(t * value);
+  return frames / value;
+}
+
 function mainTrack(p: Project) {
   const t = p.timeline.tracks.find((t) => t.id === MAIN_TRACK);
   if (!t) throw new Error(`Project has no main track "${MAIN_TRACK}"`);
@@ -106,8 +137,13 @@ export function appendClip(
 ): Project {
   const asset = ownAsset(p, assetId);
   if (!asset) throw new Error(`Unknown asset "${assetId}"`);
-  const inPoint = slice.in ?? 0;
-  const outPoint = Math.min(slice.out ?? asset.duration, asset.duration);
+  // Both points go on the frame grid; the end may not pass the source's last whole frame.
+  const fps = p.timeline.fps;
+  const inPoint = snapToFrame(slice.in ?? 0, fps);
+  const outPoint = Math.min(
+    snapToFrame(slice.out ?? asset.duration, fps),
+    snapToFrame(asset.duration, fps, "floor"),
+  );
   if (outPoint - inPoint <= EPS) throw new Error("Clip would be empty");
   const clip: Clip = {
     id: newId("clip"),
@@ -122,12 +158,16 @@ export function appendClip(
   return withClips(p, [...mainClips(p), clip]);
 }
 
-/** Split whichever clip contains timeline time `t` into two. */
-export function splitAt(p: Project, t: number): Project {
+/**
+ * Split whichever clip contains timeline time `t` into two. The cut moves to the nearest frame boundary first, so a
+ * request between two frames cuts on one of them; a request that rounds onto a clip edge splits nothing and throws.
+ */
+export function splitAt(p: Project, requested: number): Project {
   const clips = mainClips(p);
+  const t = snapToFrame(requested, p.timeline.fps);
   const idx = clips.findIndex((c) => t > c.start + EPS && t < clipEnd(c) - EPS);
   const c = clips[idx];
-  if (!c) throw new Error(`No clip can be split at ${t}s`);
+  if (!c) throw new Error(`No clip can be split at ${requested}s`);
   const cut = c.in + (t - c.start);
   // A fade belongs to the clip's outer edge, so the new inner edges start with none.
   const left: Clip = { ...c, out: cut, fadeOut: 0 };
@@ -152,9 +192,16 @@ export function shotRanges(p: Project): Range[] {
   return shots;
 }
 
-/** Remove the timeline range [from, to) and close the gap. */
-export function deleteRange(p: Project, from: number, to: number): Project {
-  if (to <= from) throw new Error("Range end must be after start");
+/**
+ * Remove the timeline range [from, to) and close the gap. Both ends move to the nearest frame boundary first, so the
+ * cut is always between whole frames. A range shorter than a frame removes nothing and returns a copy of `p`.
+ */
+export function deleteRange(p: Project, requestedFrom: number, requestedTo: number): Project {
+  if (requestedTo <= requestedFrom) throw new Error("Range end must be after start");
+  const fps = p.timeline.fps;
+  const from = snapToFrame(requestedFrom, fps);
+  const to = snapToFrame(requestedTo, fps);
+  if (to - from <= EPS) return structuredClone(p);
   const out: Clip[] = [];
   for (const c of mainClips(p)) {
     const s = c.start;
@@ -228,8 +275,12 @@ export function mergeRanges(ranges: Range[]): Range[] {
  * Translate ranges expressed in an asset's own time (e.g. silences or filler
  * words detected on the source file) into timeline ranges, covering every
  * clip that currently uses that asset.
+ *
+ * The result is on the frame grid: each edge is moved to the nearest frame boundary, and a piece that rounds to
+ * nothing is dropped. Callers that ask "is anything left to cut?" therefore never count a cut that removes no frame.
  */
 export function assetRangesToTimeline(p: Project, assetId: string, ranges: Range[]): Range[] {
+  const fps = p.timeline.fps;
   const out: Range[] = [];
   for (const c of mainClips(p)) {
     if (c.assetId !== assetId) continue;
@@ -239,7 +290,10 @@ export function assetRangesToTimeline(p: Project, assetId: string, ranges: Range
       if (e - s > EPS) out.push({ start: c.start + (s - c.in), end: c.start + (e - c.in) });
     }
   }
-  return mergeRanges(out);
+  const onGrid = out
+    .map((r) => ({ start: snapToFrame(r.start, fps), end: snapToFrame(r.end, fps) }))
+    .filter((r) => r.end > r.start);
+  return mergeRanges(onGrid);
 }
 
 /** Delete source-time ranges of an asset wherever the timeline uses them. */
@@ -261,8 +315,13 @@ export function trimClip(p: Project, clipId: string, trim: { in?: number; out?: 
   if (!c) throw new Error(`Unknown clip "${clipId}"`);
   const asset = ownAsset(p, c.assetId);
   if (!asset) throw new Error(`Clip "${clipId}" references missing asset "${c.assetId}"`);
-  const inPoint = Math.max(0, trim.in ?? c.in);
-  const outPoint = Math.min(asset.duration, trim.out ?? c.out);
+  // Both points go on the frame grid; the end may not pass the source's last whole frame.
+  const fps = p.timeline.fps;
+  const inPoint = snapToFrame(Math.max(0, trim.in ?? c.in), fps);
+  const outPoint = Math.min(
+    snapToFrame(trim.out ?? c.out, fps),
+    snapToFrame(asset.duration, fps, "floor"),
+  );
   if (outPoint - inPoint <= EPS) throw new Error("Trim would make the clip empty");
   const next = withClips(
     p,

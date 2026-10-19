@@ -718,6 +718,8 @@ export function planRanges(plan: CutPlan, opts: ApplyOptions = {}): Range[] {
 /**
  * Remove the chosen decisions from the project, everywhere the timeline uses the asset.
  * Ranges already cut earlier are skipped. Returns the project unchanged if nothing is left to cut.
+ * The cut edges land on the frame grid (see {@link assetRangesToTimeline}), so a decision that removes no whole frame
+ * is not applied.
  */
 export function applyCutPlan(p: Project, plan: CutPlan, opts: ApplyOptions = {}): Project {
   const timeline = assetRangesToTimeline(p, plan.assetId, planRanges(plan, opts));

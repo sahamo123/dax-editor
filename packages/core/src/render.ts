@@ -13,7 +13,7 @@ import { runFfmpeg } from "./exec.js";
 import { imageInputArgs, imageOverlayFilters, imagesOf } from "./image-overlays.js";
 import { type FontFiles, filterPath, overlayFilters, type TextFile } from "./overlay-filters.js";
 import type { Clip, Project } from "./schema.js";
-import { clipDuration, mainClips, ownAsset, timelineDuration } from "./timeline.js";
+import { frameRate, mainClips, ownAsset, snapToFrame, timelineDuration } from "./timeline.js";
 import { zoomFilters, zoomsOf } from "./zoom.js";
 
 function encoderArgs(encoder: string): string[] {
@@ -28,6 +28,16 @@ function encoderArgs(encoder: string): string[] {
 }
 
 const n = (x: number) => x.toFixed(6);
+
+/**
+ * Half a millisecond, in seconds. Trim times are printed with six decimals, which can round a cut that sits exactly on
+ * a frame a hair past it, keeping or dropping one frame too many. Moving every boundary this much earlier keeps it on
+ * its frame. It is far below a frame, so nothing visible moves.
+ */
+const FRAME_NUDGE = 0.0005;
+
+/** The trim/atrim time for a frame boundary, nudged so the printed number stays on the right side of that frame. */
+const boundary = (t: number) => n(Math.max(0, t - FRAME_NUDGE));
 
 /** Length of the tiny audio fade at each cut. Stops a hard splice from clicking; too short to hear as a dip. */
 const JOIN_FADE = 0.008;
@@ -61,9 +71,10 @@ export interface RenderContext {
 }
 
 /**
- * Turn the project into one FFmpeg command: trim each clip (with fades), normalise, concat, then (in this order)
- * zoom the joined picture, draw image overlays, draw text overlays and captions, and mix the audio layer (music and
- * sound effects) under the joined main audio. Everything after the join works in timeline time.
+ * Turn the project into one FFmpeg command: convert each source to the project rate once, trim each clip on the frame
+ * grid (with fades), normalise, concat, then (in this order) zoom the joined picture, draw image overlays, draw text
+ * overlays and captions, and mix the audio layer (music and sound effects) under the joined main audio. Everything
+ * after the join works in timeline time.
  */
 export function buildRenderPlan(
   project: Project,
@@ -71,9 +82,16 @@ export function buildRenderPlan(
   encoder: string,
   ctx: RenderContext = {},
 ): RenderPlan {
-  const clips = mainClips(project);
-  if (clips.length === 0) throw new Error("Timeline is empty");
   const { width: W, height: H, fps } = project.timeline;
+  // A clip that rounds to no whole frame (possible only in projects saved before cuts were framed) adds no picture,
+  // so it is left out rather than trimmed to nothing.
+  const clips = mainClips(project).filter((c) => snapToFrame(c.out, fps) > snapToFrame(c.in, fps));
+  if (clips.length === 0) throw new Error("Timeline is empty");
+  /** Number of clips per source, so each source's single conversion pass can be split into that many copies. */
+  const uses = new Map<string, number>();
+  for (const c of clips) uses.set(c.assetId, (uses.get(c.assetId) ?? 0) + 1);
+  /** The project rate as FFmpeg reads it (NTSC rates exact), used by every conversion pass and by the grid. */
+  const rate = frameRate(fps);
 
   /** FFmpeg input arguments, flat (`-i a.mp4 -loop 1 ... -i b.png`). */
   const inputs: string[] = [];
@@ -87,6 +105,8 @@ export function buildRenderPlan(
   };
   const filters: string[] = [];
   const concatPads: string[] = [];
+  /** Labels of each source's converted copies, one per clip that uses it, handed out in clip order. */
+  const sourceLabels = new Map<string, string[]>();
 
   clips.forEach((c, i) => {
     const asset = project.assets[c.assetId];
@@ -100,8 +120,21 @@ export function buildRenderPlan(
     if (k === undefined) {
       k = addInput(asset.path);
       inputIndex.set(asset.id, k);
+      // Convert the whole source to the project rate once, before any trim, then split it into one copy per clip.
+      // Converting each clip on its own adds frames at every join, which is the audio/picture drift this avoids.
+      const input = k;
+      const copies = uses.get(asset.id) ?? 1;
+      const labels = Array.from({ length: copies }, (_, j) => `[src${input}_${j}]`);
+      filters.push(
+        `[${input}:v]fps=${rate.filter}${copies > 1 ? `,split=${copies}` : ""}${labels.join("")}`,
+      );
+      sourceLabels.set(asset.id, labels);
     }
-    const dur = clipDuration(c);
+    // Cut points on the frame grid: the model puts them there, and the render snaps again so that a stream is always
+    // a whole number of frames long and picture and sound end together.
+    const inS = snapToFrame(c.in, fps);
+    const outS = snapToFrame(c.out, fps);
+    const dur = outS - inS;
     const vFade =
       (c.fadeIn > 0 ? `,fade=t=in:st=0:d=${n(c.fadeIn)}` : "") +
       (c.fadeOut > 0 ? `,fade=t=out:st=${n(Math.max(0, dur - c.fadeOut))}:d=${n(c.fadeOut)}` : "");
@@ -115,8 +148,11 @@ export function buildRenderPlan(
         : "") +
       (joinIn ? `,afade=t=in:st=0:d=${n(JOIN_FADE)}` : "") +
       (joinOut ? `,afade=t=out:st=${n(dur - JOIN_FADE)}:d=${n(JOIN_FADE)}` : "");
-    const head = `[${k}:v]trim=start=${n(c.in)}:end=${n(c.out)},setpts=PTS-STARTPTS`;
-    const tail = `setsar=1,fps=${fps},format=yuv420p${vFade}[v${i}]`;
+    // This clip's own converted copy of the source (no second fps pass here: it would add frames).
+    const copy = sourceLabels.get(asset.id)?.shift();
+    if (!copy) throw new Error(`No converted copy of ${asset.path} is left for clip ${c.id}`);
+    const head = `${copy}trim=start=${boundary(inS)}:end=${boundary(outS)},setpts=PTS-STARTPTS`;
+    const tail = `setsar=1,format=yuv420p${vFade}[v${i}]`;
     if (project.timeline.fit === "cover") {
       filters.push(
         `${head},scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},${tail}`,
@@ -137,7 +173,7 @@ export function buildRenderPlan(
     }
     if (asset.hasAudio) {
       filters.push(
-        `[${k}:a]atrim=start=${n(c.in)}:end=${n(c.out)},asetpts=PTS-STARTPTS,` +
+        `[${k}:a]atrim=start=${boundary(inS)}:end=${boundary(outS)},asetpts=PTS-STARTPTS,` +
           `aresample=48000,aformat=channel_layouts=stereo,volume=${c.volume}${aFade}[a${i}]`,
       );
     } else {

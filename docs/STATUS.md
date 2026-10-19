@@ -6,7 +6,7 @@ tags: [status, roadmap, handoff]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T21:30:00Z
+  at: 2026-10-19T12:00:00Z
 ---
 
 # Project status
@@ -18,7 +18,7 @@ The engine, command registry, skills, templates, agent, engine server and launch
 ## Works today
 
 - **Command registry** (`packages/core/src/commands.ts`, `template-commands.ts`, `effect-commands.ts`): 45 commands with typed arguments, model-facing descriptions and JSON-schema tool specs. It is the only way a project changes.
-- **Timeline and edits**: undoable pure edits, a gapless main track, clip fades, and 8 ms audio fades at real cuts so joins do not click.
+- **Timeline and edits**: undoable pure edits, a gapless main track, clip fades, and 8 ms audio fades at real cuts so joins do not click. Cuts sit on the project's frame grid, and each source is converted to the project rate once before trimming, so picture and sound end together after 60 joins (measured, see [A/V sync](research/av-sync-and-breath-recipes.md)).
 - **History tree** (`session.ts`): states tagged manual, AI or template; jump to any state; named checkpoints; undo then edit keeps the old branch.
 - **Cut engine** (`cuts.ts`): speech detection relative to the noise floor, five presets (gentle, standard, tight, podcast, tutorial), and reviewable cut plans. Commands `plan_cuts`, `apply_cut_plan`, `smart_cut`. Filler-word cuts need a transcript from `transcribe`, which needs the speech runtime and a model installed (see Known issues).
 - **Word-timed captions** (`captions.ts`): three looks burned in via ASS, following every cut. Command `set_captions`. Needs a transcript.
@@ -84,6 +84,7 @@ Each item starts after the in-progress builds it depends on are merged.
 ## Known issues
 
 - CI has not yet run on GitHub.
+- Projects saved before the frame-grid change are not re-quantised on open. Their cuts are snapped at render, so the timeline can differ from the output by up to half a frame per old cut. Breath attenuation ([research](research/av-sync-and-breath-recipes.md), section 5) is not built.
 - Windows and macOS are untested.
 - The independent review's 3 high and 9 medium findings stay open until the hardening pass merges.
 - Core export is not yet atomic or cancellable. Cancelling an MCP export lets FFmpeg finish in the background and then deletes its file.
