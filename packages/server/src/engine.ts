@@ -43,6 +43,8 @@ import { SERVER_VERSION } from "./version.js";
 
 /** How long provider status is reused before the registry is asked again. */
 const PROVIDER_TTL_MS = 5000;
+/** Answer for a manual edit that arrives while an AI run is active. */
+const BUSY_MESSAGE = "An AI edit is in progress. Wait for it to finish or cancel it first.";
 /** After a cancel, how long to wait for a runner that ignores the abort signal before freeing the `busy` flag anyway. */
 const CANCEL_GRACE_MS = 5000;
 
@@ -276,9 +278,11 @@ export class Engine {
     }
     if (name === "export_video") return this.startExport(args);
     // Edits are applied one at a time so two requests cannot interleave their read-modify-write.
-    return this.serial(async () =>
-      toResponse(await tryRunCommand(this.commandContext(), name, args)),
-    );
+    return this.serial(async () => {
+      // Checked again here: an AI run may have started while this call waited for its turn (the check above ran earlier).
+      if (!def.readOnly && this.chat) return { ok: false, error: BUSY_MESSAGE };
+      return toResponse(await tryRunCommand(this.commandContext(), name, args));
+    });
   }
 
   /** Import files by path through `import_media`; each one becomes a history entry and gets a proxy job. */
@@ -289,6 +293,8 @@ export class Engine {
         error: "An AI edit is in progress. Wait for it to finish or cancel it first.",
       };
     return this.serial(async () => {
+      // Checked again inside the queue for the same reason as in runCommand.
+      if (this.chat) return { ok: false, error: BUSY_MESSAGE } as const;
       const assetIds: string[] = [];
       const failed: Array<{ path: string; error: string }> = [];
       for (const path of paths) {
@@ -418,6 +424,8 @@ export class Engine {
 
     void (async () => {
       try {
+        // Edits accepted before this run started finish first; new ones are refused while the run is busy.
+        await this.commandChain;
         const runner = await this.resolveRunner();
         await runner.run(message, {
           session: this.projects.session,
