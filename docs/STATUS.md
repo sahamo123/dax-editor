@@ -87,7 +87,7 @@ Each item starts after the in-progress builds it depends on are merged.
 ## Known issues
 
 - CI has not yet run on GitHub.
-- Projects saved before the frame-grid change are not re-quantised on open. Their cuts are snapped at render, so the timeline can differ from the output by up to half a frame per old cut. Breath attenuation ([research](research/av-sync-and-breath-recipes.md), section 5) is not built.
+- Projects saved before the frame-grid change are not re-quantised on open. Their cuts are snapped at render, so the timeline can differ from the output by up to half a frame per old cut. Breaths are kept and attenuated by 12 dB (see [cut intelligence status](research/cut-intelligence.md)); the per-preset breath depths and render ramp are not built.
 - Windows and macOS are untested.
 - The independent review's 3 high and 9 medium findings stay open until the hardening pass merges.
 - Core export is not yet atomic or cancellable. Cancelling an MCP export lets FFmpeg finish in the background and then deletes its file.
