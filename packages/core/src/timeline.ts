@@ -2,7 +2,7 @@
 
 import { newId } from "./ids.js";
 import { shiftOverlaysForDelete } from "./overlays.js";
-import type { Asset, Clip, Fit, Project, Range, Transcript } from "./schema.js";
+import type { Asset, Clip, Fit, Overlay, Project, Range, Transcript } from "./schema.js";
 
 /**
  * Pure edit operations. Each takes a project and returns a new one; the input
@@ -145,16 +145,29 @@ export function deleteRange(p: Project, from: number, to: number): Project {
   return next;
 }
 
-/** Remove several timeline ranges at once (ranges refer to the *current* timeline). */
+/**
+ * Remove several timeline ranges at once (ranges refer to the *current* timeline). Overlapping or touching ranges
+ * are merged first, so the same footage is never cut twice; empty ranges are ignored.
+ */
 export function deleteRanges(p: Project, ranges: Range[]): Project {
-  const sorted = [...ranges].sort((a, b) => b.start - a.start);
-  return sorted.reduce((acc, r) => deleteRange(acc, r.start, r.end), p);
+  const merged = mergeRanges(ranges.filter((r) => r.end - r.start > EPS)).sort(
+    (a, b) => b.start - a.start,
+  );
+  return merged.reduce((acc, r) => deleteRange(acc, r.start, r.end), p);
 }
 
 /** Keep only the given timeline ranges, deleting everything between them. */
 export function keepRanges(p: Project, keep: Range[]): Project {
   const dur = timelineDuration(p);
-  const sorted = [...keep].sort((a, b) => a.start - b.start);
+  // Ranges are clamped to the timeline first. Without this a range past the end (or entirely outside it) left the
+  // whole timeline to be removed, which is never what was asked for.
+  const inside = keep
+    .map((r) => ({ start: Math.max(0, r.start), end: Math.min(dur, r.end) }))
+    .filter((r) => r.end - r.start > EPS);
+  if (inside.length === 0) {
+    throw new Error(`None of the kept ranges is inside the timeline (0 to ${dur.toFixed(2)}s)`);
+  }
+  const sorted = mergeRanges(inside);
   const remove: Range[] = [];
   let cursor = 0;
   for (const r of sorted) {
@@ -217,10 +230,12 @@ export function trimClip(p: Project, clipId: string, trim: { in?: number; out?: 
   const inPoint = Math.max(0, trim.in ?? c.in);
   const outPoint = Math.min(asset.duration, trim.out ?? c.out);
   if (outPoint - inPoint <= EPS) throw new Error("Trim would make the clip empty");
-  return withClips(
+  const next = withClips(
     p,
     clips.map((x) => (x.id === clipId ? { ...x, in: inPoint, out: outPoint } : x)),
   );
+  next.timeline.overlays = remapOverlays(p, next);
+  return next;
 }
 
 /** Move a clip to a new position in the main track's order (0-based). */
@@ -231,7 +246,44 @@ export function moveClip(p: Project, clipId: string, index: number): Project {
   const [moved] = clips.splice(from, 1);
   if (!moved) throw new Error(`Unknown clip "${clipId}"`);
   clips.splice(Math.max(0, Math.min(index, clips.length)), 0, moved);
-  return withClips(p, clips);
+  const next = withClips(p, clips);
+  next.timeline.overlays = remapOverlays(p, next);
+  return next;
+}
+
+/**
+ * Carry the overlays of `before` over to the clip layout of `after`, for edits that keep every clip id but move or
+ * resize clips (trim, move). Each overlay time is mapped through the footage it sits on: the same source moment
+ * lands where that footage now is. Times in a trimmed-away part snap to the edge that remains. An overlay that is
+ * left with no length is dropped, as a ripple delete drops one it fully covers.
+ */
+function remapOverlays(before: Project, after: Project): Overlay[] {
+  const oldClips = mainClips(before);
+  const newById = new Map(mainClips(after).map((c) => [c.id, c] as const));
+  const shiftAfterEnd = timelineDuration(after) - timelineDuration(before);
+  /** Map one timeline time. `isEnd` decides which clip owns a time that sits exactly on a clip boundary. */
+  const map = (t: number, isEnd: boolean): number => {
+    for (const c of oldClips) {
+      const s = c.start;
+      const e = clipEnd(c);
+      const owns = isEnd ? t > s + EPS && t <= e + EPS : t >= s - EPS && t < e - EPS;
+      if (!owns) continue;
+      const n = newById.get(c.id);
+      if (!n) break;
+      // Source moment this time shows, then where that source moment is in the new clip (clamped to it).
+      const src = c.in + (t - s);
+      return n.start + Math.min(clipDuration(n), Math.max(0, src - n.in));
+    }
+    // Past the last clip (or in a clip that vanished): keep the same distance from the end.
+    return t + shiftAfterEnd;
+  };
+  const out: Overlay[] = [];
+  for (const o of before.timeline.overlays) {
+    const start = Math.max(0, map(o.start, false));
+    const end = map(o.start + o.duration, true);
+    if (end - start > EPS) out.push({ ...o, start, duration: end - start });
+  }
+  return out;
 }
 
 /** Set a clip's linear gain (1 = unchanged, 0 = muted). */
