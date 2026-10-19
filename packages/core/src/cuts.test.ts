@@ -99,9 +99,10 @@ describe("planCuts from words", () => {
   it("shortens a long pause and keeps a natural gap on each side", () => {
     const p = plan(talk, { duration: 3.8 });
     const pause = p.decisions.find((d) => d.kind === "pause");
-    // standard: keepPause 0.3 -> 0.15 kept after the last word and before the next
-    expect(pause?.range.start).toBeCloseTo(1.15, 2);
-    expect(pause?.range.end).toBeCloseTo(2.85, 2);
+    // standard: keepPause 0.3 -> 0.2 kept after the last word and 0.1 before the next
+    // Two thirds of the kept silence goes after the word (its tail decays), one third before the next word.
+    expect(pause?.range.start).toBeCloseTo(1.2, 2);
+    expect(pause?.range.end).toBeCloseTo(2.9, 2);
     expect(pause?.status).toBe("approved");
     expect(pause?.reason).toMatch(/2\.0s pause/);
   });
@@ -116,7 +117,8 @@ describe("planCuts from words", () => {
     const head = p.decisions.find((d) => d.kind === "head");
     const tail = p.decisions.find((d) => d.kind === "tail");
     expect(head?.range.end).toBeCloseTo(2 - CUT_PRESETS.standard.padPre, 2);
-    expect(tail?.range.start).toBeCloseTo(2.8 + CUT_PRESETS.standard.padPost, 2);
+    // The tail keeps the after-word share of the pause (0.2 s), since word endings are the ones that get clipped.
+    expect(tail?.range.start).toBeCloseTo(2.8 + CUT_PRESETS.standard.keepPause * (2 / 3), 2);
     expect(tail?.range.end).toBe(6);
   });
 

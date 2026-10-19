@@ -106,6 +106,16 @@ export interface SpeechDetectOptions {
   offAboveFloor?: number;
   /** Ignore sounds shorter than this many seconds (clicks, coughs). Default 0.15. */
   minSpeech?: number;
+  /**
+   * Keep a span this many seconds past where it falls below the off threshold, when the sound is still audible
+   * (above floor+3 dB) in that stretch: a word's decaying tail, which the off threshold would cut. Default 0 (off).
+   */
+  hangover?: number;
+  /**
+   * Start a span up to this many seconds earlier while the sound is still above floor+6 dB: a soft onset such as an
+   * "s" or "f" before the loud vowel. Default 0 (off).
+   */
+  lookback?: number;
 }
 
 /** Find stretches of speech (anything clearly above the room tone), in source seconds. */
@@ -125,7 +135,32 @@ export function detectSpeechSpans(levels: AudioLevels, opts: SpeechDetectOptions
     }
   });
   if (start !== null) spans.push({ start: start * f, end: levels.db.length * f });
-  return spans.filter((s) => s.end - s.start >= minSpeech);
+
+  // The off threshold and the loud vowel's onset can clip word edges. Widen each span into audible neighbours.
+  const hold = Math.round((opts.hangover ?? 0) / f);
+  const back = Math.round((opts.lookback ?? 0) / f);
+  const tail = estimateFloor(levels) + TAIL_AUDIBLE_DB;
+  const dbAt = (i: number) => levels.db[i] ?? -100;
+  const grown = spans.map((sp) => {
+    let i0 = Math.round(sp.start / f);
+    let i1 = Math.round(sp.end / f);
+    // A decaying tail counts when any frame of the next `hold` frames is still audible.
+    if (hold > 0 && i1 < levels.db.length) {
+      let audible = false;
+      for (let k = i1; k < Math.min(levels.db.length, i1 + hold); k++) audible ||= dbAt(k) >= tail;
+      if (audible) i1 = Math.min(levels.db.length, i1 + hold);
+    }
+    for (let k = 0; k < back && i0 - 1 >= 0 && dbAt(i0 - 1) >= tail; k++) i0--;
+    return { start: i0 * f, end: i1 * f };
+  });
+  // Widening can make neighbouring spans touch or overlap; join them.
+  const merged: Range[] = [];
+  for (const sp of grown) {
+    const last = merged[merged.length - 1];
+    if (last && sp.start <= last.end) last.end = Math.max(last.end, sp.end);
+    else merged.push({ ...sp });
+  }
+  return merged.filter((s) => s.end - s.start >= minSpeech);
 }
 
 // ---------- presets ----------
@@ -197,8 +232,18 @@ export const CUT_PRESETS: Record<CutPresetName, CutParams> = {
 
 // ---------- the plan ----------
 
-/** Why a stretch is proposed for removal. */
-export type CutKind = "pause" | "filler" | "head" | "tail" | "false_start" | "retake";
+/**
+ * Why a stretch is proposed for removal. `non_silent_gap` is a pause the engine did NOT cut because the audio in it
+ * is not silence (music, laughter, other sound); it is listed as a proposal so a person can still choose to cut it.
+ */
+export type CutKind =
+  | "pause"
+  | "filler"
+  | "head"
+  | "tail"
+  | "false_start"
+  | "retake"
+  | "non_silent_gap";
 
 /** One proposed removal. `range` is in the source file's time. */
 export interface CutDecision {
@@ -224,6 +269,8 @@ export interface CutPlan {
   duration: number;
   approvedSeconds: number;
   proposedSeconds: number;
+  /** Things the user should know about how the plan was made, e.g. that the audio could not be checked. */
+  warnings?: string[];
 }
 
 /** Input to {@link planCuts}. Give `words` for the best result; otherwise `speech` spans are used. */
@@ -235,6 +282,14 @@ export interface PlanInput {
   overrides?: Partial<CutParams>;
   words?: Word[];
   speech?: Range[];
+  /**
+   * The asset's loudness frames (from {@link analyzeAudio}). With `words`, every pause is checked against them and
+   * is only cut if the audio in it really is silence; music, laughter and other sound are kept and listed as `non_silent_gap` proposals.
+   * Without it the pauses are cut from the word timings alone.
+   */
+  levels?: AudioLevels;
+  /** Notes to carry onto the plan, e.g. that the audio could not be read. */
+  warnings?: string[];
 }
 
 const norm = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}']/gu, "");
@@ -270,6 +325,173 @@ function similarity(a: string[], b: string[]): number {
   return inter / (A.size + B.size - inter);
 }
 
+// ---------- is this gap really silent? ----------
+
+/** What the planner knows about the sound of one asset: its loudness frames, room-tone floor and speech level. */
+interface Acoustics {
+  levels: AudioLevels;
+  /** Room-tone level in dBFS ({@link estimateFloor}). */
+  floor: number;
+  /** Typical level of the spoken words in dBFS (median of the frames inside words). */
+  speechDb: number;
+}
+
+/** A sound event is a run of frames above `floor + EVENT_ON_DB` (it ends when a frame falls below `floor + EVENT_OFF_DB`). */
+const EVENT_ON_DB = 10;
+const EVENT_OFF_DB = 6;
+/** Events shorter than this are clicks and lip smacks. They do not make a gap "not silent". */
+const EVENT_MIN_SECONDS = 0.15;
+/** A short event touching the edge of a cut that is at least this close to speech level is a cropped word, not noise. */
+const EDGE_LOUD_BELOW_SPEECH_DB = 20;
+
+/** Share of a shortened pause's kept silence that goes after the word before it (the rest goes before the next word). */
+const TAIL_SHARE = 2 / 3;
+/** How long after a word's end its decaying tail is measured (seconds). */
+const TAIL_WINDOW = 0.2;
+/** A tail frame counts when it is this many dB above the room tone: the level at which a decaying "s" is still speech. */
+const TAIL_AUDIBLE_DB = 3;
+
+/** Longest a cut may be pushed later past a word end to keep its decaying tail (seconds). */
+const TAIL_GROW_MAX = 0.3;
+/** Longest a cut may be pushed earlier before a word to keep a soft onset (seconds). */
+const ONSET_GROW_MAX = 0.25;
+
+/**
+ * Move a cut start later while the sound at it is still audible, so a decaying word tail is kept. Stops at the first
+ * quiet frame, or after {@link TAIL_GROW_MAX} past `from`. Returns `t` unchanged when the audio is not known.
+ */
+function growPastTail(levels: AudioLevels | undefined, t: number, from: number): number {
+  if (!levels || levels.db.length === 0) return t;
+  const f = levels.frameSeconds;
+  const audible = estimateFloor(levels) + TAIL_AUDIBLE_DB;
+  const limit = from + TAIL_GROW_MAX;
+  let i = Math.max(0, Math.ceil(t / f - 0.5));
+  while (i < levels.db.length && i * f < limit && (levels.db[i] ?? -100) >= audible) i++;
+  return Math.max(t, i * f);
+}
+
+/**
+ * Move a cut end earlier while the sound just before it is still audible, so a soft onset of the next word is kept.
+ * Stops at the first quiet frame, or after {@link ONSET_GROW_MAX} before `to`. Returns `t` unchanged when the audio
+ * is not known.
+ */
+function growBeforeOnset(levels: AudioLevels | undefined, t: number, to: number): number {
+  if (!levels || levels.db.length === 0) return t;
+  const f = levels.frameSeconds;
+  const audible = estimateFloor(levels) + TAIL_AUDIBLE_DB;
+  const limit = to - ONSET_GROW_MAX;
+  let i = Math.min(levels.db.length - 1, Math.floor(t / f - 0.5));
+  while (i >= 0 && (i + 1) * f > limit && (levels.db[i] ?? -100) >= audible) i--;
+  return Math.min(t, (i + 1) * f);
+}
+
+/**
+ * Share of the word-tail energy that a set of removed ranges takes away. For each word, the frames in the
+ * 0.2 s (the tail window) after its end that are audibly above the room tone are summed as power; the result is the
+ * fraction of that power whose frame centre falls inside `removed`. 0 means no tail was clipped, 1 means every tail was
+ * removed, and 0 is returned when there is no audible tail at all. Ranges are source seconds, like `words`.
+ */
+export function clippedTailRatio(
+  levels: AudioLevels,
+  words: Word[],
+  removed: Range[],
+  windowSeconds = TAIL_WINDOW,
+): number {
+  if (levels.db.length === 0) return 0;
+  const f = levels.frameSeconds;
+  const audible = estimateFloor(levels) + TAIL_AUDIBLE_DB;
+  const frameCount = Math.max(1, Math.round(windowSeconds / f));
+  let total = 0;
+  let lost = 0;
+  for (const word of words) {
+    if (!(word.end > word.start)) continue;
+    // A frame belongs to the word's tail when its centre is at or after the word end.
+    const first = Math.max(0, Math.ceil(word.end / f - 0.5));
+    const last = Math.min(levels.db.length - 1, first + frameCount - 1);
+    for (let i = first; i <= last; i++) {
+      const v = levels.db[i] ?? -100;
+      if (v < audible) continue;
+      const power = 10 ** (v / 10);
+      const t = (i + 0.5) * f;
+      total += power;
+      if (removed.some((r) => t >= r.start && t < r.end)) lost += power;
+    }
+  }
+  return total > 0 ? lost / total : 0;
+}
+
+/** What the gap check found in a stretch the planner wants to cut. */
+interface GapVerdict {
+  /** Set when the stretch holds a sound that should not be cut away: its loudest level (dBFS) and when it starts (source seconds). */
+  content?: { peakDb: number; at: number };
+}
+
+/** Median of a list; -100 for an empty one. */
+function medianOf(xs: number[]): number {
+  if (xs.length === 0) return -100;
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)] ?? -100;
+}
+
+/** Build the {@link Acoustics} for a transcript's words, or undefined when there are no levels to look at. */
+function acousticsOf(levels: AudioLevels | undefined, words: Word[]): Acoustics | undefined {
+  if (!levels || levels.db.length === 0) return undefined;
+  const floor = estimateFloor(levels);
+  const f = levels.frameSeconds;
+  const inWords: number[] = [];
+  for (const w of words) {
+    const first = Math.max(0, Math.ceil(w.start / f - 0.5));
+    const last = Math.min(levels.db.length - 1, Math.floor(w.end / f - 0.5));
+    for (let i = first; i <= last; i++) inWords.push(levels.db[i] ?? -100);
+  }
+  // Without usable words, assume speech is far above the room tone so only clearly loud sound counts as content.
+  const speechDb = inWords.length > 0 ? medianOf(inWords) : floor + 30;
+  return { levels, floor, speechDb };
+}
+
+/**
+ * Decide whether `range` (source seconds) is silent enough to cut. It looks at the 20 ms loudness frames inside it and
+ * finds sound events: runs above `floor + 10 dB`. A gap is NOT silent if it holds an event that lasts 150 ms or more
+ * (music, laughter, a long noise), or a shorter one at the very edge of the range that is near speech level (a word
+ * the transcript timed too early or late). Shorter events inside the range are clicks and are ignored. Frames inside
+ * `ignore` (filler words the plan is removing on purpose) are not counted.
+ */
+function judgeGap(ac: Acoustics, range: Range, ignore: Range[] = []): GapVerdict {
+  const { levels, floor, speechDb } = ac;
+  const f = levels.frameSeconds;
+  // A frame belongs to the range when its centre does.
+  const i0 = Math.max(0, Math.ceil(range.start / f - 0.5));
+  const i1 = Math.min(levels.db.length - 1, Math.floor(range.end / f - 0.5));
+  const level = (i: number) => {
+    const t = (i + 0.5) * f;
+    return ignore.some((r) => t >= r.start && t <= r.end) ? -100 : (levels.db[i] ?? -100);
+  };
+  let verdict: GapVerdict = {};
+  let from = -1;
+  let peak = -100;
+  const close = (last: number) => {
+    const seconds = (last - from + 1) * f;
+    const touchesEdge = from === i0 || last === i1;
+    const loudEdge = touchesEdge && peak >= speechDb - EDGE_LOUD_BELOW_SPEECH_DB;
+    if (
+      (seconds >= EVENT_MIN_SECONDS || loudEdge) &&
+      (!verdict.content || peak > verdict.content.peakDb)
+    ) {
+      verdict = { content: { peakDb: peak, at: from * f } };
+    }
+    from = -1;
+    peak = -100;
+  };
+  for (let i = i0; i <= i1; i++) {
+    const v = level(i);
+    if (from < 0 && v >= floor + EVENT_ON_DB) from = i;
+    else if (from >= 0 && v < floor + EVENT_OFF_DB) close(i - 1);
+    if (from >= 0) peak = Math.max(peak, v);
+  }
+  if (from >= 0) close(i1);
+  return verdict;
+}
+
 /**
  * Propose cuts for one asset. Works from word timings when given (best), else from speech spans.
  * The plan only describes cuts; nothing changes until {@link applyCutPlan}.
@@ -277,10 +499,13 @@ function similarity(a: string[], b: string[]): number {
 export function planCuts(input: PlanInput): CutPlan {
   const presetName = input.preset ?? "standard";
   const p: CutParams = { ...CUT_PRESETS[presetName], ...input.overrides };
-  const left = Math.max(p.padPost, p.keepPause / 2);
-  const right = Math.max(p.padPre, p.keepPause / 2);
+  // Word endings decay and get clipped more often than word starts, so most of the kept silence goes after a word
+  // (left) and the rest before the next one (right). The total kept silence is unchanged.
+  const left = Math.max(p.padPost, p.keepPause * TAIL_SHARE);
+  const right = Math.max(p.padPre, p.keepPause * (1 - TAIL_SHARE));
   const fillerSet = new Set(DEFAULT_FILLERS);
   const decisions: CutDecision[] = [];
+  const warnings = [...(input.warnings ?? [])];
   const add = (d: Omit<CutDecision, "id">) => {
     if (d.range.end - d.range.start >= 0.05) decisions.push({ id: newId("cut"), ...d });
   };
@@ -293,29 +518,54 @@ export function planCuts(input: PlanInput): CutPlan {
   const fillers = removeFillers ? allWords.filter((w) => isFiller(w, fillerSet)) : [];
 
   if (items.length === 0) {
-    return finish(input, presetName, p, decisions);
+    return finish(input, presetName, p, decisions, warnings);
   }
+
+  // With the audio levels and a transcript, every cut of "silence" is checked against the sound inside it.
+  const ac = allWords.length > 0 ? acousticsOf(input.levels, allWords) : undefined;
+  /** Add `kind` over `range` if the range is silent; otherwise record a proposal that explains why it was left. */
+  const addIfSilent = (
+    kind: "pause" | "head" | "tail",
+    range: Range,
+    d: Omit<CutDecision, "id" | "kind" | "range">,
+    ignore: Range[] = [],
+  ) => {
+    const verdict = ac ? judgeGap(ac, range, ignore) : {};
+    if (!verdict.content) return add({ kind, range, ...d });
+    add({
+      kind: "non_silent_gap",
+      range,
+      reason: `${(range.end - range.start).toFixed(1)}s ${kind === "pause" ? "gap" : kind} is not silent (sound at ${verdict.content.at.toFixed(1)}s, ${verdict.content.peakDb.toFixed(0)} dB: music, laughter or other noise), so it was not cut`,
+      confidence: 0.3,
+      status: "proposed",
+    });
+  };
 
   // Head and tail silence.
   const first = items[0] as Range;
   const last = items[items.length - 1] as Range;
-  if (first.start - p.padPre > 0.25) {
-    add({
-      kind: "head",
-      range: { start: 0, end: first.start - p.padPre },
-      reason: `${(first.start).toFixed(1)}s of silence before the first word`,
-      confidence: 0.95,
-      status: "approved",
-    });
+  // Head and tail use the same kept silence as the pauses: `right` before the first word, `left` after the last.
+  if (first.start - right > 0.25) {
+    addIfSilent(
+      "head",
+      { start: 0, end: growBeforeOnset(input.levels, first.start - right, first.start) },
+      {
+        reason: `${first.start.toFixed(1)}s of silence before the first word`,
+        confidence: 0.95,
+        status: "approved",
+      },
+    );
   }
-  if (input.duration - last.end - p.padPost > 0.25) {
-    add({
-      kind: "tail",
-      range: { start: last.end + p.padPost, end: input.duration },
-      reason: `${(input.duration - last.end).toFixed(1)}s of silence after the last word`,
-      confidence: 0.95,
-      status: "approved",
-    });
+  if (input.duration - last.end - left > 0.25) {
+    addIfSilent(
+      "tail",
+      { start: growPastTail(input.levels, last.end + left, last.end), end: input.duration },
+      {
+        reason: `${(input.duration - last.end).toFixed(1)}s of silence after the last word`,
+        confidence: 0.95,
+        status: "approved",
+      },
+    );
   }
 
   // Gaps between consecutive voiced items: shorten long pauses, and clear out filler words.
@@ -328,8 +578,9 @@ export function planCuts(input: PlanInput): CutPlan {
       if (p.fillers !== "isolated") return true;
       return f.start - a.end >= 0.25 || b.start - f.end >= 0.25;
     });
-    const start = a.end + left;
-    const end = b.start - right;
+    // Where the audio is known, a decaying tail after `a` or a soft onset before `b` pushes the cut edge outwards.
+    const start = growPastTail(input.levels, a.end + left, a.end);
+    const end = growBeforeOnset(input.levels, b.start - right, b.start);
     if (removable.length > 0 && end - start >= 0.05) {
       add({
         kind: "filler",
@@ -342,13 +593,17 @@ export function planCuts(input: PlanInput): CutPlan {
         status: "approved",
       });
     } else if (gap > p.pauseMin && end - start >= 0.05) {
-      add({
-        kind: "pause",
-        range: { start, end },
-        reason: `${gap.toFixed(1)}s pause shortened to ${(left + right).toFixed(2)}s`,
-        confidence: 0.95,
-        status: "approved",
-      });
+      // Filler words left in this gap (not removable under the preset) are part of the cut, so they are not "sound".
+      addIfSilent(
+        "pause",
+        { start, end },
+        {
+          reason: `${gap.toFixed(1)}s pause shortened to ${(left + right).toFixed(2)}s`,
+          confidence: 0.95,
+          status: "approved",
+        },
+        inside,
+      );
     }
   }
 
@@ -356,14 +611,14 @@ export function planCuts(input: PlanInput): CutPlan {
   for (const f of fillers) {
     if (
       f.end <= first.start - 0.01 &&
-      first.start - p.padPre - f.start > 0 &&
+      first.start - right - f.start > 0 &&
       !decisions.some((d) => d.range.start <= f.start && d.range.end >= f.end)
     ) {
       add({
         kind: "filler",
         range: {
           start: Math.max(0, f.start - 0.02),
-          end: Math.min(first.start - p.padPre, f.end + 0.02),
+          end: Math.min(first.start - right, f.end + 0.02),
         },
         reason: `filler "${f.text.trim()}" at ${f.start.toFixed(1)}s`,
         confidence: 0.9,
@@ -410,7 +665,7 @@ export function planCuts(input: PlanInput): CutPlan {
     }
   }
 
-  return finish(input, presetName, p, decisions);
+  return finish(input, presetName, p, decisions, warnings);
 }
 
 function finish(
@@ -418,6 +673,7 @@ function finish(
   preset: CutPresetName,
   params: CutParams,
   decisions: CutDecision[],
+  warnings: string[],
 ): CutPlan {
   decisions.sort((a, b) => a.range.start - b.range.start);
   const sum = (status: CutDecision["status"]) =>
@@ -425,7 +681,7 @@ function finish(
       (n, r) => n + (r.end - r.start),
       0,
     );
-  return {
+  const plan: CutPlan = {
     id: newId("plan"),
     assetId: input.assetId,
     preset,
@@ -435,6 +691,8 @@ function finish(
     approvedSeconds: sum("approved"),
     proposedSeconds: sum("proposed"),
   };
+  if (warnings.length > 0) plan.warnings = warnings;
+  return plan;
 }
 
 /** Which decisions {@link applyCutPlan} should apply. */

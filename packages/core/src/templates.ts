@@ -744,7 +744,13 @@ function planWindows(
       );
       continue;
     }
-    candidates.push({ ...it, position: positionOf(it.step), start: ms(w.start), end: ms(w.end) });
+    // Rounding to milliseconds can push an end past the video length (43.06667 becomes 43.067), so clamp it.
+    candidates.push({
+      ...it,
+      position: positionOf(it.step),
+      start: ms(w.start),
+      end: Math.min(ms(w.end), total),
+    });
   }
   const byPriority = candidates
     .map((c, i) => ({ c, i }))
@@ -1176,7 +1182,8 @@ async function overlaySteps(a: {
           const r = await a.runCommand(sctx, "add_overlay", {
             preset: item.step.preset,
             start: w.start,
-            duration: ms(w.end - w.start),
+            // Round down against the video length, so start + duration never runs past it after rounding.
+            duration: Math.min(ms(w.end - w.start), Math.floor((total - w.start) * 1000) / 1000),
             text: item.text,
             ...(item.subtitle ? { subtitle: item.subtitle } : {}),
             fontSize: fit.size,
