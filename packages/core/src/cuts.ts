@@ -8,7 +8,12 @@ import { resolve } from "node:path";
 import { abortError, ffmpegBin, type RunOptions } from "./exec.js";
 import { newId } from "./ids.js";
 import type { Project, Range, Transcript, Word } from "./schema.js";
-import { assetRangesToTimeline, deleteRanges, mergeRanges } from "./timeline.js";
+import {
+  assetRangesToTimeline,
+  deleteRanges,
+  mergeRanges,
+  setAssetRangesGain,
+} from "./timeline.js";
 import { DEFAULT_FILLERS } from "./transcript.js";
 
 // ---------- audio analysis ----------
@@ -237,6 +242,8 @@ export const CUT_PRESETS: Record<CutPresetName, CutParams> = {
 /**
  * Why a stretch is proposed for removal. `non_silent_gap` is a pause the engine did NOT cut because the audio in it
  * is not silence (music, laughter, other sound); it is listed as a proposal so a person can still choose to cut it.
+ * `breath` is not a removal: a breath inside a pause that is cut is kept and quietened by {@link BREATH_DB} instead
+ * (see {@link applyCutPlan}). It never appears in {@link planRanges}.
  */
 export type CutKind =
   | "pause"
@@ -245,9 +252,10 @@ export type CutKind =
   | "tail"
   | "false_start"
   | "retake"
-  | "non_silent_gap";
+  | "non_silent_gap"
+  | "breath";
 
-/** One proposed removal. `range` is in the source file's time. */
+/** One proposed removal (or, for kind `breath`, one breath to quieten). `range` is in the source file's time. */
 export interface CutDecision {
   id: string;
   kind: CutKind;
@@ -357,6 +365,18 @@ const TAIL_AUDIBLE_DB = 3;
 const TAIL_GROW_MAX = 0.3;
 /** Longest a cut may be pushed earlier before a word to keep a soft onset (seconds). */
 const ONSET_GROW_MAX = 0.25;
+
+/** Gain applied to a breath kept inside a pause, in dB. A breath is quieter than speech; this makes it recede without vanishing. */
+export const BREATH_DB = -12;
+/** Shortest and longest run of breath sound (seconds). Shorter is a click; longer is not a breath. */
+const BREATH_MIN = 0.15;
+const BREATH_MAX = 0.6;
+/** A breath peaks at least this many dB below the typical speech level, so a burst of speech is never quietened as a breath. */
+const BREATH_BELOW_SPEECH_DB = 12;
+/** A breath keeps this much distance from the words either side of its pause (seconds), so a word tail is never read as one. */
+const BREATH_CLEAR = TAIL_WINDOW;
+/** Silence kept after the last kept breath before the pause's cut resumes (seconds). */
+const BREATH_KEEP_AFTER = 0.1;
 
 /**
  * Move a cut start later while the sound at it is still audible, so a decaying word tail is kept. Stops at the first
@@ -495,6 +515,50 @@ function judgeGap(ac: Acoustics, range: Range, ignore: Range[] = []): GapVerdict
 }
 
 /**
+ * Breaths inside a pause (source seconds). A breath is a run of 150 to 600 ms of sound above the room tone whose loudest
+ * frame is at least {@link BREATH_BELOW_SPEECH_DB} below the typical speech level, and which keeps
+ * {@link BREATH_CLEAR} from both words, so a decaying word tail is never mistaken for one. Frames inside `ignore`
+ * count as silence. Breaths are found from the same 20 ms frames as {@link judgeGap}.
+ */
+function findBreaths(ac: Acoustics, range: Range, ignore: Range[] = []): Range[] {
+  const { levels, floor, speechDb } = ac;
+  const f = levels.frameSeconds;
+  const i0 = Math.max(0, Math.ceil(range.start / f - 0.5));
+  const i1 = Math.min(levels.db.length - 1, Math.floor(range.end / f - 0.5));
+  // Frames a breath must keep clear of the pause's edges (the words).
+  const clear = Math.ceil(BREATH_CLEAR / f);
+  const level = (i: number) => {
+    const t = (i + 0.5) * f;
+    return ignore.some((r) => t >= r.start && t <= r.end) ? -100 : (levels.db[i] ?? -100);
+  };
+  const found: Range[] = [];
+  let from = -1;
+  let peak = -100;
+  const close = (last: number) => {
+    const seconds = (last - from + 1) * f;
+    const interior = from - i0 >= clear && i1 - last >= clear;
+    if (
+      seconds >= BREATH_MIN &&
+      seconds <= BREATH_MAX &&
+      interior &&
+      peak <= speechDb - BREATH_BELOW_SPEECH_DB
+    ) {
+      found.push({ start: from * f, end: (last + 1) * f });
+    }
+    from = -1;
+    peak = -100;
+  };
+  for (let i = i0; i <= i1; i++) {
+    const v = level(i);
+    if (from < 0 && v >= floor + EVENT_ON_DB) from = i;
+    else if (from >= 0 && v < floor + EVENT_OFF_DB) close(i - 1);
+    if (from >= 0) peak = Math.max(peak, v);
+  }
+  if (from >= 0) close(i1);
+  return found;
+}
+
+/**
  * Propose cuts for one asset. Works from word timings when given (best), else from speech spans.
  * The plan only describes cuts; nothing changes until {@link applyCutPlan}.
  */
@@ -534,14 +598,21 @@ export function planCuts(input: PlanInput): CutPlan {
   ) => {
     const verdict = ac ? judgeGap(ac, range, ignore) : {};
     if (!verdict.content) return add({ kind, range, ...d });
+    notSilent(kind, range, verdict.content);
+  };
+  /** Record a stretch that holds sound as a proposal, saying why it was not cut. */
+  const notSilent = (
+    kind: "pause" | "head" | "tail",
+    range: Range,
+    content: NonNullable<GapVerdict["content"]>,
+  ) =>
     add({
       kind: "non_silent_gap",
       range,
-      reason: `${(range.end - range.start).toFixed(1)}s ${kind === "pause" ? "gap" : kind} is not silent (sound at ${verdict.content.at.toFixed(1)}s, ${verdict.content.peakDb.toFixed(0)} dB: music, laughter or other noise), so it was not cut`,
+      reason: `${(range.end - range.start).toFixed(1)}s ${kind === "pause" ? "gap" : kind} is not silent (sound at ${content.at.toFixed(1)}s, ${content.peakDb.toFixed(0)} dB: music, laughter or other noise), so it was not cut`,
       confidence: 0.3,
       status: "proposed",
     });
-  };
 
   // Head and tail silence.
   const first = items[0] as Range;
@@ -595,17 +666,53 @@ export function planCuts(input: PlanInput): CutPlan {
         status: "approved",
       });
     } else if (gap > p.pauseMin && end - start >= 0.05) {
-      // Filler words left in this gap (not removable under the preset) are part of the cut, so they are not "sound".
-      addIfSilent(
-        "pause",
-        { start, end },
-        {
-          reason: `${gap.toFixed(1)}s pause shortened to ${(left + right).toFixed(2)}s`,
-          confidence: 0.95,
-          status: "approved",
-        },
-        inside,
-      );
+      // Breaths are found first: a breath is kept, not removed, so the cut must start after the last one.
+      const breaths = ac ? findBreaths(ac, { start: a.end, end: b.start }, inside) : [];
+      const lastBreath = breaths[breaths.length - 1];
+      if (ac && lastBreath) {
+        // The cut stays one join: silence before the breath is kept with it, and the cut resumes after the breath.
+        // Judged over the whole gap (not just the cut), with the breaths and fillers not counted as sound.
+        const judged = {
+          start: growPastTail(input.levels, a.end, a.end),
+          end: growBeforeOnset(input.levels, b.start, b.start),
+        };
+        const verdict = judgeGap(ac, judged, [...inside, ...breaths]);
+        if (verdict.content) {
+          notSilent("pause", { start, end }, verdict.content);
+        } else {
+          const cutStart = lastBreath.end + BREATH_KEEP_AFTER;
+          if (end - cutStart >= 0.05) {
+            add({
+              kind: "pause",
+              range: { start: cutStart, end },
+              reason: `${gap.toFixed(1)}s pause shortened to ${(end - cutStart).toFixed(2)}s, with a breath kept`,
+              confidence: 0.95,
+              status: "approved",
+            });
+          }
+          for (const br of breaths) {
+            add({
+              kind: "breath",
+              range: br,
+              reason: `breath at ${br.start.toFixed(1)}s kept in the pause, ${BREATH_DB} dB`,
+              confidence: 0.8,
+              status: "approved",
+            });
+          }
+        }
+      } else {
+        // Filler words left in this gap (not removable under the preset) are part of the cut, so they are not "sound".
+        addIfSilent(
+          "pause",
+          { start, end },
+          {
+            reason: `${gap.toFixed(1)}s pause shortened to ${(left + right).toFixed(2)}s`,
+            confidence: 0.95,
+            status: "approved",
+          },
+          inside,
+        );
+      }
     }
   }
 
@@ -678,11 +785,11 @@ function finish(
   warnings: string[],
 ): CutPlan {
   decisions.sort((a, b) => a.range.start - b.range.start);
+  // A breath is kept, not removed, so it adds no seconds to either total.
   const sum = (status: CutDecision["status"]) =>
-    mergeRanges(decisions.filter((d) => d.status === status).map((d) => d.range)).reduce(
-      (n, r) => n + (r.end - r.start),
-      0,
-    );
+    mergeRanges(
+      decisions.filter((d) => d.status === status && d.kind !== "breath").map((d) => d.range),
+    ).reduce((n, r) => n + (r.end - r.start), 0);
   const plan: CutPlan = {
     id: newId("plan"),
     assetId: input.assetId,
@@ -709,23 +816,50 @@ export interface ApplyOptions {
 
 /** The source-time ranges a plan would remove under `opts`, merged. */
 export function planRanges(plan: CutPlan, opts: ApplyOptions = {}): Range[] {
-  const chosen = plan.decisions.filter((d) => {
+  return mergeRanges(
+    chosenDecisions(plan, opts)
+      .filter((d) => d.kind !== "breath")
+      .map((d) => d.range),
+  );
+}
+
+/** The breaths the chosen decisions keep and quieten (source seconds, merged). See {@link applyCutPlan}. */
+export function planBreaths(plan: CutPlan, opts: ApplyOptions = {}): Range[] {
+  return mergeRanges(
+    chosenDecisions(plan, opts)
+      .filter((d) => d.kind === "breath")
+      .map((d) => d.range),
+  );
+}
+
+/** The decisions {@link applyCutPlan} considers under `opts`: the approved ones unless told otherwise. */
+function chosenDecisions(plan: CutPlan, opts: ApplyOptions): CutDecision[] {
+  return plan.decisions.filter((d) => {
     if (opts.exclude?.includes(d.id)) return false;
     if (opts.only) return opts.only.includes(d.id);
     return d.status === "approved" || opts.includeProposed === true;
   });
-  return mergeRanges(chosen.map((d) => d.range));
 }
 
 /**
- * Remove the chosen decisions from the project, everywhere the timeline uses the asset.
- * Ranges already cut earlier are skipped. Returns the project unchanged if nothing is left to cut.
- * The cut edges land on the frame grid (see {@link assetRangesToTimeline}), so a decision that removes no whole frame
- * is not applied.
+ * Apply the chosen decisions to the project. Removals (every kind except `breath`) are cut out, everywhere the timeline
+ * uses the asset; ranges already cut earlier are skipped. Then each chosen breath is quietened by {@link BREATH_DB}
+ * in place, so it is kept but recedes. The removal edges land on the frame grid (see {@link assetRangesToTimeline}),
+ * so a decision that removes no whole frame is not applied. Returns the project unchanged if there is nothing to do.
  */
 export function applyCutPlan(p: Project, plan: CutPlan, opts: ApplyOptions = {}): Project {
   const timeline = assetRangesToTimeline(p, plan.assetId, planRanges(plan, opts));
-  return timeline.length === 0 ? p : deleteRanges(p, timeline);
+  const cut = timeline.length === 0 ? p : deleteRanges(p, timeline);
+  // Breaths are placed after the cuts, so their ranges are read in the timeline as it now is.
+  return setAssetRangesGain(cut, plan.assetId, planBreaths(plan, opts), 10 ** (BREATH_DB / 20));
+}
+
+/**
+ * Whether applying the plan under `opts` would change the project at all, by a cut or by a breath gain. Commands use
+ * this to say "nothing changed" instead of recording an empty history step, so a second run is a no-op.
+ */
+export function planWouldChange(p: Project, plan: CutPlan, opts: ApplyOptions = {}): boolean {
+  return JSON.stringify(applyCutPlan(p, plan, opts)) !== JSON.stringify(p);
 }
 
 /** Convenience: a transcript's words, or an empty list. */

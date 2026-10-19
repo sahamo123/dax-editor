@@ -1,0 +1,24 @@
+{
+  "id": "retake-proposal-only",
+  "description": "A repeated take is proposed for review and never removed silently: every word of both takes stays.",
+  "fixture": "retake-takes",
+  "prompt": "Clean up this video.",
+  "tags": ["retakes", "review"],
+  "checks": [
+    {
+      "type": "sourceKept",
+      "ranges": [
+        { "start": 0.5, "end": 0.9 },
+        { "start": 1.05, "end": 1.45 },
+        { "start": 1.6, "end": 2.0 },
+        { "start": 2.15, "end": 2.55 },
+        { "start": 2.7, "end": 3.1 },
+        { "start": 4.3, "end": 4.7 },
+        { "start": 4.85, "end": 5.25 },
+        { "start": 5.4, "end": 5.8 },
+        { "start": 5.95, "end": 6.35 },
+        { "start": 6.5, "end": 6.9 }
+      ]
+    }
+  ]
+}

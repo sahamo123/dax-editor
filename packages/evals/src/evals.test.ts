@@ -27,7 +27,7 @@ describe("oracle adapter (harness self-test, needs ffmpeg)", () => {
     const records = await runSuite(new OracleAdapter(), tasks, { fixtureDir });
     const failed = records.filter((r) => !r.pass);
     expect(failed, JSON.stringify(failed, null, 2)).toEqual([]);
-  }, 120_000);
+  }, 300_000);
 });
 
 describe("runner", () => {

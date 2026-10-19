@@ -394,6 +394,42 @@ export function setClipVolume(p: Project, clipId: string, volume: number): Proje
 }
 
 /**
+ * Multiply the volume of the footage of `assetId` that lies inside `ranges` (source seconds) by `gain`. Clips are split at
+ * the range edges first, so only that footage changes. A split inside one source is seamless (the picture and the sound
+ * continue exactly), so no join is added to the picture. An edge that already sits on a clip edge is not split again, and
+ * a range whose two edges are both already clip edges is left alone: a repeat call is therefore a no-op, and the gain is
+ * never applied twice to the same piece. Ranges are mapped through the timeline as it now is, and must be on the frame grid
+ * (they are snapped here). Throws if `gain` is negative or not finite.
+ */
+export function setAssetRangesGain(
+  p: Project,
+  assetId: string,
+  ranges: Range[],
+  gain: number,
+): Project {
+  if (!(gain >= 0) || !Number.isFinite(gain)) throw new Error(`Gain must be >= 0, got ${gain}`);
+  let next = p;
+  for (const r of assetRangesToTimeline(p, assetId, ranges)) {
+    // An edge that is strictly inside a clip needs a split; one on a clip edge does not.
+    const inside = (t: number) =>
+      mainClips(next).some((c) => t > c.start + EPS && t < clipEnd(c) - EPS);
+    const splitStart = inside(r.start);
+    const splitEnd = inside(r.end);
+    if (!splitStart && !splitEnd) continue;
+    if (splitStart) next = splitAt(next, r.start);
+    if (splitEnd) next = splitAt(next, r.end);
+    // The pieces that now make up the range are the clips of this asset that lie inside it.
+    for (const c of mainClips(next)) {
+      if (c.assetId !== assetId) continue;
+      if (c.start >= r.start - EPS && clipEnd(c) <= r.end + EPS) {
+        next = setClipVolume(next, c.id, c.volume * gain);
+      }
+    }
+  }
+  return next;
+}
+
+/**
  * Set how long a clip fades in from black and out to black (seconds, 0 = none).
  * The two fades together cannot be longer than the clip.
  */

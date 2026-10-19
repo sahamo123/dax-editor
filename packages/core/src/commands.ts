@@ -15,7 +15,7 @@ import {
   CUT_PRESET_NAMES,
   detectSpeechSpans,
   planCuts,
-  planRanges,
+  planWouldChange,
 } from "./cuts.js";
 import { describeEffects, EFFECT_COMMANDS } from "./effect-commands.js";
 import { detectScenes, detectSilence, padSilences, probe } from "./media.js";
@@ -817,8 +817,11 @@ export const COMMANDS: readonly CommandDef[] = [
     async run(ctx, a) {
       const plan = await buildPlan(ctx, a.assetId, a.preset);
       ctx.session.plans.set(plan.id, plan);
-      const approved = plan.decisions.filter((d) => d.status === "approved").length;
-      const proposed = plan.decisions.length - approved;
+      // Breaths are kept, not cut, so they are neither "cut(s) ready" nor "to review".
+      const approved = plan.decisions.filter(
+        (d) => d.status === "approved" && d.kind !== "breath",
+      ).length;
+      const proposed = plan.decisions.filter((d) => d.status === "proposed").length;
       return {
         summary: plan.decisions.length
           ? `Plan ${plan.id}: ${approved} cut(s) ready (${fmt(plan.approvedSeconds)}) and ${proposed} to review (${fmt(plan.proposedSeconds)}).`
@@ -862,10 +865,7 @@ export const COMMANDS: readonly CommandDef[] = [
         ...(a.exclude ? { exclude: a.exclude } : {}),
       };
       const before = timelineDuration(ctx.session.project);
-      if (
-        assetRangesToTimeline(ctx.session.project, plan.assetId, planRanges(plan, opts)).length ===
-        0
-      ) {
+      if (!planWouldChange(ctx.session.project, plan, opts)) {
         return { summary: "Nothing left to cut from that plan. Nothing changed." };
       }
       await edit(ctx, `Apply cuts (${plan.preset})`, (p) => applyCutPlan(p, plan, opts));
@@ -888,9 +888,8 @@ export const COMMANDS: readonly CommandDef[] = [
       const plan = await buildPlan(ctx, a.assetId, a.preset);
       ctx.session.plans.set(plan.id, plan);
       const before = timelineDuration(ctx.session.project);
-      const ranges = assetRangesToTimeline(ctx.session.project, plan.assetId, planRanges(plan));
       const review = plan.decisions.filter((d) => d.status === "proposed");
-      if (ranges.length === 0) {
+      if (!planWouldChange(ctx.session.project, plan)) {
         return {
           summary: `No cuts needed.${review.length ? ` ${review.length} possible cut(s) to review (false starts, retakes, or pauses with sound in them; plan ${plan.id}).` : ""}`,
           data: { planId: plan.id },
@@ -899,7 +898,7 @@ export const COMMANDS: readonly CommandDef[] = [
       await edit(ctx, `Smart cut (${plan.preset})`, (p) => applyCutPlan(p, plan));
       const after = timelineDuration(ctx.session.project);
       return {
-        summary: `Removed ${fmt(before - after)} (${plan.decisions.filter((d) => d.status === "approved").length} cut(s)). Timeline is now ${fmt(after)}.${review.length ? ` ${review.length} more for review: apply_cut_plan with planId ${plan.id} and includeProposed.` : ""}`,
+        summary: `Removed ${fmt(before - after)} (${plan.decisions.filter((d) => d.status === "approved" && d.kind !== "breath").length} cut(s)). Timeline is now ${fmt(after)}.${review.length ? ` ${review.length} more for review: apply_cut_plan with planId ${plan.id} and includeProposed.` : ""}`,
         data: {
           planId: plan.id,
           secondsRemoved: before - after,

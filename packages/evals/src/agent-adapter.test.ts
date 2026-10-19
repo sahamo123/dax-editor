@@ -15,10 +15,13 @@ import { runSuite, runTask } from "./runner.js";
 import { type EvalTask, EvalTaskSchema } from "./task.js";
 
 const taskDir = join(import.meta.dirname, "..", "tasks");
+/** The scripted model below only knows these starter tasks. The newer tasks are solved by the oracle and checked there. */
+const STARTER_IDS = ["delete-middle-2s", "keep-first-3-seconds", "remove-silences"];
 const tasks: EvalTask[] = readdirSync(taskDir)
   .filter((f) => f.endsWith(".json"))
   .sort()
-  .map((f) => EvalTaskSchema.parse(JSON.parse(readFileSync(join(taskDir, f), "utf8"))));
+  .map((f) => EvalTaskSchema.parse(JSON.parse(readFileSync(join(taskDir, f), "utf8"))))
+  .filter((t) => STARTER_IDS.includes(t.id));
 
 const fixtureDir = mkdtempSync(join(tmpdir(), "dax-evals-agent-"));
 afterAll(() => rmSync(fixtureDir, { recursive: true, force: true }));

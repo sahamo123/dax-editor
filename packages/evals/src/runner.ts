@@ -1,10 +1,35 @@
 // Runs eval tasks against a ModelAdapter and scores the results.
 
-import { addAsset, appendClip, emptyProject, probe, Session } from "@dax/core";
-import { generateFixture } from "./fixtures.js";
+import {
+  addAsset,
+  appendClip,
+  emptyProject,
+  type Project,
+  probe,
+  Session,
+  setAssetTranscript,
+} from "@dax/core";
+import { fixtureTranscript, generateFixture } from "./fixtures.js";
 import type { RunRecord, ToolCallCounts } from "./metrics.js";
 import { runChecks } from "./score.js";
-import type { EvalTask } from "./task.js";
+import type { EvalTask, FixtureName } from "./task.js";
+
+/**
+ * The project a task starts from: the fixture on the main track, with its transcript when it has speech. The runner and
+ * the checks tests both start here, so they see the same footage.
+ */
+export async function fixtureProject(
+  name: FixtureName,
+  dir: string,
+  title: string,
+): Promise<{ project: Project; assetId: string; fixturePath: string }> {
+  const fixturePath = await generateFixture(name, dir);
+  const asset = await probe(fixturePath);
+  let project = appendClip(addAsset(emptyProject(title), asset), asset.id);
+  const transcript = fixtureTranscript(name);
+  if (transcript) project = setAssetTranscript(project, asset.id, transcript);
+  return { project, assetId: asset.id, fixturePath };
+}
 
 /** What an adapter hands back after attempting a task. */
 export interface AgentResult {
@@ -52,9 +77,11 @@ export async function runTask(
   task: EvalTask,
   opts: RunOptions,
 ): Promise<RunRecord> {
-  const fixturePath = await generateFixture(task.fixture, opts.fixtureDir);
-  const asset = await probe(fixturePath);
-  const project = appendClip(addAsset(emptyProject(task.id), asset), asset.id);
+  const { project, assetId, fixturePath } = await fixtureProject(
+    task.fixture,
+    opts.fixtureDir,
+    task.id,
+  );
   const session = new Session(project);
 
   let result: AgentResult = { turns: 0, toolCalls: { total: 0, invalid: 0 } };
@@ -63,7 +90,7 @@ export async function runTask(
   // and counting them would make tokens-per-second look worse than the model really is.
   const started = Date.now();
   try {
-    result = await adapter.run({ task, session, assetId: asset.id, fixturePath });
+    result = await adapter.run({ task, session, assetId, fixturePath });
   } catch (err) {
     error = err instanceof Error ? err.message : String(err);
   }
