@@ -5,16 +5,20 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { audioClips } from "./audio-layer.js";
 import { COMMANDS, type CommandContext, commandTools, runCommand } from "./commands.js";
+import { imagesOf } from "./image-overlays.js";
 import { probe } from "./media.js";
 import { Session } from "./session.js";
 import {
+  audioLevels,
   ff,
   hasFfmpeg,
   makePng,
   makeSpeechVideo,
   makeTempDir,
   makeTone,
+  pixel,
   removeTempDir,
+  rgbFrameAt,
 } from "./test-utils.js";
 import { addAsset, appendClip, emptyProject, timelineDuration } from "./timeline.js";
 import { zoomsOf } from "./zoom.js";
@@ -27,10 +31,13 @@ const EFFECT_NAMES = [
   "update_audio",
   "remove_audio",
   "set_ducking",
+  "add_image_overlay",
+  "update_image_overlay",
+  "remove_image_overlay",
 ];
 
 describe("effects commands in the registry", () => {
-  it("registers the zoom and audio commands, with short plain descriptions and documented arguments", () => {
+  it("registers all ten commands, with short plain descriptions and documented arguments", () => {
     const tools = commandTools({ names: EFFECT_NAMES });
     expect(tools.map((t) => t.name).sort()).toEqual([...EFFECT_NAMES].sort());
     for (const t of tools) {
@@ -263,10 +270,74 @@ describe.skipIf(!hasFfmpeg())("audio and image commands with real files (needs f
     );
     await expect(runCommand(c, "add_audio", { path: f("mute.mp4") })).rejects.toThrow(/no sound/);
     await expect(runCommand(c, "add_audio", { assetId: "nope" })).rejects.toThrow(/Unknown asset/);
+    await expect(runCommand(c, "add_image_overlay", { path: videoPath })).rejects.toThrow(
+      /needs a picture/,
+    );
     const locked = await ctx({ allowedRoots: [join(dir, "nowhere")] });
     await expect(runCommand(locked, "add_audio", { path: f("song.wav") })).rejects.toThrow(
       /outside the allowed folders/,
     );
     expect(audioClips(c.session.project)).toHaveLength(0);
   }, 30_000);
+
+  it("adds a logo from a PNG with a preset, updates it, removes it, and is safe to repeat", async () => {
+    const c = await ctx();
+    const r = await runCommand(c, "add_image_overlay", {
+      path: f("logo.png"),
+      preset: "watermark",
+    });
+    expect(r.summary).toMatch(/Added "logo.png" at 0s for 6s \(bottom-right\)/);
+    const id = (r.data as { imageId: string }).imageId;
+    const img = imagesOf(c.session.project)[0];
+    expect(img).toMatchObject({ preset: "watermark", opacity: 0.5, animation: "none" });
+    const states = c.session.history().length;
+    await runCommand(c, "add_image_overlay", { path: f("logo.png"), preset: "watermark" });
+    expect(imagesOf(c.session.project)).toHaveLength(1);
+    expect(c.session.history()).toHaveLength(states);
+
+    await runCommand(c, "update_image_overlay", {
+      imageId: id,
+      opacity: 0.8,
+      position: "top-left",
+    });
+    expect(imagesOf(c.session.project)[0]).toMatchObject({ opacity: 0.8, position: "top-left" });
+    const info = (await runCommand(c, "get_project", {})).data as { images: { file: string }[] };
+    expect(info.images[0]?.file).toBe("logo.png");
+    await runCommand(c, "remove_image_overlay", { imageId: id });
+    await expect(runCommand(c, "remove_image_overlay", { imageId: id })).rejects.toThrow(
+      /Unknown image/,
+    );
+    await runCommand(c, "undo", {});
+    expect(imagesOf(c.session.project)).toHaveLength(1);
+  }, 30_000);
+
+  it("exports a video with a zoom, music and a logo together", async () => {
+    const c = await ctx();
+    await runCommand(c, "add_zoom", { start: 1, end: 3, scale: 1.5 });
+    await runCommand(c, "add_audio", { path: f("song.wav"), loop: true, volume: 0.5 });
+    await runCommand(c, "add_image_overlay", {
+      path: f("logo.png"),
+      preset: "sticker-pop",
+      start: 3.5,
+      duration: 2,
+      animation: "none",
+    });
+    await runCommand(c, "add_overlay", {
+      preset: "title-fade",
+      start: 0.5,
+      duration: 2,
+      text: "Hi",
+    });
+    const out = join(dir, "all.mp4");
+    await runCommand(c, "export_video", { path: out });
+    const info = await probe(out);
+    expect(info.duration).toBeCloseTo(6, 0);
+    expect(info.width).toBe(640);
+    // The sticker (red, centred) is on screen at 4.5 s and not at 0.2 s.
+    const during = pixel(rgbFrameAt(out, 4.5), 320, 180);
+    expect(during[0]).toBeGreaterThan(200);
+    expect(pixel(rgbFrameAt(out, 0.2), 320, 180)[0]).toBeLessThan(80);
+    // Music is audible in the gap between voice bursts (3.6 to 4.2 s).
+    expect(audioLevels(out, 3.8, 0.3, 220).rmsDb).toBeGreaterThan(-30);
+  }, 120_000);
 });

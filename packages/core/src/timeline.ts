@@ -2,6 +2,7 @@
 
 import { shiftAudioForDelete } from "./audio-layer.js";
 import { newId } from "./ids.js";
+import { shiftImagesForDelete } from "./image-overlays.js";
 import { shiftOverlaysForDelete } from "./overlays.js";
 import type { Asset, Clip, Fit, Project, Range, Transcript } from "./schema.js";
 import { shiftZoomsForDelete } from "./zoom.js";
@@ -145,6 +146,8 @@ export function deleteRange(p: Project, from: number, to: number): Project {
   // Overlays, images and zooms are placed in timeline time, so they must move with the footage they sit
   // over. Music is anchored to the timeline instead and sound effects to their moment (see shiftAudioForDelete).
   next.timeline.overlays = shiftOverlaysForDelete(next.timeline.overlays, from, to);
+  if (next.timeline.images)
+    next.timeline.images = shiftImagesForDelete(next.timeline.images, from, to);
   if (next.timeline.zooms) next.timeline.zooms = shiftZoomsForDelete(next.timeline.zooms, from, to);
   next.timeline.tracks = shiftAudioForDelete(next.timeline.tracks, from, to);
   return next;

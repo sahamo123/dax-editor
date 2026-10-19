@@ -238,7 +238,7 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "get_project",
     description:
-      "Describe the current project: format, total duration, imported assets, the clips on the timeline (with ids and times in seconds), text overlays, zooms, music and sound effects. Call this first, and again after edits, to see the real state.",
+      "Describe the current project: format, total duration, imported assets, the clips on the timeline (with ids and times in seconds), text overlays, zooms, music and sound effects, and image overlays. Call this first, and again after edits, to see the real state.",
     schema: z.object({}),
     readOnly: true,
     async run(ctx) {
@@ -247,6 +247,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const extras = [
         d.zooms.length ? `${d.zooms.length} zoom(s)` : "",
         d.audio.length ? `${d.audio.length} audio clip(s)` : "",
+        d.images.length ? `${d.images.length} image(s)` : "",
       ].filter(Boolean);
       return {
         summary: `${d.name}: ${fmt(d.duration)}, ${d.clips.length} clip(s), ${d.overlays.length} overlay(s), ${d.assets.length} asset(s)${extras.length ? `, ${extras.join(", ")}` : ""}.`,

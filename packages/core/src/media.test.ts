@@ -92,6 +92,36 @@ describe("parseProbe", () => {
     expect(a.kind).toBe("audio");
   });
 
+  it("treats PNG and JPEG files (a one-frame video stream in an image container) as images", () => {
+    for (const format_name of ["png_pipe", "jpeg_pipe", "webp_pipe", "image2"]) {
+      const a = parseProbe(
+        { format: { format_name }, streams: [{ codec_type: "video", width: 200, height: 100 }] },
+        "/x/logo.png",
+      );
+      expect(a, format_name).toMatchObject({ kind: "image", duration: 0, hasAudio: false });
+      expect(a.width).toBe(200);
+    }
+  });
+
+  it("does not mistake a real video for an image, and never reports a NaN duration", () => {
+    const v = parseProbe(
+      {
+        format: { format_name: "mov,mp4,m4a,3gp,3g2,mj2", duration: "4" },
+        streams: [{ codec_type: "video", width: 64, height: 64 }, { codec_type: "audio" }],
+      },
+      "/x/v.mp4",
+    );
+    expect(v.kind).toBe("video");
+    const odd = parseProbe(
+      {
+        format: { format_name: "png_pipe", duration: "N/A" },
+        streams: [{ codec_type: "video", width: 8, height: 8 }],
+      },
+      "/x/odd.png",
+    );
+    expect(odd.duration).toBe(0);
+  });
+
   it("rejects files with no media streams", () => {
     expect(() => parseProbe({ streams: [] }, "/x/none")).toThrow();
   });

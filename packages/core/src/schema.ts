@@ -150,6 +150,44 @@ export const ZoomSchema = z.object({
 /** A validated {@link ZoomSchema} value. */
 export type Zoom = z.infer<typeof ZoomSchema>;
 
+/** Where an image overlay (logo, watermark, sticker) sits on the frame. Corners keep a margin from the edges. */
+export const IMAGE_POSITIONS = [
+  "top-left",
+  "top-right",
+  "bottom-left",
+  "bottom-right",
+  "top",
+  "bottom",
+  "center",
+] as const;
+/** One of {@link IMAGE_POSITIONS}. */
+export type ImagePosition = (typeof IMAGE_POSITIONS)[number];
+
+/** Entrance and exit motions for images: the text animations without `typewriter`, which has no meaning for a picture. */
+export const IMAGE_ANIMATIONS = ["none", "fade", "slide-up", "slide-left", "pop"] as const;
+/** One of {@link IMAGE_ANIMATIONS}. */
+export type ImageAnimation = (typeof IMAGE_ANIMATIONS)[number];
+
+/**
+ * A picture (logo, watermark, sticker) drawn over the video between `start` and `start + duration`
+ * (timeline seconds). `width` is a fraction of the frame width (the height follows the picture's shape),
+ * `opacity` runs from 0 (clear) to 1 (solid). `preset` records which built-in preset created it (informational).
+ */
+export const ImageOverlaySchema = z.object({
+  id: z.string(),
+  kind: z.literal("image"),
+  assetId: z.string(),
+  start: z.number().nonnegative(),
+  duration: z.number().positive(),
+  position: z.enum(IMAGE_POSITIONS).default("top-right"),
+  width: z.number().min(0.02).max(1).default(0.15),
+  opacity: z.number().min(0).max(1).default(1),
+  animation: z.enum(IMAGE_ANIMATIONS).default("fade"),
+  preset: z.string().default("custom"),
+});
+/** A validated {@link ImageOverlaySchema} value. */
+export type ImageOverlay = z.infer<typeof ImageOverlaySchema>;
+
 /**
  * How music is lowered while someone speaks on the main track. `amountDb` is roughly how many decibels
  * quieter the music gets under speech; `releaseSeconds` is how long it takes to come back up afterwards.
@@ -200,6 +238,8 @@ export const TimelineSchema = z.object({
   overlays: z.array(OverlaySchema).default([]),
   /** Punch-ins and push-ins on the finished picture. Absent means none. */
   zooms: z.array(ZoomSchema).optional(),
+  /** Pictures (logos, watermarks, stickers) over the video. Absent means none. */
+  images: z.array(ImageOverlaySchema).optional(),
   /** How music ducks under speech. Absent means the defaults ({@link DuckingSchema}). */
   ducking: DuckingSchema.optional(),
   /** Present when captions are on. */

@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { audioLayerFilters } from "./audio-layer.js";
 import { buildAss, captionLines } from "./captions.js";
 import { ffmpegBin, run, runFfmpeg } from "./exec.js";
+import { imageInputArgs, imageOverlayFilters, imagesOf } from "./image-overlays.js";
 import { type FontFiles, filterPath, overlayFilters, type TextFile } from "./overlay-filters.js";
 import type { Clip, Project } from "./schema.js";
 import { clipDuration, mainClips, timelineDuration } from "./timeline.js";
@@ -187,6 +188,19 @@ export function buildRenderPlan(
     filters.push(...zoomed);
     videoLabel = "[vzoom]";
   }
+
+  // Image overlays: each picture is its own looped input.
+  imagesOf(project).forEach((img, i) => {
+    const asset = project.assets[img.assetId];
+    if (!asset) throw new Error(`Image overlay ${img.id} references missing asset ${img.assetId}`);
+    if (asset.kind !== "image") {
+      throw new Error(`Asset ${asset.path} is ${asset.kind}; an image overlay needs a picture`);
+    }
+    const k = addInput(asset.path, imageInputArgs(img, fps));
+    const out = `[vimg${i}]`;
+    filters.push(...imageOverlayFilters(img, `[${k}:v]`, videoLabel, out, W, H));
+    videoLabel = out;
+  });
 
   // Overlays and captions are drawn after the join so their times are timeline times.
   const files: TextFile[] = [];

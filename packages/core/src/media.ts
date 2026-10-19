@@ -32,7 +32,7 @@ export interface ProbeStream {
 
 /** Convert ffprobe's JSON into an {@link Asset}. Kept separate from {@link probe} so it can be tested without ffprobe installed. */
 export function parseProbe(
-  json: { streams?: ProbeStream[]; format?: { duration?: string } },
+  json: { streams?: ProbeStream[]; format?: { duration?: string; format_name?: string } },
   absPath: string,
 ): Asset {
   const streams = json.streams ?? [];
@@ -40,9 +40,14 @@ export function parseProbe(
   const audio = streams.find((s) => s.codec_type === "audio");
   if (!video && !audio) throw new Error(`${basename(absPath)} has no audio or video streams`);
 
-  const duration = Number(json.format?.duration ?? video?.duration ?? audio?.duration ?? 0);
+  const rawDuration = Number(json.format?.duration ?? video?.duration ?? audio?.duration ?? 0);
+  const duration = Number.isFinite(rawDuration) ? rawDuration : 0;
   const isStill = video?.disposition?.attached_pic === 1;
-  const kind: Asset["kind"] = video && !isStill ? "video" : audio ? "audio" : "image";
+  // A PNG or JPEG file shows up as a one-frame "video" stream; its container name (png_pipe, jpeg_pipe,
+  // webp_pipe, image2, ...) is what tells it apart from a real video.
+  const format = json.format?.format_name ?? "";
+  const isPicture = !audio && (format === "image2" || /_pipe$/.test(format));
+  const kind: Asset["kind"] = video && !isStill && !isPicture ? "video" : audio ? "audio" : "image";
 
   const asset: Asset = {
     id: newId("asset"),

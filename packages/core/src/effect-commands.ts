@@ -24,8 +24,25 @@ import {
 import type { CommandContext, CommandDef, CommandResult } from "./commands.js";
 import { isPathInside } from "./connector.js";
 import { newId } from "./ids.js";
+import {
+  addImageOverlay,
+  getImagePreset,
+  IMAGE_PRESETS,
+  imageOverlayFromPreset,
+  imagesOf,
+  removeImageOverlay,
+  updateImageOverlay,
+} from "./image-overlays.js";
 import { probe } from "./media.js";
-import { type Asset, AUDIO_ROLES, EASES, MAX_ZOOM, type Project } from "./schema.js";
+import {
+  type Asset,
+  AUDIO_ROLES,
+  EASES,
+  IMAGE_ANIMATIONS,
+  IMAGE_POSITIONS,
+  MAX_ZOOM,
+  type Project,
+} from "./schema.js";
 import { addAsset, timelineDuration } from "./timeline.js";
 import {
   addZoom,
@@ -456,8 +473,127 @@ const audioCommands: CommandDef[] = [
   }),
 ];
 
+// ---------------------------------------------------------------------------------------------
+// Image overlays
+// ---------------------------------------------------------------------------------------------
+
+const imagePresetIds = IMAGE_PRESETS.map((p) => p.id) as [string, ...string[]];
+
+const imageFields = {
+  position: z.enum(IMAGE_POSITIONS).optional().describe("Where it sits on the frame"),
+  width: z
+    .number()
+    .min(0.02)
+    .max(1)
+    .optional()
+    .describe("Width as a fraction of the frame, e.g. 0.15 = 15%"),
+  opacity: z.number().min(0).max(1).optional().describe("0 clear to 1 solid"),
+  animation: z.enum(IMAGE_ANIMATIONS).optional().describe("How it enters and leaves"),
+};
+
+const addImageSchema = z.object({
+  path: z.string().min(1).optional().describe("Full path of a PNG or JPG file to import"),
+  assetId: z.string().optional().describe("Or a picture that is already imported"),
+  preset: z
+    .enum(imagePresetIds)
+    .default("logo-corner")
+    .describe(
+      "logo-corner (small, top-right, stays), watermark (faint, bottom-right, stays), sticker-pop (centre, pops in), logo-end-card (big, centre), bug-slide (bottom-left, slides in)",
+    ),
+  start: startArg("When it appears").default(0),
+  duration: z
+    .number()
+    .min(0.2)
+    .max(3600)
+    .optional()
+    .describe("How long it stays. logo-corner and watermark default to the rest of the video."),
+  ...imageFields,
+});
+
+const imageCommands: CommandDef[] = [
+  define({
+    name: "add_image_overlay",
+    description:
+      "Put a picture (logo, watermark, sticker; PNG or JPG with a path or assetId) over the video. Pick a preset, then adjust position, width, opacity, start and duration. Times are timeline seconds. Safe to repeat: the same picture at the same start is updated.",
+    schema: addImageSchema,
+    async run(ctx, a) {
+      const { asset, isNew } = await resolveMediaAsset(ctx, a, "image");
+      const project = ctx.session.project;
+      const total = timelineDuration(project);
+      if (total > 0 && a.start >= total - 1e-3) {
+        throw new Error(
+          `The video is only ${fmt(total)} long; the picture would start after the end.`,
+        );
+      }
+      const image = imageOverlayFromPreset(a.preset, {
+        assetId: asset.id,
+        start: a.start,
+        total,
+        ...(a.duration !== undefined ? { duration: a.duration } : {}),
+        ...(a.position ? { position: a.position } : {}),
+        ...(a.width !== undefined ? { width: a.width } : {}),
+        ...(a.opacity !== undefined ? { opacity: a.opacity } : {}),
+        ...(a.animation ? { animation: a.animation } : {}),
+      });
+      const existing = imagesOf(project).find(
+        (o) => o.assetId === asset.id && Math.abs(o.start - a.start) < SAME_RANGE_TOLERANCE,
+      );
+      const changed = existing
+        ? await editIfChanged(ctx, "Update image overlay", (p) =>
+            updateImageOverlay(p, existing.id, {
+              start: image.start,
+              duration: image.duration,
+              position: image.position,
+              width: image.width,
+              opacity: image.opacity,
+              animation: image.animation,
+            }),
+          )
+        : await editIfChanged(ctx, `Add ${getImagePreset(a.preset)?.label ?? "image"}`, (p) =>
+            addImageOverlay(isNew ? withAsset(p, asset) : p, image),
+          );
+      return {
+        summary: `${existing ? "Updated" : "Added"} "${basename(asset.path)}" at ${fmt(image.start)} for ${fmt(image.duration)} (${image.position}).${changed ? "" : NOTHING_CHANGED}`,
+        data: { imageId: existing?.id ?? image.id, assetId: asset.id },
+      };
+    },
+  }),
+
+  define({
+    name: "update_image_overlay",
+    description:
+      "Change a picture overlay's timing, position, size, opacity or animation. Only the fields you give change. Use get_project to find image ids.",
+    schema: z.object({
+      imageId: z.string().describe("Image overlay id from get_project"),
+      start: startArg("New start").optional(),
+      duration: z.number().min(0.2).max(3600).optional().describe("New length, in seconds"),
+      ...imageFields,
+    }),
+    async run(ctx, a) {
+      const { imageId, ...rest } = a;
+      const patch = Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined));
+      await edit(ctx, "Update image overlay", (p) => updateImageOverlay(p, imageId, patch));
+      return { summary: "Image overlay updated." };
+    },
+  }),
+
+  define({
+    name: "remove_image_overlay",
+    description: "Delete a picture overlay. Use get_project to find image ids.",
+    schema: z.object({ imageId: z.string() }),
+    async run(ctx, a) {
+      await edit(ctx, "Remove image overlay", (p) => removeImageOverlay(p, a.imageId));
+      return { summary: "Image overlay removed." };
+    },
+  }),
+];
+
 /** The effects commands: zoom, audio layer and image overlays. Append them to `COMMANDS`. */
-export const EFFECT_COMMANDS: readonly CommandDef[] = [...zoomCommands, ...audioCommands];
+export const EFFECT_COMMANDS: readonly CommandDef[] = [
+  ...zoomCommands,
+  ...audioCommands,
+  ...imageCommands,
+];
 
 /**
  * The zooms, audio clips, images and ducking of a project in the compact form `get_project` shows. Times are
@@ -487,6 +623,18 @@ export function describeEffects(p: Project) {
       fadeIn: c.fadeIn,
       fadeOut: c.fadeOut,
       loop: c.loop ?? false,
+    })),
+    images: imagesOf(p).map((o) => ({
+      id: o.id,
+      assetId: o.assetId,
+      file: basename(p.assets[o.assetId]?.path ?? ""),
+      start: r(o.start),
+      end: r(o.start + o.duration),
+      position: o.position,
+      width: o.width,
+      opacity: o.opacity,
+      animation: o.animation,
+      preset: o.preset,
     })),
     ducking: duckingOf(p),
   };

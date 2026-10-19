@@ -6,6 +6,7 @@ export * from "./cuts.js";
 export * from "./effect-commands.js";
 export { ffmpegBin, ffprobeBin } from "./exec.js";
 export * from "./ids.js";
+export * from "./image-overlays.js";
 export * from "./media.js";
 export * from "./overlay-filters.js";
 export * from "./overlays.js";

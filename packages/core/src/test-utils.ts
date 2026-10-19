@@ -71,6 +71,53 @@ export function grayFrameAt(file: string, t: number, w = 640, h = 360): Buffer {
   return frame;
 }
 
+/** RGB bytes (3 per pixel, row by row) of the frame at `t` seconds, 640x360 unless told otherwise. */
+export function rgbFrameAt(file: string, t: number, w = 640, h = 360): Buffer {
+  const all = execFileSync(
+    "ffmpeg",
+    [
+      ...["-v", "error", "-ss", String(t), "-i", file, "-frames:v", "1"],
+      ...["-vf", `scale=${w}:${h}`, "-pix_fmt", "rgb24", "-f", "rawvideo", "-"],
+    ],
+    { maxBuffer: 64 * 1024 * 1024 },
+  );
+  if (all.length < w * h * 3) throw new Error(`No frame at ${t}s in ${file}`);
+  return all;
+}
+
+/** The pixel at (x, y) of an RGB frame made by {@link rgbFrameAt}. */
+export function pixel(frame: Buffer, x: number, y: number, w = 640): [number, number, number] {
+  const i = (y * w + x) * 3;
+  return [frame[i] ?? 0, frame[i + 1] ?? 0, frame[i + 2] ?? 0];
+}
+
+/** Bounding box of the red pixels (a red logo on grey), or null when there are none. `minRed` lowers the bar for translucent logos. */
+export function redBounds(
+  frame: Buffer,
+  w = 640,
+  h = 360,
+  minRed = 180,
+): { left: number; right: number; top: number; bottom: number; count: number } | null {
+  let left = w;
+  let right = -1;
+  let top = h;
+  let bottom = -1;
+  let count = 0;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const [r, g, b] = pixel(frame, x, y, w);
+      if (r > minRed && g < 90 && b < 90) {
+        count++;
+        left = Math.min(left, x);
+        right = Math.max(right, x);
+        top = Math.min(top, y);
+        bottom = Math.max(bottom, y);
+      }
+    }
+  }
+  return count === 0 ? null : { left, right, top, bottom, count };
+}
+
 /** The white box's outline in a grey frame: first and last bright column on the middle row, and rows on the middle column. */
 export function boxEdges(
   frame: Buffer,
