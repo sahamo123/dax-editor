@@ -38,6 +38,10 @@ function typesOf(schema: unknown): string[] {
   return out;
 }
 
+/**
+ * Schema keywords kept in compact style. Limits, defaults and the shape of free-form objects are what a small model
+ * needs to fill arguments correctly, so they stay; prose is reduced to a short hint per field (see compactSchema).
+ */
 const KEEP_IN_COMPACT = new Set([
   "type",
   "enum",
@@ -46,7 +50,20 @@ const KEEP_IN_COMPACT = new Set([
   "required",
   "anyOf",
   "oneOf",
+  "minimum",
+  "maximum",
+  "exclusiveMinimum",
+  "exclusiveMaximum",
+  "default",
+  "additionalProperties",
 ]);
+
+/** Longest hint kept per field in compact style; enough for a unit such as "in seconds" or "in dB". */
+const COMPACT_HINT_CHARS = 60;
+
+/** Words that name a unit. A field description containing one of them keeps a short hint in compact style. */
+const UNIT_WORDS =
+  /\b(seconds?|milliseconds?|ms|minutes?|frames|fps|pixels?|px|percent|db|decibels?|hz|bytes?|tokens?)\b|%/i;
 
 function compactSchema(schema: unknown): unknown {
   if (Array.isArray(schema)) return schema.map(compactSchema);
@@ -55,11 +72,26 @@ function compactSchema(schema: unknown): unknown {
   for (const [key, value] of Object.entries(schema)) {
     if (!KEEP_IN_COMPACT.has(key)) continue;
     if (key === "properties" && isObject(value)) {
-      out[key] = Object.fromEntries(Object.entries(value).map(([k, v]) => [k, compactSchema(v)]));
+      out[key] = Object.fromEntries(Object.entries(value).map(([k, v]) => [k, compactProperty(v)]));
     } else if (key === "enum" || key === "required" || key === "type") {
       out[key] = value;
     } else {
       out[key] = compactSchema(value);
+    }
+  }
+  return out;
+}
+
+/**
+ * One field in compact style: its schema without prose, plus a short hint from its description so units (seconds,
+ * dB, pixels) are not lost.
+ */
+function compactProperty(schema: unknown): unknown {
+  const out = compactSchema(schema);
+  if (isObject(schema) && typeof schema.description === "string" && isObject(out)) {
+    // Only a description that names a unit is kept: the unit is what a model cannot guess from the type alone.
+    if (UNIT_WORDS.test(schema.description)) {
+      (out as Json).description = firstSentence(schema.description, COMPACT_HINT_CHARS);
     }
   }
   return out;

@@ -15,7 +15,7 @@ describe("toToolDefinition", () => {
     expect(JSON.stringify(def.parameters)).toContain("in seconds");
   });
 
-  it("compact style keeps names, types, enums and required, and drops prose", () => {
+  it("compact style keeps names, types, enums, limits and required, and drops most prose", () => {
     const def = toToolDefinition(tool("add_overlay"), "compact");
     const params = def.parameters as {
       properties: Record<string, Record<string, unknown>>;
@@ -23,16 +23,34 @@ describe("toToolDefinition", () => {
     };
     expect(def.name).toBe("add_overlay");
     expect(params.required).toEqual(["preset", "start"]);
-    expect(params.properties.start).toEqual({ type: "number" });
+    // A field whose description names a unit keeps a short hint, so the unit is not lost.
+    expect(params.properties.start).toEqual({
+      type: "number",
+      minimum: 0,
+      description: "When the text appears, in seconds",
+    });
     expect(params.properties.position?.enum).toEqual(["center", "top", "bottom", "lower-third"]);
-    expect(JSON.stringify(def.parameters)).not.toContain("description");
+    // A field without a unit keeps no prose at all.
+    expect(params.properties.position).not.toHaveProperty("description");
     expect(def.description.length).toBeLessThanOrEqual(163);
+  });
+
+  it("compact style keeps limits, defaults and the shape of free-form objects", () => {
+    const def = toToolDefinition(tool("detect_silence"), "compact");
+    const noise = (def.parameters as { properties: Record<string, Record<string, unknown>> })
+      .properties.noiseDb;
+    expect(noise).toMatchObject({ type: "number", minimum: -80, maximum: -5, default: -30 });
+    const tpl = toToolDefinition(tool("apply_template"), "compact");
+    const vars = (tpl.parameters as { properties: Record<string, Record<string, unknown>> })
+      .properties.variables;
+    expect(vars).toMatchObject({ type: "object", additionalProperties: expect.any(Object) });
   });
 
   it("compact style is much smaller than full for the whole registry", () => {
     const size = (style: "full" | "compact") =>
       JSON.stringify(commandTools().map((t) => toToolDefinition(t, style))).length;
-    expect(size("compact")).toBeLessThan(size("full") * 0.6);
+    // Limits and units are kept on purpose, so compact is not as small as it once was; it is still clearly smaller.
+    expect(size("compact")).toBeLessThan(size("full") * 0.8);
   });
 
   it("compact descriptions are the first sentence", () => {
@@ -56,7 +74,9 @@ describe("toolSignature", () => {
     expect(toolSignature(tool("trim_clip"))).toBe(
       "trim_clip(clipId: string, in?: number, out?: number)",
     );
-    expect(toolSignature(tool("get_project"))).toBe("get_project()");
+    expect(toolSignature(tool("get_project"))).toBe(
+      "get_project(offset?: integer, limit?: integer)",
+    );
   });
 
   it("shows enums, lists and nested objects", () => {

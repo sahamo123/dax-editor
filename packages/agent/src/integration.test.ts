@@ -76,9 +76,9 @@ describe("agent over the OpenAI-compatible API", () => {
     expect(first.messages[0]?.content).toMatch(/Call get_project first/);
     expect(first.messages[1]).toEqual({ role: "user", content: "Delete 2 to 4 seconds" });
     expect(first.tools.length).toBeGreaterThan(10);
-    // Compact style: no per-field descriptions inside the parameter schemas.
+    // Compact style: prose is cut from the parameter schemas (no field's long description reaches the model).
     expect(JSON.stringify(first.tools.map((t) => t.function.parameters))).not.toContain(
-      "description",
+      "Where the text sits on the frame",
     );
 
     // Second request: the assistant tool call (repaired JSON) and the tool result.
