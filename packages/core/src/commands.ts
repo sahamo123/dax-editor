@@ -182,12 +182,28 @@ async function checkPath(ctx: CommandContext, path: string): Promise<string> {
   return abs;
 }
 
-/** A compact description of the project for a person or a model. */
-function describeProject(p: Project) {
+/** Clips and overlays per page of `get_project`. Large projects are read in pages so one reply stays small. */
+const PROJECT_PAGE = 100;
+
+/**
+ * A compact description of the project for a person or a model. Clips and overlays are returned one page at a time
+ * (`offset`, `limit`); `nextOffset` says where the next page starts, or is null when the lists are complete.
+ */
+function describeProject(p: Project, offset = 0, limit = PROJECT_PAGE) {
+  const allClips = mainClips(p);
+  const allOverlays = p.timeline.overlays;
+  const clipsPage = allClips.slice(offset, offset + limit);
+  const overlaysPage = allOverlays.slice(offset, offset + limit);
+  const shown = Math.max(clipsPage.length, overlaysPage.length);
+  const more = offset + limit < Math.max(allClips.length, allOverlays.length);
   return {
     name: p.name,
     format: `${p.timeline.width}x${p.timeline.height} @ ${p.timeline.fps} fps`,
     duration: Number(timelineDuration(p).toFixed(3)),
+    clipCount: allClips.length,
+    overlayCount: allOverlays.length,
+    offset,
+    nextOffset: more ? offset + shown : null,
     assets: Object.values(p.assets).map((a) => ({
       id: a.id,
       file: basename(a.path),
@@ -196,7 +212,7 @@ function describeProject(p: Project) {
       hasAudio: a.hasAudio,
       hasTranscript: Boolean(a.transcript),
     })),
-    clips: mainClips(p).map((c) => ({
+    clips: clipsPage.map((c) => ({
       id: c.id,
       assetId: c.assetId,
       start: Number(c.start.toFixed(3)),
@@ -210,7 +226,7 @@ function describeProject(p: Project) {
     captions: p.timeline.captions
       ? { ...p.timeline.captions, lines: captionLines(p, p.timeline.captions.maxWords).length }
       : null,
-    overlays: p.timeline.overlays.map((o) => ({
+    overlays: overlaysPage.map((o) => ({
       id: o.id,
       start: Number(o.start.toFixed(3)),
       end: Number((o.start + o.duration).toFixed(3)),
@@ -268,12 +284,28 @@ export const COMMANDS: readonly CommandDef[] = [
     name: "get_project",
     description:
       "Describe the current project: format, total duration, imported assets, the clips on the timeline (with ids and times in seconds), and text overlays. Call this first, and again after edits, to see the real state.",
-    schema: z.object({}),
+    schema: z.object({
+      offset: z
+        .number()
+        .int()
+        .min(0)
+        .default(0)
+        .describe("Skip this many clips and overlays (use nextOffset from the last reply)"),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(500)
+        .default(PROJECT_PAGE)
+        .describe("Most clips and most overlays to return in one reply"),
+    }),
     readOnly: true,
-    async run(ctx) {
-      const d = describeProject(ctx.session.project);
+    async run(ctx, a) {
+      const d = describeProject(ctx.session.project, a.offset, a.limit);
+      const more =
+        d.nextOffset === null ? "" : ` Showing from ${d.offset}; more with offset ${d.nextOffset}.`;
       return {
-        summary: `${d.name}: ${fmt(d.duration)}, ${d.clips.length} clip(s), ${d.overlays.length} overlay(s), ${d.assets.length} asset(s).`,
+        summary: `${d.name}: ${fmt(d.duration)}, ${d.clipCount} clip(s), ${d.overlayCount} overlay(s), ${d.assets.length} asset(s).${more}`,
         data: d,
       };
     },
@@ -372,6 +404,19 @@ export const COMMANDS: readonly CommandDef[] = [
       assetId: assetIdArg,
       from: seconds("Start of the window in the source file").optional(),
       to: seconds("End of the window in the source file").optional(),
+      offset: z
+        .number()
+        .int()
+        .min(0)
+        .default(0)
+        .describe("Skip this many words of the window (use nextOffset from the last reply)"),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(1000)
+        .default(300)
+        .describe("Most words to return in one reply"),
     }),
     readOnly: true,
     async run(ctx, a) {
@@ -384,9 +429,19 @@ export const COMMANDS: readonly CommandDef[] = [
       const from = a.from ?? 0;
       const to = a.to ?? Number.POSITIVE_INFINITY;
       const words = asset.transcript.words.filter((w) => w.end > from && w.start < to);
+      const page = words.slice(a.offset, a.offset + a.limit);
+      const next = a.offset + page.length < words.length ? a.offset + page.length : null;
+      const more = next === null ? "" : ` More with offset ${next}.`;
       return {
-        summary: `${words.length} word(s).`,
-        data: { assetId: asset.id, text: formatTranscript({ words }) },
+        summary: `Words ${page.length ? a.offset + 1 : 0}-${a.offset + page.length} of ${words.length}.${more}`,
+        data: {
+          assetId: asset.id,
+          totalWords: words.length,
+          offset: a.offset,
+          returned: page.length,
+          nextOffset: next,
+          text: formatTranscript({ words: page }),
+        },
       };
     },
   }),
