@@ -199,12 +199,18 @@ importers:
       '@dax/core':
         specifier: workspace:*
         version: link:../core
+      '@dax/local-llm':
+        specifier: workspace:*
+        version: link:../local-llm
       '@dax/protocol':
         specifier: workspace:*
         version: link:../protocol
       '@dax/server':
         specifier: workspace:*
         version: link:../server
+      '@dax/stt':
+        specifier: workspace:*
+        version: link:../stt
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
