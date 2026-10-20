@@ -2,7 +2,7 @@
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { Session } from "@dax/core";
 import type { AgentEvent, Settings } from "@dax/protocol";
 import type { RunnerEnv } from "@dax/server";
@@ -58,16 +58,24 @@ describe("defaultSkillsDir", () => {
     for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
   });
 
+  // Keep real checkout skills beyond the six-ancestor search, even when TEMP lives inside the repository.
+  const isolatedRoot = () => {
+    const base = mkdtempSync(join(tmpdir(), "dax-skills-"));
+    dirs.push(base);
+    const root = join(base, "isolated", "tree", "root");
+    mkdirSync(root, { recursive: true });
+    return root;
+  };
+
   it("uses the configured folder before searching", () => {
     expect(defaultSkillsDir({ DAX_SKILLS_DIR: "/opt/dax/skills" }, "/nowhere/x.js")).toBe(
-      "/opt/dax/skills",
+      resolve("/opt/dax/skills"),
     );
   });
 
   it("does not take an ancestor folder that only has a README", () => {
     // Before the fix any folder called skills with a README counted, including one in a parent directory.
-    const root = mkdtempSync(join(tmpdir(), "dax-skills-"));
-    dirs.push(root);
+    const root = isolatedRoot();
     mkdirSync(join(root, "skills"));
     writeFileSync(join(root, "skills", "README.md"), "not the shipped skills");
     const from = join(root, "app", "src", "launch.js");
@@ -75,8 +83,7 @@ describe("defaultSkillsDir", () => {
   });
 
   it("finds a skills folder that holds skill folders", () => {
-    const root = mkdtempSync(join(tmpdir(), "dax-skills-"));
-    dirs.push(root);
+    const root = isolatedRoot();
     mkdirSync(join(root, "skills", "add-title"), { recursive: true });
     writeFileSync(join(root, "skills", "README.md"), "skills");
     writeFileSync(join(root, "skills", "add-title", "SKILL.md"), "---\nname: add-title\n---");

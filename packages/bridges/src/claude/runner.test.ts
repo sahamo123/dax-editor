@@ -334,21 +334,25 @@ describe("secrets", () => {
     expect(runs[0]?.token).not.toBe(runs[1]?.token);
   });
 
-  it("writes the per-run files with owner-only permissions", async () => {
-    // Observe the folder while the run is in progress.
-    const h = harness({ run: [{ hang: true }] });
-    const controller = new AbortController();
-    const running = h.chat("hi", { signal: controller.signal });
-    await waitFor(
-      () => leftoverRunDirs().length === 1 && h.fake.calls().some((c) => c.mode === "run"),
-    );
-    const [runDirName] = leftoverRunDirs();
-    const root = join(dataDir, "bridges", runDirName ?? "");
-    expect(statSync(root).mode & 0o077).toBe(0);
-    expect(statSync(join(root, "mcp.json")).mode & 0o077).toBe(0);
-    controller.abort();
-    await running;
-  });
+  // Windows stat.mode does not represent ACLs; this assertion specifically verifies POSIX mode bits.
+  it.skipIf(process.platform === "win32")(
+    "writes the per-run files with POSIX owner-only permissions",
+    async () => {
+      // Observe the folder while the run is in progress.
+      const h = harness({ run: [{ hang: true }] });
+      const controller = new AbortController();
+      const running = h.chat("hi", { signal: controller.signal });
+      await waitFor(
+        () => leftoverRunDirs().length === 1 && h.fake.calls().some((c) => c.mode === "run"),
+      );
+      const [runDirName] = leftoverRunDirs();
+      const root = join(dataDir, "bridges", runDirName ?? "");
+      expect(statSync(root).mode & 0o077).toBe(0);
+      expect(statSync(join(root, "mcp.json")).mode & 0o077).toBe(0);
+      controller.abort();
+      await running;
+    },
+  );
 });
 
 describe("failures", () => {
@@ -464,7 +468,7 @@ describe("failures", () => {
 });
 
 describe("cancel", () => {
-  it("ends the CLI with SIGTERM, leaves no process, endpoint or files, and reports nothing more", async () => {
+  it("cancels the CLI, leaves no process, endpoint or files, and reports nothing more", async () => {
     const h = harness({ run: [{ hang: true }] });
     const controller = new AbortController();
     const events: AgentEvent[] = [];
@@ -488,7 +492,9 @@ describe("cancel", () => {
     expect(Date.now() - started).toBeLessThan(3000);
 
     expect(isAlive(pid)).toBe(false);
-    expect(readFileSync(join(dir, "sigterm.marker"), "utf8")).toBe("SIGTERM");
+    // taskkill forcibly terminates Windows processes; only POSIX executes the signal handler.
+    if (process.platform === "win32") expect(existsSync(join(dir, "sigterm.marker"))).toBe(false);
+    else expect(readFileSync(join(dir, "sigterm.marker"), "utf8")).toBe("SIGTERM");
     await expect(fetch(url, { method: "POST" })).rejects.toThrow();
     expect(leftoverRunDirs()).toEqual([]);
     // The server reports "Cancelled." itself; the bridge adds no done or error.
@@ -510,7 +516,9 @@ describe("cancel", () => {
     const started = Date.now();
     controller.abort();
     await running;
-    expect(Date.now() - started).toBeGreaterThanOrEqual(350); // waited for the 400 ms grace
+    if (process.platform !== "win32")
+      expect(Date.now() - started).toBeGreaterThanOrEqual(350); // POSIX waits for the 400 ms grace
+    else expect(Date.now() - started).toBeLessThan(3000); // taskkill does not deliver an ignorable signal
     expect(isAlive(pid)).toBe(false);
   });
 

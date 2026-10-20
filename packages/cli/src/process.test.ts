@@ -97,16 +97,20 @@ describe.skipIf(!built)("dax serve (needs a build)", () => {
     expect(JSON.parse(r.stdout).args).toEqual(["--exit7", "--port", "0"]);
   });
 
-  it("forwards SIGTERM to the server and exits cleanly", async () => {
-    const child = spawn(process.execPath, [BIN, "serve"], {
-      cwd: dir,
-      env: env({ DAX_SERVER_BIN: fake() }),
-    });
-    const exited = new Promise<number | null>((resolve) => child.on("exit", (c) => resolve(c)));
-    await firstLine(child);
-    child.kill("SIGTERM");
-    expect(await exited).toBe(0);
-  });
+  // Windows kill(SIGTERM) forcibly terminates the CLI; stdin-close/orphan behavior is tested separately below.
+  it.skipIf(process.platform === "win32")(
+    "forwards POSIX SIGTERM to the server and exits cleanly",
+    async () => {
+      const child = spawn(process.execPath, [BIN, "serve"], {
+        cwd: dir,
+        env: env({ DAX_SERVER_BIN: fake() }),
+      });
+      const exited = new Promise<number | null>((resolve) => child.on("exit", (c) => resolve(c)));
+      await firstLine(child);
+      child.kill("SIGTERM");
+      expect(await exited).toBe(0);
+    },
+  );
 
   it("leaves no orphan server when the CLI is killed (the server exits when its stdin closes)", async () => {
     const child = spawn(process.execPath, [BIN, "serve"], {

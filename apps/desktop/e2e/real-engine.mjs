@@ -5,15 +5,29 @@
 
 import { spawn } from "node:child_process";
 import { randomBytes } from "node:crypto";
-import { mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { delimiter, dirname, isAbsolute, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ffmpegBin, ffprobeBin } from "@dax/core";
 import { engineApi } from "./engine-api.mjs";
 
 /** Absolute path of the built engine executable (`@dax/engine`'s `dist/cli.js`). */
 function engineCli() {
   return join(dirname(fileURLToPath(import.meta.resolve("@dax/engine"))), "cli.js");
+}
+
+// Preserve media tools while isolating the child's CLI search path and home from the host account.
+function mediaBinary(file) {
+  if (isAbsolute(file)) return file;
+  for (const dir of (process.env.PATH ?? process.env.Path ?? "").split(delimiter)) {
+    const candidate = join(
+      dir,
+      process.platform === "win32" && !file.endsWith(".exe") ? `${file}.exe` : file,
+    );
+    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
+  }
+  throw new Error(`Required test media tool is missing: ${file}`);
 }
 
 /**
@@ -30,7 +44,20 @@ export async function startRealEngine({ origin, allowRoots = [], env = {} }) {
   for (const root of allowRoots) args.push("--allow-root", root);
   // stdin stays open (a pipe): the engine exits when its parent's stdin closes, as it does under the desktop shell.
   const child = spawn(process.execPath, args, {
-    env: { ...process.env, ...env, DAX_SERVER_TOKEN: token },
+    env: {
+      ...process.env,
+      PATH: join(dataDir, "empty-path"),
+      HOME: dataDir,
+      USERPROFILE: dataDir,
+      APPDATA: join(dataDir, "appdata"),
+      LOCALAPPDATA: join(dataDir, "local-appdata"),
+      DAX_CLAUDE_BIN: join(dataDir, "missing-cli.exe"),
+      DAX_CODEX_BIN: join(dataDir, "missing-codex.exe"),
+      DAX_FFMPEG: mediaBinary(ffmpegBin()),
+      DAX_FFPROBE: mediaBinary(ffprobeBin()),
+      ...env,
+      DAX_SERVER_TOKEN: token,
+    },
     stdio: ["pipe", "pipe", "pipe"],
   });
   const logs = [];
@@ -70,9 +97,9 @@ export async function startRealEngine({ origin, allowRoots = [], env = {} }) {
     dataDir,
     logs,
     api: engineApi(info.url, info.token),
-    /** Stop the engine (SIGTERM, then SIGKILL after 10 s) and remove its data folder. */
+    /** Close the parent pipe for graceful shutdown on every OS; force only after 10 s. */
     async close() {
-      child.kill("SIGTERM");
+      child.stdin.end();
       const killer = setTimeout(() => child.kill("SIGKILL"), 10_000);
       await exited;
       clearTimeout(killer);

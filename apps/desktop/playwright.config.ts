@@ -1,6 +1,7 @@
 // Playwright configuration for the end-to-end tests. They run the production build in the preinstalled
 // Chromium against a mock engine server (e2e/mock-server.mjs) started per test.
 
+import { existsSync } from "node:fs";
 import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
@@ -17,7 +18,9 @@ export default defineConfig({
     colorScheme: "dark",
     launchOptions: {
       // The sandbox ships Chromium at a fixed path; set PW_CHROMIUM to use another build.
-      executablePath: process.env.PW_CHROMIUM ?? "/opt/pw-browsers/chromium",
+      executablePath:
+        process.env.PW_CHROMIUM ??
+        (existsSync("/opt/pw-browsers/chromium") ? "/opt/pw-browsers/chromium" : undefined),
       args: ["--no-sandbox"],
     },
   },

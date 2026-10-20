@@ -107,10 +107,13 @@ describe.skipIf(!existsSync(CLI))("dax-server executable", () => {
     await l.exit;
   });
 
-  it("exits cleanly (code 0) on SIGTERM and stops listening", async () => {
+  it("stops listening on SIGTERM (graceful on POSIX, forced on Windows)", async () => {
     const l = await launch();
     l.child.kill("SIGTERM");
-    expect(await l.exit).toEqual({ code: 0, signal: null });
+    // Windows terminates the process directly; it does not deliver the POSIX signal handler.
+    expect(await l.exit).toEqual(
+      process.platform === "win32" ? { code: null, signal: "SIGTERM" } : { code: 0, signal: null },
+    );
     await expect(rawRequest(l.info.port, "/api/health")).rejects.toThrow();
   });
 

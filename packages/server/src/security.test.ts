@@ -2,7 +2,7 @@
 // None of these needs FFmpeg except where a media file is required to probe Range handling (see media.test.ts).
 
 import { mkdir, readdir, readFile, stat, symlink, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { ScriptedRunner } from "./stubs.js";
 import { type Harness, openWs, rawRequest, startHarness } from "./test/harness.js";
@@ -288,8 +288,14 @@ describe("path traversal", () => {
     await mkdir(join(h.workDir, "inner"), { recursive: true });
     const outsideFile = join(h.workDir, "..", "outside.mp4");
     await writeFile(outsideFile, "not a video");
-    const link = join(h.workDir, "inner", "sneaky.mp4");
-    await symlink(outsideFile, link);
+    // Junctions exercise realpath escapes on Windows without file-symlink privileges.
+    const link =
+      process.platform === "win32"
+        ? join(h.workDir, "inner", "escape", "outside.mp4")
+        : join(h.workDir, "inner", "sneaky.mp4");
+    if (process.platform === "win32")
+      await symlink(dirname(outsideFile), join(h.workDir, "inner", "escape"), "junction");
+    else await symlink(outsideFile, link);
 
     const attempts = [
       "/etc/passwd",
