@@ -32,8 +32,13 @@ describe("file paths from command arguments", () => {
     mkdirSync(outside);
     const secret = join(outside, "secret.mp4");
     writeFileSync(secret, "not really a video");
-    const link = join(allowed, "link.mp4");
-    symlinkSync(secret, link);
+    // Windows file symlinks require a privilege; directory junctions exercise the same escape without it.
+    const link =
+      process.platform === "win32"
+        ? join(allowed, "link", "secret.mp4")
+        : join(allowed, "link.mp4");
+    if (process.platform === "win32") symlinkSync(outside, join(allowed, "link"), "junction");
+    else symlinkSync(secret, link);
 
     const session = new Session(emptyProject("t"));
     const r = await tryRunCommand(

@@ -158,10 +158,11 @@ export function buildRenderPlan(
         `${head},scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},${tail}`,
       );
     } else if (project.timeline.fit === "blur") {
-      // A blurred, enlarged copy fills the frame; the sharp picture sits centred on top of it.
+      // Gaussian blur is available in LGPL builds; boxblur requires GPL-enabled FFmpeg.
+      // The enlarged copy fills the frame; the sharp picture sits centred on top of it.
       filters.push(
         `${head},split=2[bg${i}][fg${i}]`,
-        `[bg${i}]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},boxblur=24:3[bb${i}]`,
+        `[bg${i}]scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},gblur=sigma=24:steps=3[bb${i}]`,
         `[fg${i}]scale=${W}:${H}:force_original_aspect_ratio=decrease[ff${i}]`,
         `[bb${i}][ff${i}]overlay=(W-w)/2:(H-h)/2,${tail}`,
       );
