@@ -50,7 +50,7 @@ The engine, command registry, skills, templates, agent, engine server and launch
 
 ## In progress
 
-Built in separate git worktrees under `.claude/worktrees`. None of these is merged yet.
+Built in separate git worktrees under `.claude/worktrees`. Every commit on those `worktree-agent-*` branches is already on `claude/exciting-lamport-1k91fh`, so the worktrees are local scratch and are not needed. Check `git log` before trusting any "not merged" line below. The one unsaved edit is in [docs/handoff](handoff/README.md) (the local-llm archive symlink patch), and it does not apply cleanly yet.
 
 - Hardening pass for the independent review's 3 high and 9 medium findings: export encoder fallback, preview blocklist, rollback after a failed autosave, path traversal through overlay ids, atomic and cancellable export, history pruning, a cancel signal, context budgets for small models, and safe template replacement.
 - `@dax/local-llm` and `@dax/stt` are wired into `@dax/engine` (the default local-model controller and speech transcriber, with tests that need no network). Branch `claude/exciting-lamport-1k91fh` carries the wiring; it has not been merged. The live llama.cpp and whisper.cpp tests stay opt-in.
@@ -87,6 +87,8 @@ Each item starts after the in-progress builds it depends on are merged.
 ## Known issues
 
 - CI has not yet run on GitHub.
+- The local-llm archive symlink-chain patch (`docs/handoff/local-llm-archive-symlink-chains.patch`) conflicts with the current `archive.ts`, and nothing in it has been run. Finish it per [handoff section 4](engineering/handoff.md).
+- pnpm 10 ignores the esbuild build script (`pnpm approve-builds` decides it). Dependencies and system tools are listed in [handoff section 3](engineering/handoff.md#3-dependencies-and-system-requirements).
 - Projects saved before the frame-grid change are not re-quantised on open. Their cuts are snapped at render, so the timeline can differ from the output by up to half a frame per old cut. Breaths are kept and attenuated by 12 dB (see [cut intelligence status](research/cut-intelligence.md)); the per-preset breath depths and render ramp are not built.
 - Windows and macOS are untested.
 - The independent review's 3 high and 9 medium findings stay open until the hardening pass merges.
