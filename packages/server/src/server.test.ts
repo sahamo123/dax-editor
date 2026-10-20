@@ -795,6 +795,27 @@ describe("local model endpoints", () => {
 });
 
 describe("graceful shutdown", () => {
+  it.skipIf(!HAS_FFMPEG)(
+    "waits for an interrupted export to release and remove partial output",
+    async () => {
+      const h = await startHarness();
+      try {
+        const video = await makeVideo(h.workDir, "shutdown-export.mp4", {
+          seconds: 20,
+          size: "640x360",
+        });
+        await h.post("/api/import", { paths: [video] });
+        const result = await h.command("export_video", { path: join(h.workDir, "export.mp4") });
+        expect(result.ok).toBe(true);
+        await h.server.close();
+        expect((await readdir(h.workDir)).filter((name) => name.includes("partial"))).toEqual([]);
+      } finally {
+        await h.cleanup();
+      }
+    },
+    60_000,
+  );
+
   it("closes WebSocket clients with 1001, stops listening, saves the project and is idempotent", async () => {
     const h = await startHarness();
     const ws = await h.ws();

@@ -82,6 +82,7 @@ export class Engine {
   private localTask: AbortController | undefined;
   /** Set from the moment an export is accepted until it ends; aborting it kills FFmpeg. */
   private exportAbort: AbortController | undefined;
+  private exportTask: Promise<void> | undefined;
   private providerCache: { at: number; value: ProviderStatus[] } | undefined;
   private broadcastScheduled = false;
   private broadcastChain: Promise<void> = Promise.resolve();
@@ -373,7 +374,7 @@ export class Engine {
           respond({ ok: true, summary: `Export of ${label} started.`, data: { jobId: j.id } });
         },
       });
-      void tryRunCommand(ctx, "export_video", args).then((out) => {
+      this.exportTask = tryRunCommand(ctx, "export_video", args).then((out) => {
         if (this.exportAbort === abort) this.exportAbort = undefined;
         if (out.ok) {
           const j = ensureJob();
@@ -551,8 +552,10 @@ export class Engine {
     this.chat?.abort.abort();
     this.localTask?.abort();
     this.exportAbort?.abort();
-    this.media.shutdown();
-    this.processes.killAll();
+    const mediaStopped = this.media.shutdown();
+    await this.processes.killAll();
+    await mediaStopped;
+    await this.exportTask;
     await Promise.race([this.cfg.localModel.stop().catch(() => undefined), delay(5000)]);
     await this.projects
       .flush()

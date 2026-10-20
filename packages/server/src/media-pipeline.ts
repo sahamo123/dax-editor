@@ -106,6 +106,7 @@ export class MediaPipeline {
   /** Last setup failure reported per asset id, so retries that fail the same way do not add a job each time. */
   private readonly setupErrors = new Map<string, string>();
   private readonly abort = new AbortController();
+  private readonly pending = new Set<Promise<unknown>>();
 
   constructor(
     private readonly cfg: {
@@ -119,19 +120,28 @@ export class MediaPipeline {
     },
   ) {}
 
-  /** Stop all work: abort running tasks and refuse new ones. */
-  shutdown(): void {
+  /** Abort queued/running work and wait for worker exit and file cleanup; refuse all new work. */
+  async shutdown(): Promise<void> {
     this.abort.abort();
+    await Promise.allSettled([...this.pending]);
+  }
+
+  private track<T>(work: Promise<T>): Promise<T> {
+    this.pending.add(work);
+    const done = () => this.pending.delete(work);
+    void work.then(done, done);
+    return work;
   }
 
   /** Make sure every media asset of `project` has (or is getting) a proxy. Safe to call after every change; assets already known are skipped. */
   ensureAssets(project: Project): void {
+    if (this.abort.signal.aborted) return;
     for (const asset of Object.values(project.assets)) {
       // `started` is filled synchronously: ensureAssets runs after every change and start() awaits.
       if (this.started.has(asset.id) || this.entries.has(asset.id) || asset.kind === "image")
         continue;
       this.started.add(asset.id);
-      this.start(asset).then(
+      this.track(this.start(asset)).then(
         () => this.setupErrors.delete(asset.id),
         (err) => this.setupFailed(asset, err),
       );
@@ -343,7 +353,17 @@ export class MediaPipeline {
    * the caller has already validated the id format.
    * @throws MediaError with a status the HTTP layer returns as is.
    */
-  async fileFor(asset: Asset, kind: MediaKind, query: URLSearchParams): Promise<MediaFile> {
+  fileFor(asset: Asset, kind: MediaKind, query: URLSearchParams): Promise<MediaFile> {
+    if (this.abort.signal.aborted)
+      return Promise.reject(new MediaError(503, "Server is shutting down"));
+    return this.track(this.makeFile(asset, kind, query));
+  }
+
+  private async makeFile(
+    asset: Asset,
+    kind: MediaKind,
+    query: URLSearchParams,
+  ): Promise<MediaFile> {
     const entry = await this.entryFor(asset);
     // Resolved lazily: a cached proxy or thumbnail can be served even if the original has since moved.
     const source: SourceFn = async () =>

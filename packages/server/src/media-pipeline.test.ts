@@ -4,7 +4,7 @@ import { copyFile, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { addAsset, emptyProject, probe, resetEncoderProbes } from "@dax/core";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { ProcessRegistry } from "./ffmpeg-run.js";
 import { JobManager } from "./jobs.js";
 import { createLogger } from "./logger.js";
@@ -30,8 +30,51 @@ describe.skipIf(!HAS_FFMPEG)("media pipeline encoder health", () => {
     });
   });
   afterAll(async () => {
-    pipeline.shutdown();
+    await pipeline.shutdown();
     await rm(dir, { recursive: true, force: true });
+  });
+
+  it("shutdown waits for active preview workers to close before cache removal", async () => {
+    const registry = new ProcessRegistry();
+    const add = registry.add.bind(registry);
+    let workerClosed = false;
+    let started: () => void = () => undefined;
+    const workerStarted = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    vi.spyOn(registry, "add").mockImplementation((child) => {
+      add(child);
+      child.once("close", () => {
+        workerClosed = true;
+      });
+      started();
+    });
+    const cacheDir = join(dir, "shutdown-cache");
+    const active = new MediaPipeline({
+      cacheDir,
+      allowedRoots: [dir],
+      jobs: new JobManager(() => undefined),
+      registry,
+      log: createLogger(() => undefined),
+      onChange: () => undefined,
+    });
+    const asset = await probe(
+      await makeVideo(dir, "shutdown.mp4", { seconds: 10, size: "640x360" }),
+    );
+    try {
+      active.ensureAssets(addAsset(emptyProject("shutdown"), asset));
+      await workerStarted;
+      await active.shutdown();
+      expect(workerClosed).toBe(true);
+      await rm(cacheDir, { recursive: true, force: true });
+      await expect(active.fileFor(asset, "proxy.mp4", new URLSearchParams())).rejects.toMatchObject(
+        { status: 503 },
+      );
+    } finally {
+      await active.shutdown();
+      await registry.killAll();
+      await rm(cacheDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 });
+    }
   });
 
   /** Wait until the newest job whose label contains `name` stops running. */
