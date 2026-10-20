@@ -115,17 +115,38 @@ pub struct LaunchConfig {
 /// The command-line arguments passed to the server entry script.
 pub fn server_args(entry: &Path, data_dir: &Path, origins: &[String]) -> Vec<OsString> {
     let mut args: Vec<OsString> = vec![
-        entry.into(),
+        node_path(entry).into_os_string(),
         "--port".into(),
         "0".into(),
         "--data-dir".into(),
-        data_dir.into(),
+        node_path(data_dir).into_os_string(),
     ];
     for origin in origins {
         args.push("--origin".into());
         args.push(origin.into());
     }
     args
+}
+
+/// Strip Windows verbatim drive/UNC prefixes before handing paths to Node's realpath parser.
+/// Node 22 rejects a verbatim drive path with EISDIR for `C:`. Preserve UTF-16 without lossy conversion.
+pub fn node_path(path: &Path) -> PathBuf {
+    #[cfg(windows)]
+    {
+        use std::os::windows::ffi::{OsStrExt, OsStringExt};
+        let wide: Vec<u16> = path.as_os_str().encode_wide().collect();
+        let prefix: Vec<u16> = r"\\?\".encode_utf16().collect();
+        let unc: Vec<u16> = r"\\?\UNC\".encode_utf16().collect();
+        if wide.starts_with(&unc) {
+            let mut normal: Vec<u16> = r"\\".encode_utf16().collect();
+            normal.extend_from_slice(&wide[unc.len()..]);
+            return OsString::from_wide(&normal).into();
+        }
+        if wide.starts_with(&prefix) && wide.get(5) == Some(&(b':' as u16)) {
+            return OsString::from_wide(&wide[prefix.len()..]).into();
+        }
+    }
+    path.to_path_buf()
 }
 
 /// Build the (not yet spawned) command for the server: arguments, environment, and the three
@@ -135,10 +156,10 @@ pub fn build_command(cfg: &LaunchConfig) -> Command {
     cmd.args(server_args(&cfg.paths.entry, &cfg.data_dir, &cfg.origins));
     cmd.env(TOKEN_ENV, &cfg.token);
     if let Some(ffmpeg) = &cfg.paths.ffmpeg {
-        cmd.env("DAX_FFMPEG", ffmpeg);
+        cmd.env("DAX_FFMPEG", node_path(ffmpeg));
     }
     if let Some(ffprobe) = &cfg.paths.ffprobe {
-        cmd.env("DAX_FFPROBE", ffprobe);
+        cmd.env("DAX_FFPROBE", node_path(ffprobe));
     }
     // A user's NODE_OPTIONS or NODE_PATH could preload or substitute code in the engine; the
     // shipped server is a self-contained bundle, so the app never wants either.
@@ -146,7 +167,7 @@ pub fn build_command(cfg: &LaunchConfig) -> Command {
     cmd.env("NODE_ENV", "production");
     // Run from the data dir: harmless for the server, and keeps the app directory un-locked on
     // Windows so the installer can replace it.
-    cmd.current_dir(&cfg.data_dir);
+    cmd.current_dir(node_path(&cfg.data_dir));
     cmd.stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
