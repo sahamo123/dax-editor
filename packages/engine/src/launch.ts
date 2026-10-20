@@ -1,6 +1,7 @@
 // Starts the server with everything wired: agent, skills, providers, and (when supplied) local model and speech-to-text.
 
 import { existsSync, readdirSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type CliBridges, createCliBridges } from "@dax/bridges";
@@ -14,6 +15,7 @@ import {
 } from "@dax/server";
 import type { CreateTranscriberOptions } from "@dax/stt";
 import { createLocalModelController, localConnection } from "./local-model.js";
+import { seedOfflineBundle } from "./offline-bundle.js";
 import { createProviderRegistry } from "./providers.js";
 import { createRunnerFactory, type RunnerFactoryOptions } from "./runner.js";
 import { createSpeechTranscriber } from "./speech.js";
@@ -55,6 +57,8 @@ export interface LaunchOptions
    * closes the bridges when the server closes.
    */
   cliBridges?: CliBridges | false;
+  /** Offline installer resources. Omit to discover them beside the engine; false disables seeding and auto-start. */
+  offlineBundleDir?: string | false;
 }
 
 /** Find the shipped `skills/` folder: the environment override first, then walking up from this file. */
@@ -95,8 +99,28 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
     localModelOptions,
     extraProviders,
     cliBridges,
+    offlineBundleDir,
     ...server
   } = options;
+  let bundled = false;
+  if (
+    localModelController === undefined &&
+    offlineBundleDir !== false &&
+    process.platform === "win32" &&
+    process.arch === "x64"
+  ) {
+    try {
+      bundled = await seedOfflineBundle(
+        server.dataDir,
+        offlineBundleDir ? { bundleDir: offlineBundleDir } : {},
+      );
+    } catch (error) {
+      // A damaged offline seed must not stop the manual editor from opening.
+      process.stderr.write(
+        `Offline AI setup failed: ${error instanceof Error ? error.message : String(error)}\n`,
+      );
+    }
+  }
   // Speech-to-text is on by default. It sets itself up only on first use and reports what is missing instead of failing.
   const transcriber: Transcriber | undefined =
     transcriberOption === false
@@ -108,8 +132,32 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
       ? undefined
       : (localModelController ??
         createLocalModelController({
-          manager: new LocalModelManager({ dataDir: server.dataDir, ...localModelOptions }),
+          manager: new LocalModelManager({
+            dataDir: server.dataDir,
+            ...(bundled ? { runtime: { target: { backend: "cpu" } } } : {}),
+            ...localModelOptions,
+          }),
         }));
+  const savedSettings: unknown = bundled
+    ? await readFile(join(server.dataDir, "settings.json"), "utf8")
+        .then(JSON.parse)
+        .catch(() => undefined)
+    : undefined;
+  const wantsLocal =
+    !(
+      typeof savedSettings === "object" &&
+      savedSettings !== null &&
+      "activeProvider" in savedSettings
+    ) || savedSettings.activeProvider === "local";
+  if (bundled && local && wantsLocal) {
+    try {
+      await local.start({ signal: AbortSignal.timeout(90_000), onProgress: () => undefined });
+    } catch (error) {
+      process.stderr.write(
+        `Offline AI start failed: ${error instanceof Error ? error.message : String(error)}\n`,
+      );
+    }
+  }
   const dir = skillsDir ?? defaultSkillsDir();
   // Bridges are on by default. They spawn nothing until the Settings screen or a chat run asks.
   const bridges: CliBridges | undefined =
