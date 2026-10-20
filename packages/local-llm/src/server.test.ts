@@ -184,9 +184,13 @@ describe("LlamaServer", () => {
   });
 
   it("detects a crash after start and reports exit code and the last log lines", async () => {
-    const server = make({}, { FAKE_EXIT_AFTER_MS: "700", FAKE_EXIT_CODE: "139" });
+    const server = make({}, { FAKE_EXIT_CODE: "139" });
     const crash = new Promise<CrashInfo>((resolve) => server.on("crash", resolve));
     await server.start();
+    await fetch(new URL("/__test/crash", server.baseUrl), {
+      method: "POST",
+      headers: { Authorization: `Bearer ${server.apiKey}` },
+    });
     const info = await crash;
     expect(info.code).toBe(139);
     expect(info.logTail.join("\n")).toContain("simulated crash");
@@ -377,7 +381,8 @@ describe("orphan protection", () => {
       JSON.stringify({
         pid: leftover.pid,
         parentPid: deadParent.pid,
-        executable: "fake-llama-server.mjs",
+        // Windows tasklist reports the executable image, not its script argument.
+        executable: process.platform === "win32" ? process.execPath : "fake-llama-server.mjs",
         startedAt: new Date().toISOString(),
       }),
     );

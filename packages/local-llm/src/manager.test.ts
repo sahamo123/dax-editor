@@ -287,12 +287,12 @@ describe("LocalModelManager", () => {
   });
 
   it("surfaces a crash in status and events, and can start again afterwards", async () => {
-    const m = make({}, { FAKE_EXIT_AFTER_MS: "700" });
+    const m = make();
     await m.install("tiny-a");
     const events: LocalModelEvent["type"][] = [];
     m.onEvent((e) => events.push(e.type));
-    await m.start();
-    await new Promise<void>((resolve) => {
+    const handle = await m.start();
+    const crashed = new Promise<void>((resolve) => {
       const off = m.onEvent((e) => {
         if (e.type === "server-crashed") {
           off();
@@ -300,6 +300,11 @@ describe("LocalModelManager", () => {
         }
       });
     });
+    await fetch(new URL("/__test/crash", handle.baseUrl), {
+      method: "POST",
+      headers: { Authorization: `Bearer ${handle.apiKey}` },
+    });
+    await crashed;
     const s = await m.status();
     expect(s.server.state).toBe("crashed");
     expect(s.server.lastError).toMatch(/exited unexpectedly/);

@@ -64,6 +64,17 @@ const server = createServer((req, res) => {
     res.end(JSON.stringify({ error: { message: "Invalid API Key" } }));
     return;
   }
+  // Tests request a crash only after start() has verified readiness and port ownership.
+  if (req.url === "/__test/crash" && req.method === "POST") {
+    res.writeHead(202);
+    res.end("crashing", () =>
+      setImmediate(() => {
+        console.error("fatal: simulated crash");
+        process.exit(Number(process.env.FAKE_EXIT_CODE ?? 139));
+      }),
+    );
+    return;
+  }
   if (req.url === "/v1/chat/completions" && req.method === "POST") {
     let body = "";
     req.on("data", (c) => {

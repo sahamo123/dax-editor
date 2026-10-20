@@ -14,7 +14,6 @@ import {
   open,
   readlink,
   realpath,
-  rename,
   rm,
   symlink,
   writeFile,
@@ -22,6 +21,7 @@ import {
 import { dirname, isAbsolute, join, normalize, parse, relative, resolve, sep } from "node:path";
 import { createGunzip, inflateRaw } from "node:zlib";
 import { ArchiveError } from "./errors.js";
+import { renameExtractedDirectory } from "./windows-rename.js";
 
 /**
  * Inflate raw deflate data, refusing to produce more than `maxLength` bytes. The bound stops a
@@ -591,7 +591,7 @@ export async function extractArchive(
     else if (lower.endsWith(".zip")) await extractZip(archive, staging, options);
     else throw new ArchiveError(`Unsupported archive type: ${archive}`);
     await rm(destDir, { recursive: true, force: true });
-    await rename(staging, destDir);
+    await renameExtractedDirectory(staging, destDir);
   } catch (error) {
     await rm(staging, { recursive: true, force: true });
     throw error;
