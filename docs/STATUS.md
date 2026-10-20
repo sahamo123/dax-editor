@@ -13,6 +13,8 @@ generated:
 
 ## Windows laptop checkpoint — October 20, 2026
 
+The browser preview launcher now redirects the plain root address to the current engine session. Fresh tabs and bookmarks no longer require manually carrying the per-launch engine URL/token; this also replaces stale remembered connections after a launcher restart. The redirect stays loopback-only and is not cached.
+
 Current local implementation and evidence supersede older "not merged" / "Windows untested" statements below. Delivery remains **NOT READY** until native validation is completed.
 
 - Source and dependency caches are in the laptop checkout. See [the implementation plan](engineering/windows-desktop-plan.md) and `DEVELOPMENT-TASKS.md` at the repository root.

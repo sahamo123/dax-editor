@@ -30,7 +30,9 @@ The environment script changes only that shell. It selects local runtimes, writa
 
 For a working development preview while native launch is blocked, double-click `Start Development Preview.cmd` (or run `pnpm dev:preview` after entering the local toolchain environment). This opens the same editor in the default browser with the packaged engine and offline AI. It binds to loopback only on port 4175; projects and model data persist in the ignored `.dax-data/` folder. Keep its console open and press Ctrl+C to shut down. The launcher uses Windows' built-in `explorer.exe` to open the browser; no new dependency is required. Browser imports use typed local file paths, and native dialogs/drag-and-drop still need separate validation.
 
-`node scripts/dev-preview.mjs --smoke` verifies the frontend, authenticated engine and running local model, then shuts down without opening a browser. This is an explicit real-model check; default tests do not download or start models.
+Opening the plain preview address automatically supplies the current engine connection, including in a fresh browser tab or after restarting the launcher. The loopback-only launcher redirects the root page using the existing session-token URL mechanism; the redirect is not cached. Keep the launcher running while editing.
+
+`node scripts/dev-preview.mjs --smoke` verifies the plain-link redirect, frontend, authenticated engine and running local model, then shuts down without opening a browser. This is an explicit real-model check; default tests do not download or start models.
 
 ```powershell
 .\scripts\Build-Windows.ps1 -Installer

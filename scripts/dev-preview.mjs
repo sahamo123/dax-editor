@@ -16,8 +16,32 @@ if (!existsSync(engineFile) || !existsSync(join(desktop, "dist/index.html"))) {
 const { preview } = await import(
   pathToFileURL(join(desktop, "node_modules/vite/dist/node/index.js")).href
 );
+let connectionUrl;
 const web = await preview({
   root: desktop,
+  plugins: [
+    {
+      name: "preview-engine-connection",
+      configurePreviewServer(server) {
+        // A plain bookmark or a different browser tab needs this launch's connection,
+        // rather than stale session storage or a token copied by hand.
+        server.middlewares.use((request, response, next) => {
+          if (request.url !== "/" || request.headers.host !== "127.0.0.1:4175") return next();
+          if (!connectionUrl) {
+            response.writeHead(503, { "Retry-After": "1", "Cache-Control": "no-store" });
+            response.end("Editor engine is starting. Reload in a moment.");
+            return;
+          }
+          response.writeHead(302, {
+            Location: connectionUrl,
+            "Cache-Control": "no-store",
+            "Referrer-Policy": "no-referrer",
+          });
+          response.end();
+        });
+      },
+    },
+  ],
   preview: { host: "127.0.0.1", port: 4175, strictPort: true, open: false },
 });
 const origin = "http://127.0.0.1:4175";
@@ -83,6 +107,7 @@ try {
       }
     });
   });
+  connectionUrl = `${origin}/?${new URLSearchParams({ server: info.url, token: info.token })}`;
   const health = await fetch(`${info.url}/api/health`, {
     headers: { Authorization: `Bearer ${info.token}` },
   });
@@ -92,6 +117,9 @@ try {
     `Development preview ready at ${origin}. Project data: .dax-data. Press Ctrl+C to stop.`,
   );
   if (process.argv.includes("--smoke")) {
+    const entry = await fetch(origin, { redirect: "manual" });
+    if (entry.status !== 302 || entry.headers.get("location") !== connectionUrl)
+      throw new Error("Plain preview link did not receive the current engine connection.");
     const status = await fetch(`${info.url}/api/local-model`, {
       headers: { Authorization: `Bearer ${info.token}` },
     }).then((response) => response.json());
@@ -101,8 +129,7 @@ try {
     );
     await stop();
   } else if (!process.argv.includes("--no-open")) {
-    const url = `${origin}/?${new URLSearchParams({ server: info.url, token: info.token })}`;
-    spawn("explorer.exe", [url], { stdio: "ignore", windowsHide: true }).on("error", () => {
+    spawn("explorer.exe", [origin], { stdio: "ignore", windowsHide: true }).on("error", () => {
       console.error("Browser could not open. Restart with Start Development Preview.cmd.");
       void stop();
     });
