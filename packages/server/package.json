@@ -1,0 +1,40 @@
+{
+  "name": "@dax/server",
+  "version": "0.0.1",
+  "description": "Local HTTP + WebSocket engine server: the desktop app's backend. Implements @dax/protocol over the core command registry.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "dax-server": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json",
+    "test": "vitest run",
+    "docs:check": "typedoc",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@dax/core": "workspace:*",
+    "@dax/protocol": "workspace:*",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.12",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

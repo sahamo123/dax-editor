@@ -1,0 +1,381 @@
+{
+  "systeminfo": "WHISPER : COREML = 0 | OPENVINO = 0 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | AVX512 = 1 | AVX512_VBMI = 1 | AVX512_VNNI = 1 | AVX512_BF16 = 1 | AMX_INT8 = 1 | OPENMP = 1 | REPACK = 1 | ",
+  "model": {
+    "type": "tiny",
+    "multilingual": false,
+    "vocab": 51864,
+    "audio": {
+      "ctx": 1500,
+      "state": 384,
+      "head": 6,
+      "layer": 4
+    },
+    "text": {
+      "ctx": 448,
+      "state": 384,
+      "head": 6,
+      "layer": 4
+    },
+    "mels": 80,
+    "ftype": 1
+  },
+  "params": {
+    "model": "models/ggml-tiny.en.bin",
+    "language": "en",
+    "translate": false
+  },
+  "result": {
+    "language": "en"
+  },
+  "transcription": [
+    {
+      "timestamps": {
+        "from": "00:00:00,000",
+        "to": "00:00:10,360"
+      },
+      "offsets": {
+        "from": 0,
+        "to": 10360
+      },
+      "text": " and so my fellow Americans ask not what your country can do for you ask what you can do for your country",
+      "tokens": [
+        {
+          "text": "[_BEG_]",
+          "timestamps": {
+            "from": "00:00:00,000",
+            "to": "00:00:00,000"
+          },
+          "offsets": {
+            "from": 0,
+            "to": 0
+          },
+          "id": 50363,
+          "p": 0.82606,
+          "t_dtw": -1
+        },
+        {
+          "text": " and",
+          "timestamps": {
+            "from": "00:00:00,320",
+            "to": "00:00:00,430"
+          },
+          "offsets": {
+            "from": 320,
+            "to": 430
+          },
+          "id": 290,
+          "p": 0.148502,
+          "t_dtw": -1
+        },
+        {
+          "text": " so",
+          "timestamps": {
+            "from": "00:00:00,430",
+            "to": "00:00:00,720"
+          },
+          "offsets": {
+            "from": 430,
+            "to": 720
+          },
+          "id": 523,
+          "p": 0.923627,
+          "t_dtw": -1
+        },
+        {
+          "text": " my",
+          "timestamps": {
+            "from": "00:00:00,720",
+            "to": "00:00:00,970"
+          },
+          "offsets": {
+            "from": 720,
+            "to": 970
+          },
+          "id": 616,
+          "p": 0.742246,
+          "t_dtw": -1
+        },
+        {
+          "text": " fellow",
+          "timestamps": {
+            "from": "00:00:01,020",
+            "to": "00:00:01,880"
+          },
+          "offsets": {
+            "from": 1020,
+            "to": 1880
+          },
+          "id": 5891,
+          "p": 0.998481,
+          "t_dtw": -1
+        },
+        {
+          "text": " Americans",
+          "timestamps": {
+            "from": "00:00:01,880",
+            "to": "00:00:02,120"
+          },
+          "offsets": {
+            "from": 1880,
+            "to": 2120
+          },
+          "id": 3399,
+          "p": 0.776696,
+          "t_dtw": -1
+        },
+        {
+          "text": " ask",
+          "timestamps": {
+            "from": "00:00:03,290",
+            "to": "00:00:03,650"
+          },
+          "offsets": {
+            "from": 3290,
+            "to": 3650
+          },
+          "id": 1265,
+          "p": 0.569105,
+          "t_dtw": -1
+        },
+        {
+          "text": " not",
+          "timestamps": {
+            "from": "00:00:04,010",
+            "to": "00:00:04,290"
+          },
+          "offsets": {
+            "from": 4010,
+            "to": 4290
+          },
+          "id": 407,
+          "p": 0.840368,
+          "t_dtw": -1
+        },
+        {
+          "text": " what",
+          "timestamps": {
+            "from": "00:00:05,410",
+            "to": "00:00:05,570"
+          },
+          "offsets": {
+            "from": 5410,
+            "to": 5570
+          },
+          "id": 644,
+          "p": 0.683825,
+          "t_dtw": -1
+        },
+        {
+          "text": " your",
+          "timestamps": {
+            "from": "00:00:05,660",
+            "to": "00:00:05,780"
+          },
+          "offsets": {
+            "from": 5660,
+            "to": 5780
+          },
+          "id": 534,
+          "p": 0.96996,
+          "t_dtw": -1
+        },
+        {
+          "text": " country",
+          "timestamps": {
+            "from": "00:00:05,780",
+            "to": "00:00:06,340"
+          },
+          "offsets": {
+            "from": 5780,
+            "to": 6340
+          },
+          "id": 1499,
+          "p": 0.98147,
+          "t_dtw": -1
+        },
+        {
+          "text": " can",
+          "timestamps": {
+            "from": "00:00:06,340",
+            "to": "00:00:06,650"
+          },
+          "offsets": {
+            "from": 6340,
+            "to": 6650
+          },
+          "id": 460,
+          "p": 0.966483,
+          "t_dtw": -1
+        },
+        {
+          "text": " do",
+          "timestamps": {
+            "from": "00:00:06,670",
+            "to": "00:00:06,880"
+          },
+          "offsets": {
+            "from": 6670,
+            "to": 6880
+          },
+          "id": 466,
+          "p": 0.989321,
+          "t_dtw": -1
+        },
+        {
+          "text": " for",
+          "timestamps": {
+            "from": "00:00:06,880",
+            "to": "00:00:07,040"
+          },
+          "offsets": {
+            "from": 6880,
+            "to": 7040
+          },
+          "id": 329,
+          "p": 0.928582,
+          "t_dtw": -1
+        },
+        {
+          "text": " you",
+          "timestamps": {
+            "from": "00:00:07,040",
+            "to": "00:00:07,550"
+          },
+          "offsets": {
+            "from": 7040,
+            "to": 7550
+          },
+          "id": 345,
+          "p": 0.978825,
+          "t_dtw": -1
+        },
+        {
+          "text": " ask",
+          "timestamps": {
+            "from": "00:00:08,190",
+            "to": "00:00:08,470"
+          },
+          "offsets": {
+            "from": 8190,
+            "to": 8470
+          },
+          "id": 1265,
+          "p": 0.362982,
+          "t_dtw": -1
+        },
+        {
+          "text": " what",
+          "timestamps": {
+            "from": "00:00:08,630",
+            "to": "00:00:08,750"
+          },
+          "offsets": {
+            "from": 8630,
+            "to": 8750
+          },
+          "id": 644,
+          "p": 0.870133,
+          "t_dtw": -1
+        },
+        {
+          "text": " you",
+          "timestamps": {
+            "from": "00:00:08,910",
+            "to": "00:00:09,000"
+          },
+          "offsets": {
+            "from": 8910,
+            "to": 9000
+          },
+          "id": 345,
+          "p": 0.848019,
+          "t_dtw": -1
+        },
+        {
+          "text": " can",
+          "timestamps": {
+            "from": "00:00:09,000",
+            "to": "00:00:09,360"
+          },
+          "offsets": {
+            "from": 9000,
+            "to": 9360
+          },
+          "id": 460,
+          "p": 0.716411,
+          "t_dtw": -1
+        },
+        {
+          "text": " do",
+          "timestamps": {
+            "from": "00:00:09,360",
+            "to": "00:00:09,540"
+          },
+          "offsets": {
+            "from": 9360,
+            "to": 9540
+          },
+          "id": 466,
+          "p": 0.922166,
+          "t_dtw": -1
+        },
+        {
+          "text": " for",
+          "timestamps": {
+            "from": "00:00:09,540",
+            "to": "00:00:09,670"
+          },
+          "offsets": {
+            "from": 9540,
+            "to": 9670
+          },
+          "id": 329,
+          "p": 0.968487,
+          "t_dtw": -1
+        },
+        {
+          "text": " your",
+          "timestamps": {
+            "from": "00:00:09,720",
+            "to": "00:00:09,940"
+          },
+          "offsets": {
+            "from": 9720,
+            "to": 9940
+          },
+          "id": 534,
+          "p": 0.986004,
+          "t_dtw": -1
+        },
+        {
+          "text": " country",
+          "timestamps": {
+            "from": "00:00:09,940",
+            "to": "00:00:10,350"
+          },
+          "offsets": {
+            "from": 9940,
+            "to": 10350
+          },
+          "id": 1499,
+          "p": 0.997944,
+          "t_dtw": -1
+        },
+        {
+          "text": "[_TT_518]",
+          "timestamps": {
+            "from": "00:00:10,360",
+            "to": "00:00:10,360"
+          },
+          "offsets": {
+            "from": 10360,
+            "to": 10360
+          },
+          "id": 50881,
+          "p": 0.0144407,
+          "t_dtw": -1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "word-tails-kept",
+  "description": "Tighten the pauses between words without cutting off the end of any word.",
+  "fixture": "word-tails",
+  "prompt": "Tighten the pauses between the words, but do not cut off the end of any word.",
+  "tags": ["cuts", "audio"],
+  "checks": [{ "type": "clippedTail", "max": 0.1 }, { "type": "duration", "min": 3.5, "max": 6.0 }]
+}

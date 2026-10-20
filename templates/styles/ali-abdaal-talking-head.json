@@ -1,0 +1,238 @@
+{
+  "id": "ali-abdaal-talking-head",
+  "version": 1,
+  "kind": "style",
+  "name": "Talking head with chapters (Ali Abdaal-style)",
+  "description": "Friendly 16:9 talking head: pauses and fillers trimmed, the topic stated up front, a name lower-third and an end card. Gentle zoom-ins on every third shot and a quiet music bed (when you supply music) are added. Chapter cards, B-roll and sound effects are listed as not available yet.",
+  "tags": ["talking-head", "youtube", "long-form", "chapters", "education"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.3",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Video topic",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "How I study for exams"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Speaker name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Speaker role or company",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Watch this next",
+      "example": "Watch this next"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 480,
+        "max": 900
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 480,
+            "max": 900
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "standard"
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "name": "Topic and promise",
+      "durationSec": {
+        "min": 5,
+        "max": 20
+      },
+      "guidance": "Say the topic and what the viewer will get in the first lines.",
+      "footage": "Speaker to camera.",
+      "overlay": "title"
+    },
+    {
+      "id": "chapters",
+      "name": "Chapters",
+      "durationSec": {
+        "min": 240,
+        "max": 600
+      },
+      "guidance": "One idea per chapter, each opening with a title card.",
+      "footage": "Talking head with B-roll that shows what is said."
+    },
+    {
+      "id": "recap",
+      "name": "Recap",
+      "durationSec": {
+        "min": 15,
+        "max": 30
+      },
+      "guidance": "Repeat the main points in one breath."
+    },
+    {
+      "id": "cta",
+      "name": "Next video",
+      "durationSec": {
+        "min": 5,
+        "max": 10
+      },
+      "guidance": "Point to one next video.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 4,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.4,
+    "out": 0.8
+  },
+  "effects": [
+    {
+      "id": "zoom-ins",
+      "kind": "zoom",
+      "title": "Zoom-ins at key moments",
+      "description": "A gentle 10 percent tighter frame on every third shot, not on every sentence.",
+      "mode": "alternate-cuts",
+      "scale": 1.1,
+      "every": 3,
+      "minShotSec": 2
+    },
+    {
+      "id": "music-bed",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "A quiet music bed under the voice, lowered while someone speaks.",
+      "level": 0.15
+    }
+  ],
+  "deferred": [
+    {
+      "id": "broll",
+      "title": "Purposeful B-roll",
+      "description": "Cutaways that illustrate what is being said; none that only fill time.",
+      "requires": ["broll"]
+    },
+    {
+      "id": "chapter-cards",
+      "title": "Chapter cards",
+      "description": "Full-screen title cards at each topic change.",
+      "requires": ["graphic-cards"]
+    },
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Subtitles added in post for sound-off viewing.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "sound-design",
+      "title": "Sound effects",
+      "description": "Small sound effects at key moments.",
+      "requires": ["sound-effects"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "advertising",
+      "text": "If a company paid you, gave you the product free, or you have any other connection to it, say so clearly in the video, not only in the caption or description."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "general",
+      "text": "The style name describes a publicly discussed editing pattern. This template is not affiliated with or endorsed by any creator, and it does not copy anyone's footage, graphics or captions."
+    }
+  ],
+  "confirmations": []
+}

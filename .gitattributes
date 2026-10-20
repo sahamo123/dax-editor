@@ -1,0 +1,7 @@
+# Keep line endings identical on every OS so formatting checks pass on Windows too.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.mp4 binary
+*.ico binary
+*.icns binary

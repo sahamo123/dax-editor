@@ -1,0 +1,217 @@
+{
+  "id": "events-weddings",
+  "version": 1,
+  "kind": "industry",
+  "name": "Events and weddings",
+  "description": "Highlight film or teaser: names and date title, a vendor credit end card and slow fades. No cuts are made, so vows and speeches are never trimmed. Music with deep ducking under speech (when you supply music) is added. Music cuts and captions are listed as not available yet.",
+  "tags": ["events", "wedding", "highlights", "youtube", "reels"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 14",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Names or event title",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Ana and Marco"
+    },
+    {
+      "name": "date_text",
+      "label": "Date and place",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "14 June 2026 · Lake Como"
+    },
+    {
+      "name": "business_name",
+      "label": "Your studio name (credit)",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Lakeside Films"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 30,
+        "max": 300
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 180,
+            "max": 300
+          },
+          "note": "Highlight films usually run 3 to 5 minutes"
+        },
+        {
+          "platform": "website",
+          "lengthSec": {
+            "min": 30,
+            "max": 60
+          },
+          "note": "Teaser"
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "skip": true,
+    "reason": "vows, speeches and music-led moments should never be trimmed automatically"
+  },
+  "beats": [
+    {
+      "id": "opening",
+      "name": "Opening image",
+      "durationSec": {
+        "min": 0,
+        "max": 5
+      },
+      "guidance": "A single beautiful image."
+    },
+    {
+      "id": "names",
+      "name": "Names and date",
+      "durationSec": {
+        "min": 5,
+        "max": 5
+      },
+      "guidance": "Title card.",
+      "overlay": "names"
+    },
+    {
+      "id": "moments",
+      "name": "Key moments",
+      "durationSec": {
+        "min": 45,
+        "max": 100
+      },
+      "guidance": "Three to five moments of 15 to 20 seconds, cut to the music."
+    },
+    {
+      "id": "emotional",
+      "name": "Emotional beat",
+      "durationSec": {
+        "min": 15,
+        "max": 30
+      },
+      "guidance": "Vows or speeches, uncut."
+    },
+    {
+      "id": "credit",
+      "name": "Vendor credit",
+      "durationSec": {
+        "min": 5,
+        "max": 5
+      },
+      "guidance": "Your credit.",
+      "overlay": "credit"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "names",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "subtitle": "{{date_text}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 3,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.35,
+      "priority": 1
+    },
+    {
+      "id": "credit",
+      "preset": "title-fade",
+      "text": "{{business_name}}",
+      "subtitle": "{{url}}",
+      "when": "business_name",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 1,
+    "out": 2
+  },
+  "effects": [
+    {
+      "id": "bed",
+      "kind": "music",
+      "title": "Music with ducking under speech",
+      "description": "Music that drops fully under vows and speeches and comes back in the gaps.",
+      "level": 0.2,
+      "duckAmountDb": 20
+    }
+  ],
+  "deferred": [
+    {
+      "id": "music",
+      "title": "Music swells",
+      "description": "Cut moments to the music. Music can be added, but the editor cannot find the beats.",
+      "requires": ["beat-matching"]
+    },
+    {
+      "id": "captions",
+      "title": "Captions for speeches",
+      "description": "Captions for the speeches.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "slowmo",
+      "title": "Slow motion",
+      "description": "Slow motion on key moments.",
+      "requires": ["speed-change"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "privacy",
+      "text": "Get consent from the couple or hosts and from guests for social use, especially minors, and check venue filming rules."
+    },
+    {
+      "category": "general",
+      "text": "Paid vendors need licensed music for client work and for promotion."
+    }
+  ],
+  "confirmations": []
+}

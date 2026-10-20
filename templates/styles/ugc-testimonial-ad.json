@@ -1,0 +1,259 @@
+{
+  "id": "ugc-testimonial-ad",
+  "version": 1,
+  "kind": "style",
+  "name": "UGC testimonial ad",
+  "description": "Vertical customer-style ad: a pattern-interrupt hook in the first two seconds, the customer's name, an offer callout and a shop-now end card. Small punch-ins on alternate shots and a quiet track (when you supply music) are added. Captions are listed as not available yet.",
+  "tags": ["ad", "ugc", "testimonial", "short-form", "tiktok", "reels", "meta"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.11",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Pattern-interrupt hook",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "I did not expect this to work"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Customer first name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Sam"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Customer detail (optional)",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Customer since 2024"
+    },
+    {
+      "name": "offer",
+      "label": "Offer",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "20% off this week"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Shop now",
+      "example": "Shop now"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "youtube-shorts"
+        }
+      ]
+    },
+    {
+      "aspect": "4:5",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "facebook-feed"
+        },
+        {
+          "platform": "instagram-feed"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "standard"
+  },
+  "beats": [
+    {
+      "id": "interrupt",
+      "name": "Pattern interrupt",
+      "durationSec": {
+        "min": 0,
+        "max": 2
+      },
+      "guidance": "A problem or surprise in the first two seconds.",
+      "footage": "Handheld, natural light.",
+      "overlay": "hook"
+    },
+    {
+      "id": "problem",
+      "name": "Problem",
+      "durationSec": {
+        "min": 2,
+        "max": 8
+      },
+      "guidance": "Say the problem the way a customer would."
+    },
+    {
+      "id": "use",
+      "name": "Product in use",
+      "durationSec": {
+        "min": 6,
+        "max": 15
+      },
+      "guidance": "Show it being used."
+    },
+    {
+      "id": "result",
+      "name": "Result",
+      "durationSec": {
+        "min": 4,
+        "max": 8
+      },
+      "guidance": "One real result."
+    },
+    {
+      "id": "offer",
+      "name": "Offer and call to action",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "State the offer and one action.",
+      "overlay": "offer"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "hook",
+      "preset": "title-pop",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.2,
+      "duration": 2,
+      "minDuration": 1,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 2.5,
+      "duration": 3,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "offer",
+      "preset": "callout-slide-up",
+      "text": "{{offer}}",
+      "when": "offer",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3.5,
+      "minDuration": 1.5,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3.5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.3
+  },
+  "effects": [
+    {
+      "id": "punch-ins",
+      "kind": "zoom",
+      "title": "Handheld-style punch-ins",
+      "description": "A small 8 percent tighter frame on every second shot.",
+      "mode": "alternate-cuts",
+      "scale": 1.08,
+      "every": 2,
+      "minShotSec": 1.5
+    },
+    {
+      "id": "audio",
+      "kind": "music",
+      "title": "Low background track",
+      "description": "A quiet track under the voice, lowered while someone speaks.",
+      "level": 0.15
+    }
+  ],
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Short on-screen captions for sound-off viewing.",
+      "requires": ["captions"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "testimonials",
+      "text": "Testimonials and reviews must come from real people who agreed to appear and reflect their real experience. If you paid them or gave them something free, say so in the video itself, not only in the caption."
+    },
+    {
+      "category": "advertising",
+      "text": "Claims about results, savings, speed or income need evidence you can show. Avoid guarantees, and say 'results vary' next to any result you show."
+    },
+    {
+      "category": "privacy",
+      "text": "Get consent from every identifiable person in the footage, and blur or crop anyone who has not agreed. Minors need a parent or guardian's consent."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "permission",
+      "ask": "Do you have written permission from the person on camera to use this video in an ad?"
+    },
+    {
+      "id": "claims-true",
+      "ask": "Is every claim and result in the video true and backed up?"
+    }
+  ]
+}

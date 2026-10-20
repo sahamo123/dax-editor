@@ -1,0 +1,35 @@
+name: Work item (maintainers)
+description: A scoped task that a contributor or AI agent can pick up without further context
+labels: ["task"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this exists. Link the spec (`docs/specs/...`) or ADR (`docs/adr/...`) if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist that is true when the work is done. Make each item testable.
+      placeholder: "- [ ] ...\n- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Where to start
+      description: Files or modules to read and change, by repository-relative path.
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: Things a reader might be tempted to do but should not in this issue.
+  - type: textarea
+    id: verify
+    attributes:
+      label: How to verify
+      description: Commands to run and the output that means success.
+      placeholder: "pnpm check\npnpm eval --adapter oracle"

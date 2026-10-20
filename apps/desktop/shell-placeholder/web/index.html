@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dax Editor (shell placeholder)</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Dax Editor <span class="tag">shell placeholder</span></h1>
+      <p class="muted">
+        Temporary page that exercises the native shell until the real UI lands:
+        sidecar server, native file dialog, file drag-and-drop, video playback.
+      </p>
+    </header>
+
+    <main>
+      <section aria-labelledby="server-h">
+        <h2 id="server-h">Engine server</h2>
+        <dl id="server">
+          <dt>Status</dt><dd id="srv-status" class="pill wait">waiting</dd>
+          <dt>URL</dt><dd id="srv-url">-</dd>
+          <dt>Version</dt><dd id="srv-version">-</dd>
+          <dt>Token</dt><dd id="srv-token">-</dd>
+          <dt>Page to server</dt><dd id="srv-health">-</dd>
+        </dl>
+      </section>
+
+      <section aria-labelledby="media-h">
+        <h2 id="media-h">Video</h2>
+        <div class="row">
+          <button id="open" type="button">Open video...</button>
+          <input id="path" type="text" placeholder="or type an absolute path" aria-label="Video path" />
+          <button id="load" type="button">Load</button>
+        </div>
+        <div id="drop" class="drop">Drop a video file anywhere on this window</div>
+        <p id="picked" class="muted">No file chosen.</p>
+        <video id="player" controls muted preload="metadata"></video>
+        <p id="player-status" class="muted">-</p>
+      </section>
+
+      <section aria-labelledby="env-h">
+        <h2 id="env-h">Webview capabilities</h2>
+        <ul id="env"></ul>
+      </section>
+
+      <section aria-labelledby="log-h">
+        <h2 id="log-h">Log</h2>
+        <p class="row">
+          <button id="selftest" type="button">Run permission self-test</button>
+        </p>
+        <pre id="log" aria-live="polite"></pre>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>

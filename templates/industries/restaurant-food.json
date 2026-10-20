@@ -1,0 +1,233 @@
+{
+  "id": "restaurant-food",
+  "version": 1,
+  "kind": "industry",
+  "name": "Restaurant and food",
+  "description": "Short food video that keeps natural sound (no cuts): name and place lower-third, an optional dated offer and a booking end card. Music (when you supply it) is added. Step captions and sound design are listed as not available yet.",
+  "tags": ["restaurant", "food", "recipe", "reels", "tiktok"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 5",
+  "variables": [
+    {
+      "name": "business_name",
+      "label": "Restaurant name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Maple Street Kitchen"
+    },
+    {
+      "name": "location",
+      "label": "Location",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Downtown Springfield"
+    },
+    {
+      "name": "offer",
+      "label": "Dated offer (optional)",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "2 for 1 pasta until Sunday"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Book a table",
+      "example": "Book a table"
+    },
+    {
+      "name": "phone",
+      "label": "Phone number",
+      "type": "phone",
+      "required": false,
+      "example": "+1 555 010 0199"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "youtube-shorts",
+          "lengthSec": {
+            "min": 15,
+            "max": 60
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "4:5",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-feed"
+        },
+        {
+          "platform": "facebook-feed"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "skip": true,
+    "reason": "sizzle, pour and crunch are part of the video; cut dead air by hand if you need to"
+  },
+  "beats": [
+    {
+      "id": "money-shot",
+      "name": "Money shot",
+      "durationSec": {
+        "min": 0,
+        "max": 2
+      },
+      "guidance": "Start on the pour, sizzle or pull-apart.",
+      "footage": "Extreme close-up."
+    },
+    {
+      "id": "process",
+      "name": "Process",
+      "durationSec": {
+        "min": 3,
+        "max": 15
+      },
+      "guidance": "At most three steps, with close-ups."
+    },
+    {
+      "id": "plate",
+      "name": "Finished plate",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Well lit, no text over the food."
+    },
+    {
+      "id": "where",
+      "name": "Where and when",
+      "durationSec": {
+        "min": 3,
+        "max": 4
+      },
+      "guidance": "Name, place and how to book.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{business_name}}",
+      "subtitle": "{{location}}",
+      "when": "business_name",
+      "anchor": "start",
+      "offset": 2,
+      "duration": 3.5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "offer",
+      "preset": "callout-slide-up",
+      "text": "{{offer}}",
+      "when": "offer",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{phone}} · {{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3.5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.4
+  },
+  "effects": [
+    {
+      "id": "music-bed",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "Licensed music under the video, lowered while someone speaks.",
+      "level": 0.2
+    }
+  ],
+  "deferred": [
+    {
+      "id": "step-text",
+      "title": "Short step captions",
+      "description": "A few words per step.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "sound-design",
+      "title": "Sound design",
+      "description": "Sizzle, pour and chop sounds layered over the visuals.",
+      "requires": ["sound-effects"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "advertising",
+      "text": "Allergen, 'healthy' or sourcing claims need to be true and provable. Dated offers must be true on the days shown."
+    },
+    {
+      "category": "copyright",
+      "text": "If you adapt someone else's recipe or video, credit them and check you may share it."
+    },
+    {
+      "category": "advertising",
+      "text": "Alcohol promotions should be aimed at an age-appropriate audience."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "offer-true",
+      "ask": "Is the offer shown valid on the dates you will publish?"
+    }
+  ]
+}

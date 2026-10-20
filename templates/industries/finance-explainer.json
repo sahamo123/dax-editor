@@ -1,0 +1,275 @@
+{
+  "id": "finance-explainer",
+  "version": 1,
+  "kind": "industry",
+  "name": "Finance explainer",
+  "description": "Educational money video with a standing disclaimer across the whole clip, a question title, a presenter lower-third and a source or next-step end card. Captions and source cards are listed as not available yet.",
+  "tags": ["finance", "investing", "education", "youtube", "linkedin"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 9",
+  "variables": [
+    {
+      "name": "title",
+      "label": "The question",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "What is an index fund?"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Speaker name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Speaker role or company",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "disclaimer",
+      "label": "Disclaimer line shown at the bottom",
+      "type": "text",
+      "required": false,
+      "maxLength": 100,
+      "default": "Educational only, not financial advice. Numbers are illustrative.",
+      "example": "Educational only, not financial advice. Numbers are illustrative."
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Read the sources",
+      "example": "Read the sources"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 300,
+        "max": 720
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 300,
+            "max": 720
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        }
+      ]
+    },
+    {
+      "aspect": "1:1",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "linkedin",
+          "lengthSec": {
+            "min": 30,
+            "max": 60
+          }
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "gentle"
+  },
+  "beats": [
+    {
+      "id": "question",
+      "name": "Question",
+      "durationSec": {
+        "min": 0,
+        "max": 5
+      },
+      "guidance": "Open on the question.",
+      "overlay": "title"
+    },
+    {
+      "id": "definition",
+      "name": "Definition",
+      "durationSec": {
+        "min": 5,
+        "max": 20
+      },
+      "guidance": "Plain words."
+    },
+    {
+      "id": "example",
+      "name": "Worked example",
+      "durationSec": {
+        "min": 20,
+        "max": 60
+      },
+      "guidance": "Label every number as illustrative."
+    },
+    {
+      "id": "risks",
+      "name": "Risks and limits",
+      "durationSec": {
+        "min": 10,
+        "max": 20
+      },
+      "guidance": "Say what can go wrong."
+    },
+    {
+      "id": "disclaimer",
+      "name": "Disclaimer",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Say it as well as show it."
+    },
+    {
+      "id": "cta",
+      "name": "Call to action",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "One next step.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 4,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "disclosure",
+      "preset": "caption-bottom",
+      "text": "{{disclaimer}}",
+      "when": "disclaimer",
+      "anchor": "full",
+      "offset": 0,
+      "minDuration": 1,
+      "priority": 0
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.4,
+    "out": 0.8
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Captions that spell out financial terms.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "sources",
+      "title": "Source lines and illustrative tags",
+      "description": "Source cards and an 'illustrative' tag on numbers.",
+      "requires": ["graphic-cards"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "finance",
+      "text": "Rules on financial promotions vary by country and role. In many places, projecting returns or guaranteeing results in a communication is restricted, and a firm may have to approve content that an influencer posts for it."
+    },
+    {
+      "category": "finance",
+      "text": "Keep examples labelled as illustrative and sourced, and avoid cherry-picked charts."
+    },
+    {
+      "category": "advertising",
+      "text": "If a company paid you, gave you the product free, or you have any other connection to it, say so clearly in the video, not only in the caption or description."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "no-guarantee",
+      "ask": "Does the video avoid projected returns and 'guaranteed' language?"
+    },
+    {
+      "id": "numbers",
+      "ask": "Is every number labelled illustrative or sourced?"
+    },
+    {
+      "id": "approval",
+      "ask": "If you work for or are paid by a regulated firm, has its compliance team approved this video?"
+    }
+  ]
+}

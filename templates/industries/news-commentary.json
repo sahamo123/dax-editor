@@ -1,0 +1,254 @@
+{
+  "id": "news-commentary",
+  "version": 1,
+  "kind": "industry",
+  "name": "News and commentary",
+  "description": "Fast commentary video: a claim up front, source and date lower-third, a standing 'commentary' label and an end card. Captions, quote cards and B-roll are listed as not available yet.",
+  "tags": ["news", "commentary", "explainer", "shorts", "youtube"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 12",
+  "variables": [
+    {
+      "name": "title",
+      "label": "The claim or question",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "The new rule changes everything?"
+    },
+    {
+      "name": "source_name",
+      "label": "Source",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "City Council minutes"
+    },
+    {
+      "name": "source_date",
+      "label": "Source date",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "example": "12 October 2026"
+    },
+    {
+      "name": "label",
+      "label": "Label shown at the bottom",
+      "type": "text",
+      "required": false,
+      "maxLength": 100,
+      "default": "Commentary: opinion, not reporting.",
+      "example": "Commentary: opinion, not reporting."
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Sources in the description",
+      "example": "Sources in the description"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 45,
+        "max": 90
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        }
+      ]
+    },
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 360,
+        "max": 720
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 360,
+            "max": 720
+          }
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "standard"
+  },
+  "beats": [
+    {
+      "id": "claim",
+      "name": "Claim or question",
+      "durationSec": {
+        "min": 0,
+        "max": 5
+      },
+      "guidance": "State it plainly.",
+      "overlay": "hook"
+    },
+    {
+      "id": "facts",
+      "name": "What happened",
+      "durationSec": {
+        "min": 10,
+        "max": 20
+      },
+      "guidance": "Dates and numbers, each with a source."
+    },
+    {
+      "id": "analysis",
+      "name": "Analysis",
+      "durationSec": {
+        "min": 20,
+        "max": 60
+      },
+      "guidance": "Your view, marked as your view."
+    },
+    {
+      "id": "counter",
+      "name": "Counter-view",
+      "durationSec": {
+        "min": 10,
+        "max": 15
+      },
+      "guidance": "Give the best opposing point."
+    },
+    {
+      "id": "sources",
+      "name": "Sources",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Show where facts come from.",
+      "overlay": "source"
+    },
+    {
+      "id": "cta",
+      "name": "Call to action",
+      "durationSec": {
+        "min": 2,
+        "max": 3
+      },
+      "guidance": "One ask.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "hook",
+      "preset": "title-pop",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.3,
+      "duration": 2.5,
+      "minDuration": 1,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "source",
+      "preset": "lower-third-slide",
+      "text": "{{source_name}}",
+      "subtitle": "{{source_date}}",
+      "when": "source_name",
+      "anchor": "end",
+      "offset": 5,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "disclosure",
+      "preset": "caption-bottom",
+      "text": "{{label}}",
+      "when": "label",
+      "anchor": "full",
+      "offset": 0,
+      "minDuration": 1,
+      "priority": 0
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.3
+  },
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Captions with quotes word for word.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "quote-cards",
+      "title": "Quote cards",
+      "description": "Attributed quote cards.",
+      "requires": ["graphic-cards"]
+    },
+    {
+      "id": "broll",
+      "title": "Footage cutaways",
+      "description": "Dated, attributed footage.",
+      "requires": ["broll"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "general",
+      "text": "Statements about named people can raise defamation and privacy issues. Keep to facts you can source, and mark opinion as opinion."
+    },
+    {
+      "category": "copyright",
+      "text": "Footage, images, memes, logos and music from other people need permission or a licence that covers your use. Fair use depends on the country and is not automatic."
+    },
+    {
+      "category": "ai-disclosure",
+      "text": "If any shot is AI-generated or altered to look real, check whether the platform requires a disclosure label."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "sourced",
+      "ask": "Is every number and quote sourced and dated?"
+    },
+    {
+      "id": "footage-dated",
+      "ask": "Is any older footage clearly labelled as older?"
+    }
+  ]
+}

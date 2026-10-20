@@ -1,0 +1,206 @@
+{
+  "id": "documentary-interview",
+  "version": 1,
+  "kind": "style",
+  "name": "Documentary interview",
+  "description": "Interview edit that keeps the natural pauses: a title, the interviewee's name and role as a lower-third, and a thank-you end card. Subtle push-ins and a music bed (when you supply music) are added. B-roll cover and subtitles are listed as not available yet.",
+  "tags": ["documentary", "interview", "lower-third", "youtube", "long-form"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.16",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Film title",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Voices of the Valley"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Interviewee name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Interviewee role",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Thank you for watching",
+      "example": "Thank you for watching"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 300,
+        "max": 900
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 300,
+            "max": 900
+          }
+        },
+        {
+          "platform": "website",
+          "lengthSec": {
+            "min": 120,
+            "max": 600
+          }
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "gentle"
+  },
+  "beats": [
+    {
+      "id": "cold-open",
+      "name": "Cold open",
+      "durationSec": {
+        "min": 5,
+        "max": 15
+      },
+      "guidance": "Open on the strongest line, then cut to the title.",
+      "overlay": "title"
+    },
+    {
+      "id": "title-card",
+      "name": "Title card",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Show the title."
+    },
+    {
+      "id": "interview",
+      "name": "Interview",
+      "durationSec": {
+        "min": 120,
+        "max": 600
+      },
+      "guidance": "Cut with B-roll cover; let pauses carry weight.",
+      "overlay": "speaker"
+    },
+    {
+      "id": "close",
+      "name": "Closing",
+      "durationSec": {
+        "min": 10,
+        "max": 20
+      },
+      "guidance": "End on the interviewee's last thought.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.8,
+      "duration": 3.5,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 1,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.6,
+    "out": 1
+  },
+  "effects": [
+    {
+      "id": "bed",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "A music bed well below the voice, lowered while someone speaks.",
+      "level": 0.12
+    },
+    {
+      "id": "push-in",
+      "kind": "zoom",
+      "title": "Subtle push-ins",
+      "description": "A slow, small push-in (5 percent) on every shot of four seconds or more.",
+      "mode": "push-in",
+      "scale": 1.05,
+      "minShotSec": 4
+    }
+  ],
+  "deferred": [
+    {
+      "id": "broll",
+      "title": "B-roll cover",
+      "description": "Archival and location footage over the interview.",
+      "requires": ["broll"]
+    },
+    {
+      "id": "subtitles",
+      "title": "Sentence subtitles",
+      "description": "Subtitles of at most two lines for platforms that need them.",
+      "requires": ["captions"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "privacy",
+      "text": "Get a signed release from every interviewee. Do not edit someone's words so the meaning changes."
+    },
+    {
+      "category": "copyright",
+      "text": "Footage, images, memes, logos and music from other people need permission or a licence that covers your use. Fair use depends on the country and is not automatic."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": []
+}

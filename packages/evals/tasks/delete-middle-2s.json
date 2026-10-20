@@ -1,0 +1,11 @@
+{
+  "id": "delete-middle-2s",
+  "description": "Delete a stated time range and close the gap.",
+  "fixture": "tone-silence-tone",
+  "prompt": "Delete the part from 2 seconds to 4 seconds.",
+  "tags": ["delete", "core"],
+  "checks": [
+    { "type": "duration", "min": 3.9, "max": 4.1 },
+    { "type": "clipCount", "min": 2, "max": 2 }
+  ]
+}

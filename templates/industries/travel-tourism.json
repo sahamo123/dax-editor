@@ -1,0 +1,247 @@
+{
+  "id": "travel-tourism",
+  "version": 1,
+  "kind": "industry",
+  "name": "Travel and tourism",
+  "description": "Place-first travel reel: place name title, a practical tip callout and a save-or-book end card. Natural footage is kept uncut. One music track (when you supply music) is added. Captions and speed ramps are listed as not available yet.",
+  "tags": ["travel", "tourism", "destination", "reels", "tiktok", "shorts"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 18",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Place name",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "Cinque Terre, Italy"
+    },
+    {
+      "name": "tip",
+      "label": "Practical tip",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Go before 9am to skip crowds"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Save for your trip",
+      "example": "Save for your trip"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "youtube-shorts"
+        }
+      ]
+    },
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 60,
+        "max": 120
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 60,
+            "max": 120
+          }
+        },
+        {
+          "platform": "website",
+          "lengthSec": {
+            "min": 60,
+            "max": 120
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "4:5",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-feed"
+        },
+        {
+          "platform": "facebook-feed"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "skip": true,
+    "reason": "scenery and ambient sound are the content, so no pauses are cut"
+  },
+  "beats": [
+    {
+      "id": "visual",
+      "name": "Specific visual",
+      "durationSec": {
+        "min": 0,
+        "max": 2
+      },
+      "guidance": "A named place, not a generic sweep.",
+      "overlay": "place"
+    },
+    {
+      "id": "do",
+      "name": "What to do",
+      "durationSec": {
+        "min": 3,
+        "max": 8
+      },
+      "guidance": "Say what the viewer can do there."
+    },
+    {
+      "id": "highlights",
+      "name": "Three highlights",
+      "durationSec": {
+        "min": 15,
+        "max": 24
+      },
+      "guidance": "5 to 8 seconds each."
+    },
+    {
+      "id": "tip",
+      "name": "Practical tip",
+      "durationSec": {
+        "min": 5,
+        "max": 8
+      },
+      "guidance": "Cost, time or access.",
+      "overlay": "tip"
+    },
+    {
+      "id": "cta",
+      "name": "Save or book",
+      "durationSec": {
+        "min": 3,
+        "max": 3
+      },
+      "guidance": "One ask.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "place",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.4,
+      "duration": 2.5,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "tip",
+      "preset": "callout-slide-up",
+      "text": "{{tip}}",
+      "when": "tip",
+      "anchor": "end",
+      "offset": 4,
+      "duration": 3.5,
+      "minDuration": 1.5,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.4,
+    "out": 0.6
+  },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Local or licensed music",
+      "description": "One music track under the whole video, lowered while someone speaks. The editor does not switch between upbeat and calm sections.",
+      "level": 0.25
+    }
+  ],
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Text on screen can replace narration.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "ramps",
+      "title": "Speed ramps",
+      "description": "Smooth speed changes on movement.",
+      "requires": ["speed-change"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "safety",
+      "text": "Drone flights usually need local permission or a licence; filming on private property needs permission."
+    },
+    {
+      "category": "privacy",
+      "text": "Get consent from every identifiable person in the footage, and blur or crop anyone who has not agreed. Minors need a parent or guardian's consent."
+    },
+    {
+      "category": "advertising",
+      "text": "'Best' or 'cheapest' claims need support, and prices must be current."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "prices",
+      "ask": "Are the prices and opening times shown current?"
+    }
+  ]
+}

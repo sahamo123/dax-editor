@@ -1,0 +1,237 @@
+{
+  "id": "minimal-corporate-linkedin",
+  "version": 1,
+  "kind": "style",
+  "name": "Minimal corporate (LinkedIn)",
+  "description": "Calm, brand-safe video for LinkedIn and company pages: topic and name on screen in the first seconds, a clean end card with the company name and address. A very quiet music bed and your logo on the end card (when you supply them) are added. Burned-in captions are listed as not available yet.",
+  "tags": ["corporate", "linkedin", "brand", "b2b", "announcement"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.14",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Topic",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "Our Q3 product update"
+    },
+    {
+      "name": "speaker_name",
+      "label": "Speaker name",
+      "type": "name",
+      "required": false,
+      "maxLength": 50,
+      "example": "Alex Rivera"
+    },
+    {
+      "name": "speaker_role",
+      "label": "Speaker role or company",
+      "type": "text",
+      "required": false,
+      "maxLength": 70,
+      "example": "Founder, Rivera Studio"
+    },
+    {
+      "name": "company",
+      "label": "Company name",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Rivera Studio"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "4:5",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "linkedin",
+          "lengthSec": {
+            "min": 15,
+            "max": 30
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "1:1",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "linkedin",
+          "lengthSec": {
+            "min": 15,
+            "max": 30
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 15,
+        "max": 90
+      },
+      "platforms": [
+        {
+          "platform": "linkedin",
+          "lengthSec": {
+            "min": 15,
+            "max": 90
+          },
+          "note": "In-stream video can run up to 90 seconds"
+        },
+        {
+          "platform": "website",
+          "lengthSec": {
+            "min": 30,
+            "max": 90
+          }
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "4:5",
+  "cleanup": {
+    "preset": "standard"
+  },
+  "beats": [
+    {
+      "id": "topic",
+      "name": "Topic and name",
+      "durationSec": {
+        "min": 0,
+        "max": 3
+      },
+      "guidance": "Put the topic and the speaker's name on screen at once.",
+      "overlay": "title"
+    },
+    {
+      "id": "message",
+      "name": "Message",
+      "durationSec": {
+        "min": 10,
+        "max": 25
+      },
+      "guidance": "One message, 3 to 6 seconds per shot."
+    },
+    {
+      "id": "proof",
+      "name": "Proof",
+      "durationSec": {
+        "min": 5,
+        "max": 10
+      },
+      "guidance": "A number, a customer or a product shot."
+    },
+    {
+      "id": "end",
+      "name": "Company end card",
+      "durationSec": {
+        "min": 2,
+        "max": 3
+      },
+      "guidance": "Company name and address.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.3,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "speaker",
+      "preset": "lower-third-slide",
+      "text": "{{speaker_name}}",
+      "subtitle": "{{speaker_role}}",
+      "when": "speaker_name",
+      "anchor": "start",
+      "offset": 1.2,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{company}}",
+      "subtitle": "{{url}}",
+      "when": "company",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.3,
+    "out": 0.5
+  },
+  "effects": [
+    {
+      "id": "logo",
+      "kind": "logo",
+      "title": "Logo end card",
+      "description": "The company logo at the top of the end card, above the company name.",
+      "preset": "logo-end-card",
+      "position": "top",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3
+    },
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Quiet music bed",
+      "description": "Very quiet music, lowered further while someone speaks. No sound effects.",
+      "level": 0.1
+    }
+  ],
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Burned-in captions",
+      "description": "Captions drawn into the picture so they keep the brand look and work with sound off.",
+      "requires": ["captions"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "testimonials",
+      "text": "Testimonials and reviews must come from real people who agreed to appear and reflect their real experience. If you paid them or gave them something free, say so in the video itself, not only in the caption."
+    }
+  ],
+  "confirmations": []
+}

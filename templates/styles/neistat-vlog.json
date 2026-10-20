@@ -1,0 +1,197 @@
+{
+  "id": "neistat-vlog",
+  "version": 1,
+  "kind": "style",
+  "name": "Story vlog (Neistat-style)",
+  "description": "Energetic vlog: jump cuts inside speech with pauses trimmed tight, a day title and a short sign-off. A push-in on every second shot is added. Music-led cutting and sped-up montages are listed as not available yet.",
+  "tags": ["vlog", "story", "youtube", "jump-cuts"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.9",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Day or story title",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "Day 12: the long way home"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "See you tomorrow",
+      "example": "See you tomorrow"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 300,
+        "max": 900
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 300,
+            "max": 900
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 30,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "tight"
+  },
+  "beats": [
+    {
+      "id": "open",
+      "name": "Open mid-action",
+      "durationSec": {
+        "min": 3,
+        "max": 10
+      },
+      "guidance": "Start in the middle of something happening; no greeting.",
+      "overlay": "title"
+    },
+    {
+      "id": "story",
+      "name": "Story",
+      "durationSec": {
+        "min": 120,
+        "max": 600
+      },
+      "guidance": "Jump cuts only where a natural pause allows; random cuts look like mistakes."
+    },
+    {
+      "id": "montage",
+      "name": "Montage",
+      "durationSec": {
+        "min": 15,
+        "max": 45
+      },
+      "guidance": "Quick shots cut to the music."
+    },
+    {
+      "id": "close",
+      "name": "Closing thought",
+      "durationSec": {
+        "min": 10,
+        "max": 30
+      },
+      "guidance": "End on one thought.",
+      "overlay": "sign-off"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "sign-off",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 3,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.5,
+    "out": 1.2
+  },
+  "effects": [
+    {
+      "id": "push-in",
+      "kind": "zoom",
+      "title": "Push-in as a cut",
+      "description": "A 12 percent push-in on every second shot, used like a jump cut.",
+      "mode": "alternate-cuts",
+      "scale": 1.12,
+      "every": 2,
+      "minShotSec": 1
+    }
+  ],
+  "deferred": [
+    {
+      "id": "music-first",
+      "title": "Music-led cutting",
+      "description": "Choose the music first and cut to its beats. Music can be added (add_audio), but the editor cannot cut to its beats.",
+      "requires": ["beat-matching"]
+    },
+    {
+      "id": "speed-montage",
+      "title": "Sped-up montage",
+      "description": "Time-lapse footage for travel and process.",
+      "requires": ["speed-change"]
+    },
+    {
+      "id": "match-cuts",
+      "title": "Whip and match cuts",
+      "description": "Transitions between scenes.",
+      "requires": ["transitions"]
+    },
+    {
+      "id": "broll",
+      "title": "B-roll",
+      "description": "Cutaways of places and things.",
+      "requires": ["broll"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "privacy",
+      "text": "Get consent from every identifiable person in the footage, and blur or crop anyone who has not agreed. Minors need a parent or guardian's consent."
+    },
+    {
+      "category": "safety",
+      "text": "Check local rules before flying a drone or filming in restricted places, and keep stunts safe."
+    },
+    {
+      "category": "general",
+      "text": "The style name describes a publicly discussed editing pattern. This template is not affiliated with or endorsed by any creator, and it does not copy anyone's footage, graphics or captions."
+    }
+  ],
+  "confirmations": []
+}

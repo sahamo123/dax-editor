@@ -1,0 +1,198 @@
+{
+  "id": "short-form-hooks",
+  "version": 1,
+  "kind": "style",
+  "name": "Short-form hook edit",
+  "description": "Fast vertical edit for Shorts, Reels and TikTok: payoff-first hook text in the first two seconds, a promise callout and a short loop end card. Interrupt zooms on alternate shots and a music track (when you supply music) are added. Freeze-frames, captions and sound effects are listed as not available yet.",
+  "tags": ["short-form", "hook", "shorts", "reels", "tiktok", "vertical"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.12",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Hook line",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "3 edits that doubled my views"
+    },
+    {
+      "name": "promise",
+      "label": "Promise with a number",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "Takes 5 minutes"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Part 2 on my page",
+      "example": "Part 2 on my page"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 15,
+        "max": 60
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "9:16",
+  "cleanup": {
+    "preset": "tight"
+  },
+  "beats": [
+    {
+      "id": "hook",
+      "name": "Payoff-first hook",
+      "durationSec": {
+        "min": 0,
+        "max": 2
+      },
+      "guidance": "Lead with the payoff or a contradiction; never with an intro.",
+      "overlay": "hook"
+    },
+    {
+      "id": "promise",
+      "name": "Promise",
+      "durationSec": {
+        "min": 2,
+        "max": 5
+      },
+      "guidance": "Say what the viewer will get, with a number if it is true.",
+      "overlay": "promise"
+    },
+    {
+      "id": "delivery",
+      "name": "Delivery",
+      "durationSec": {
+        "min": 8,
+        "max": 40
+      },
+      "guidance": "Short shots, around three seconds or less."
+    },
+    {
+      "id": "loop",
+      "name": "Loop or next",
+      "durationSec": {
+        "min": 2,
+        "max": 4
+      },
+      "guidance": "End so the video can loop, or point to the next one.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "hook",
+      "preset": "title-pop",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.2,
+      "duration": 2.2,
+      "minDuration": 1,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "promise",
+      "preset": "callout-slide-up",
+      "text": "{{promise}}",
+      "when": "promise",
+      "anchor": "start",
+      "offset": 2.6,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.3,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 2.5,
+      "minDuration": 1.5,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "out": 0.25
+  },
+  "effects": [
+    {
+      "id": "interrupt-zoom",
+      "kind": "zoom",
+      "title": "Interrupt zooms",
+      "description": "A 20 percent punch-in on every second shot to restart attention.",
+      "mode": "alternate-cuts",
+      "scale": 1.2,
+      "every": 2,
+      "minShotSec": 0.8
+    },
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music",
+      "description": "A track under the voice.",
+      "level": 0.2
+    }
+  ],
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Short high-contrast captions",
+      "description": "Captions on screen for at least two seconds each.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "freeze-frames",
+      "title": "Freeze-frames",
+      "description": "Freeze-frames with text that restart attention.",
+      "requires": ["speed-change"]
+    },
+    {
+      "id": "sfx",
+      "title": "Sound effects on interrupts",
+      "description": "A short effect at each interrupt.",
+      "requires": ["sound-effects"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "advertising",
+      "text": "Claims about results, savings, speed or income need evidence you can show. Avoid guarantees, and say 'results vary' next to any result you show."
+    },
+    {
+      "category": "general",
+      "text": "The style name describes a publicly discussed editing pattern. This template is not affiliated with or endorsed by any creator, and it does not copy anyone's footage, graphics or captions."
+    }
+  ],
+  "confirmations": []
+}

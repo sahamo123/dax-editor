@@ -1,0 +1,352 @@
+{
+  "id": "real-estate-listing",
+  "version": 1,
+  "kind": "industry",
+  "name": "Real estate listing",
+  "description": "Listing video with a price badge, city title, agent lower-third, an optional staging disclosure and a booking end card. Pauses are only lightly trimmed. Music (when you supply it) is added. Captions and room-by-room matching are listed as not available yet.",
+  "tags": ["real-estate", "listing", "property", "tour", "youtube", "reels"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/industry-video-templates.md section 3 and example A",
+  "variables": [
+    {
+      "name": "price",
+      "label": "Price or price line",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "example": "$489,000"
+    },
+    {
+      "name": "city",
+      "label": "City or neighbourhood",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "Maple Heights"
+    },
+    {
+      "name": "agent_name",
+      "label": "Agent name",
+      "type": "name",
+      "required": true,
+      "maxLength": 50,
+      "example": "Jordan Lee"
+    },
+    {
+      "name": "agent_title",
+      "label": "Agent title or brokerage",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "Lee & Co. Realty"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 30,
+      "default": "Book a showing",
+      "example": "Book a showing"
+    },
+    {
+      "name": "phone",
+      "label": "Phone number",
+      "type": "phone",
+      "required": false,
+      "example": "+1 555 010 0199"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    },
+    {
+      "name": "disclosure",
+      "label": "Disclosure line, if any (for example virtual staging)",
+      "type": "text",
+      "required": false,
+      "maxLength": 80,
+      "example": "Some rooms are virtually staged"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 60,
+        "max": 150
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 60,
+            "max": 150
+          }
+        },
+        {
+          "platform": "website",
+          "lengthSec": {
+            "min": 60,
+            "max": 150
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 20,
+        "max": 45
+      },
+      "platforms": [
+        {
+          "platform": "instagram-reels"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "youtube-shorts"
+        }
+      ]
+    },
+    {
+      "aspect": "4:5",
+      "lengthSec": {
+        "min": 15,
+        "max": 30
+      },
+      "platforms": [
+        {
+          "platform": "instagram-feed"
+        },
+        {
+          "platform": "facebook-feed"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "gentle"
+  },
+  "beats": [
+    {
+      "id": "hero",
+      "name": "Hero exterior",
+      "durationSec": {
+        "min": 3,
+        "max": 5
+      },
+      "guidance": "Hold the exterior at least 4 seconds, with the price.",
+      "footage": "Exterior wide shot.",
+      "overlay": "price"
+    },
+    {
+      "id": "entry",
+      "name": "Entry",
+      "durationSec": {
+        "min": 3,
+        "max": 6
+      },
+      "guidance": "Introduce the agent.",
+      "footage": "Entry hall.",
+      "overlay": "agent"
+    },
+    {
+      "id": "living",
+      "name": "Living room",
+      "durationSec": {
+        "min": 8,
+        "max": 14
+      },
+      "guidance": "Name the city or neighbourhood.",
+      "footage": "Living room.",
+      "overlay": "city"
+    },
+    {
+      "id": "kitchen",
+      "name": "Kitchen",
+      "durationSec": {
+        "min": 6,
+        "max": 10
+      },
+      "guidance": "Keep clips under 6 seconds.",
+      "footage": "Kitchen."
+    },
+    {
+      "id": "bedroom",
+      "name": "Bedroom",
+      "durationSec": {
+        "min": 5,
+        "max": 8
+      },
+      "guidance": "Keep clips under 5 seconds.",
+      "footage": "Primary bedroom."
+    },
+    {
+      "id": "detail",
+      "name": "Standout detail",
+      "durationSec": {
+        "min": 3,
+        "max": 6
+      },
+      "guidance": "One feature that sets it apart.",
+      "footage": "A standout feature."
+    },
+    {
+      "id": "outdoor",
+      "name": "Outdoor",
+      "durationSec": {
+        "min": 5,
+        "max": 8
+      },
+      "guidance": "Garden, view or street."
+    },
+    {
+      "id": "end",
+      "name": "End card",
+      "durationSec": {
+        "min": 5,
+        "max": 6
+      },
+      "guidance": "Agent and how to book.",
+      "overlay": "end-card"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "price",
+      "preset": "callout-slide-up",
+      "text": "{{price}}",
+      "when": "price",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 4,
+      "minDuration": 1.5,
+      "maxFraction": 0.3,
+      "priority": 1
+    },
+    {
+      "id": "city",
+      "preset": "title-fade",
+      "text": "{{city}}",
+      "when": "city",
+      "anchor": "start",
+      "offset": 5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "agent",
+      "preset": "lower-third-slide",
+      "text": "{{agent_name}}",
+      "subtitle": "{{agent_title}}",
+      "when": "agent_name",
+      "anchor": "start",
+      "offset": 5,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "disclosure",
+      "preset": "caption-bottom",
+      "text": "{{disclosure}}",
+      "when": "disclosure",
+      "anchor": "full",
+      "offset": 0,
+      "minDuration": 1,
+      "priority": 0
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{agent_name}} · {{phone}} · {{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 5,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.5,
+    "out": 1
+  },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Warm background music",
+      "description": "Steady music with no vocals, lowered while someone speaks.",
+      "level": 0.15
+    }
+  ],
+  "deferred": [
+    {
+      "id": "captions",
+      "title": "Captions",
+      "description": "Captions where there is narration.",
+      "requires": ["captions"]
+    },
+    {
+      "id": "rooms",
+      "title": "Match footage to rooms",
+      "description": "Find which clips are the exterior, kitchen, bedroom and so on, and trim each to its beat.",
+      "requires": ["beat-matching"]
+    },
+    {
+      "id": "room-labels",
+      "title": "Standout feature callout",
+      "description": "A callout timed to the standout feature.",
+      "requires": ["beat-matching"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "real-estate",
+      "text": "Do not use wording that states a preference or limit about who may live in a property; fair-housing rules apply to listings and ads."
+    },
+    {
+      "category": "real-estate",
+      "text": "If any room is virtually staged or AI-altered, disclose it. Check your MLS and brokerage rules for photo and video."
+    },
+    {
+      "category": "advertising",
+      "text": "Housing ads can fall under special ad categories on some platforms, with limits on targeting. Check the platform rules."
+    },
+    {
+      "category": "privacy",
+      "text": "Get consent from every identifiable person in the footage, and blur or crop anyone who has not agreed. Minors need a parent or guardian's consent."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "price-current",
+      "ask": "Is the price shown still current?"
+    },
+    {
+      "id": "staging",
+      "ask": "Is any room virtually staged or AI-altered? If yes, is it disclosed?"
+    },
+    {
+      "id": "people",
+      "ask": "Has every identifiable occupant or neighbour agreed to appear, or been blurred?"
+    }
+  ]
+}

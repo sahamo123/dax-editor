@@ -1,0 +1,265 @@
+{
+  "id": "mkbhd-product-review",
+  "version": 1,
+  "kind": "style",
+  "name": "Product review (MKBHD-style)",
+  "description": "Clean product review: verdict teased early, product name and price lower-third, a verdict callout and an end card. A music bed (when you supply music) is added. Punch-ins on product details, spec cards and B-roll are listed as not available yet.",
+  "tags": ["review", "product", "youtube", "tech"],
+  "license": "Apache-2.0",
+  "author": "dax-editor contributors",
+  "source": "docs/research/creator-editing-styles.md section 3.8",
+  "variables": [
+    {
+      "name": "title",
+      "label": "Opening line",
+      "type": "text",
+      "required": false,
+      "maxLength": 60,
+      "example": "The best phone camera, again?"
+    },
+    {
+      "name": "product_name",
+      "label": "Product name",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "example": "Pixel 11 Pro"
+    },
+    {
+      "name": "price",
+      "label": "Price",
+      "type": "text",
+      "required": false,
+      "maxLength": 24,
+      "example": "$999"
+    },
+    {
+      "name": "verdict",
+      "label": "Verdict in a few words",
+      "type": "text",
+      "required": false,
+      "maxLength": 50,
+      "example": "Great camera, weak battery"
+    },
+    {
+      "name": "cta_text",
+      "label": "Call to action",
+      "type": "text",
+      "required": false,
+      "maxLength": 40,
+      "default": "Subscribe for more reviews",
+      "example": "Subscribe for more reviews"
+    },
+    {
+      "name": "url",
+      "label": "Web address",
+      "type": "url",
+      "required": false,
+      "example": "example.com/book"
+    }
+  ],
+  "formats": [
+    {
+      "aspect": "16:9",
+      "lengthSec": {
+        "min": 480,
+        "max": 900
+      },
+      "platforms": [
+        {
+          "platform": "youtube",
+          "lengthSec": {
+            "min": 480,
+            "max": 900
+          }
+        }
+      ]
+    },
+    {
+      "aspect": "9:16",
+      "lengthSec": {
+        "min": 45,
+        "max": 90
+      },
+      "platforms": [
+        {
+          "platform": "youtube-shorts"
+        },
+        {
+          "platform": "tiktok"
+        },
+        {
+          "platform": "instagram-reels"
+        }
+      ]
+    }
+  ],
+  "defaultAspect": "16:9",
+  "cleanup": {
+    "preset": "standard"
+  },
+  "beats": [
+    {
+      "id": "verdict-hook",
+      "name": "Verdict or key feature",
+      "durationSec": {
+        "min": 5,
+        "max": 15
+      },
+      "guidance": "Give the verdict or the most important feature in the first 15 seconds.",
+      "overlay": "title"
+    },
+    {
+      "id": "design",
+      "name": "Design and specs",
+      "durationSec": {
+        "min": 60,
+        "max": 120
+      },
+      "guidance": "Only the specs that change a buying decision; avoid spec dumps.",
+      "overlay": "product"
+    },
+    {
+      "id": "hands-on",
+      "name": "Hands-on",
+      "durationSec": {
+        "min": 120,
+        "max": 300
+      },
+      "guidance": "Show real use with close-ups."
+    },
+    {
+      "id": "compare",
+      "name": "Comparison",
+      "durationSec": {
+        "min": 60,
+        "max": 120
+      },
+      "guidance": "Compare with the obvious alternative."
+    },
+    {
+      "id": "verdict",
+      "name": "Verdict",
+      "durationSec": {
+        "min": 30,
+        "max": 60
+      },
+      "guidance": "Say who it is for and who should skip it.",
+      "overlay": "verdict"
+    }
+  ],
+  "overlays": [
+    {
+      "id": "title",
+      "preset": "title-fade",
+      "text": "{{title}}",
+      "when": "title",
+      "anchor": "start",
+      "offset": 0.5,
+      "duration": 3,
+      "minDuration": 1.5,
+      "maxFraction": 0.45,
+      "priority": 1
+    },
+    {
+      "id": "product",
+      "preset": "lower-third-slide",
+      "text": "{{product_name}}",
+      "subtitle": "{{price}}",
+      "when": "product_name",
+      "anchor": "start",
+      "offset": 4,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 1
+    },
+    {
+      "id": "verdict",
+      "preset": "callout-slide-up",
+      "text": "{{verdict}}",
+      "when": "verdict",
+      "anchor": "end",
+      "offset": 10,
+      "duration": 4,
+      "minDuration": 1.5,
+      "maxFraction": 0.4,
+      "priority": 1
+    },
+    {
+      "id": "end-card",
+      "preset": "title-fade",
+      "text": "{{cta_text}}",
+      "subtitle": "{{url}}",
+      "anchor": "end",
+      "offset": 0,
+      "duration": 4,
+      "minDuration": 2,
+      "maxFraction": 0.5,
+      "priority": 2
+    }
+  ],
+  "fades": {
+    "in": 0.3,
+    "out": 0.8
+  },
+  "effects": [
+    {
+      "id": "music",
+      "kind": "music",
+      "title": "Music bed",
+      "description": "Low music under the voice.",
+      "level": 0.15
+    }
+  ],
+  "deferred": [
+    {
+      "id": "punch-ins",
+      "title": "Punch-ins on product detail",
+      "description": "Zoom into the part of the product being discussed. The zoom itself exists (add_zoom with a focus point), but the editor cannot tell which part that is.",
+      "requires": ["focus-detection"]
+    },
+    {
+      "id": "spec-cards",
+      "title": "Spec and price cards",
+      "description": "Full-screen cards for specs and prices.",
+      "requires": ["graphic-cards"]
+    },
+    {
+      "id": "broll",
+      "title": "Product B-roll",
+      "description": "Close-up cutaways of the product.",
+      "requires": ["broll"]
+    },
+    {
+      "id": "grade",
+      "title": "Clean neutral colour",
+      "description": "A neutral grade that keeps product colours honest.",
+      "requires": ["color-grade"]
+    }
+  ],
+  "notes": [
+    {
+      "category": "advertising",
+      "text": "If a company paid you, gave you the product free, or you have any other connection to it, say so clearly in the video, not only in the caption or description."
+    },
+    {
+      "category": "copyright",
+      "text": "Footage, images, memes, logos and music from other people need permission or a licence that covers your use. Fair use depends on the country and is not automatic."
+    },
+    {
+      "category": "music",
+      "text": "Use only music you have the right to use: a licensed or CC0 library, or your own. Do not reuse a platform's in-app sound library on other platforms, and check that the licence covers paid ads if you promote the video."
+    },
+    {
+      "category": "general",
+      "text": "The style name describes a publicly discussed editing pattern. This template is not affiliated with or endorsed by any creator, and it does not copy anyone's footage, graphics or captions."
+    }
+  ],
+  "confirmations": [
+    {
+      "id": "price-current",
+      "ask": "Are the price and specs shown current and correct for your region?"
+    }
+  ]
+}
