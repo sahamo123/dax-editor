@@ -11,6 +11,23 @@ generated:
 
 # Project status
 
+## Windows laptop checkpoint — October 20, 2026
+
+Current local implementation and evidence supersede older "not merged" / "Windows untested" statements below. Delivery remains **NOT READY** until native validation is completed.
+
+- Source and dependency caches are in the laptop checkout. See [the implementation plan](engineering/windows-desktop-plan.md) and `DEVELOPMENT-TASKS.md` at the repository root.
+- The native Windows executable compiled. The shell now targets the React editor and bundles the full engine, fonts, skills and templates. Export save permission is narrowly granted (ADR 0011).
+- Real Windows FFmpeg overlay export failed before the drive-colon fix and passes after it (17 filter/render tests). Real-engine browser integration passed 3 tests.
+- A fresh-data-directory bundled-engine test, with outbound fetches refused, started Qwen 3.5 2B, made an actual AI title edit, exported video/audio, preserved the edit on restart and cleaned up inference. Evidence: `artifacts/offline-live-smoke.log` and `artifacts/offline-smoke-1792517191814/result.json` (local, ignored).
+- Single-installer packaging includes the verified small model, pinned CPU runtime, licence/provenance records and app-local Microsoft C++ release DLLs. WebView2 uses its offline installer. The unsigned NSIS installer rebuilt successfully with the render/archive/shutdown fixes (1.53 GiB). Installation validation is blocked. See ADR 0012 and the ignored local delivery record `artifacts/DELIVERY.json`.
+- Two native startup defects were isolated: Node 22 rejects Tauri's verbatim Windows drive paths; path normalization passes a Windows Rust regression. Zod 3's `toString` assignment fails with frozen Object.prototype; a minimal pnpm dependency patch preserves prototype freezing. That startup regression and 3 real-engine browser tests pass (4 total).
+- Windows Application Control event 3077 blocked the unsigned executable. The owner confirmed this is a personal laptop with administrator access but no signing certificate. Registry `VerifiedAndReputablePolicyState=1` reports Smart App Control enforcement; administrator access alone does not override it. Policy-trusted signing or an authorized development environment is required for native validation. No security settings were changed.
+- The full required `pnpm check` passes on Windows (`artifacts/check-windows-verified.log`); the final added preview launcher also passes lint/dead-code checks. Windows fixtures now use junctions and native path expectations. Bridge fake executables run through a test-only adapter; POSIX-only mode-bit and signal-forwarding assertions are explicitly scoped. All 32 browser editor workflows pass (`artifacts/desktop-all-e2e-verified.log`).
+- A browser teardown failure reproduced a real engine shutdown race: FFmpeg still held a preview file after shutdown returned. Media tasks, process close events and export completion/cleanup are now awaited. The regression failed before the fix and passes afterward; 40 pipeline/server checks pass.
+- `Start Development Preview.cmd` runs the browser editor with the packaged offline engine. Its real-model smoke passes (`artifacts/development-preview-smoke.log`); data persists in ignored `.dax-data/`. This gives a usable development workflow while native launch is blocked. Browser imports use typed file paths; native dialogs remain unverified.
+- Delivery work and remaining gates are tracked in [GitHub issue #2](https://github.com/sahamo123/dax-editor/issues/2) and the root task tracker.
+- The original two-hour deadline was missed. Speech installation controls, native import/save/export dialogs and the final clean-install test remain incomplete or blocked. No ready desktop release is claimed.
+
 ## Where we are
 
 Resuming from another agent or machine: start with [the handoff guide](engineering/handoff.md).

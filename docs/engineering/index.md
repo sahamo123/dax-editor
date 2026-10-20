@@ -10,3 +10,4 @@
 * [Knowledge protocol (how the repo remembers)](knowledge-protocol.md) - How work is recorded in docs/ as an Open Knowledge Format bundle so any agent or person can resume where the last one stopped.
 * [Refactoring guide](refactoring.md) - When and how to refactor safely: separate commits, tests green throughout, small steps, and the tools that find candidates.
 * [Testing standards](testing.md) - What to test, how, and what must never happen in tests (no network, no committed media), including how model behavior is evaluated.
+* [Windows laptop implementation plan](windows-desktop-plan.md) - Two-hour implementation sequence, local dependency layout, acceptance gates, and follow-up scope for the first usable Windows desktop build.

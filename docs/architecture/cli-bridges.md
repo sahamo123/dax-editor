@@ -51,6 +51,8 @@ The statuses (`not installed`, `not signed in`, `ready`, `unsupported`, `error`)
 
 `pnpm --filter @dax/bridges test` runs against a fake `claude` executable (`packages/bridges/test/fixtures/fake-claude.mjs`). It really connects to the loopback endpoint and calls real tools on a real `Session`. One fixture is a trimmed copy of a recorded real Claude Code run. No network and no real CLI are needed. The tests cover detection states, the flags, event mapping, edits credited to `ai`, token hygiene, cancel, timeouts, resume, helper cleanup and shutdown.
 
+On Windows, a test-only spawn adapter runs exact registered fake executable paths through Node, because Windows cannot execute Unix shebang fixtures. Production executable checks and spawning stay unchanged. Cancellation tests expect forced `taskkill` termination on Windows; POSIX signal-handler and mode-bit assertions remain platform-specific. These tests do not establish Windows ACL guarantees for arbitrary data folders.
+
 ## Related
 
 [CLI and MCP server](cli-and-mcp.md) (the endpoint the bridge reuses), [architecture overview](overview.md), [CLI subscription bridges research](../research/cli-subscription-bridges.md).
