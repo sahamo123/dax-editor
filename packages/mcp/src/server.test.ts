@@ -270,8 +270,13 @@ describe.skipIf(!hasFfmpeg())("end to end against real core and FFmpeg", () => {
       expect(direct.isError).toBe(true);
       expect(textOf(direct)).toContain("outside the allowed folders");
 
-      const link = join(inside, "link.mp4");
-      symlinkSync(secret, link);
+      // Windows junctions alias the outside directory without requiring privileged file symlinks.
+      const link =
+        process.platform === "win32"
+          ? join(inside, "escape", "secret.mp4")
+          : join(inside, "link.mp4");
+      if (process.platform === "win32") symlinkSync(outside, join(inside, "escape"), "junction");
+      else symlinkSync(secret, link);
       const viaLink = await client.callTool({ name: "import_media", arguments: { path: link } });
       expect(viaLink.isError).toBe(true);
       expect(textOf(viaLink)).toContain("outside the allowed folders");

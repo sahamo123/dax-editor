@@ -9,7 +9,7 @@ use crate::server_info::ServerInfo;
 use crate::sidecar::ServerManager;
 
 /// How long `get_server_info` waits for a server that is still starting.
-const WAIT: Duration = Duration::from_secs(45);
+const WAIT: Duration = Duration::from_secs(150);
 
 /// Return the engine server's address, token and version, waiting for it to finish starting.
 ///

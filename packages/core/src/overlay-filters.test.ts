@@ -25,7 +25,12 @@ describe("quoting", () => {
     expect(quoteFilterValue("it's")).toBe("'it'\\''s'");
   });
   it("turns Windows paths into forward-slash quoted paths", () => {
-    expect(filterPath("C:\\Users\\me\\Inter.otf")).toBe("'C:/Users/me/Inter.otf'");
+    expect(filterPath("C:\\Users\\me\\Inter.otf")).toBe("'C\\:/Users/me/Inter.otf'");
+  });
+  it("preserves option escapes through the graph parser for paths with apostrophes", () => {
+    expect(filterPath("C:\\Editor's files\\Inter.otf")).toBe(
+      "'C\\:/Editor\\'\\''s files/Inter.otf'",
+    );
   });
 });
 

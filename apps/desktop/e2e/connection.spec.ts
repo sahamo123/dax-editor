@@ -25,8 +25,9 @@ test("shows a reconnect banner when the engine disappears and recovers when it r
   await expect(page.getByRole("region", { name: "Timeline" })).toBeVisible();
   await shot("10-offline-banner");
 
-  await server.start();
+  // Exercise manual retry while still offline; once the server is up automatic retry can remove the button mid-click.
   await banner.getByRole("button", { name: "Retry now" }).click();
+  await server.start();
   await expect(banner).toBeHidden({ timeout: 15_000 });
   await expect(page.getByRole("banner").getByRole("button", { name: "Import" })).toBeEnabled();
 
@@ -65,8 +66,8 @@ test("an engine that is down at launch shows the banner and a waiting screen, no
   await expect(page.getByRole("banner").getByRole("button", { name: "Undo" })).toBeDisabled();
   await shot("11-down-at-launch");
 
-  await server.start();
   await page.getByRole("button", { name: "Retry now" }).click();
+  await server.start();
   await expect(page.getByText("Drop a video here or click Import")).toBeVisible({
     timeout: 15_000,
   });

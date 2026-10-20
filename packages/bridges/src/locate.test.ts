@@ -16,7 +16,11 @@ afterEach(() => removeTempDir(root));
 function put(folder: string, name: string, mode = 0o755): string {
   const dir = join(root, folder);
   mkdirSync(dir, { recursive: true });
-  const file = join(dir, name);
+  const nativeName =
+    process.platform === "win32" && mode === 0o755 && !/\.(exe|com|cmd)$/i.test(name)
+      ? `${name}.exe`
+      : name;
+  const file = join(dir, nativeName);
   writeFileSync(file, "#!/bin/sh\n");
   chmodSync(file, mode);
   return file;
@@ -80,10 +84,10 @@ describe("findExecutable", () => {
 describe("commonInstallDirs", () => {
   it("lists user-level and system install folders per platform, folders only", () => {
     const mac = commonInstallDirs("darwin", "/Users/u", {});
-    expect(mac).toContain("/Users/u/.local/bin");
+    expect(mac).toContain(join("/Users/u", ".local", "bin"));
     expect(mac).toContain("/opt/homebrew/bin");
     const linux = commonInstallDirs("linux", "/home/u", {});
-    expect(linux).toContain("/home/u/.local/bin");
+    expect(linux).toContain(join("/home/u", ".local", "bin"));
     expect(linux).toContain("/usr/local/bin");
     // None of the entries is a file that could hold a login.
     for (const dir of [...mac, ...linux]) expect(dir).not.toMatch(/credentials|auth\.json/i);

@@ -19,7 +19,8 @@ The launcher: starts `@dax/server` with the AI agent, skills, provider registry,
 
 ## Built-in model and speech
 
-- **Defaults:** `launch()` always builds both. The model controller is a `LocalModelManager` in the engine's data folder; the speech engine is `createSpeechTranscriber(dataDir, speechOptions)`. Building them does no I/O beyond reading the data folder. Nothing is downloaded, installed or started until a user action asks.
+- **Defaults:** `launch()` builds both controllers. Source checkouts do not download, install or start a model by default. The packaged Windows x64 app seeds its verified bundled model/runtime and starts the local provider on first launch (ADR 0012); it never fetches model bytes at runtime. Saved external-provider choices and a recorded model uninstall are respected. Speech remains opt-in.
+- **Offline bundle:** `offline-bundle.ts` verifies model, runtime archive and app-local C++ DLL hashes before seeding app data. `offlineBundleDir: false` disables seeding for tests/embedders. Runtime/model provenance is prepared at build time by `apps/desktop/scripts/prepare-offline-ai.mjs`.
 - **Model choice:** the controller's `status().recommendation` is the catalog model for this machine (`recommendModel`). `install` takes an optional catalog id; `start` loads the installed model the manager would pick (recommended, then the default, then the first installed one), with its catalog context window.
 - **Speech choice:** the whisper.cpp model is `SpeechModelManager.recommend()` for this machine, from the `@dax/stt` catalog, unless `speechOptions.modelId` says otherwise.
 - **Injection:** `localModelController` (an instance, or `false` for "not supported in this build"), `localModelOptions` (test seams for the default manager: `detect`, `fetch`, `runtime`), `transcriber` (an instance, or `false`) and `speechOptions` (for example `binaryPath`, `autoInstall`).

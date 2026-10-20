@@ -101,9 +101,12 @@ describe.skipIf(!hasFfmpeg())("export safety (needs ffmpeg)", () => {
 
   it("refuses to export over one of its own source files, however it is named", async () => {
     const before = readFileSync(src);
-    const soft = join(dir, "soft.mp4");
+    // A Windows directory junction aliases the source without requiring file-symlink privileges.
+    const soft =
+      process.platform === "win32" ? join(dir, "alias", "src.mp4") : join(dir, "soft.mp4");
     const hard = join(dir, "hard.mp4");
-    symlinkSync(src, soft);
+    if (process.platform === "win32") symlinkSync(dir, join(dir, "alias"), "junction");
+    else symlinkSync(src, soft);
     linkSync(src, hard);
     for (const target of [src, soft, hard]) {
       await expect(exportProject(project, target)).rejects.toThrow(/source file/);

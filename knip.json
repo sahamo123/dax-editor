@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreBinaries": ["ffmpeg", "ffprobe", "rustc", "espeak-ng", "pgrep"],
+  "ignoreBinaries": ["ffmpeg", "ffprobe", "rustc", "espeak-ng", "pgrep", "explorer.exe"],
   "workspaces": {
     "apps/desktop": {
       "entry": ["e2e/*.spec.ts"],

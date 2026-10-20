@@ -11,11 +11,13 @@ generated:
 
 # Handoff: resuming dax-editor
 
-The repository is the only source of truth. Everything needed to continue is on branch `claude/exciting-lamport-1k91fh`, pushed to `origin`. Nothing needed lives in a chat, a local worktree, `/tmp` or a cache. Section 3 lists every dependency and where it is pinned.
+The repository is the source of truth. The upstream baseline is `82f1d24` on `claude/exciting-lamport-1k91fh`; the October 20 Windows implementation is on `codex/windows-offline-desktop`, split into logical commits. Inspect `git status` before switching branches. Build artifacts, dependency caches and `.dax-data/` preview project data are ignored by Git. Read the Windows checkpoint in `docs/STATUS.md`, the root `DEVELOPMENT-TASKS.md`, and `WINDOWS-DEVELOPMENT.md` before the historical state below. Delivery tracking is [GitHub issue #2](https://github.com/sahamo123/dax-editor/issues/2). Section 3 lists baseline dependencies and pins.
+
+The unsigned Windows installer includes offline AI. Full `pnpm check`, 32 browser workflows and the real-model development preview smoke pass. `Start Development Preview.cmd` opens the browser editor and offline AI with persistent `.dax-data/`. Native validation remains blocked by Windows Application Control event 3077; Smart App Control reports enforcement on this personal administrator-owned laptop. No signing certificate is available, and no security policy was changed. Bundled-engine/browser evidence does not replace native install and dialog validation.
 
 ## 1. Start (any agent, any machine)
 
-1. `git checkout claude/exciting-lamport-1k91fh` (never `main`, never another branch).
+1. `git checkout codex/windows-offline-desktop` for the current Windows work; the historical baseline is `claude/exciting-lamport-1k91fh`. Preserve local changes before switching.
 2. Read `AGENTS.md`, then this file, then `docs/STATUS.md` (current state and "Needs a human").
 3. Install the toolchain in section 3.1, then `corepack enable && pnpm bootstrap`.
 4. `pnpm check`. It must pass before you change anything. If it fails, fix that first. Known flaky tests are in section 6.

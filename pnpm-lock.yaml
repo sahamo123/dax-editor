@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  zod@3.25.76:
+    hash: 4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62
+    path: patches/zod@3.25.76.patch
+
 importers:
 
   .:
@@ -107,7 +112,7 @@ importers:
         version: link:../protocol
       zod:
         specifier: ^3.23.8
-        version: 3.25.76
+        version: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -173,10 +178,10 @@ importers:
     dependencies:
       zod:
         specifier: ^3.23.8
-        version: 3.25.76
+        version: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
       zod-to-json-schema:
         specifier: ^3.25.2
-        version: 3.25.2(zod@3.25.76)
+        version: 3.25.2(zod@3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62))
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -232,7 +237,7 @@ importers:
         version: link:../core
       zod:
         specifier: ^3.23.8
-        version: 3.25.76
+        version: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -248,7 +253,7 @@ importers:
     dependencies:
       zod:
         specifier: ^3.23.8
-        version: 3.25.76
+        version: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -292,7 +297,7 @@ importers:
         version: link:../core
       zod:
         specifier: ^3.23.8
-        version: 3.25.76
+        version: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -317,7 +322,7 @@ importers:
         version: 8.22.0
       zod:
         specifier: ^3.23.8
-        version: 3.25.76
+        version: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -339,7 +344,7 @@ importers:
         version: link:../core
       zod:
         specifier: ^3.23.8
-        version: 3.25.76
+        version: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
     devDependencies:
       '@types/node':
         specifier: ^22.0.0
@@ -3734,11 +3739,11 @@ snapshots:
 
   yaml@2.9.1: {}
 
-  zod-to-json-schema@3.25.2(zod@3.25.76):
+  zod-to-json-schema@3.25.2(zod@3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)):
     dependencies:
-      zod: 3.25.76
+      zod: 3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62)
 
-  zod@3.25.76: {}
+  zod@3.25.76(patch_hash=4e3ee8ef2ea087f49a50efb0b524bfb4240b6bafddc6844ab043238030df4b62): {}
 
   zod@4.6.7: {}
 

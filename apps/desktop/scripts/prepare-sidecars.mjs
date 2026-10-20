@@ -19,6 +19,7 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
+  mkdtempSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -43,6 +44,8 @@ const binDir = join(tauriDir, "binaries");
 const resDir = join(tauriDir, "resources");
 const cacheDir = join(desktopDir, ".cache", "sidecars");
 const lock = JSON.parse(readFileSync(join(desktopDir, "sidecars.lock.json"), "utf8"));
+// Other platform builds may omit the Windows offline seed, but the resource directory must exist.
+mkdirSync(join(resDir, "local-ai"), { recursive: true });
 
 const args = process.argv.slice(2);
 const flag = (name) => args.includes(name);
@@ -84,9 +87,9 @@ function download(url, file) {
 
 /** Extract an archive with `tar` (bsdtar on Windows and macOS reads .zip too) into a fresh dir. */
 function extract(archive, name) {
-  const out = join(cacheDir, `x-${name}`);
-  rmSync(out, { recursive: true, force: true });
-  mkdirSync(out, { recursive: true });
+  // A previous extraction can be a developer's active runtime on Windows. Never remove it
+  // while preparing another build; each verified archive gets its own fresh extraction.
+  const out = mkdtempSync(join(cacheDir, `x-${name}-`));
   execFileSync("tar", ["-xf", archive, "-C", out], { stdio: "inherit" });
   return out;
 }
@@ -214,7 +217,7 @@ async function prepareServer() {
   const outDir = join(resDir, "server");
   rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
-  const realEntry = join(repoRoot, "packages", "server", "dist", "cli.js");
+  const realEntry = join(repoRoot, "packages", "engine", "dist", "cli.js");
   if (existsSync(realEntry)) {
     const { build } = await import("esbuild");
     await build({
@@ -240,12 +243,12 @@ async function prepareServer() {
       join(outDir, "cli.mjs"),
     );
     console.warn(
-      "[sidecars] packages/server/dist/cli.js not found: bundled the STAND-IN server. " +
-        "Run `pnpm --filter @dax/server build` for the real one.",
+      "[sidecars] packages/engine/dist/cli.js not found: bundled the STAND-IN server. " +
+        "Run `pnpm --filter @dax/engine... build` for the real one.",
     );
   } else {
     throw new Error(
-      "packages/server/dist/cli.js is missing. Build it first (pnpm --filter @dax/server build) " +
+      "packages/engine/dist/cli.js is missing. Build it first (pnpm --filter @dax/engine... build) " +
         "or pass --allow-standin for a placeholder.",
     );
   }
@@ -257,6 +260,13 @@ async function prepareServer() {
     cpSync(coreAssets, assetsOut, { recursive: true });
   } else {
     mkdirSync(assetsOut, { recursive: true });
+  }
+  // The bundled launcher discovers these beside server/; installed apps have no source checkout.
+  for (const name of ["skills", "templates"]) {
+    const source = join(repoRoot, name);
+    const destination = join(resDir, name);
+    rmSync(destination, { recursive: true, force: true });
+    cpSync(source, destination, { recursive: true });
   }
 }
 

@@ -14,9 +14,17 @@ export class ProcessRegistry {
     child.once("close", () => this.children.delete(child));
   }
 
-  /** Send SIGKILL to every tracked child. Used on shutdown; FFmpeg output files are written to temp names, so partial files are never served. */
-  killAll(): void {
-    for (const c of this.children) c.kill("SIGKILL");
+  /** Kill all tracked children and wait for their close events, so output handles are released before resolving. */
+  async killAll(): Promise<void> {
+    await Promise.all(
+      [...this.children].map(
+        (child) =>
+          new Promise<void>((resolve) => {
+            child.once("close", () => resolve());
+            child.kill("SIGKILL");
+          }),
+      ),
+    );
   }
 }
 

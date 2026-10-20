@@ -5,7 +5,10 @@
   "identifier": "org.daxeditor.desktop",
   "mainBinaryName": "dax-editor",
   "build": {
-    "frontendDist": "../shell-placeholder/web"
+    "devUrl": "http://127.0.0.1:5173",
+    "beforeDevCommand": "pnpm dev --host 127.0.0.1",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
   },
   "app": {
     "withGlobalTauri": false,
@@ -56,6 +59,7 @@
     }
   },
   "bundle": {
+    "useLocalToolsDir": true,
     "active": true,
     "targets": ["deb", "rpm", "appimage", "nsis", "app", "dmg"],
     "category": "Video",
@@ -75,6 +79,9 @@
     "resources": {
       "resources/server/": "server/",
       "resources/assets/": "assets/",
+      "resources/skills/": "skills/",
+      "resources/templates/": "templates/",
+      "resources/local-ai/": "local-ai/",
       "resources/licenses/": "licenses/"
     },
     "linux": {
@@ -101,9 +108,10 @@
     },
     "windows": {
       "nsis": {
-        "installMode": "currentUser"
+        "installMode": "currentUser",
+        "compression": "zlib"
       },
-      "webviewInstallMode": { "type": "downloadBootstrapper" }
+      "webviewInstallMode": { "type": "offlineInstaller", "silent": true }
     }
   }
 }

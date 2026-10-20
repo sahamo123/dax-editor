@@ -8,6 +8,11 @@ export {
   type LocalConnection,
   type ModelManager,
 } from "./local-model.js";
+export {
+  OFFLINE_MODEL_ID,
+  type OfflineBundleOptions,
+  seedOfflineBundle,
+} from "./offline-bundle.js";
 export { createProviderRegistry, type RegistryOptions } from "./providers.js";
 export {
   createRunnerFactory,

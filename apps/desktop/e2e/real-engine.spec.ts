@@ -123,15 +123,16 @@ test("saves settings and an API key, lists the providers, and never shows the ke
   await page.getByRole("button", { name: "Settings" }).click();
   const dialog = page.getByRole("dialog", { name: "Settings" });
 
-  // The local model: this engine has no runtime, and the card says so instead of offering a download that fails.
+  // The real launcher wires a runtime manager, but a fresh data folder has no downloaded model.
   await dialog.getByRole("button", { name: /Local model/ }).click();
-  await expect(dialog.getByTestId("local-model-unsupported")).toContainText("not available");
-  await expect(dialog.getByRole("button", { name: /Download/ })).toBeHidden();
+  await expect(dialog.getByTestId("local-model-status")).toHaveText("Not downloaded");
+  await expect(dialog.getByRole("button", { name: /Download/ })).toBeVisible();
 
-  // A command-line provider without a bridge is "Not found", not "Not signed in".
+  // The bridge status must agree with the real engine, regardless of this machine's installed CLIs.
   await dialog.getByRole("button", { name: /Claude Code/ }).click();
-  await expect(dialog.locator(".status-pill")).toHaveText("Not found");
-  await expect(dialog.getByText("Sign-in bridge not installed in this build")).toBeVisible();
+  const claude = before.find((provider) => provider.kind === "cli-claude");
+  if (!claude) throw new Error("Engine omitted the Claude CLI provider");
+  await expect(dialog.getByText(claude.detail, { exact: true })).toBeVisible();
 
   // An OpenAI-compatible provider, pointed at the fake model server.
   await dialog.getByRole("button", { name: /OpenAI-compatible API/ }).click();

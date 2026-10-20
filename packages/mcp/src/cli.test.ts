@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { startMcpFromArgs } from "./main.js";
 import { hasFfmpeg, makeClip, makeTempDir, removeTempDir } from "./test/media.js";
 
 const BIN = fileURLToPath(new URL("../dist/cli.js", import.meta.url));
@@ -95,7 +96,7 @@ describe.skipIf(!built)("dax-mcp over stdio (needs a build)", () => {
 });
 
 describe.skipIf(!built)("dax-mcp --http (needs a build)", () => {
-  it("prints a startup line without the secret, writes an owner-only token file, and cleans up on SIGTERM", async () => {
+  it("prints a startup line without the secret and cleans up on POSIX SIGTERM", async () => {
     const tokenFile = join(dir, "mcp-token");
     const child = spawn(process.execPath, [BIN, "--http", "--token-file", tokenFile], {
       env: childEnv(),
@@ -136,9 +137,22 @@ describe.skipIf(!built)("dax-mcp --http (needs a build)", () => {
     } finally {
       child.kill("SIGTERM");
     }
-    expect(await exited).toBe(0);
-    expect(existsSync(tokenFile)).toBe(false);
+    // Windows kill(SIGTERM) is forced termination, so JavaScript cleanup handlers cannot run.
+    expect(await exited).toBe(process.platform === "win32" ? null : 0);
+    if (process.platform !== "win32") expect(existsSync(tokenFile)).toBe(false);
   }, 60_000);
+
+  it("removes its token file on controlled shutdown on every platform", async () => {
+    const tokenFile = join(dir, "controlled-token");
+    const running = await startMcpFromArgs(["--http", "--token-file", tokenFile], childEnv());
+    try {
+      expect(existsSync(tokenFile)).toBe(true);
+    } finally {
+      await running.close();
+    }
+    await running.closed;
+    expect(existsSync(tokenFile)).toBe(false);
+  });
 
   it("exits with a usage error when HTTP has no way to deliver the token", async () => {
     const child = spawn(process.execPath, [BIN, "--http"], { env: childEnv(), stdio: "ignore" });

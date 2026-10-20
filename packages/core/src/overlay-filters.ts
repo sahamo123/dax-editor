@@ -35,7 +35,9 @@ export function quoteFilterValue(value: string): string {
 
 /** A path in the form FFmpeg wants inside a filter: forward slashes, quoted. Works for Windows drive letters. */
 export function filterPath(path: string): string {
-  return quoteFilterValue(path.replace(/\\/g, "/"));
+  // The graph parser removes the outer quotes before the option parser sees the value.
+  // Preserve an escape for drive-letter colons and apostrophes through both parsing layers.
+  return quoteFilterValue(path.replace(/\\/g, "/").replace(/[:']/g, "\\$&"));
 }
 
 const NARROW = new Set("iIlj.,;:'!|()[]` ");

@@ -5,6 +5,7 @@ import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { fakeExecutables } from "./fake-processes.js";
 
 /** Folder with the recorded stream-json fixtures and the fake CLI script. */
 export const FIXTURE_DIR = fileURLToPath(new URL("../../test/fixtures/", import.meta.url));
@@ -84,19 +85,20 @@ export function removeTempDir(dir: string): void {
 
 /**
  * Write an executable named `name` into `dir` that behaves according to `scenario`.
- * The launcher is a node script with a shebang, so it also works when found through `PATH`.
+ * The launcher uses a shebang on POSIX. The Windows test adapter runs registered `.exe` fixtures through Node.
  */
 export function writeFakeCli(dir: string, scenario: FakeScenario = {}, name = "claude"): FakeCli {
   const callsFile = join(dir, `${name}.calls.jsonl`);
   const grandchildPidFile = join(dir, `${name}.grandchildren`);
   const full = { ...scenario, callsFile, grandchildPidFile, fixtureDir: FIXTURE_DIR };
   const script = pathToFileURL(join(FIXTURE_DIR, "fake-claude.mjs")).href;
-  const path = join(dir, name);
+  const path = join(dir, process.platform === "win32" ? `${name}.exe` : name);
   writeFileSync(
     path,
     `#!${process.execPath}\nglobalThis.__FAKE_SCENARIO__ = ${JSON.stringify(full)};\nimport(${JSON.stringify(script)});\n`,
   );
   chmodSync(path, 0o755);
+  fakeExecutables.add(path);
   return {
     path,
     dir,

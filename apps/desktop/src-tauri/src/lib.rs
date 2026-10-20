@@ -67,7 +67,8 @@ fn launch_config<R: tauri::Runtime>(app: &tauri::App<R>) -> Result<LaunchConfig,
         data_dir,
         origins,
         token,
-        startup_timeout: Duration::from_secs(30),
+        // First launch verifies/copies bundled model bytes and loads the offline CPU model.
+        startup_timeout: Duration::from_secs(120),
         shutdown_grace: Duration::from_secs(3),
     })
 }

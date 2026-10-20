@@ -2,7 +2,7 @@
 
 import { mkdir, mkdtemp, realpath, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { parseServerArgs } from "./args.js";
 import { JobManager } from "./jobs.js";
@@ -111,7 +111,7 @@ describe("resolveInsideRoots", () => {
     await mkdir(root, { recursive: true });
     await mkdir(outside, { recursive: true });
     await writeFile(join(outside, "secret.txt"), "secret");
-    await symlink(outside, join(root, "link"));
+    await symlink(outside, join(root, "link"), process.platform === "win32" ? "junction" : "dir");
   });
   afterAll(async () => rm(join(root, ".."), { recursive: true, force: true }));
 
@@ -235,9 +235,9 @@ describe("parseServerArgs", () => {
     );
     expect(r.options).toMatchObject({
       port: 0,
-      dataDir: "/d",
+      dataDir: resolve("/d"),
       origins: ["http://localhost:5173", "tauri://localhost"],
-      allowRoots: ["/a", "/b"],
+      allowRoots: [resolve("/a"), resolve("/b")],
     });
     expect(r.exitOnStdinClose).toBe(true);
   });

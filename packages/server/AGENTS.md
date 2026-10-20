@@ -35,6 +35,7 @@ Test: `pnpm --filter @dax/server test` (needs FFmpeg; media tests skip without i
 - **Edits are serialised** (`Engine.serial`) and mutating commands are refused with `ok: false` while an AI run is active (`busy`). Exports run outside that lock on an immutable project snapshot.
 - Anything that changes the project must go through the session (`apply`/`undo`/`redo`/`restore`/`checkpoint`): `EngineSession` turns those into a pushed `state` event and a media scan. Do not mutate `session.project` directly.
 - FFmpeg output always goes to a temp name and is renamed when complete, so a partial file is never served. Arguments are arrays, never shell strings.
+- Shutdown is asynchronous: abort media/export work, await child `close` events and pending file cleanup, then resolve. A kill request alone does not release Windows file handles. `MediaPipeline.shutdown()` and `ProcessRegistry.killAll()` must be awaited.
 - stdout is for the single `ServerInfo` line only; logs go to stderr.
 
 ## Data directory layout
