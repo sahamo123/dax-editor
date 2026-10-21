@@ -36,7 +36,7 @@ export function TaskQueue(): ReactElement {
             · <span>{task.status}</span>
             <p>{task.title}</p>
             {task.error ? <p className="note note--warn">{task.error}</p> : null}
-            {task.status === "queued" || task.status === "running" ? (
+            {task.status === "queued" || (task.status === "running" && !task.steersRunId) ? (
               <button
                 type="button"
                 className="btn btn--small"

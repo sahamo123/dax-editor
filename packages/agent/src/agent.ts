@@ -62,6 +62,8 @@ export interface CreateAgentOptions {
 
 /** Per-run inputs for {@link Agent.run}. */
 export interface AgentRunOptions {
+  /** Drain newly submitted user guidance between steps. Existing calls finish; tools/permissions never expand. */
+  takeSteering?: () => string[];
   /** The project to edit. Edits are recorded in its history with source `ai`. */
   session: Session;
   /** Earlier messages of this conversation: pass the `messages` returned by the previous run. */
@@ -220,6 +222,7 @@ class Loop {
     for (;;) {
       if (this.run.signal?.aborted) return this.finish("cancelled");
       if (this.turns >= this.maxTurns) return this.finish("max_turns");
+      this.takeSteering();
       this.turns++;
       this.emit({ type: "status", text: "Thinking..." });
 
@@ -273,6 +276,7 @@ class Loop {
         this.messages.push({ role: "assistant", text, toolCalls: [] });
         (streamer ?? new TextStreamer((t) => this.emit({ type: "text", text: t }))).finish(text);
         this.finalText = text;
+        if (this.turns < this.maxTurns && this.takeSteering()) continue;
         return this.finish("done");
       }
 
@@ -281,6 +285,19 @@ class Loop {
       const stopped = await this.runCalls(toolCalls, response.stopReason === "length");
       if (stopped) return this.finish(stopped.cause, stopped.message);
     }
+  }
+
+  /** Incorporate newly submitted user guidance without interrupting in-flight work. */
+  private takeSteering(): boolean {
+    const messages = this.run.takeSteering?.() ?? [];
+    for (const message of messages)
+      this.messages.push({
+        role: "user",
+        content: `Continue the current task from its present state with this new guidance: ${message}`,
+      });
+    if (messages.length)
+      this.emit({ type: "status", text: "Continuing with your steering guidance." });
+    return messages.length > 0;
   }
 
   /** Ask the contextProvider for guidance; a failure is reported but never stops the run. */

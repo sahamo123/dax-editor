@@ -156,6 +156,7 @@ export const TaskInfoSchema = z.object({
   error: z.string().optional(),
   attachments: z.array(z.string()).optional(),
   queuePosition: z.number().int().positive().optional(),
+  steersRunId: z.string().optional(),
 });
 /** Validated task metadata stored locally and sent with editor state. */
 export type TaskInfo = z.infer<typeof TaskInfoSchema>;

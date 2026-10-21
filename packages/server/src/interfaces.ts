@@ -20,6 +20,8 @@ export interface AgentRunContext {
   signal: AbortSignal;
   /** Folders the agent may import from and export to (the server's `--allow-root` set). */
   allowedRoots: readonly string[];
+  /** Drain new user guidance at model/tool boundaries without cancelling the current run. Optional for older runners. */
+  takeSteering?(): string[];
 }
 
 /**

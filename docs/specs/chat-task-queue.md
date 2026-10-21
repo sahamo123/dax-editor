@@ -11,7 +11,7 @@ generated:
 
 # Chat tasks, steering and planning mode
 
-The chat composer stays editable during a run. Send queues a follow-up; Steer now cancels the active run and inserts the new instruction at the front. Existing edits remain in project history. Each request captures its mode at submission, has a stable task id, and moves through queued, running, completed, failed or cancelled. Queue depth is limited to 20. The task panel shows status and supports cancelling specific queued/running work.
+The chat composer stays editable during a run. Send queues a follow-up; Steer task adds guidance to the active conversation at the next model boundary without aborting current work. Mode switches, attachments and runners without live guidance support continue immediately after the active run finishes. Stop remains a separate explicit cancellation action. Existing edits remain in project history. Each request captures its mode at submission, has a stable task id, and moves through queued, running, completed, failed or cancelled. Queue depth is limited to 20. The task panel shows status and supports cancelling specific queued/running work.
 
 Tasks are authoritative in the engine and written atomically with private permissions to app-local `tasks.json`. Metadata survives browser refresh; engine restart marks unfinished work interrupted and does not execute it. Retain the latest 100 finished tasks plus active tasks. This feature tracks chat and browser imports; manual timeline edits remain tracked in project history and export progress remains in the existing jobs panel.
 

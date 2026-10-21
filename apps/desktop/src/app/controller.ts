@@ -277,7 +277,7 @@ export function createController(deps: ControllerDeps): Controller {
           .addNotice(
             "info",
             options.steer
-              ? "Steering queued next; stopping the current task."
+              ? "Steering added. The current task continues from its present state."
               : "Request queued. See task status below.",
           );
     },

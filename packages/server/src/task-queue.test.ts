@@ -84,16 +84,21 @@ describe("chat task queue", () => {
       await h.cleanup();
     }
   });
-  it("steers next after cancellation and retains an older queued request", async () => {
+  it("steers within the active run without cancelling it and retains older queued work", async () => {
     const started: string[] = [];
+    const guidance: string[] = [];
+    let proceed: (() => void) | undefined;
+    let aborted = false;
     const h = await startHarness({
       agentRunner: {
         async run(message, ctx) {
           started.push(message);
           if (message === "first")
-            await new Promise<void>((resolve) =>
-              ctx.signal.addEventListener("abort", () => resolve(), { once: true }),
-            );
+            await new Promise<void>((resolve) => {
+              proceed = resolve;
+            });
+          aborted ||= ctx.signal.aborted;
+          guidance.push(...(ctx.takeSteering?.() ?? []));
           ctx.onEvent({ type: "done", turns: 1 });
         },
       },
@@ -102,11 +107,17 @@ describe("chat task queue", () => {
       await h.post("/api/chat", { message: "first" });
       await vi.waitFor(() => expect(started).toEqual(["first"]));
       await h.post("/api/chat", { message: "later", queue: true });
-      await h.post("/api/chat", { message: "steering", steer: true, mode: "plan" });
-      await vi.waitFor(() => expect(started).toEqual(["first", "steering", "later"]));
+      await h.post("/api/chat", { message: "steering", steer: true, mode: "edit" });
+      expect(started).toEqual(["first"]);
+      proceed?.();
+      await vi.waitFor(() => expect(started).toEqual(["first", "later"]));
+      expect(guidance).toEqual(["steering"]);
+      expect(aborted).toBe(false);
       const state = (await h.req("/api/state")).json<StateResponse>();
-      expect(state.tasks?.find((task) => task.title === "first")?.status).toBe("cancelled");
+      expect(state.tasks?.find((task) => task.title === "first")?.status).toBe("completed");
+      expect(state.tasks?.find((task) => task.title === "steering")?.status).toBe("completed");
     } finally {
+      proceed?.();
       await h.cleanup();
     }
   });

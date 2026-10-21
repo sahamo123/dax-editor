@@ -242,6 +242,7 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
           history: [...history],
           onEvent: ctx.onEvent,
           signal: ctx.signal,
+          ...(ctx.takeSteering ? { takeSteering: ctx.takeSteering } : {}),
           allowedRoots: [...ctx.allowedRoots],
           ...(options.transcriber ? { transcriber: options.transcriber } : {}),
         });

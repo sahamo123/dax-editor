@@ -17,7 +17,7 @@ Users need queued follow-ups, steering, video attachments and planning without c
 
 ## Decision
 
-The engine owns a serial queue, captured per-request modes and private task metadata. Browser refresh reconnects to the active queue. Engine restart marks unfinished work interrupted rather than automatically executing it. Steering cancels the active request and inserts the new task first, preserving edits already made. Planning offers only registry commands marked read-only; the tool runner refuses all other calls. CLI bridges are unavailable in Planning mode because this interface cannot constrain their external tools. Planning video attachments remain staged; edit tasks import attachments when dispatched.
+The engine owns a serial queue, captured per-request modes and private task metadata. Browser refresh reconnects to the active queue. Engine restart marks unfinished work interrupted rather than automatically executing it. Steering cooperatively adds guidance at the next model boundary without cancelling the active request. In-flight work finishes and completed edits remain. Attachments, mode changes and runners without guidance support continue after the active run completes; permissions never expand mid-run. Stop explicitly cancels. Planning offers only registry commands marked read-only; the tool runner refuses all other calls. CLI bridges are unavailable in Planning mode because this interface cannot constrain their external tools. Planning video attachments remain staged; edit tasks import attachments when dispatched.
 
 ## Consequences
 

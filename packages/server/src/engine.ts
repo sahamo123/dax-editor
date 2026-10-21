@@ -498,11 +498,11 @@ export class Engine {
       status: "queued",
       createdAt: Date.now(),
       ...(options.attachments?.length ? { attachments: options.attachments } : {}),
+      ...(options.steer && this.chat ? { steersRunId: this.chat.runId } : {}),
     };
     this.tasks.put(task);
     if (options.steer) {
       this.chatQueue.unshift(task);
-      this.cancelChat();
     } else this.chatQueue.push(task);
     this.dispatchChat();
     this.scheduleBroadcast();
@@ -525,6 +525,8 @@ export class Engine {
     if (this.chat || this.closing) return;
     const task = this.chatQueue.shift();
     if (!task) return;
+    // A runner without live guidance support, a mode switch or attachments continue as a new run after the old one finishes.
+    delete task.steersRunId;
     this.tasks.put({ ...task, status: "running" });
     const message = task.title;
     const runId = task.id;
@@ -533,6 +535,7 @@ export class Engine {
     let terminal = false;
     let startStateId: number | undefined;
     let failure: string | undefined;
+    const joined: TaskInfo[] = [];
     const emit = (event: AgentEvent) => {
       if (finished) return;
       if (event.type === "done" || event.type === "error") terminal = true;
@@ -553,6 +556,12 @@ export class Engine {
         status: abort.signal.aborted ? "cancelled" : failure ? "failed" : "completed",
         ...(failure ? { error: failure } : {}),
       });
+      for (const steering of joined)
+        this.tasks.put({
+          ...steering,
+          status: abort.signal.aborted ? "cancelled" : failure ? "failed" : "completed",
+          ...(failure ? { error: failure } : {}),
+        });
       if (this.chat?.runId === runId) this.chat = undefined;
       this.dispatchChat();
       this.scheduleBroadcast();
@@ -587,6 +596,22 @@ export class Engine {
           onEvent: emit,
           signal: abort.signal,
           allowedRoots: this.cfg.allowedRoots,
+          takeSteering: () => {
+            if (finished || abort.signal.aborted) return [];
+            const ready = this.chatQueue.filter(
+              (entry) =>
+                entry.steersRunId === runId &&
+                entry.mode === task.mode &&
+                !entry.attachments?.length,
+            );
+            for (const entry of ready) {
+              this.chatQueue.splice(this.chatQueue.indexOf(entry), 1);
+              joined.push(entry);
+              this.tasks.put({ ...entry, status: "running" });
+            }
+            if (ready.length) this.scheduleBroadcast();
+            return ready.sort((a, b) => a.createdAt - b.createdAt).map((entry) => entry.title);
+          },
         });
         if (abort.signal.aborted) emit({ type: "status", text: "Cancelled." });
       } catch (err) {

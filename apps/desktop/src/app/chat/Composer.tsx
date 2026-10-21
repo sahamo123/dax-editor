@@ -154,7 +154,7 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
             disabled={disabled || submitting || !text.trim()}
             onClick={() => send(text, true)}
           >
-            Steer now
+            Steer task
           </button>
         ) : null}
       </div>

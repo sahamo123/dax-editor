@@ -1,6 +1,7 @@
 # Project log
 
 ## 2026-10-20
+* **Decision**: corrected steering semantics to follow the owner's clarification: add guidance to the active conversation without cancelling or restarting it. The current model/tool step finishes, then the next model turn sees the guidance and continues with the same history. Stop remains explicit cancellation. Different modes, attachments and older runners continue after the active run rather than interrupting it. Consumed guidance keeps a linked task record; tests preserve the original run and its edits.
 * **Update**: browser end-to-end import tests now select file bytes instead of expecting the superseded path dialog. The app-owned upload folder remains usable with restrictive external import roots; a regression verifies external paths remain blocked.
 * **Fix**: Planning uses its own concise system prompt and skips execution-oriented skill guidance, instead of appending a planning note to the default editing instructions. This removes contradictory instructions that encouraged unnecessary tool rounds. Planning remains bounded to three model rounds with the same enforced read-only allow-list.
 * **Fix**: queued chat events carry their actual execution-time history boundary, so Undo this change cannot include earlier queued tasks merely because the user submitted them before those tasks finished. A regression checks the authoritative boundary; restart coverage verifies queued work becomes interrupted without execution.

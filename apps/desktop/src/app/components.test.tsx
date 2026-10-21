@@ -23,7 +23,7 @@ describe("ChatPanel", () => {
     const file = new File(["video"], "attached.mp4", { type: "video/mp4" });
     await userEvent.upload(screen.getByLabelText("Choose videos"), file);
     await userEvent.type(screen.getByLabelText("Message to the assistant"), "Plan the next edit");
-    await userEvent.click(screen.getByRole("button", { name: "Steer now" }));
+    await userEvent.click(screen.getByRole("button", { name: "Steer task" }));
     expect(controller.sendChat).toHaveBeenCalledWith("Plan the next edit", {
       mode: "plan",
       steer: true,
