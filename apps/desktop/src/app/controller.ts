@@ -54,13 +54,20 @@ export interface Controller {
   redo(): Promise<void>;
   /** Import files by absolute path. */
   importPaths(paths: string[]): Promise<boolean>;
+  /** Copy selected browser videos into persistent local engine storage and import each; errors become toasts. */
+  uploadFiles(files: File[]): Promise<boolean>;
   /**
    * Export to `path`. The server answers as soon as FFmpeg has started (with the export job's id), so progress
    * and the "Exported ..." toast come from job events; a refusal (bad path, file exists) is toasted here.
    */
   exportTo(path: string, overwrite: boolean): Promise<boolean>;
   /** Show `text` as the user's message and start an AI run. A refusal (no assistant, busy) lands in the transcript. */
-  sendChat(text: string): Promise<void>;
+  sendChat(
+    text: string,
+    options?: { mode?: "edit" | "plan"; steer?: boolean; files?: File[] },
+  ): Promise<void>;
+  /** Cancel one queued or running task while preserving its history entry. */
+  cancelTask(id: string): Promise<void>;
   /** Stop the running AI run; the transcript shows "Stopped." */
   cancelChat(): Promise<void>;
   /** Return the project to where it was before the AI run `runId` (several undo steps if it made several edits). */
@@ -164,7 +171,7 @@ export function createController(deps: ControllerDeps): Controller {
               );
             }
           } else {
-            s.applyChat(event.runId, event.event);
+            s.applyChat(event.runId, event.event, event.startStateId);
           }
         },
       });
@@ -207,6 +214,20 @@ export function createController(deps: ControllerDeps): Controller {
       return true;
     },
 
+    async uploadFiles(files) {
+      let imported = false;
+      for (const [index, file] of files.entries()) {
+        toast("info", `Importing ${index + 1}/${files.length}: ${file.name}…`);
+        const result = await client.uploadMedia(file);
+        if (!result.ok) toast("error", result.error);
+        else {
+          imported = true;
+          toast("success", `Imported ${file.name}.`);
+        }
+      }
+      return imported;
+    },
+
     async exportTo(path, overwrite) {
       const r = await client.run("export_video", { path, overwrite });
       if (!r.ok) {
@@ -219,12 +240,52 @@ export function createController(deps: ControllerDeps): Controller {
       return true;
     },
 
-    async sendChat(text) {
+    async sendChat(text, options = {}) {
       const message = text.trim();
       if (!message) return;
+      const attachments: string[] = [];
+      for (const file of options.files ?? []) {
+        const uploaded = await client.uploadMedia(file, true);
+        if (!uploaded.ok) {
+          store.getState().addNotice("error", uploaded.error);
+          return;
+        }
+        const data = uploaded.data;
+        if (
+          typeof data !== "object" ||
+          data === null ||
+          !("path" in data) ||
+          typeof data.path !== "string"
+        ) {
+          store.getState().addNotice("error", "The editor did not confirm the attachment.");
+          return;
+        }
+        attachments.push(data.path);
+      }
       store.getState().beginUserMessage(message);
-      const r = await client.chat(message);
+      const queued = Boolean(store.getState().state?.busy);
+      const r = await client.chat(message, {
+        mode: options.mode ?? "edit",
+        queue: true,
+        steer: options.steer ?? false,
+        attachments,
+      });
       if (!r.ok) store.getState().addNotice("error", r.error);
+      else if (queued)
+        store
+          .getState()
+          .addNotice(
+            "info",
+            options.steer
+              ? "Steering added. The current task continues from its present state."
+              : "Request queued. See task status below.",
+          );
+    },
+
+    async cancelTask(id) {
+      const result = await client.cancelTask(id);
+      if (!result.ok) toast("error", result.error);
+      else await refreshState();
     },
 
     async cancelChat() {

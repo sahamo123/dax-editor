@@ -20,6 +20,8 @@ export interface AgentRunContext {
   signal: AbortSignal;
   /** Folders the agent may import from and export to (the server's `--allow-root` set). */
   allowedRoots: readonly string[];
+  /** Drain new user guidance at model/tool boundaries without cancelling the current run. Optional for older runners. */
+  takeSteering?(): string[];
 }
 
 /**
@@ -33,6 +35,8 @@ export interface AgentRunner {
 
 /** What a {@link AgentRunnerFactory} may look at when choosing a runner for the active provider. */
 export interface RunnerEnv {
+  /** Planning runners must expose only read-only tools; defaults to editing. */
+  mode?: "edit" | "plan";
   /** Current settings, including `activeProvider`. */
   settings: Settings;
   /** The stored API key for a provider, if any. Never log or return it. */

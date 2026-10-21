@@ -12,6 +12,8 @@ import {
   trimHistory,
 } from "@dax/agent";
 import {
+  commandTools,
+  getCommand,
   loadSkills,
   type Session,
   type Skill,
@@ -168,6 +170,10 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
         provider: createOpenAiProvider({
           baseUrl: local.baseUrl,
           model: local.model,
+          maxTokens: 512,
+          timeoutMs: 90_000,
+          maxRetries: 0,
+          extraBody: { chat_template_kwargs: { enable_thinking: false } },
           ...(local.apiKey ? { apiKey: local.apiKey } : {}),
         }),
         contextTokens: local.contextTokens,
@@ -178,6 +184,11 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
 
   return async (env) => {
     const kind = env.settings.activeProvider;
+    const planning = env.mode === "plan";
+    if (planning && kind.startsWith("cli-"))
+      return unavailable(
+        "Planning mode is available with the local model or an API assistant. Choose one before planning.",
+      );
     const made = await makeProvider(kind, env);
     if (typeof made === "string") {
       return (await options.extraProviders?.(kind, env)) ?? unavailable(made);
@@ -187,13 +198,36 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
     const budget = contextBudget(made.contextTokens);
     const agent = createAgent({
       provider: made.provider,
+      ...(planning
+        ? {
+            systemPrompt:
+              "You are the planning assistant inside a video editor. Return a short, practical numbered plan for the user's request. Do not execute edits, claim changes were made, or request editing tools. You may inspect the current project with the read-only tools when needed. You cannot see the video's contents; state any missing information. Ask the user to switch to Edit mode and submit an execution request when the plan is ready.",
+            maxTurns: 3,
+          }
+        : {}),
+      streamText: kind === "local",
       contextTokens: budget.contextTokens,
       toolStyle: budget.compact ? "compact" : "full",
-      ...(budget.compact ? { tools: smallModelTools() } : {}),
+      ...(planning
+        ? {
+            tools: (budget.compact ? smallModelTools() : commandTools()).filter(
+              (tool) => getCommand(tool.name)?.readOnly === true,
+            ),
+          }
+        : budget.compact
+          ? { tools: smallModelTools() }
+          : {}),
       contextProvider: (message) =>
-        skills.length > 0
-          ? skillContext(selectSkills(message, skills, { maxChars: budget.skillChars }))
-          : undefined,
+        [
+          planning
+            ? "PLANNING MODE: inspect and propose a plan only. Do not change the project or claim edits were made. Ask the user to switch to Edit mode to execute."
+            : "",
+          !planning && skills.length > 0
+            ? skillContext(selectSkills(message, skills, { maxChars: budget.skillChars }))
+            : "",
+        ]
+          .filter(Boolean)
+          .join("\n"),
     });
     return {
       async run(message, ctx) {
@@ -208,6 +242,7 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
           history: [...history],
           onEvent: ctx.onEvent,
           signal: ctx.signal,
+          ...(ctx.takeSteering ? { takeSteering: ctx.takeSteering } : {}),
           allowedRoots: [...ctx.allowedRoots],
           ...(options.transcriber ? { transcriber: options.transcriber } : {}),
         });

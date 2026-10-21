@@ -13,11 +13,13 @@ export const API = {
   state: "/api/state",
   command: "/api/command",
   importMedia: "/api/import",
+  uploadMedia: "/api/import/upload",
   projectNew: "/api/project/new",
   projectOpen: "/api/project/open",
   projectSave: "/api/project/save",
   chat: "/api/chat",
   chatCancel: "/api/chat/cancel",
+  taskCancel: "/api/tasks/:taskId/cancel",
   settings: "/api/settings",
   apiKey: "/api/settings/api-key",
   providers: "/api/providers",
@@ -112,6 +114,11 @@ export const ImportRequestSchema = z.object({ paths: z.array(z.string().min(1)).
 /** A validated {@link ImportRequestSchema} value. */
 export type ImportRequest = z.infer<typeof ImportRequestSchema>;
 
+/** Maximum bytes in one browser video upload (1 GiB); enforced while streaming to local disk. */
+export const MAX_UPLOAD_BYTES = 1024 * 1024 * 1024;
+/** Browser upload filename metadata. Only the extension is used for the server-generated storage path. */
+export const UploadNameSchema = z.string().min(1).max(255);
+
 /** Start a new, empty project. */
 export const ProjectNewRequestSchema = z.object({
   name: z.string().min(1).max(120).default("Untitled"),
@@ -128,9 +135,31 @@ export const ProjectPathRequestSchema = z.object({ path: z.string().min(1).optio
 export type ProjectPathRequest = z.infer<typeof ProjectPathRequestSchema>;
 
 /** Send a chat message to the active AI provider. The reply streams over the WebSocket as `chat` events. */
-export const ChatRequestSchema = z.object({ message: z.string().min(1).max(8000) });
+export const ChatRequestSchema = z.object({
+  message: z.string().min(1).max(8000),
+  mode: z.enum(["edit", "plan"]).default("edit"),
+  queue: z.boolean().default(false),
+  steer: z.boolean().default(false),
+  attachments: z.array(z.string().min(1)).max(10).default([]),
+});
 /** A validated {@link ChatRequestSchema} value. */
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
+
+/** A locally tracked unit of chat/import work. Queued requests keep the mode selected when submitted. */
+export const TaskInfoSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  kind: z.enum(["chat", "import"]),
+  mode: z.enum(["edit", "plan"]),
+  status: z.enum(["queued", "running", "completed", "failed", "cancelled", "interrupted"]),
+  createdAt: z.number(),
+  error: z.string().optional(),
+  attachments: z.array(z.string()).optional(),
+  queuePosition: z.number().int().positive().optional(),
+  steersRunId: z.string().optional(),
+});
+/** Validated task metadata stored locally and sent with editor state. */
+export type TaskInfo = z.infer<typeof TaskInfoSchema>;
 
 /** Where chat messages go. */
 export const PROVIDER_KINDS = [
@@ -310,6 +339,8 @@ export interface StateResponse {
   providers: ProviderStatus[];
   /** True while an AI run is in progress. */
   busy: boolean;
+  /** Recent local work, including queued requests; absent on older engine versions. */
+  tasks?: TaskInfo[];
   serverVersion: string;
   /** Path of the open project file, if it has been saved. */
   projectPath?: string;
@@ -330,7 +361,7 @@ export type AgentEvent =
 export type WsEvent =
   | { type: "state"; state: StateResponse }
   | { type: "job"; job: JobInfo }
-  | { type: "chat"; runId: string; event: AgentEvent };
+  | { type: "chat"; runId: string; event: AgentEvent; startStateId?: number };
 
 /** What the server prints on startup (one JSON line on stdout) so a launcher can find it. */
 export interface ServerInfo {

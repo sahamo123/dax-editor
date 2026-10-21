@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+Steering was corrected after the initial task-queue delivery: `Steer task` now adds guidance at the next model boundary in the same active run, without cancellation. Stop is separate. Modes/attachments or older runners continue after current work finishes. See the updated ADR 0013 and `packages/agent/src/steering.test.ts`.
+
+The latest preview work is on `codex/browser-chat-tasks`, tracked in issue #4 and described in `docs/specs/browser-import-and-responsive-chat.md`, `docs/specs/chat-task-queue.md` and ADR 0013: browser picker/upload, chat video attachments, engine task queue, steering and enforced Planning mode. Full checks pass in `artifacts/chat-tasks-full-check.log`; live browser import/playback and a real offline Planning reply were observed. The native installer has not been rebuilt for these improvements. Preserve ignored `.dax-data/` sources, projects, models and task history.
+
 The repository is the source of truth. The upstream baseline is `82f1d24` on `claude/exciting-lamport-1k91fh`; the October 20 Windows implementation is on `codex/windows-offline-desktop`, split into logical commits. Inspect `git status` before switching branches. Build artifacts, dependency caches and `.dax-data/` preview project data are ignored by Git. Read the Windows checkpoint in `docs/STATUS.md`, the root `DEVELOPMENT-TASKS.md`, and `WINDOWS-DEVELOPMENT.md` before the historical state below. Delivery tracking is [GitHub issue #2](https://github.com/sahamo123/dax-editor/issues/2). Section 3 lists baseline dependencies and pins.
 
 The unsigned Windows installer includes offline AI. Full `pnpm check`, 32 browser workflows and the real-model development preview smoke pass. `Start Development Preview.cmd` opens the browser editor and offline AI with persistent `.dax-data/`. Native validation remains blocked by Windows Application Control event 3077; Smart App Control reports enforcement on this personal administrator-owned laptop. No signing certificate is available, and no security policy was changed. Bundled-engine/browser evidence does not replace native install and dialog validation.

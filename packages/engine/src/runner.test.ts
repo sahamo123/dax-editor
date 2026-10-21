@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { Session } from "@dax/core";
+import { getCommand, Session } from "@dax/core";
 import type { AgentEvent, Settings } from "@dax/protocol";
 import type { RunnerEnv } from "@dax/server";
 import { afterEach, describe, expect, it } from "vitest";
@@ -43,6 +43,101 @@ afterEach(() => {
 });
 
 describe("createRunnerFactory", () => {
+  it("enforces planning tools even when a model requests an edit", async () => {
+    const bodies: Array<{
+      tools: Array<{ function: { name: string } }>;
+      messages: Array<{ role: string; content: string }>;
+    }> = [];
+    const server = createServer((req, res) => {
+      let body = "";
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+      req.on("end", () => {
+        bodies.push(JSON.parse(body));
+        res.setHeader("content-type", "application/json");
+        res.end(
+          JSON.stringify({
+            choices: [
+              {
+                message:
+                  bodies.length === 1
+                    ? {
+                        content: null,
+                        tool_calls: [
+                          {
+                            id: "edit",
+                            function: { name: "set_format", arguments: '{"preset":"square-1080"}' },
+                          },
+                        ],
+                      }
+                    : { content: "Here is a plan." },
+                finish_reason: bodies.length === 1 ? "tool_calls" : "stop",
+              },
+            ],
+          }),
+        );
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    open = server;
+    const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/v1`;
+    const session = new Session();
+    const before = JSON.stringify(session.project);
+    const runner = await createRunnerFactory()({
+      ...env(settings({ providers: { "openai-compatible": { baseUrl: url, model: "m" } } })),
+      mode: "plan",
+    });
+    await runner.run("Change the format", {
+      session,
+      onEvent: () => undefined,
+      signal: new AbortController().signal,
+      allowedRoots: [],
+    });
+    expect(JSON.stringify(session.project)).toBe(before);
+    expect(bodies[0]?.messages[0]?.content).toContain("Do not execute edits");
+    expect(bodies[0]?.messages[0]?.content).not.toContain("you make it by calling tools");
+    expect(
+      bodies[0]?.tools.every((tool) => getCommand(tool.function.name)?.readOnly === true),
+    ).toBe(true);
+  });
+
+  it("streams bounded local replies with template thinking disabled", async () => {
+    let body: Record<string, unknown> = {};
+    const server = createServer((req, res) => {
+      let text = "";
+      req.on("data", (chunk) => {
+        text += chunk;
+      });
+      req.on("end", () => {
+        body = JSON.parse(text);
+        res.setHeader("content-type", "text/event-stream");
+        for (const content of ["Hello ", "there."])
+          res.write(`data: ${JSON.stringify({ choices: [{ delta: { content } }] })}\n\n`);
+        res.end('data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\ndata: [DONE]\n\n');
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    open = server;
+    const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}/v1`;
+    const events: AgentEvent[] = [];
+    const runner = await createRunnerFactory({
+      localEndpoint: async () => ({ baseUrl, contextTokens: 8192 }),
+    })(env(settings({ activeProvider: "local" })));
+    await runner.run("Hello", {
+      session: new Session(),
+      onEvent: (event) => events.push(event),
+      signal: new AbortController().signal,
+      allowedRoots: [],
+    });
+    expect(body).toMatchObject({
+      stream: true,
+      max_tokens: 512,
+      chat_template_kwargs: { enable_thinking: false },
+    });
+    expect(events.filter((event) => event.type === "text").length).toBeGreaterThan(1);
+    expect(events.at(-1)?.type).toBe("done");
+  });
   it("explains what is missing instead of failing", async () => {
     const events: AgentEvent[] = [];
     const runner = await createRunnerFactory()(env(settings({ activeProvider: "anthropic" })));

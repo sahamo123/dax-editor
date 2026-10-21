@@ -1,5 +1,5 @@
 // First run: nothing imported yet. The editor must say what to do, work without AI, and import a video
-// (typed path in the browser build, or a dropped path).
+// (browser file selection/local upload, or a dropped path).
 
 import { chatInput, expect, test } from "./fixtures";
 
@@ -27,7 +27,7 @@ test("first-run screen says to drop or import, and that AI is optional", async (
   await shot("01-first-run");
 });
 
-test("imports a video by typed path and shows it in the editor and the media bin", async ({
+test("uploads a selected video and shows it in the editor and the media bin", async ({
   page,
   startServer,
   openApp,
@@ -37,20 +37,18 @@ test("imports a video by typed path and shows it in the editor and the media bin
   const server = await startServer();
   await openApp(server);
 
+  const picker = page.waitForEvent("filechooser");
   await page.getByRole("banner").getByRole("button", { name: "Import" }).click();
-  const dialog = page.getByRole("dialog", { name: "Import video" });
-  await expect(dialog).toBeVisible();
-  await dialog.getByLabel("File path(s)").fill(sampleVideo);
-  await dialog.getByRole("button", { name: "Import", exact: true }).click();
+  await (await picker).setFiles(sampleVideo);
 
-  await expect(page.getByText("Video imported.")).toBeVisible();
+  await expect(page.getByText("Imported interview.mp4.", { exact: true })).toBeVisible();
   await expect(page.getByText("Drop a video here or click Import")).toBeHidden();
   expect(Object.keys((await server.project()).assets)).toHaveLength(1);
 
   await page.getByRole("tab", { name: "Media" }).click();
   // The timeline labels its clip with the same file name, so look inside the Media panel only.
   await expect(
-    page.getByRole("tabpanel", { name: "Media" }).getByText("interview.mp4", { exact: true }),
+    page.getByRole("tabpanel", { name: "Media" }).getByText("video-interview.mp4", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText("On timeline")).toBeVisible();
   // The thumbnail comes from the server's media pipeline over the token-protected media URL.
@@ -64,7 +62,7 @@ test("imports a video by typed path and shows it in the editor and the media bin
   await shot("02-imported-media-bin");
 });
 
-test("shows a clear error when the engine refuses a path", async ({
+test("shows a clear error when selected bytes are not video", async ({
   page,
   startServer,
   openApp,
@@ -72,14 +70,15 @@ test("shows a clear error when the engine refuses a path", async ({
   const server = await startServer();
   await openApp(server);
 
+  const picker = page.waitForEvent("filechooser");
   await page.getByRole("banner").getByRole("button", { name: "Import" }).click();
-  const dialog = page.getByRole("dialog", { name: "Import video" });
-  await dialog.getByLabel("File path(s)").fill("/etc/hosts");
-  await dialog.getByRole("button", { name: "Import", exact: true }).click();
-
-  await expect(page.getByText(/outside the allowed folders/)).toBeVisible();
-  // The dialog stays open so the path can be corrected.
-  await expect(dialog).toBeVisible();
+  await (await picker).setFiles({
+    name: "bad.mp4",
+    mimeType: "video/mp4",
+    buffer: Buffer.from("not video"),
+  });
+  await expect(page.getByText(/ffprobe|Invalid data|video stream/i).first()).toBeVisible();
+  expect(Object.keys((await server.project()).assets)).toHaveLength(0);
 });
 
 test("a dropped path imports; a drop without paths explains what to do", async ({

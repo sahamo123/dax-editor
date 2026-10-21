@@ -92,6 +92,8 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
   const allowedRoots = (options.allowRoots?.length ? options.allowRoots : [homedir(), dataDir]).map(
     (r) => resolve(r),
   );
+  // Browser uploads are app-owned sources, even when external path imports use a narrower allow-list.
+  allowedRoots.push(resolve(dataDir, "uploads"));
   const maxBody = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
 
   const hub = new WsHub();

@@ -91,6 +91,26 @@ export async function pickFiles(): Promise<string[] | null> {
   return Array.isArray(picked) ? picked : [picked];
 }
 
+/** Open the browser's video picker in the current user gesture. Resolves to selected files, or [] on cancel. */
+export function pickBrowserFiles(): Promise<File[]> {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".mp4,.mov,.mkv,.webm,.avi,.m4v,.mpg,.mpeg";
+    input.multiple = true;
+    input.hidden = true;
+    input.setAttribute("aria-label", "Choose videos");
+    const finish = (files: File[]) => {
+      input.remove();
+      resolve(files);
+    };
+    input.addEventListener("change", () => finish(Array.from(input.files ?? [])), { once: true });
+    input.addEventListener("cancel", () => finish([]), { once: true });
+    document.body.append(input);
+    input.click();
+  });
+}
+
 /**
  * Ask where to save an export. Tauri: the native save dialog. Web: `null` (the caller shows a typed-path box).
  * Resolves to `""` if the user cancels.
@@ -110,6 +130,8 @@ export async function pickSavePath(defaultName: string): Promise<string | null> 
 
 /** Callbacks for {@link onFileDrop}. */
 export interface FileDropHandlers {
+  /** Browser-selected bytes for local upload; native drops continue to use absolute paths. */
+  onFiles?(files: File[]): void;
   /** Files were dropped; `paths` are absolute paths and may be empty if the source gave none (web). */
   onDrop(paths: string[]): void;
   /** A drag entered (true) or left (false) the window, for highlighting a drop zone. */
@@ -157,6 +179,11 @@ function onWebDrop(handlers: FileDropHandlers): () => void {
     e.preventDefault();
     depth = 0;
     handlers.onHover?.(false);
+    const files = Array.from(e.dataTransfer?.files ?? []);
+    if (files.length && handlers.onFiles) {
+      handlers.onFiles(files);
+      return;
+    }
     const text =
       e.dataTransfer?.getData("text/uri-list") || e.dataTransfer?.getData("text/plain") || "";
     handlers.onDrop(pathsFromDropText(text));
@@ -175,8 +202,7 @@ function onWebDrop(handlers: FileDropHandlers): () => void {
 
 /**
  * Listen for files dropped on the window. Tauri: real paths from the webview's drag-and-drop event.
- * Web: the browser hides file paths, so only dropped text or `file://` links produce paths; otherwise
- * `onDrop([])` fires and the UI explains how to import by typing a path.
+ * Web: selected bytes go to `onFiles` for local upload; dropped text or file links still produce paths.
  * Returns a function that stops listening.
  */
 export function onFileDrop(handlers: FileDropHandlers): () => void {

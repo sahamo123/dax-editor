@@ -81,6 +81,9 @@ function Connected({ conn }: { conn: ServerConnection }): ReactElement {
   useEffect(
     () =>
       onFileDrop({
+        onFiles: (files) => {
+          void controller.uploadFiles(files);
+        },
         onHover: (over) => store.getState().patchUi({ dropHover: over }),
         onDrop: (paths) => {
           const s = store.getState();

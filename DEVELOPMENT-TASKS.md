@@ -78,6 +78,8 @@ Statuses: DONE means verified evidence exists; RUNNING means work/check is activ
 
 ## Latest verified results
 
+- Browser imports, video attachments, chat queue/steering and enforced Planning mode: implemented under GitHub issue #4. Full check passes (`artifacts/chat-tasks-full-check.log`); subsequent server attachment/drop/control tests pass in final logs. Live browser selection imported and played generated footage; offline Planning chat returned without timeline changes. Native installer refresh/validation remains outstanding.
+
 - Windows overlay render regression: reproduced before fix; real rendering passes after path escaping correction.
 - Persistence/overlay operation tests: 27 passed outside the restrictive sandbox.
 - Archive/listener tests: 28 passed, 11 POSIX-only cases skipped. This does not validate Linux/macOS symlink behavior.

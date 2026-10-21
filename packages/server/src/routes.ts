@@ -8,11 +8,13 @@ import {
   CommandRequestSchema,
   ImportRequestSchema,
   LocalModelInstallRequestSchema,
+  MAX_UPLOAD_BYTES,
   type MediaKind,
   PROVIDER_KINDS,
   ProjectNewRequestSchema,
   ProjectPathRequestSchema,
   SettingsSchema,
+  UploadNameSchema,
 } from "@dax/protocol";
 import { z } from "zod";
 import type { Engine } from "./engine.js";
@@ -54,6 +56,15 @@ export function buildRouter(engine: Engine): Router {
     json(200, await engine.importFiles(req.paths));
   });
 
+  r.add("POST", API.uploadMedia, async ({ req, url, json }) => {
+    const name = parseWith(UploadNameSchema, url.searchParams.get("name"));
+    if (req.headers["content-type"] !== "application/octet-stream")
+      throw new HttpError(415, "Content-Type must be application/octet-stream");
+    if (Number(req.headers["content-length"] ?? 0) > MAX_UPLOAD_BYTES)
+      throw new HttpError(413, "Video exceeds the 1 GiB upload limit.", true);
+    json(200, await engine.importUpload(name, req, url.searchParams.get("stage") === "true"));
+  });
+
   // ----- projects -----
   r.add("POST", API.projectNew, async ({ body, json }) => {
     const req = parseWith(ProjectNewRequestSchema, await body());
@@ -85,9 +96,12 @@ export function buildRouter(engine: Engine): Router {
   // ----- chat -----
   r.add("POST", API.chat, async ({ body, json }) => {
     const req = parseWith(ChatRequestSchema, await body());
-    json(202, { runId: engine.startChat(req.message) });
+    json(202, { runId: engine.startChat(req.message, req) });
   });
   r.add("POST", API.chatCancel, ({ json }) => json(200, { cancelled: engine.cancelChat() }));
+  r.add("POST", API.taskCancel, ({ params, json }) =>
+    json(200, { cancelled: engine.cancelTask(params.taskId ?? "") }),
+  );
 
   // ----- settings and providers -----
   r.add("GET", API.settings, ({ json }) => json(200, engine.settings.get()));

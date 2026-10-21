@@ -14,6 +14,46 @@ import { emptyProjectState, historyItem, makeState, providers, renderApp } from 
 import { TopBar } from "./topbar/TopBar";
 
 describe("ChatPanel", () => {
+  it("keeps composing while busy, captures Planning mode and steers with video attachments", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(makeState({ busy: true, providers: providers(["local"]) })),
+    );
+    await userEvent.selectOptions(screen.getByLabelText("Chat mode"), "plan");
+    await userEvent.click(screen.getByRole("button", { name: "Attach videos" }));
+    const file = new File(["video"], "attached.mp4", { type: "video/mp4" });
+    await userEvent.upload(screen.getByLabelText("Choose videos"), file);
+    await userEvent.type(screen.getByLabelText("Message to the assistant"), "Plan the next edit");
+    await userEvent.click(screen.getByRole("button", { name: "Steer task" }));
+    expect(controller.sendChat).toHaveBeenCalledWith("Plan the next edit", {
+      mode: "plan",
+      steer: true,
+      files: [file],
+    });
+    expect(screen.getByLabelText("Message to the assistant")).toBeEnabled();
+  });
+
+  it("shows queued status and cancels a particular task", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(
+        makeState({
+          tasks: [
+            {
+              id: "queued-task",
+              title: "Add intro",
+              kind: "chat",
+              mode: "edit",
+              status: "queued",
+              createdAt: 1,
+              queuePosition: 1,
+            },
+          ],
+        }),
+      ),
+    );
+    expect(screen.getByText(/Queue #1/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Cancel task" }));
+    expect(controller.cancelTask).toHaveBeenCalledWith("queued-task");
+  });
   it("shows the setup card, says the editor works without AI, and locks the composer when no assistant exists", () => {
     renderApp(<ChatPanel />);
     expect(screen.getByText(/The editor works without AI/)).toBeInTheDocument();
@@ -36,10 +76,18 @@ describe("ChatPanel", () => {
     );
     const box = screen.getByLabelText("Message to the assistant");
     await userEvent.type(box, "make it shorter{Enter}");
-    expect(controller.sendChat).toHaveBeenCalledWith("make it shorter");
+    expect(controller.sendChat).toHaveBeenCalledWith("make it shorter", {
+      mode: "edit",
+      steer: false,
+      files: [],
+    });
     expect(box).toHaveValue("");
     await userEvent.click(screen.getByRole("button", { name: "Add a title" }));
-    expect(controller.sendChat).toHaveBeenLastCalledWith("Add a title");
+    expect(controller.sendChat).toHaveBeenLastCalledWith("Add a title", {
+      mode: "edit",
+      steer: false,
+      files: [],
+    });
   });
 
   it("Shift+Enter adds a new line instead of sending", async () => {
@@ -380,10 +428,12 @@ describe("EmptyState", () => {
     expect(screen.getByText(/You don't need\s+AI to edit/)).toBeInTheDocument();
   });
 
-  it("opens the typed-path dialog when the browser has no file dialog", async () => {
-    const { store } = renderApp(<EmptyState />);
+  it("opens a browser video picker and uploads selected files", async () => {
+    const { controller } = renderApp(<EmptyState />);
     await userEvent.click(screen.getByRole("button", { name: /Import video/ }));
-    expect(store.getState().ui.importOpen).toBe(true);
+    const file = new File(["video"], "test.mp4", { type: "video/mp4" });
+    await userEvent.upload(screen.getByLabelText("Choose videos"), file);
+    expect(controller.uploadFiles).toHaveBeenCalledWith([file]);
   });
 });
 

@@ -17,12 +17,11 @@ test("imports a clip, runs a manual edit, and the UI follows the engine", async 
   const engine = await startEngine();
   await openApp(engine);
 
-  // Import through the dialog: POST /api/import, then the engine pushes the new state over the WebSocket.
+  // Import selected bytes through the authenticated upload route; the engine pushes state over WebSocket.
+  const picker = page.waitForEvent("filechooser");
   await page.getByRole("banner").getByRole("button", { name: "Import" }).click();
-  const dialog = page.getByRole("dialog", { name: "Import video" });
-  await dialog.getByLabel("File path(s)").fill(sampleVideo);
-  await dialog.getByRole("button", { name: "Import", exact: true }).click();
-  await expect(page.getByText("Video imported.")).toBeVisible();
+  await (await picker).setFiles(sampleVideo);
+  await expect(page.getByText("Imported interview.mp4.", { exact: true })).toBeVisible();
   await expect(page.getByText("Drop a video here or click Import")).toBeHidden();
 
   const imported = await engine.api.project();
@@ -33,7 +32,7 @@ test("imports a clip, runs a manual edit, and the UI follows the engine", async 
   // The Media tab: the card and its thumbnail, made by the engine's FFmpeg pipeline and served with the token.
   await page.getByRole("tab", { name: "Media" }).click();
   await expect(
-    page.getByRole("tabpanel", { name: "Media" }).getByText("interview.mp4", { exact: true }),
+    page.getByRole("tabpanel", { name: "Media" }).getByText("video-interview.mp4", { exact: true }),
   ).toBeVisible();
   await expect
     .poll(() =>

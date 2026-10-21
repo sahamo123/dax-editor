@@ -75,6 +75,18 @@ describe("web platform", () => {
     fire("drop");
     expect(onDrop).toHaveBeenCalledTimes(1);
   });
+  it("passes dropped browser files to the local upload handler", () => {
+    const onDrop = vi.fn();
+    const onFiles = vi.fn();
+    const file = new File(["video"], "clip.mp4");
+    const off = onFileDrop({ onDrop, onFiles });
+    const event = new Event("drop", { cancelable: true });
+    Object.defineProperty(event, "dataTransfer", { value: { types: ["Files"], files: [file] } });
+    window.dispatchEvent(event);
+    expect(onFiles).toHaveBeenCalledWith([file]);
+    expect(onDrop).not.toHaveBeenCalled();
+    off();
+  });
 });
 
 describe("tauri platform", () => {
