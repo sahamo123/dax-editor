@@ -360,7 +360,7 @@ export type AgentEvent =
 export type WsEvent =
   | { type: "state"; state: StateResponse }
   | { type: "job"; job: JobInfo }
-  | { type: "chat"; runId: string; event: AgentEvent };
+  | { type: "chat"; runId: string; event: AgentEvent; startStateId?: number };
 
 /** What the server prints on startup (one JSON line on stdout) so a launcher can find it. */
 export interface ServerInfo {

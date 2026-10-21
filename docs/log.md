@@ -1,6 +1,7 @@
 # Project log
 
 ## 2026-10-20
+* **Fix**: queued chat events carry their actual execution-time history boundary, so Undo this change cannot include earlier queued tasks merely because the user submitted them before those tasks finished. A regression checks the authoritative boundary; restart coverage verifies queued work becomes interrupted without execution.
 * **Creation**: browser video picker/upload and drop support replace path-only importing in the preview. Chat gains video attachments, engine-owned queued tasks, steering and individual cancellation. Private task metadata survives refresh; engine restart marks unfinished work interrupted. Planning/Edit is captured per task, with read-only command enforcement and CLI planning refusal (ADR 0013, issue #4). Regression tests refuse a mutating model call in Planning mode.
 * **Update**: local replies stream with template thinking disabled, a 512-token cap and a 90-second per-request timeout without retries. Full repository checks pass. Live browser selection imported generated footage and played its preview; an offline Planning reply completed without timeline changes. The existing native installer predates this preview update and remains unvalidated.
 * **Fix**: the plain development-preview link omitted the per-launch engine connection, leaving a fresh tab disconnected or using a stale remembered session. The launcher now supplies the existing connection URL through a non-cached loopback root redirect before serving the editor. The real-model smoke also checks this redirect.

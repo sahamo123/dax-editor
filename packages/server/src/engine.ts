@@ -531,12 +531,18 @@ export class Engine {
     const abort = new AbortController();
     let finished = false;
     let terminal = false;
+    let startStateId: number | undefined;
     let failure: string | undefined;
     const emit = (event: AgentEvent) => {
       if (finished) return;
       if (event.type === "done" || event.type === "error") terminal = true;
       if (event.type === "error") failure = event.message;
-      this.cfg.emit({ type: "chat", runId, event: this.scrubEvent(event) });
+      this.cfg.emit({
+        type: "chat",
+        runId,
+        event: this.scrubEvent(event),
+        ...(startStateId !== undefined ? { startStateId } : {}),
+      });
     };
     const finish = () => {
       if (finished) return;
@@ -558,6 +564,7 @@ export class Engine {
       try {
         // Edits accepted before this run started finish first; new ones are refused while the run is busy.
         await this.commandChain;
+        startStateId = this.projects.session.history().find((state) => state.current)?.id;
         for (const path of task.attachments ?? []) {
           await resolveInsideRoots(path, [join(this.cfg.dataDir, "uploads")]);
           if (task.mode === "edit") {

@@ -81,7 +81,7 @@ export interface AppStore {
   /** Record the latest progress of a background job. */
   applyJob(job: JobInfo): void;
   /** Fold one `chat` event into the transcript. */
-  applyChat(runId: string, event: AgentEvent): void;
+  applyChat(runId: string, event: AgentEvent, startStateId?: number): void;
   /** Add the user's message and remember the current history state as the undo point of the coming run. */
   beginUserMessage(text: string): void;
   /** Add a system line (for example a refused request) to the transcript. */
@@ -162,13 +162,15 @@ export function createAppStore(): StoreApi<AppStore> {
 
     applyJob: (job) => set((s) => ({ jobs: { ...s.jobs, [job.id]: job } })),
 
-    applyChat: (runId, event) =>
+    applyChat: (runId, event, startStateId) =>
       set((s) => {
         const known = s.chat.some((i) => i.kind === "run" && i.id === runId);
         // A run we did not start (another window) has no recorded undo point; use where we are now.
         const start = known
           ? null
-          : (s.pendingStartId ?? (s.state ? currentStateId(s.state.history) : null));
+          : (startStateId ??
+            s.pendingStartId ??
+            (s.state ? currentStateId(s.state.history) : null));
         return {
           chat: applyChatEvent(s.chat, runId, event, start),
           pendingStartId: known ? s.pendingStartId : null,

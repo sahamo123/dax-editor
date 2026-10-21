@@ -45,6 +45,21 @@ function setup(clientOver: Record<string, unknown> = {}) {
   return { store, client, controller, socket };
 }
 
+it("uses the engine's actual undo boundary for a queued task instead of the earlier submission state", () => {
+  const { store, socket } = setup();
+  store.getState().applyState(makeState());
+  store.getState().beginUserMessage("queued before other edits");
+  socket().onEvent({
+    type: "chat",
+    runId: "queued-run",
+    startStateId: 42,
+    event: { type: "status", text: "Thinking..." },
+  });
+  expect(
+    store.getState().chat.find((item) => item.kind === "run" && item.id === "queued-run"),
+  ).toMatchObject({ startStateId: 42 });
+});
+
 describe("controller", () => {
   it("goes online on open, loads state, and shows an offline banner state when the socket closes", async () => {
     const { store, client, socket } = setup();

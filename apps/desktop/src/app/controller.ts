@@ -171,7 +171,7 @@ export function createController(deps: ControllerDeps): Controller {
               );
             }
           } else {
-            s.applyChat(event.runId, event.event);
+            s.applyChat(event.runId, event.event, event.startStateId);
           }
         },
       });

@@ -5,6 +5,41 @@ import { describe, expect, it, vi } from "vitest";
 import { startHarness } from "./test/harness.js";
 
 describe("chat task queue", () => {
+  it("marks queued work interrupted on engine restart without executing it", async () => {
+    const first = await startHarness({
+      agentRunner: {
+        async run(_message, ctx) {
+          await new Promise<void>((resolve) =>
+            ctx.signal.addEventListener("abort", () => resolve(), { once: true }),
+          );
+        },
+      },
+    });
+    try {
+      await first.post("/api/chat", { message: "running" });
+      await first.post("/api/chat", { message: "queued", queue: true });
+      await first.server.close();
+      const called = vi.fn();
+      const second = await startHarness({
+        dataDir: first.dataDir,
+        agentRunner: {
+          async run() {
+            called();
+          },
+        },
+      });
+      try {
+        const state = (await second.req("/api/state")).json<StateResponse>();
+        expect(state.tasks?.find((task) => task.title === "queued")?.status).toBe("interrupted");
+        expect(state.busy).toBe(false);
+        expect(called).not.toHaveBeenCalled();
+      } finally {
+        await second.cleanup();
+      }
+    } finally {
+      await first.cleanup();
+    }
+  });
   it("queues FIFO, captures modes, cancels queued work and persists results", async () => {
     const started: string[] = [];
     const modes: Array<string | undefined> = [];
