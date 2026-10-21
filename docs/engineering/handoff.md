@@ -11,6 +11,8 @@ generated:
 
 # Handoff: resuming dax-editor
 
+Provider continuation is on `codex/lightweight-ai-providers`, issue #6. OpenRouter now has its own settings/key namespace and fixed endpoint; generic APIs have endpoint presets and generation settings. No hosted API call was made. The smaller local model was tested but rejected as the default because real command execution failed; preserve the current 2B bundle and the ignored trial evidence. See `docs/specs/lightweight-ai-providers.md`.
+
 Steering was corrected after the initial task-queue delivery: `Steer task` now adds guidance at the next model boundary in the same active run, without cancellation. Stop is separate. Modes/attachments or older runners continue after current work finishes. See the updated ADR 0013 and `packages/agent/src/steering.test.ts`.
 
 The latest preview work is on `codex/browser-chat-tasks`, tracked in issue #4 and described in `docs/specs/browser-import-and-responsive-chat.md`, `docs/specs/chat-task-queue.md` and ADR 0013: browser picker/upload, chat video attachments, engine task queue, steering and enforced Planning mode. Full checks pass in `artifacts/chat-tasks-full-check.log`; live browser import/playback and a real offline Planning reply were observed. The native installer has not been rebuilt for these improvements. Preserve ignored `.dax-data/` sources, projects, models and task history.

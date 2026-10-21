@@ -26,6 +26,12 @@ export const PROVIDERS: readonly ProviderInfo[] = [
       "OpenAI, OpenRouter, Ollama, LM Studio or any server that speaks the OpenAI chat format.",
   },
   {
+    kind: "openrouter",
+    label: "OpenRouter",
+    blurb:
+      "Use your OpenRouter key and a model ID with tool calling. Online; provider charges and limits apply.",
+  },
+  {
     kind: "anthropic",
     label: "Anthropic API",
     blurb: "Use your own Anthropic API key.",

@@ -138,23 +138,36 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       const apiKey = await env.getApiKey(kind);
       if (!apiKey) return "Add an Anthropic API key in Settings to use Claude.";
       return {
-        provider: createAnthropicProvider({ apiKey, model: model ?? "" }),
+        provider: createAnthropicProvider({
+          apiKey,
+          model: model ?? "",
+          ...(cfg.maxTokens ? { maxTokens: cfg.maxTokens } : {}),
+        }),
         ...(cfg.contextTokens ? { contextTokens: cfg.contextTokens } : {}),
       };
     }
-    if (kind === "openai-compatible") {
-      if (!cfg.baseUrl)
+    if (kind === "openai-compatible" || kind === "openrouter") {
+      const baseUrl = kind === "openrouter" ? "https://openrouter.ai/api/v1" : cfg.baseUrl;
+      if (!baseUrl)
         return "Set the server address (base URL) for your OpenAI-compatible provider in Settings.";
       const apiKey = await env.getApiKey(kind);
-      if (apiKey && !keyMayGoTo(cfg.baseUrl)) {
+      if (kind === "openrouter" && !apiKey) return "Add your OpenRouter API key in Settings.";
+      if (kind === "openrouter" && !model)
+        return "Choose an OpenRouter model ID in Settings. Editing requires a model with tool calling.";
+      if (apiKey && !keyMayGoTo(baseUrl)) {
         // Name the host only: the address may carry credentials or a path that should not be echoed.
-        const host = safeHost(cfg.baseUrl);
+        const host = safeHost(baseUrl);
         return `Your API key would be sent over an unencrypted connection to ${host}. Use an https:// address, or remove the key.`;
       }
       return {
         provider: createOpenAiProvider({
-          baseUrl: cfg.baseUrl,
+          baseUrl,
           model: model ?? "",
+          ...(cfg.maxTokens ? { maxTokens: cfg.maxTokens } : {}),
+          ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
+          ...(kind === "openrouter"
+            ? { extraBody: { provider: { require_parameters: true } } }
+            : {}),
           ...(apiKey ? { apiKey } : {}),
         }),
         // Unset means a large hosted model; set a smaller window in Settings for a small model behind this address.

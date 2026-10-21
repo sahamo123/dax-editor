@@ -165,6 +165,7 @@ export type TaskInfo = z.infer<typeof TaskInfoSchema>;
 export const PROVIDER_KINDS = [
   "local",
   "openai-compatible",
+  "openrouter",
   "anthropic",
   "cli-claude",
   "cli-codex",
@@ -184,6 +185,10 @@ export const ProviderConfigSchema = z.object({
    * shorter conversation. Default: 8192 for the built-in model, 32768 for the others.
    */
   contextTokens: z.number().int().min(2048).max(1_000_000).optional(),
+  /** Optional maximum reply tokens; providers may impose a smaller model-specific limit. */
+  maxTokens: z.number().int().min(1).max(65_536).optional(),
+  /** Optional sampling temperature; omit for models that do not accept this parameter. */
+  temperature: z.number().min(0).max(2).optional(),
 });
 /** A validated {@link ProviderConfigSchema} value. */
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;

@@ -48,6 +48,35 @@ function ApiFields({
     <div className="stack">
       {isOpenAi ? (
         <label className="field">
+          <span className="field__label">Connection preset</span>
+          <select
+            className="input"
+            value=""
+            onChange={(e) => {
+              const url = e.target.value;
+              if (url) onConfig({ baseUrl: url, model: undefined });
+              onApiKey("");
+            }}
+          >
+            <option value="">Choose a preset or enter a custom address</option>
+            <option value="https://api.openai.com/v1">OpenAI</option>
+            <option value="http://127.0.0.1:1234/v1">LM Studio</option>
+            <option value="http://127.0.0.1:11434/v1">Ollama</option>
+          </select>
+          <span className="field__hint">
+            For LM Studio or Ollama, start its local server and enter the loaded model name.
+            Changing this preset does not move or remove a previously saved key.
+          </span>
+        </label>
+      ) : null}
+      {kind === "openrouter" ? (
+        <p className="muted">
+          Endpoint: https://openrouter.ai/api/v1. Enter a model ID from OpenRouter, such as
+          provider/model-name. Choose a model that supports tools for editing.
+        </p>
+      ) : null}
+      {isOpenAi ? (
+        <label className="field">
           <span className="field__label">Base URL</span>
           <input
             className="input input--mono"
@@ -70,11 +99,60 @@ function ApiFields({
         <input
           className="input input--mono"
           value={config.model ?? ""}
-          placeholder="Model name to request"
+          placeholder={kind === "openrouter" ? "provider/model-name" : "Model name to request"}
           spellCheck={false}
           onChange={(e) => onConfig({ model: e.target.value })}
         />
       </label>
+      <label className="field">
+        <span className="field__label">Context window (tokens)</span>
+        <input
+          className="input"
+          type="number"
+          min={2048}
+          max={1000000}
+          value={config.contextTokens ?? ""}
+          placeholder="Automatic"
+          onChange={(e) =>
+            onConfig({ contextTokens: e.target.value === "" ? undefined : Number(e.target.value) })
+          }
+        />
+      </label>
+      <label className="field">
+        <span className="field__label">Maximum reply tokens</span>
+        <input
+          className="input"
+          type="number"
+          min={1}
+          max={65536}
+          value={config.maxTokens ?? ""}
+          placeholder="Provider default"
+          onChange={(e) =>
+            onConfig({ maxTokens: e.target.value === "" ? undefined : Number(e.target.value) })
+          }
+        />
+      </label>
+      {kind !== "anthropic" ? (
+        <label className="field">
+          <span className="field__label">Temperature</span>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            max={2}
+            aria-label="Temperature"
+            step={0.1}
+            value={config.temperature ?? ""}
+            placeholder="Provider default"
+            onChange={(e) =>
+              onConfig({ temperature: e.target.value === "" ? undefined : Number(e.target.value) })
+            }
+          />
+          <span className="field__hint">
+            Leave blank if the model does not accept a temperature setting.
+          </span>
+        </label>
+      ) : null}
       <label className="field">
         <span className="field__label">
           API key
@@ -177,6 +255,17 @@ export function SettingsDialog(): ReactElement | null {
   const status = state.providers.find((p) => p.kind === selected);
   const baseUrlBad =
     selected === "openai-compatible" && Boolean(config.baseUrl) && !validUrl(config.baseUrl ?? "");
+  const numbersBad = Object.values(draft.providers).some(
+    (cfg) =>
+      (cfg.contextTokens !== undefined &&
+        (!Number.isInteger(cfg.contextTokens) ||
+          cfg.contextTokens < 2048 ||
+          cfg.contextTokens > 1_000_000)) ||
+      (cfg.maxTokens !== undefined &&
+        (!Number.isInteger(cfg.maxTokens) || cfg.maxTokens < 1 || cfg.maxTokens > 65_536)) ||
+      (cfg.temperature !== undefined &&
+        (!Number.isFinite(cfg.temperature) || cfg.temperature < 0 || cfg.temperature > 2)),
+  );
 
   const patchConfig = (patch: Partial<ProviderConfig>) =>
     setDraft({ ...draft, providers: { ...draft.providers, [selected]: { ...config, ...patch } } });
@@ -186,7 +275,9 @@ export function SettingsDialog(): ReactElement | null {
     // Drop empty strings: the server's schema wants a real URL / model name or no field at all.
     const providers: Settings["providers"] = {};
     for (const [kind, cfg] of Object.entries(draft.providers) as [ProviderKind, ProviderConfig][]) {
-      const clean: ProviderConfig = {};
+      const clean: ProviderConfig = { ...cfg };
+      delete clean.baseUrl;
+      delete clean.model;
       if (cfg.baseUrl?.trim()) clean.baseUrl = cfg.baseUrl.trim();
       if (cfg.model?.trim()) clean.model = cfg.model.trim();
       providers[kind] = clean;
@@ -216,7 +307,7 @@ export function SettingsDialog(): ReactElement | null {
           <button
             type="button"
             className="btn btn--primary"
-            disabled={saving || baseUrlBad}
+            disabled={saving || baseUrlBad || numbersBad}
             onClick={() => void save()}
           >
             {saving ? "Saving..." : "Save"}
@@ -260,7 +351,9 @@ export function SettingsDialog(): ReactElement | null {
           </header>
 
           {selected === "local" ? <LocalModelCard /> : null}
-          {selected === "openai-compatible" || selected === "anthropic" ? (
+          {selected === "openai-compatible" ||
+          selected === "anthropic" ||
+          selected === "openrouter" ? (
             <ApiFields
               kind={selected}
               config={config}

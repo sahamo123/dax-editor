@@ -57,7 +57,15 @@ describe("startup and state", () => {
       });
       expect(s.settings).toEqual({ activeProvider: "local", providers: {} });
       expect(s.providers.map((p) => p.kind).sort()).toEqual(
-        ["anthropic", "cli-claude", "cli-codex", "cli-gemini", "local", "openai-compatible"].sort(),
+        [
+          "anthropic",
+          "cli-claude",
+          "cli-codex",
+          "cli-gemini",
+          "local",
+          "openai-compatible",
+          "openrouter",
+        ].sort(),
       );
       expect(s.providers.every((p) => !p.available && p.hasApiKey === false)).toBe(true);
     });

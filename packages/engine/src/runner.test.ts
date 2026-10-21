@@ -153,7 +153,11 @@ describe("createRunnerFactory", () => {
   it("runs a message through a model and keeps the conversation for the same project", async () => {
     const m = await mockModel();
     open = m.server;
-    const s = settings({ providers: { "openai-compatible": { baseUrl: m.url, model: "m" } } });
+    const s = settings({
+      providers: {
+        "openai-compatible": { baseUrl: m.url, model: "m", maxTokens: 321, temperature: 0.2 },
+      },
+    });
     const factory = createRunnerFactory();
     const session = new Session();
     const events: AgentEvent[] = [];
@@ -164,6 +168,11 @@ describe("createRunnerFactory", () => {
       allowedRoots: [],
     };
     await (await factory(env(s))).run("first message", ctx);
+    expect(JSON.parse(m.bodies[0] ?? "{}")).toMatchObject({
+      model: "m",
+      max_tokens: 321,
+      temperature: 0.2,
+    });
     await (await factory(env(s))).run("second message", ctx);
     expect(events.some((e) => e.type === "done")).toBe(true);
     expect(m.bodies[1]).toContain("first message");

@@ -16,7 +16,7 @@ export interface RegistryOptions {
 }
 
 /** Providers that need only an API key (plus a base URL for the generic one). */
-const KEYED: readonly ProviderKind[] = ["anthropic", "openai-compatible"];
+const KEYED: readonly ProviderKind[] = ["anthropic", "openai-compatible", "openrouter"];
 
 /** The registry used by the real app. CLI-based providers report what `cliStatuses` says, or "not installed in this build" without it. */
 export function createProviderRegistry(options: RegistryOptions = {}): ProviderRegistry {
@@ -37,12 +37,19 @@ export function createProviderRegistry(options: RegistryOptions = {}): ProviderR
         if (KEYED.includes(kind)) {
           const hasApiKey = (await env.getApiKey(kind)) !== undefined;
           const needsUrl = kind === "openai-compatible" && !env.settings.providers[kind]?.baseUrl;
-          const available = kind === "openai-compatible" ? !needsUrl : hasApiKey;
+          const needsModel = kind === "openrouter" && !env.settings.providers[kind]?.model;
+          const available = (kind === "openai-compatible" ? !needsUrl : hasApiKey) && !needsModel;
           out.push({
             kind,
             available,
             hasApiKey,
-            detail: available ? "Ready" : needsUrl ? "Set the server address" : "Add an API key",
+            detail: available
+              ? "Configured (connection not tested)"
+              : needsUrl
+                ? "Set the server address"
+                : !hasApiKey
+                  ? "Add an API key"
+                  : "Choose a model ID",
           });
         } else if (kind === "local") {
           const ready = (await options.localReady?.()) ?? false;
