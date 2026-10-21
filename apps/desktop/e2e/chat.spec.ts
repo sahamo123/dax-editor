@@ -102,7 +102,11 @@ test("Stop cancels a long run", async ({ page, startServer, openApp, sampleVideo
   await chatInput(page).press("Enter");
   const stop = page.getByRole("button", { name: "Stop" });
   await expect(stop).toBeVisible();
-  await expect(chatInput(page)).toBeDisabled();
+  await expect(chatInput(page)).toBeEnabled();
+  await expect(chatInput(page)).toHaveAttribute(
+    "placeholder",
+    "Queue a follow-up or steer this task…",
+  );
 
   await stop.click();
   await expect(page.getByText("Stopped.")).toBeVisible();
@@ -121,6 +125,33 @@ test("a suggestion chip sends its text", async ({ page, startServer, openApp, sa
   await expect(log.getByText("Cut to 30 seconds", { exact: true })).toBeVisible();
   // The scripted assistant understands "cut to N", which here is longer than the clip, so it keeps all of it.
   await expect(log.locator("details.tool", { hasText: "Keep only" })).toBeVisible();
+});
+
+test("queues follow-ups with captured Planning mode and cancels a specific queued task", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+}) => {
+  const server = await startServer({ aiReady: true });
+  await server.importPaths([sampleVideo]);
+  await openApp(server);
+  await chatInput(page).fill("work slowly please");
+  await chatInput(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Stop", exact: true })).toBeVisible();
+  await page.getByLabel("Chat mode", { exact: true }).selectOption("plan");
+  await chatInput(page).fill("Plan the later title");
+  await chatInput(page).press("Enter");
+  const task = page
+    .getByRole("list", { name: "Task queue" })
+    .locator("li")
+    .filter({ hasText: "Plan the later title" });
+  await expect(task).toContainText("Queue #1");
+  await expect(task).toContainText("Plan");
+  await task.getByRole("button", { name: "Cancel task" }).click();
+  await expect(task).toContainText("cancelled");
+  await page.getByRole("button", { name: "Stop", exact: true }).click();
+  await expect(chatInput(page)).toBeEnabled();
 });
 
 test("with no assistant set up the chat is disabled but editing still works", async ({

@@ -22,3 +22,5 @@ The engine owns a serial queue, captured per-request modes and private task meta
 ## Consequences
 
 State responses expose task metadata and queue positions. Private app-local `tasks.json` contains request text and selected paths; it never enters Git. Retain 100 finished tasks plus active work, with at most 20 queued requests. Authenticated video uploads stay local with a 1 GiB per-file limit. Sources remain for project persistence. Automatic cleanup of unattached staged sources and non-video attachments are deferred. Manual timeline changes retain project history; exports retain existing job tracking.
+
+The app-owned upload folder remains available when external path imports use an explicit narrower allow-list. This admits selected upload bytes without granting access to other app data or relaxing external import restrictions. A regression verifies both sides of that boundary.

@@ -1,5 +1,7 @@
 // Browser imports retain valid media locally and reject unauthorized, invalid or oversized uploads.
 import { readdir, readFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { MAX_UPLOAD_BYTES } from "@dax/protocol";
 import { afterEach, describe, expect, it } from "vitest";
 import { HAS_FFMPEG, type Harness, makeVideo, startHarness } from "./test/harness.js";
@@ -10,6 +12,20 @@ afterEach(async () => {
   h = undefined;
 });
 describe("browser upload", () => {
+  it.skipIf(!HAS_FFMPEG)(
+    "allows app-owned uploads while preserving a restrictive external-path policy",
+    async () => {
+      h = await startHarness({ allowRoots: [join(tmpdir(), "dax-external-imports-disabled")] });
+      const source = await makeVideo(h.workDir, "restricted.mp4");
+      expect((await h.post("/api/import", { paths: [source] })).json().ok).toBe(false);
+      const uploaded = await h.req("/api/import/upload?name=restricted.mp4", {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: await readFile(source),
+      });
+      expect(uploaded.json().ok).toBe(true);
+    },
+  );
   it.skipIf(!HAS_FFMPEG)("stages a planning attachment without changing the timeline", async () => {
     h = await startHarness();
     const source = await makeVideo(h.workDir, "attachment.mp4");
