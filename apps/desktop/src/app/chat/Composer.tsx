@@ -1,6 +1,7 @@
 // The message box at the bottom of the chat: suggestion chips, a growing text area, Send and (during a run) Stop.
 
 import { type KeyboardEvent, type ReactElement, useRef, useState } from "react";
+import { pickBrowserFiles } from "../../platform";
 import { useApp, useController } from "../context";
 import { Icon } from "../ui/icons";
 
@@ -20,16 +21,21 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
   const controller = useController();
   const busy = useApp((s) => Boolean(s.state?.busy) || s.chatSending);
   const [text, setText] = useState("");
+  const [mode, setMode] = useState<"edit" | "plan">("edit");
+  const [files, setFiles] = useState<File[]>([]);
+  const [submitting, setSubmitting] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
 
   const disabled = blockedReason !== null;
 
-  const send = (message: string) => {
+  const send = (message: string, steer = false) => {
     const clean = message.trim();
-    if (!clean || disabled || busy) return;
+    if (!clean || disabled || submitting) return;
     setText("");
     if (ref.current) ref.current.style.height = "";
-    void controller.sendChat(clean);
+    setSubmitting(true);
+    void controller.sendChat(clean, { mode, steer, files }).finally(() => setSubmitting(false));
+    setFiles([]);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -41,6 +47,52 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
 
   return (
     <div className="composer">
+      <fieldset className="chips" aria-label="Chat controls">
+        <label>
+          Mode{" "}
+          <select
+            aria-label="Chat mode"
+            value={mode}
+            disabled={submitting}
+            onChange={(event) => setMode(event.target.value === "plan" ? "plan" : "edit")}
+          >
+            <option value="edit">Edit</option>
+            <option value="plan">Planning — no changes</option>
+          </select>
+        </label>
+        <button
+          type="button"
+          className="btn btn--small"
+          disabled={disabled || submitting || files.length >= 10}
+          onClick={() =>
+            void pickBrowserFiles().then((selected) =>
+              setFiles((current) => [...current, ...selected].slice(0, 10)),
+            )
+          }
+        >
+          Attach videos
+        </button>
+      </fieldset>
+      {mode === "plan" ? (
+        <p className="muted">
+          Planning only. The assistant can inspect and propose steps; editing tools are blocked.
+        </p>
+      ) : null}
+      {files.length > 0 ? (
+        <fieldset aria-label="Attachments">
+          {files.map((file, index) => (
+            <button
+              type="button"
+              key={`${file.name}-${file.size}-${file.lastModified}`}
+              className="chip"
+              onClick={() => setFiles((current) => current.filter((_, i) => i !== index))}
+              aria-label={`Remove attachment ${file.name}`}
+            >
+              {file.name} ×
+            </button>
+          ))}
+        </fieldset>
+      ) : null}
       {showSuggestions && !busy ? (
         <fieldset className="chips">
           <legend className="sr-only">Suggestions</legend>
@@ -58,9 +110,12 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
           aria-label="Message to the assistant"
           rows={1}
           value={text}
-          disabled={disabled || busy}
+          disabled={disabled || submitting}
           placeholder={
-            blockedReason ?? (busy ? "Working..." : "Describe an edit, e.g. cut the pauses")
+            blockedReason ??
+            (busy
+              ? "Queue a follow-up or steer this task…"
+              : "Describe an edit, e.g. cut the pauses")
           }
           onChange={(e) => {
             setText(e.target.value);
@@ -80,18 +135,28 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
           >
             <Icon name="stop" size={14} />
           </button>
-        ) : (
+        ) : null}
+        <button
+          type="button"
+          className="send-btn"
+          aria-label="Send message"
+          title="Send (Enter)"
+          disabled={disabled || submitting || !text.trim()}
+          onClick={() => send(text)}
+        >
+          {busy ? "Queue" : null}
+          <Icon name="send" size={16} />
+        </button>
+        {busy ? (
           <button
             type="button"
-            className="send-btn"
-            aria-label="Send message"
-            title="Send (Enter)"
-            disabled={disabled || !text.trim()}
-            onClick={() => send(text)}
+            className="btn btn--small"
+            disabled={disabled || submitting || !text.trim()}
+            onClick={() => send(text, true)}
           >
-            <Icon name="send" size={16} />
+            Steer now
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );

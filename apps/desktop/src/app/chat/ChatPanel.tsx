@@ -7,6 +7,7 @@ import { activeProvider, anyProviderAvailable, isProjectEmpty } from "../selecto
 import { Composer } from "./Composer";
 import { ProviderSelect, ProviderStatusLine } from "./ProviderPicker";
 import { SetupCard } from "./SetupCard";
+import { TaskQueue } from "./TaskQueue";
 import { Transcript } from "./Transcript";
 
 function Welcome({
@@ -61,6 +62,7 @@ export function ChatPanel(): ReactElement {
           empty={<Welcome loaded={state !== null} hasVideo={hasVideo} ready={activeReady} />}
         />
       </div>
+      <TaskQueue />
       <Composer blockedReason={blocked} showSuggestions={hasVideo && activeReady && online} />
     </aside>
   );

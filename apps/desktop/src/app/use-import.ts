@@ -1,8 +1,8 @@
 // The one "Import video" action, shared by the top bar, the empty state and the media bin: use the native file
-// dialog when there is one, otherwise open the typed-path dialog.
+// dialog when there is one, otherwise select browser files for a local upload.
 
 import { useCallback } from "react";
-import { pickFiles } from "../platform";
+import { pickBrowserFiles, pickFiles } from "../platform";
 import { useApp, useController } from "./context";
 
 /** Returns a function that starts an import. Safe to call from any button. */
@@ -12,7 +12,7 @@ export function useImport(): () => Promise<void> {
   return useCallback(async () => {
     try {
       const picked = await pickFiles();
-      if (picked === null) patchUi({ importOpen: true, importNote: null });
+      if (picked === null) await controller.uploadFiles(await pickBrowserFiles());
       else if (picked.length > 0) await controller.importPaths(picked);
     } catch (err) {
       // A failing native dialog should not strand the user: fall back to typing a path.

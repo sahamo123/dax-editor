@@ -1393,3 +1393,34 @@ textarea.input {
 .connect__title {
   font-size: 18px;
 }
+.task-queue {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  max-height: 200px;
+  overflow: auto;
+  font-size: 12px;
+}
+.task-queue summary {
+  cursor: pointer;
+}
+.task-queue ol {
+  padding-left: 18px;
+}
+.task-queue li {
+  padding: 6px 0;
+  overflow-wrap: anywhere;
+}
+.task-queue li p {
+  margin: 4px 0;
+}
+.composer select {
+  background: var(--bg-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px;
+  max-width: 185px;
+}
+.composer .chips {
+  flex-wrap: wrap;
+}

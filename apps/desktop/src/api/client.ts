@@ -7,6 +7,7 @@ import {
   type ApiKeyRequest,
   AUTH_SCHEME,
   type CancelResponse,
+  type ChatRequest,
   type ChatStarted,
   type CommandResponse,
   type ErrorResponse,
@@ -16,6 +17,7 @@ import {
   type LocalModelInstallRequest,
   type LocalModelStatus,
   LocalModelStatusSchema,
+  MAX_UPLOAD_BYTES,
   type ProjectNewRequest,
   type ProviderKind,
   type ProviderStatus,
@@ -102,6 +104,7 @@ export class DaxClient {
     path: string,
     body?: unknown,
     timeoutMs = this.timeoutMs,
+    rawBody?: Blob,
   ): Promise<ApiResult<T>> {
     const controller = new AbortController();
     const timer = timeoutMs > 0 ? setTimeout(() => controller.abort(), timeoutMs) : undefined;
@@ -110,9 +113,13 @@ export class DaxClient {
         method,
         headers: {
           Authorization: `${AUTH_SCHEME} ${this.token}`,
-          ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
+          ...(rawBody
+            ? { "Content-Type": "application/octet-stream" }
+            : body !== undefined
+              ? { "Content-Type": "application/json" }
+              : {}),
         },
-        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+        ...(rawBody ? { body: rawBody } : body !== undefined ? { body: JSON.stringify(body) } : {}),
         signal: controller.signal,
       });
       const text = await res.text();
@@ -177,6 +184,28 @@ export class DaxClient {
     return { ok: false, error: "The editor engine sent an unexpected reply." };
   }
 
+  /** Copy one selected video to local engine storage and import it; rejects empty or over-1-GiB files. Never throws. */
+  async uploadMedia(file: File, stageOnly = false): Promise<CommandResponse> {
+    if (!file.size || file.size > MAX_UPLOAD_BYTES)
+      return { ok: false, error: "Choose a non-empty video smaller than 1 GiB." };
+    const r = await this.request<CommandResponse>(
+      "POST",
+      `${API.uploadMedia}?name=${encodeURIComponent(file.name)}&stage=${stageOnly}`,
+      undefined,
+      0,
+      file,
+    );
+    if (!r.ok) return { ok: false, error: r.error };
+    const v: unknown = r.value;
+    if (
+      isRecord(v) &&
+      ((v.ok === true && typeof v.summary === "string") ||
+        (v.ok === false && typeof v.error === "string"))
+    )
+      return v as CommandResponse;
+    return { ok: false, error: "The editor engine sent an unexpected upload reply." };
+  }
+
   /** `POST /api/project/new`: the server answers with the new project's full state. */
   async projectNew(req: Partial<ProjectNewRequest> = {}): Promise<ApiResult<StateResponse>> {
     return this.request("POST", API.projectNew, req);
@@ -197,9 +226,17 @@ export class DaxClient {
    * WebSocket. A provider that is not set up is not a failed request: the run's first event is an `error`.
    * Only an already-running AI run (409) or a malformed message (400) is refused here.
    */
-  async chat(message: string): Promise<ApiResult<ChatStarted>> {
+  async chat(
+    message: string,
+    options: Partial<Omit<ChatRequest, "message">> = {},
+  ): Promise<ApiResult<ChatStarted>> {
     // No timeout: a server that holds the request open until the run ends must not look like a failure.
-    return this.request("POST", API.chat, { message }, 0);
+    return this.request("POST", API.chat, { message, ...options }, 0);
+  }
+
+  /** Cancel a specific queued or running task. Finished task records are retained. */
+  async cancelTask(id: string): Promise<ApiResult<CancelResponse>> {
+    return this.request("POST", API.taskCancel.replace(":taskId", encodeURIComponent(id)), {});
   }
 
   /** `POST /api/chat/cancel`: stop the running AI run, if any (`cancelled` is false when none was running). */
