@@ -198,6 +198,13 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
     const budget = contextBudget(made.contextTokens);
     const agent = createAgent({
       provider: made.provider,
+      ...(planning
+        ? {
+            systemPrompt:
+              "You are the planning assistant inside a video editor. Return a short, practical numbered plan for the user's request. Do not execute edits, claim changes were made, or request editing tools. You may inspect the current project with the read-only tools when needed. You cannot see the video's contents; state any missing information. Ask the user to switch to Edit mode and submit an execution request when the plan is ready.",
+            maxTurns: 3,
+          }
+        : {}),
       streamText: kind === "local",
       contextTokens: budget.contextTokens,
       toolStyle: budget.compact ? "compact" : "full",
@@ -215,7 +222,7 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
           planning
             ? "PLANNING MODE: inspect and propose a plan only. Do not change the project or claim edits were made. Ask the user to switch to Edit mode to execute."
             : "",
-          skills.length > 0
+          !planning && skills.length > 0
             ? skillContext(selectSkills(message, skills, { maxChars: budget.skillChars }))
             : "",
         ]

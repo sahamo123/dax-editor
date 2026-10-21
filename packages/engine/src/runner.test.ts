@@ -44,7 +44,10 @@ afterEach(() => {
 
 describe("createRunnerFactory", () => {
   it("enforces planning tools even when a model requests an edit", async () => {
-    const bodies: Array<{ tools: Array<{ function: { name: string } }> }> = [];
+    const bodies: Array<{
+      tools: Array<{ function: { name: string } }>;
+      messages: Array<{ role: string; content: string }>;
+    }> = [];
     const server = createServer((req, res) => {
       let body = "";
       req.on("data", (chunk) => {
@@ -92,6 +95,8 @@ describe("createRunnerFactory", () => {
       allowedRoots: [],
     });
     expect(JSON.stringify(session.project)).toBe(before);
+    expect(bodies[0]?.messages[0]?.content).toContain("Do not execute edits");
+    expect(bodies[0]?.messages[0]?.content).not.toContain("you make it by calling tools");
     expect(
       bodies[0]?.tools.every((tool) => getCommand(tool.function.name)?.readOnly === true),
     ).toBe(true);
