@@ -33,6 +33,8 @@ export interface AgentRunner {
 
 /** What a {@link AgentRunnerFactory} may look at when choosing a runner for the active provider. */
 export interface RunnerEnv {
+  /** Planning runners must expose only read-only tools; defaults to editing. */
+  mode?: "edit" | "plan";
   /** Current settings, including `activeProvider`. */
   settings: Settings;
   /** The stored API key for a provider, if any. Never log or return it. */

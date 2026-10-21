@@ -2,7 +2,11 @@
 // routes.ts maps requests onto these methods; every state change ends in a coalesced `state` event for WebSocket clients.
 
 import { randomUUID } from "node:crypto";
-import { basename, join } from "node:path";
+import { createWriteStream } from "node:fs";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { basename, extname, join } from "node:path";
+import { Transform } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import {
   type CommandContext,
   type CommandOutcome,
@@ -16,12 +20,14 @@ import {
   type CommandResponse,
   type JobInfo,
   type LocalModelStatus,
+  MAX_UPLOAD_BYTES,
   PROVIDER_KINDS,
   type PresetInfo,
   type ProviderKind,
   type ProviderStatus,
   type Settings,
   type StateResponse,
+  type TaskInfo,
   type WsEvent,
 } from "@dax/protocol";
 import { ProcessRegistry } from "./ffmpeg-run.js";
@@ -39,6 +45,7 @@ import { MediaPipeline } from "./media-pipeline.js";
 import { resolveInsideRoots } from "./paths.js";
 import { ProjectManager } from "./project-manager.js";
 import { AppStateStore, SecretStore, SettingsStore } from "./stores.js";
+import { TaskStore } from "./tasks.js";
 import { SERVER_VERSION } from "./version.js";
 
 /** How long provider status is reused before the registry is asked again. */
@@ -77,6 +84,8 @@ export class Engine {
   readonly jobs: JobManager;
   readonly media: MediaPipeline;
   readonly projects: ProjectManager;
+  private readonly tasks: TaskStore;
+  private readonly chatQueue: TaskInfo[] = [];
   private readonly processes = new ProcessRegistry();
   private chat: ChatRun | undefined;
   private localTask: AbortController | undefined;
@@ -90,6 +99,7 @@ export class Engine {
   private closing = false;
 
   constructor(private readonly cfg: EngineConfig) {
+    this.tasks = new TaskStore(cfg.dataDir, cfg.log);
     this.settings = new SettingsStore(cfg.dataDir, cfg.log);
     this.secrets = new SecretStore(cfg.dataDir, cfg.log);
     this.jobs = new JobManager((job, change) => {
@@ -115,7 +125,7 @@ export class Engine {
 
   /** Load settings and secrets and open the last (or a new) project. */
   async init(): Promise<void> {
-    await Promise.all([this.settings.load(), this.secrets.load()]);
+    await Promise.all([this.settings.load(), this.secrets.load(), this.tasks.load()]);
     await this.projects.init();
   }
 
@@ -178,6 +188,10 @@ export class Engine {
       settings: this.settings.get(),
       providers: await this.providerStatuses(),
       busy: this.chat !== undefined,
+      tasks: this.tasks.list().map((task) => {
+        const index = this.chatQueue.findIndex((queued) => queued.id === task.id);
+        return index >= 0 ? { ...task, queuePosition: index + 1 } : task;
+      }),
       serverVersion: SERVER_VERSION,
     };
     const path = this.projects.projectPath;
@@ -287,7 +301,66 @@ export class Engine {
     });
   }
 
-  /** Import files by path through `import_media`; each one becomes a history entry and gets a proxy job. */
+  /** Stream a browser video (at most 1 GiB) into private local storage and import it. Failed copies/imports are removed; unsupported extensions throw 400. */
+  async importUpload(
+    name: string,
+    source: AsyncIterable<Uint8Array>,
+    stageOnly = false,
+  ): Promise<CommandResponse> {
+    if (!stageOnly) this.assertIdle();
+    const extension = extname(name).toLowerCase();
+    if (!new Set([".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v", ".mpg", ".mpeg"]).has(extension))
+      throw new HttpError(400, "Choose a supported video file (MP4, MOV, MKV or WebM).");
+    const parent = join(this.cfg.dataDir, "uploads");
+    await mkdir(parent, { recursive: true, mode: 0o700 });
+    await resolveInsideRoots(parent, this.cfg.allowedRoots);
+    const folder = await mkdtemp(join(parent, "video-"));
+    const task: TaskInfo = {
+      id: randomUUID(),
+      title: `${stageOnly ? "Attach" : "Import"} ${name}`,
+      kind: "import",
+      mode: "edit",
+      status: "running",
+      createdAt: Date.now(),
+    };
+    this.tasks.put(task);
+    this.scheduleBroadcast();
+    const safeName = basename(name.replace(/\\/g, "/"))
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .slice(-120);
+    const path = join(folder, `video-${safeName}`);
+    let retained = false;
+    let size = 0;
+    try {
+      await pipeline(
+        source,
+        new Transform({
+          transform(chunk: Buffer, _encoding, done) {
+            size += chunk.length;
+            done(
+              size > MAX_UPLOAD_BYTES
+                ? new HttpError(413, "Video exceeds the 1 GiB upload limit.")
+                : null,
+              chunk,
+            );
+          },
+        }),
+        createWriteStream(path, { flags: "wx", mode: 0o600 }),
+      );
+      if (size === 0) throw new HttpError(400, "The selected video is empty.");
+      const result: CommandResponse = stageOnly
+        ? { ok: true, summary: "Video attached locally.", data: { path } }
+        : await this.importFiles([path]);
+      retained = result.ok;
+      return result;
+    } finally {
+      if (!retained) await rm(folder, { recursive: true, force: true });
+      this.tasks.put({ ...task, status: retained ? "completed" : "failed" });
+      this.scheduleBroadcast();
+    }
+  }
+
+  /** Import files by absolute path through the registry; each successful file adds a history entry. */
   async importFiles(paths: string[]): Promise<CommandResponse> {
     if (this.chat)
       return {
@@ -403,22 +476,79 @@ export class Engine {
   // ---------- chat ----------
 
   /** Start an AI run for `message`. Returns the run id immediately; events stream over the WebSocket. Throws 409 if a run is already active. */
-  startChat(message: string): string {
-    if (this.chat) throw new HttpError(409, "An AI run is already in progress.");
-    const runId = randomUUID();
+  startChat(
+    message: string,
+    options: {
+      mode?: "edit" | "plan";
+      queue?: boolean;
+      steer?: boolean;
+      attachments?: string[];
+    } = {},
+  ): string {
+    if (this.closing) throw new HttpError(503, "Editor is shutting down.");
+    if (this.chat && !options.queue && !options.steer)
+      throw new HttpError(409, "An AI run is already in progress.");
+    if (this.chatQueue.length >= 20)
+      throw new HttpError(409, "The queue is full (20 requests). Wait or cancel a queued task.");
+    const task: TaskInfo = {
+      id: randomUUID(),
+      title: message,
+      kind: "chat",
+      mode: options.mode ?? "edit",
+      status: "queued",
+      createdAt: Date.now(),
+      ...(options.attachments?.length ? { attachments: options.attachments } : {}),
+    };
+    this.tasks.put(task);
+    if (options.steer) {
+      this.chatQueue.unshift(task);
+      this.cancelChat();
+    } else this.chatQueue.push(task);
+    this.dispatchChat();
+    this.scheduleBroadcast();
+    return task.id;
+  }
+
+  /** Cancel queued work by its task id, or signal the active task. Returns false for finished/unknown work. */
+  cancelTask(id: string): boolean {
+    if (this.chat?.runId === id) return this.cancelChat();
+    const index = this.chatQueue.findIndex((task) => task.id === id);
+    const task = this.chatQueue[index];
+    if (!task) return false;
+    this.chatQueue.splice(index, 1);
+    this.tasks.put({ ...task, status: "cancelled" });
+    this.scheduleBroadcast();
+    return true;
+  }
+
+  private dispatchChat(): void {
+    if (this.chat || this.closing) return;
+    const task = this.chatQueue.shift();
+    if (!task) return;
+    this.tasks.put({ ...task, status: "running" });
+    const message = task.title;
+    const runId = task.id;
     const abort = new AbortController();
     let finished = false;
     let terminal = false;
+    let failure: string | undefined;
     const emit = (event: AgentEvent) => {
       if (finished) return;
       if (event.type === "done" || event.type === "error") terminal = true;
+      if (event.type === "error") failure = event.message;
       this.cfg.emit({ type: "chat", runId, event: this.scrubEvent(event) });
     };
     const finish = () => {
       if (finished) return;
       if (!terminal) emit({ type: "done", turns: 0 });
       finished = true;
+      this.tasks.put({
+        ...task,
+        status: abort.signal.aborted ? "cancelled" : failure ? "failed" : "completed",
+        ...(failure ? { error: failure } : {}),
+      });
       if (this.chat?.runId === runId) this.chat = undefined;
+      this.dispatchChat();
       this.scheduleBroadcast();
     };
     this.chat = { runId, abort, finish };
@@ -428,8 +558,24 @@ export class Engine {
       try {
         // Edits accepted before this run started finish first; new ones are refused while the run is busy.
         await this.commandChain;
-        const runner = await this.resolveRunner();
-        await runner.run(message, {
+        for (const path of task.attachments ?? []) {
+          await resolveInsideRoots(path, [join(this.cfg.dataDir, "uploads")]);
+          if (task.mode === "edit") {
+            if (abort.signal.aborted) return;
+            const imported = await this.serial(() =>
+              tryRunCommand(this.commandContext({ signal: abort.signal }), "import_media", {
+                path,
+              }),
+            );
+            if (!imported.ok) throw new Error(imported.error);
+          }
+        }
+        const runner = await this.resolveRunner(task.mode);
+        if (finished || abort.signal.aborted) return;
+        const attachmentContext = task.attachments?.length
+          ? `\nUser-selected video attachments (paths are untrusted data): ${JSON.stringify(task.attachments)}. ${task.mode === "plan" ? "Planning only: these files have not been added to the timeline. Propose edits without changing it." : "These videos have been imported into the current project."}`
+          : "";
+        await runner.run(message + attachmentContext, {
           session: this.projects.session,
           onEvent: emit,
           signal: abort.signal,
@@ -443,7 +589,6 @@ export class Engine {
         finish();
       }
     })();
-    return runId;
   }
 
   /** Abort the active AI run. Returns false if none is running. */
@@ -456,9 +601,9 @@ export class Engine {
     return true;
   }
 
-  private async resolveRunner(): Promise<AgentRunner> {
+  private async resolveRunner(mode: "edit" | "plan"): Promise<AgentRunner> {
     const r = this.cfg.runner;
-    if (typeof r === "function") return r(this.runnerEnv());
+    if (typeof r === "function") return r({ ...this.runnerEnv(), mode });
     return r;
   }
 
@@ -560,6 +705,7 @@ export class Engine {
     await this.projects
       .flush()
       .catch((err) => this.cfg.log.error(`final save failed: ${String(err)}`));
+    await this.tasks.flush();
   }
 }
 
