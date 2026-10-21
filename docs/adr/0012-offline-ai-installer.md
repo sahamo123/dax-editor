@@ -11,6 +11,8 @@ generated:
 
 # ADR 0012: Offline AI in one installer
 
+October 20 continuation: retain this runtime/package decision. A 533 MB Qwen3.5 0.8B trial was faster in raw CPU generation but failed the editing replacement gate, so it does not replace the 2B seed. OpenRouter is a separate optional hosted provider with its own key namespace and fixed official endpoint. See [the provider spec](../specs/lightweight-ai-providers.md) for evidence and configuration.
+
 The owner requires a Windows desktop app with offline AI and one installer containing its dependencies. A single setup program that downloads a model on first run does not satisfy that requirement.
 
 Bundle the catalogued Qwen 3.5 2B Q4_K_M weights (1,280,835,840 bytes) and the pinned Windows x64 CPU llama.cpp runtime. Verify the model against its catalog SHA-256 and the runtime archive against the release digest before packaging. The Windows runtime digest for b11721 was cross-checked against GitHub's release API on October 20, 2026 and matches the source pin. Include the upstream licence texts and pinned source/revision/digest provenance.

@@ -3,6 +3,59 @@
 
 import { chatInput, expect, test } from "./fixtures";
 
+test("saves OpenRouter separately and preserves model generation settings", async ({
+  page,
+  startServer,
+  openApp,
+  shot,
+}) => {
+  const server = await startServer();
+  await openApp(server);
+  await page.getByRole("button", { name: "Settings" }).click();
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  await dialog.getByRole("button", { name: /Not set up OpenRouter/ }).click();
+  await expect(dialog.getByText(/Endpoint: https:\/\/openrouter/)).toBeVisible();
+  await dialog.getByLabel("Model", { exact: true }).fill("vendor/chosen-model");
+  await dialog.getByLabel("API key").fill("test-router-key");
+  await dialog.getByLabel("Context window (tokens)").fill("8192");
+  await dialog.getByLabel("Maximum reply tokens").fill("512");
+  await dialog.getByLabel("Temperature", { exact: true }).fill("0");
+  await dialog.getByLabel(/Use OpenRouter for chat/).check();
+  await shot("openrouter-provider-settings");
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  expect(server.settings.activeProvider).toBe("openrouter");
+  expect(server.settings.providers.openrouter).toEqual({
+    model: "vendor/chosen-model",
+    contextTokens: 8192,
+    maxTokens: 512,
+    temperature: 0,
+  });
+  expect(server.secrets.openrouter).toBe("test-router-key");
+  expect(server.secrets["openai-compatible"]).toBeUndefined();
+  await page.getByRole("button", { name: "Settings" }).click();
+  await expect(dialog.getByLabel("API key")).toHaveValue("");
+  await expect(dialog.getByLabel("Maximum reply tokens")).toHaveValue("512");
+  expect(await page.content()).not.toContain("test-router-key");
+});
+
+test("selects the LM Studio endpoint preset", async ({ page, startServer, openApp }) => {
+  const server = await startServer();
+  await openApp(server);
+  await page.getByRole("button", { name: "Settings" }).click();
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  await dialog.getByRole("button", { name: /OpenAI-compatible API/ }).click();
+  await dialog.getByLabel("Connection preset").selectOption("http://127.0.0.1:1234/v1");
+  await expect(dialog.getByLabel("Base URL")).toHaveValue("http://127.0.0.1:1234/v1");
+  await dialog.getByLabel("Model", { exact: true }).fill("my-local-model");
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).toBeHidden();
+  expect(server.settings.providers["openai-compatible"]).toEqual({
+    baseUrl: "http://127.0.0.1:1234/v1",
+    model: "my-local-model",
+  });
+});
+
 test("saves an OpenAI-compatible provider and never shows the key again", async ({
   page,
   startServer,
@@ -16,7 +69,7 @@ test("saves an OpenAI-compatible provider and never shows the key again", async 
   const dialog = page.getByRole("dialog", { name: "Settings" });
   await dialog.getByRole("button", { name: /OpenAI-compatible API/ }).click();
   await dialog.getByLabel("Base URL").fill("https://llm.example.test/v1");
-  await dialog.getByLabel("Model").fill("tiny-model");
+  await dialog.getByLabel("Model", { exact: true }).fill("tiny-model");
   await dialog.getByLabel("API key").fill("sk-secret-123");
   await dialog.getByLabel(/Use OpenAI-compatible API for chat/).check();
   await shot("08-settings-api");
