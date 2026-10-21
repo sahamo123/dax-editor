@@ -13,6 +13,10 @@ generated:
 
 ## Windows laptop checkpoint — October 20, 2026
 
+The preview now has a browser video picker and local streaming upload, including dropped files and chat video attachments (1 GiB per file, up to 10 attachments per request). Send queues follow-ups; Steer now cancels the active request and puts the new instruction next. Tasks show queue positions, status and recent results, persisted in private `tasks.json`. Engine restart marks unfinished work interrupted. Planning/Edit is captured per request; Planning exposes only read-only registry tools and never imports attachments into the timeline (ADR 0013, [issue #4](https://github.com/sahamo123/dax-editor/issues/4)). Manual timeline history and export jobs retain their existing tracking.
+
+Local replies stream with template thinking disabled, a 512-token cap and a 90-second per-request timeout without retries. A live file chooser imported generated footage and played its preview; a real offline Planning reply completed without timeline changes. Full checks pass in `artifacts/chat-tasks-full-check.log`; subsequent attachment/drop/control regressions have separate final logs. The native installer predates these preview improvements and remains unvalidated.
+
 The browser preview launcher now redirects the plain root address to the current engine session. Fresh tabs and bookmarks no longer require manually carrying the per-launch engine URL/token; this also replaces stale remembered connections after a launcher restart. The redirect stays loopback-only and is not cached.
 
 Current local implementation and evidence supersede older "not merged" / "Windows untested" statements below. Delivery remains **NOT READY** until native validation is completed.
