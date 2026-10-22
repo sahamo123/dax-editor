@@ -2,7 +2,13 @@
 // socket, feeds server pushes into the store, and exposes plain async actions (run a command, import, export,
 // chat, settings). Actions never throw; failures become toasts or transcript notices.
 
-import type { CommandResponse, ImportResult, ProviderKind, Settings } from "@dax/protocol";
+import type {
+  CommandResponse,
+  ImportResult,
+  ProviderKind,
+  Settings,
+  SpeechStatus,
+} from "@dax/protocol";
 import type { StoreApi } from "zustand/vanilla";
 import type { DaxClient, LiveSocket, LocalModelAction, SocketStatus } from "../api";
 import { openLiveSocket } from "../api";
@@ -51,6 +57,10 @@ export interface Controller {
   recentProjects(): Promise<string[]>;
   /** Select the original source using native/browser file selection and preserve the asset identity. */
   relinkMedia(assetId: string): Promise<void>;
+  /** Read speech setup; unsupported builds return null with an explanatory notice. */
+  speechStatus(): Promise<SpeechStatus | null>;
+  /** Install/remove speech or begin an asynchronous transcription. */
+  speech(action: "install" | "remove" | "transcribe", assetId?: string): Promise<void>;
   /** Run a registry command as a manual edit. Failures also raise a toast. Never throws. */
   run(name: string, args?: Record<string, unknown>): Promise<CommandResponse>;
   /** Same as {@link Controller.run} but without a failure toast (the caller shows its own message). */
@@ -136,8 +146,17 @@ export function createController(deps: ControllerDeps): Controller {
   }
 
   const run = async (name: string, args: Record<string, unknown> = {}, quiet = false) => {
-    const r = await client.run(name, args);
+    const state = store.getState().state;
+    const r = await client.run(
+      name,
+      args,
+      state?.projectId !== undefined && state.revision !== undefined
+        ? { projectId: state.projectId, expectedRevision: state.revision }
+        : undefined,
+    );
     if (!r.ok && !quiet) toast("error", r.error);
+    if (!r.ok && r.error.includes("project changed")) await refreshState();
+    if (r.ok) await refreshState();
     return r;
   };
 
@@ -405,6 +424,17 @@ export function createController(deps: ControllerDeps): Controller {
       } catch {
         toast("error", "Could not select replacement media.");
       }
+    },
+
+    async speechStatus() {
+      const r = await client.speechStatus();
+      return r.ok ? r.value : null;
+    },
+
+    async speech(action, assetId) {
+      const r = await client.speech(action, assetId);
+      if (!r.ok) toast("error", r.error);
+      await refreshState();
     },
 
     async testProvider(kind) {

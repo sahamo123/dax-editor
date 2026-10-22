@@ -23,6 +23,8 @@ import {
   type ProviderKind,
   type ProviderStatus,
   type Settings,
+  type SpeechStatus,
+  SpeechStatusSchema,
   type StateResponse,
 } from "@dax/protocol";
 import type { LocalModelAction } from "./local-model";
@@ -161,9 +163,13 @@ export class DaxClient {
   }
 
   /** `POST /api/command`: run a registry command as a manual edit. Never throws; failures are `{ ok: false }`. */
-  async run(name: string, args: Record<string, unknown> = {}): Promise<CommandResponse> {
+  async run(
+    name: string,
+    args: Record<string, unknown> = {},
+    guard?: { projectId?: string; expectedRevision?: number },
+  ): Promise<CommandResponse> {
     // No timeout: export_video and remove_silences can legitimately take minutes.
-    const r = await this.request<CommandResponse>("POST", API.command, { name, args }, 0);
+    const r = await this.request<CommandResponse>("POST", API.command, { name, args, ...guard }, 0);
     if (!r.ok) return { ok: false, error: r.error };
     const v: unknown = r.value;
     if (isRecord(v) && v.ok === true && typeof v.summary === "string") return v as CommandResponse;
@@ -277,6 +283,28 @@ export class DaxClient {
   /** `GET /api/providers`: which providers can be used right now. */
   async getProviders(): Promise<ApiResult<ProviderStatus[]>> {
     return this.request("GET", API.providers);
+  }
+
+  /** Read offline speech setup without downloading components. */
+  async speechStatus(): Promise<ApiResult<SpeechStatus>> {
+    const r = await this.request<unknown>("GET", API.speech);
+    return r.ok ? parsed(SpeechStatusSchema, r.value, "speech status") : r;
+  }
+
+  /** Start installation/transcription or remove the speech model; progress arrives as jobs. */
+  async speech(
+    action: "install" | "remove" | "transcribe",
+    assetId?: string,
+  ): Promise<ApiResult<unknown>> {
+    return this.request(
+      "POST",
+      action === "install"
+        ? API.speechInstall
+        : action === "remove"
+          ? API.speechRemove
+          : API.transcribe,
+      action === "transcribe" ? { assetId } : {},
+    );
   }
 
   /** Run an explicit non-editing tool probe using saved connection settings. */
