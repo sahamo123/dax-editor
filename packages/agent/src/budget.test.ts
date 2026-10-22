@@ -4,7 +4,13 @@
 import { type Asset, addAsset, appendClip, commandTools, emptyProject, Session } from "@dax/core";
 import { describe, expect, it } from "vitest";
 import { createAgent } from "./agent.js";
-import { contextBudget, SMALL_MODEL_TOOL_NAMES, smallModelTools, trimHistory } from "./budget.js";
+import {
+  contextBudget,
+  focusedModelTools,
+  SMALL_MODEL_TOOL_NAMES,
+  smallModelTools,
+  trimHistory,
+} from "./budget.js";
 import { ScriptedProvider } from "./scripted.js";
 import type { ChatMessage, ToolCall } from "./types.js";
 
@@ -43,6 +49,20 @@ describe("contextBudget", () => {
 });
 
 describe("smallModelTools", () => {
+  it("keeps title requests small even when they name a fade preset", () => {
+    expect(
+      focusedModelTools(
+        "Add a title saying Hello using the title-fade preset. Do not change the clips.",
+      )
+        .map((tool) => tool.name)
+        .sort(),
+    ).toEqual(["add_overlay", "get_project", "redo", "undo"]);
+    expect(
+      focusedModelTools("Change the title text to Hello. Keep its timing.")
+        .map((tool) => tool.name)
+        .sort(),
+    ).toEqual(["get_project", "redo", "undo", "update_overlay"]);
+  });
   it("retains everyday steering tools and adds requested speech and motion capabilities", () => {
     expect(
       smallModelTools("make it portrait")

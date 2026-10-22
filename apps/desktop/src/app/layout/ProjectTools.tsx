@@ -54,6 +54,7 @@ export function ProjectTools(): ReactElement {
         <span className="field__label">Output format</span>
         <select
           className="input"
+          aria-label="Output format"
           value=""
           disabled={!online}
           onChange={(event) => {

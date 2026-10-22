@@ -393,7 +393,9 @@ export function SettingsDialog(): ReactElement | null {
                     <span
                       className={`dot ${st?.available ? "dot--ready" : "dot--idle"}`}
                       role="img"
-                      aria-label={st?.available ? "Ready" : "Not set up"}
+                      aria-label={
+                        st?.connectionState ?? (st?.available ? "Available" : "Not set up")
+                      }
                     />
                     <span className="nav-item__label">{p.label}</span>
                     {isActive ? <span className="badge">In use</span> : null}

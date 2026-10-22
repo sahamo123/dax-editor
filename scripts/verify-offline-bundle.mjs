@@ -83,9 +83,20 @@ async function start() {
       reject(new Error(`Engine exited ${code}: ${logs.slice(-3000)}`));
     });
   });
+  const events = [];
+  const wsUrl = new URL("/ws", info.url.replace(/^http/, "ws"));
+  wsUrl.searchParams.set("token", info.token);
+  const socket = new WebSocket(wsUrl);
+  socket.addEventListener("message", (event) => {
+    const message = JSON.parse(String(event.data));
+    if (message.type === "chat")
+      events.push({ runId: message.runId, type: message.event.type, at: Date.now() });
+  });
   return {
     api: engineApi(info.url, info.token),
+    events,
     async stop() {
+      socket.close();
       child.stdin.end();
       const timeout = setTimeout(() => child.kill("SIGKILL"), 15_000);
       await exited;
@@ -97,14 +108,52 @@ async function start() {
 let engine = await start();
 try {
   const local = (await engine.api.call("GET", "/api/local-model")).body;
-  assert.equal(local.running, true, JSON.stringify(local));
+  assert.equal(local.installed, true, JSON.stringify(local));
+  assert.equal(local.running, false, "Manual startup must not load inference");
   assert.equal(local.modelId, "qwen3.5-2b-q4km");
-  console.log("Offline model running; engine startup needed no external fetch.");
+  console.log("Offline model installed but unloaded; engine startup needed no external fetch.");
   const imported = await engine.api.importPaths([source]);
   assert.equal(imported.ok, true, JSON.stringify(imported));
   await engine.api.settled(90_000);
   const format = await engine.api.command("set_format", { width: 640, height: 360, fps: 30 });
   assert.equal(format.ok, true, JSON.stringify(format));
+  const manualOutput = join(resultDir, "manual-only.mp4");
+  assert.equal((await engine.api.command("export_video", { path: manualOutput })).ok, true);
+  await engine.api.settled(120_000);
+  assert.equal((await engine.api.call("GET", "/api/local-model")).body.running, false);
+  const measurements = [];
+  async function request(message, verify) {
+    const started = Date.now();
+    const reply = await engine.api.call("POST", "/api/chat", { message });
+    assert.equal(reply.status, 202);
+    while ((await engine.api.state()).busy) {
+      if (Date.now() - started > 240_000) throw new Error("Local AI request timed out");
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    const state = await engine.api.state();
+    const passed = verify(state.project);
+    const first = engine.events.find(
+      (event) => event.runId === reply.body.runId && ["text", "tool_call"].includes(event.type),
+    );
+    measurements.push({
+      message,
+      elapsedMs: Date.now() - started,
+      firstResponseMs: first ? first.at - started : null,
+      passed,
+      task: state.tasks.find((task) => task.id === reply.body.runId)?.status,
+    });
+    await writeFile(join(resultDir, "benchmark.json"), JSON.stringify(measurements, null, 2));
+    assert.ok(passed, `Actual project did not match: ${message}`);
+    return state;
+  }
+  await request(
+    "Set the output to square 1080 by 1080. Preserve the clips and fit setting.",
+    (p) => p.timeline.width === 1080 && p.timeline.height === 1080,
+  );
+  await request(
+    "Set the output to 640 by 360 at 30 fps. Preserve the clips and fit setting.",
+    (p) => p.timeline.width === 640 && p.timeline.height === 360,
+  );
   const chat = await engine.api.call("POST", "/api/chat", {
     message:
       'Add a title that says "Offline Ready" at the beginning for 2 seconds. Use the title-fade preset. Do not change the clips.',
@@ -125,6 +174,28 @@ try {
     "No AI edit in history",
   );
   console.log("Real local AI added the title through the command registry.");
+  await request(
+    'Change the title text to "Offline Revised". Keep its timing and all clips unchanged.',
+    (p) =>
+      p.timeline.overlays.some((o) => /Offline Revised/i.test(o.text)) &&
+      p.timeline.tracks[0].clips.length === 1,
+  );
+  await request(
+    "Set the clip volume to 50 percent. Keep all other properties unchanged.",
+    (p) => Math.abs(p.timeline.tracks[0].clips[0].volume - 0.5) < 0.001,
+  );
+  const beforeUnsupported = JSON.stringify(await engine.api.project());
+  await request(
+    "Can you edit a Blender scene by executing arbitrary Python? Explain the limitation only; do not edit anything.",
+    (p) => JSON.stringify(p) === beforeUnsupported,
+  );
+  await request(
+    "Trim the existing clip to source in 0 seconds and source out 3 seconds. Keep its volume and all titles.",
+    (p) =>
+      p.timeline.tracks[0].clips[0].in === 0 &&
+      p.timeline.tracks[0].clips[0].out === 3 &&
+      p.timeline.tracks[0].clips[0].volume === 0.5,
+  );
   const output = join(resultDir, "offline-edit.mp4");
   const exported = await engine.api.command("export_video", { path: output });
   assert.equal(exported.ok, true, JSON.stringify(exported));
@@ -138,16 +209,16 @@ try {
   );
   assert.ok(metadata.streams.some((s) => s.codec_type === "video"));
   assert.ok(metadata.streams.some((s) => s.codec_type === "audio"));
-  assert.ok(Math.abs(Number(metadata.format.duration) - 4) < 0.1);
+  assert.ok(Math.abs(Number(metadata.format.duration) - 3) < 0.1);
   const record = JSON.parse(await readFile(join(dataDir, "run/llama-server.pid.json"), "utf8"));
   await engine.stop();
   assert.throws(() => process.kill(record.pid, 0), "Inference process survived shutdown");
   engine = await start();
   assert.ok(
-    (await engine.api.project()).timeline.overlays.some((o) => /Offline Ready/i.test(o.text)),
+    (await engine.api.project()).timeline.overlays.some((o) => /Offline Revised/i.test(o.text)),
     "Saved edit missing after restart",
   );
-  assert.equal((await engine.api.call("GET", "/api/local-model")).body.running, true);
+  assert.equal((await engine.api.call("GET", "/api/local-model")).body.running, false);
   await writeFile(
     join(resultDir, "result.json"),
     JSON.stringify(
@@ -159,6 +230,9 @@ try {
         duration: metadata.format.duration,
         restartPersistence: true,
         inferenceCleanup: true,
+        onDemandStartup: true,
+        manualOnlyExport: manualOutput,
+        measurements,
       },
       null,
       2,

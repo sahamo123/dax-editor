@@ -67,6 +67,9 @@ test("Ctrl+Z and Shift+Ctrl+Z undo and redo, but not while typing in a text box"
   await page.locator("body").click({ position: { x: 700, y: 400 } });
   await page.keyboard.press("Control+z");
   await expect.poll(async () => (await server.project()).timeline.overlays.length).toBe(0);
+  await expect(
+    page.getByRole("banner").getByRole("button", { name: "Redo", exact: true }),
+  ).toBeEnabled();
   await page.keyboard.press("Control+Shift+z");
   await expect.poll(async () => (await server.project()).timeline.overlays.length).toBe(1);
 

@@ -73,7 +73,7 @@ test("saves an OpenAI-compatible provider and never shows the key again", async 
   await dialog.getByLabel("API key").fill("sk-secret-123");
   await dialog.getByLabel(/Use OpenAI-compatible API for chat/).check();
   await shot("08-settings-api");
-  await dialog.getByRole("button", { name: "Save" }).click();
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
 
   await expect(page.getByText("Settings saved.")).toBeVisible();
   await expect(dialog).toBeHidden();
@@ -84,7 +84,9 @@ test("saves an OpenAI-compatible provider and never shows the key again", async 
   });
   expect(server.secrets["openai-compatible"]).toBe("sk-secret-123");
   // The assistant is now ready, so the chat unlocks.
-  await expect(page.getByTestId("provider-status")).toContainText("is ready");
+  await expect(page.getByTestId("provider-status")).toContainText(
+    "Configured (connection not tested)",
+  );
   await expect(chatInput(page)).toBeEnabled();
 
   // Reopening: the key box is empty and says a key is saved; the key is nowhere in the page.
@@ -104,7 +106,7 @@ test("rejects a malformed base URL before saving", async ({ page, startServer, o
   await dialog.getByRole("button", { name: /OpenAI-compatible API/ }).click();
   await dialog.getByLabel("Base URL").fill("not a url");
   await expect(dialog.getByText(/Enter a full address/)).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "Save" })).toBeDisabled();
+  await expect(dialog.getByRole("button", { name: "Save", exact: true })).toBeDisabled();
 });
 
 test("downloads, starts and uses the local model", async ({
@@ -132,9 +134,9 @@ test("downloads, starts and uses the local model", async ({
 
   await dialog.getByRole("button", { name: "Start" }).click();
   await expect(dialog.getByTestId("local-model-status")).toHaveText("Running", { timeout: 15_000 });
-  await dialog.getByRole("button", { name: "Save" }).click();
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
 
-  await expect(page.getByTestId("provider-status")).toContainText("Local model is ready");
+  await expect(page.getByTestId("provider-status")).toContainText("Running locally");
   await chatInput(page).fill("Add a title");
   await chatInput(page).press("Enter");
   await expect(page.getByText("I added a title at the start.")).toBeVisible();

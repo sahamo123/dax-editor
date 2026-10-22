@@ -55,10 +55,11 @@ export function ProviderStatusLine(): ReactElement | null {
   if (!state) return null;
   const active = activeProvider(state);
   const ready = Boolean(active?.available);
+  const connected = active?.connectionState ? active.connectionState === "connected" : ready;
   const kind = state.settings.activeProvider;
   return (
     <div
-      className={`provider-status ${ready ? "is-ready" : "is-warn"}`}
+      className={`provider-status ${connected ? "is-ready" : "is-warn"}`}
       data-testid="provider-status"
     >
       <span className="provider-status__dot" aria-hidden="true" />

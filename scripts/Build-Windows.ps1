@@ -11,7 +11,7 @@ try {
         & node scripts/prepare-offline-ai.mjs
         if ($LASTEXITCODE -ne 0) { throw 'Offline AI preparation failed.' }
         & node scripts/prepare-offline-speech.mjs
-        if ($LASTEXITCODE -ne 0) { throw 'Offline AI preparation failed.' }
+        if ($LASTEXITCODE -ne 0) { throw 'Offline speech preparation failed.' }
         & node scripts/prepare-sidecars.mjs --release --target x86_64-pc-windows-msvc
         if ($LASTEXITCODE -ne 0) { throw 'Sidecar preparation failed.' }
         $taskBuildArgs = @('exec', 'tauri', 'build', '--ci')

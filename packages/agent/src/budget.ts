@@ -29,6 +29,7 @@ export const SMALL_MODEL_TOOL_NAMES: readonly string[] = [
   "set_fades",
   "set_format",
   "add_overlay",
+  "update_overlay",
   "remove_overlay",
   "apply_template",
   "undo",
@@ -37,19 +38,27 @@ export const SMALL_MODEL_TOOL_NAMES: readonly string[] = [
 
 /** Everyday tools plus requested speech/motion/template tools, in registry order. Retains everyday controls for steering. */
 export function smallModelTools(message?: string): ToolSpec[] {
-  const names = new Set(SMALL_MODEL_TOOL_NAMES);
+  return commandTools({
+    names: [
+      ...new Set([
+        ...SMALL_MODEL_TOOL_NAMES,
+        ...focusedModelTools(message).map((tool) => tool.name),
+      ]),
+    ],
+  });
+}
+
+/** Relevant advertised tools for a request; unknown intent keeps the established everyday list. */
+export function focusedModelTools(message?: string): ToolSpec[] {
+  const names = new Set(["get_project", "undo", "redo"]);
   const groups: Array<[RegExp, string[]]> = [
     [
       /\b(format|portrait|landscape|square|aspect|resolution|fit|vertical|horizontal)\b/i,
       ["set_format"],
     ],
+    [/\b(volume|audio|mute|louder|quieter)\b|\bfade[ -]?(in|out)\b/i, ["set_volume", "set_fades"]],
     [
-      /\b(title|text|overlay|lower.third|callout)\b/i,
-      ["list_presets", "add_overlay", "update_overlay", "remove_overlay"],
-    ],
-    [/\b(volume|audio|mute|louder|quieter|fade)\b/i, ["set_volume", "set_fades"]],
-    [
-      /\b(trim|split|cut|delete|remove|keep|move|reorder|clip)\b/i,
+      /\b(trim|split|cut|delete|remove|move|reorder)\b|\bkeep only\b/i,
       ["split", "delete_range", "keep_only", "trim_clip", "move_clip", "remove_clip"],
     ],
     [
@@ -64,12 +73,22 @@ export function smallModelTools(message?: string): ToolSpec[] {
       ],
     ],
     [/\b(blender|3d|motion|intro|logo)\b/i, ["list_motion_templates", "render_motion_template"]],
-    [/\b(template|preset|style)\b/i, ["list_templates", "apply_template", "list_presets"]],
+    [/\btemplate\b/i, ["list_templates", "apply_template"]],
+    [/\blist presets\b/i, ["list_presets"]],
     [/\b(import|upload|footage)\b/i, ["import_media"]],
   ];
   for (const [pattern, tools] of groups)
     if (message && pattern.test(message)) for (const tool of tools) names.add(tool);
-  return commandTools({ names: [...names] });
+  if (message && /\b(title|text|overlay|lower.third|callout)\b/i.test(message)) {
+    names.add(
+      /\b(add|insert|create|put)\b/i.test(message)
+        ? "add_overlay"
+        : /\b(change|update|replace|edit)\b/i.test(message)
+          ? "update_overlay"
+          : "add_overlay",
+    );
+  }
+  return commandTools({ names: names.size > 3 ? [...names] : [...SMALL_MODEL_TOOL_NAMES] });
 }
 
 /** Tokens kept free for the model's reply and its tool-call syntax. */

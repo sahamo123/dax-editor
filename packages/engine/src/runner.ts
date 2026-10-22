@@ -8,6 +8,7 @@ import {
   createAgent,
   createAnthropicProvider,
   createOpenAiProvider,
+  focusedModelTools,
   smallModelTools,
   trimHistory,
 } from "@dax/agent";
@@ -237,6 +238,12 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       streamText: kind === "local",
       contextTokens: budget.contextTokens,
       toolStyle: budget.compact ? "compact" : "full",
+      ...(budget.compact
+        ? {
+            selectToolNames: (guidance: string) =>
+              focusedModelTools(guidance).map((tool) => tool.name),
+          }
+        : {}),
       ...(planning
         ? {
             tools: (budget.compact ? smallModelTools(env.message) : commandTools()).filter(
@@ -252,7 +259,11 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
             ? "PLANNING MODE: inspect and propose a plan only. Do not change the project or claim edits were made. Ask the user to switch to Edit mode to execute."
             : "",
           !planning && skills.length > 0
-            ? skillContext(selectSkills(message, skills, { maxChars: budget.skillChars }))
+            ? skillContext(
+                selectSkills(message, skills, {
+                  maxChars: budget.compact ? Math.min(1200, budget.skillChars) : budget.skillChars,
+                }),
+              )
             : "",
         ]
           .filter(Boolean)
@@ -270,7 +281,18 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
         const result = await agent.run(message, {
           session: ctx.session,
           ...(ctx.executeCommand ? { executeCommand: ctx.executeCommand } : {}),
-          history: [...history],
+          // Old tool payloads are large and contain stale IDs/state. Small models keep conversational intent;
+          // get_project supplies authoritative state again before each edit.
+          history: budget.compact
+            ? trimHistory(
+                history.filter(
+                  (item) =>
+                    item.role === "user" ||
+                    (item.role === "assistant" && item.toolCalls.length === 0),
+                ),
+                4000,
+              )
+            : [...history],
           onEvent: ctx.onEvent,
           signal: ctx.signal,
           ...(ctx.takeSteering ? { takeSteering: ctx.takeSteering } : {}),

@@ -13,7 +13,7 @@ test("a chat run streams text and tool steps, and Undo this change reverts it", 
   await server.importPaths([sampleVideo]);
   await openApp(server);
 
-  await expect(page.getByTestId("provider-status")).toContainText("Local model is ready");
+  await expect(page.getByTestId("provider-status")).toContainText("Running locally");
   // With a video and a ready assistant the suggestion chips appear.
   await expect(page.getByRole("button", { name: "Remove silences" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Add a title" })).toBeVisible();
@@ -168,6 +168,13 @@ test("with no assistant set up the chat is disabled but editing still works", as
   await expect(page.getByRole("button", { name: "Remove silences" })).toBeHidden();
   // Manual editing through the same commands is fully available: undo/redo buttons work.
   await server.command("add_overlay", { preset: "title-fade", start: 0 });
+  await page.getByRole("tab", { name: "History", exact: true }).click();
+  await expect(
+    page
+      .getByRole("tabpanel", { name: "History" })
+      .getByRole("button", { name: /Add Title: fade/ })
+      .first(),
+  ).toHaveAttribute("aria-current", "step");
   const undo = page.getByRole("banner").getByRole("button", { name: "Undo" });
   await expect(undo).toBeEnabled();
   await undo.click();
