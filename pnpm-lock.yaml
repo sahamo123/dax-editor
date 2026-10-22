@@ -314,6 +314,9 @@ importers:
       '@dax/core':
         specifier: workspace:*
         version: link:../core
+      '@dax/mcp':
+        specifier: workspace:*
+        version: link:../mcp
       '@dax/protocol':
         specifier: workspace:*
         version: link:../protocol

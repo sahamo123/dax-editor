@@ -34,6 +34,7 @@
       "project": ["src/**/*.ts"]
     },
     "packages/mcp": {
+      "entry": ["src/editor-proxy.ts"],
       "project": ["src/**/*.ts"]
     },
     "packages/protocol": {

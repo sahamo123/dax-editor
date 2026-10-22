@@ -75,17 +75,21 @@ export function buildRouter(engine: Engine): Router {
   r.add("POST", API.projectCopy, async ({ body, json }) => {
     const req = parseWith(ProjectCopyRequestSchema, await body());
     engine.assertIdle();
-    await engine.projects.openCopy(req.project).catch((e) => {
-      throw projectError(e);
-    });
+    await engine
+      .withIdleProject(() => engine.projects.openCopy(req.project))
+      .catch((e) => {
+        throw projectError(e);
+      });
     json(200, await engine.buildState());
   });
   r.add("POST", API.projectNew, async ({ body, json }) => {
     const req = parseWith(ProjectNewRequestSchema, await body());
     engine.assertIdle();
-    await engine.projects.createNew(req).catch((e) => {
-      throw projectError(e);
-    });
+    await engine
+      .withIdleProject(() => engine.projects.createNew(req))
+      .catch((e) => {
+        throw projectError(e);
+      });
     json(200, await engine.buildState());
   });
 
@@ -93,17 +97,22 @@ export function buildRouter(engine: Engine): Router {
     const req = parseWith(ProjectPathRequestSchema, await body());
     if (req.path === undefined) throw new HttpError(400, "Invalid request: path: Required");
     engine.assertIdle();
-    await engine.projects.open(req.path).catch((e) => {
-      throw projectError(e);
-    });
+    const path = req.path;
+    await engine
+      .withIdleProject(() => engine.projects.open(path))
+      .catch((e) => {
+        throw projectError(e);
+      });
     json(200, await engine.buildState());
   });
 
   r.add("POST", API.projectSave, async ({ body, json }) => {
     const req = parseWith(ProjectPathRequestSchema, await body());
-    await engine.projects.save(req.path).catch((e) => {
-      throw projectError(e);
-    });
+    await engine
+      .withIdleProject(() => engine.projects.save(req.path))
+      .catch((e) => {
+        throw projectError(e);
+      });
     json(200, await engine.buildState());
   });
 

@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@dax/core": "workspace:*",
+    "@dax/mcp": "workspace:*",
     "@dax/protocol": "workspace:*",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
