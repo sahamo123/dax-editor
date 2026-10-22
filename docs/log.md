@@ -2,6 +2,10 @@
 
 ## 2026-10-22
 
+* **Correction**: the second candidate build prepared verified offline AI/speech successfully, then exposed Git GNU tar interpreting Windows drive letters as remote hosts. Sidecar preparation now selects the native Windows bsdtar by absolute system path. A host-selection regression passes; packaging-script coverage is now 13 passing tests. The third artifact-only build continues in PR #37. No Windows policy change is involved.
+
+* **Verification**: final application source 0d1b7e7 passes pnpm check (1,780 package tests plus 14 root tests), 37 browser workflows and 25 Rust tests. The stronger real offline suite now passes format fit/fps/title timing preservation, title follow-up, volume, trim, unsupported request, manual-only export, restart persistence and inference cleanup; it supersedes the earlier narrow PASS. Local requests remain slow at 49–129 seconds. Portable packaging follow-up passes all 12 shell-script tests, dead-code checks and actual local resource preparation. The saved development preview was restarted with current resources and playback observed. Native/Blender/hosted/actual-client acceptance remains explicitly unverified.
+
 * **Correction**: the first Windows candidate build exposed a laptop-specific MSVC redistributable path. Packaging now locates complete release CRT/OpenMP layouts using the explicit override, laptop-local SDK or Microsoft's vswhere installation discovery. Component names and versions are discovered rather than pinned to one machine; debug layouts are excluded and bundled DLL hashes remain recorded. A synthetic-layout regression verifies selection and missing/debug rejection.
 
 * **Creation**: artifact-only Windows candidate workflow on the dedicated review branch, using existing pinned build actions and read-only repository permissions. It prepares the wired engine, verified local AI/speech and LGPL-safe sidecars, then uploads an unsigned installer without publishing a release. Reason: local Application Control blocks both available native build-tool paths. A successful CI artifact still does not validate installation on this laptop.

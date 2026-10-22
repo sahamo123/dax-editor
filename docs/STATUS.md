@@ -13,12 +13,12 @@ generated:
 
 ## Functional desktop release — October 22, 2026
 
-The owner approved the [functional release contract](specs/functional-desktop-release.md), tracked by [issue #8](https://github.com/sahamo123/dax-editor/issues/8), issues #9–#17 and dependent draft PRs #18–#33. Implemented: task/revision guards, captured queued settings/credentials, provider probes and independent provider namespaces, project lifecycle/relink/manual controls, responsive tools, offline speech, live-session MCP, and optional bounded Blender templates. The full repository gate passed at 5196e95; final performance/browser corrections still need the current-source gate. Native release remains **NOT READY**; no security policy has been changed.
+The owner approved the [functional release contract](specs/functional-desktop-release.md), tracked by [issue #8](https://github.com/sahamo123/dax-editor/issues/8), issues #9–#17 and dependent draft PRs #18–#37. Implemented: task/revision guards, captured queued settings/credentials, provider probes and independent provider namespaces, project lifecycle/relink/manual controls, responsive tools, offline speech, live-session MCP, and optional bounded Blender templates. Current application source (0d1b7e7) passes `pnpm check`, 37 browser workflows and 25 Rust tests. Packaging follow-up f42200a passes 13 shell-script tests, dead-code checks and actual local offline-resource preparation. Native release remains **NOT READY**; no security policy has been changed.
 
 - **Verified now:** real speech transcription/correction/captioned export (23 words; stream durations differ by under 1 ms), MCP transport/read-only/revision/batch tests, and laptop manual project-copy/undo/redo controls. See the contract and root tracker for evidence paths.
-- **Local AI:** on-demand startup and configurable idle unload are implemented. Stronger real tests exposed 90-second request timeouts; relevant advertised tools and compact conversation history improve measured format edits to roughly 70 seconds cold / 26 seconds warm on the i5-8265U. Title/follow-up/volume/trim correctness and performance remain under test. Earlier isolated successes are not the full suite.
-- **Blocked or pending:** actual hosted-provider edits without owner-configured keys; actual Claude/Codex sessions; multiple named same-family connections; complete manual parity; final installer and native clean install/upgrade/dialogs. The verified official Blender 4.5.14 executable is also blocked by Code Integrity event 3077, so real template renders are unverified.
-- **Preview:** `Start Development Preview.cmd` uses persistent `.dax-data/`. Fresh screenshots `artifacts/functional-audit/03-current-tools.png` and `04-current-workspace.png` show the current layout. The local model stays unloaded until chat needs it; the currently running process must restart after further engine changes.
+- **Local AI:** on-demand startup and configurable idle unload are implemented. The stronger offline suite passes format/title/follow-up/volume/trim/unsupported requests, manual-only export, restart persistence and inference cleanup with outbound fetches refused. Final assertions include fit/fps/title timing preservation (ADR 0015). Evidence: `artifacts/offline-smoke-1792707259245/result.json`. Measured requests took 49–129 seconds on the i5-8265U; first response took 15–85 seconds. This is slow and does not establish arbitrary-request correctness. A mid-run inference sample was 2.66 GB; whole-application peak memory remains unmeasured.
+- **Blocked or pending:** actual hosted-provider edits without owner-configured keys; actual Claude/Codex sessions; multiple named same-family connections; complete manual parity; final installer and native clean install/upgrade/dialogs. The verified official Blender 4.5.14 executable is also blocked by Code Integrity event 3077, so real template renders are unverified. Local native rebuilding is blocked both at the Tauri Node binding and the official Cargo CLI's generated build helpers. PR #37 provides an unsigned artifact-only Windows candidate build; CI artifacts and native installation are separate gates.
+- **Preview:** `Start Development Preview.cmd` uses persistent `.dax-data/`. It has been restarted with current application source; the final smoke verifies frontend, authenticated engine and installed/unloaded local AI (`artifacts/functional-final-preview-smoke.log`). Browser playback was observed after reconnect. Final screenshots live under `artifacts/functional-audit/final/`. Historical checkpoints below retain their original evidence and are superseded by this section.
 
 ## Windows laptop checkpoint — October 20, 2026
 
@@ -45,7 +45,11 @@ Current local implementation and evidence supersede older "not merged" / "Window
 - Delivery work and remaining gates are tracked in [GitHub issue #2](https://github.com/sahamo123/dax-editor/issues/2) and the root task tracker.
 - The original two-hour deadline was missed. Speech installation controls, native import/save/export dialogs and the final clean-install test remain incomplete or blocked. No ready desktop release is claimed.
 
-## Where we are
+## Historical upstream baseline (superseded by the October checkpoints)
+
+The sections below preserve the earlier handoff for provenance. Their "not merged", "not run" and feature-absence statements describe that earlier branch, not the current functional-release source. Use the October 22 section and linked acceptance contract for current work.
+
+## Where we were
 
 Resuming from another agent or machine: start with [the handoff guide](engineering/handoff.md).
 
