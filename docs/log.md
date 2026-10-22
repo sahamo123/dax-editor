@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Correction**: queued requests retain their submitted credential in memory as well as settings. Compatible API keys bind to the saved server address; changing an address never sends the previous key to the new host. Settings persist before new keys bind, and failed settings writes retain the old in-memory value. Regression covers queued settings/key changes without persisting credentials in tasks. Full check exposed and corrected a controller assertion for the safer save order; MCP documentation links and CSS formatting also corrected.
+
 * **Creation**: bounded Blender motion templates (title card, logo intro, 3D text), separate-process CPU rendering, progress/cancel, generated-asset recipes and in-place regeneration with undo. Core tests use generated video and an injected renderer. Official Blender 4.5.14 portable bytes matched upstream SHA-256, but execution on this laptop was blocked by Windows Application Control event 3077. Real Blender rendering is unverified; no security policy changed.
 
 * **Creation**: live-session MCP execution seams and atomic bounded edit batches, with per-client revision guards and a separate read-only Planning transport (ADR 0014). The server reuses the existing MCP workspace package; no new external runtime dependency. External client setup uses a stable stdio proxy with secrets in private discovery storage.

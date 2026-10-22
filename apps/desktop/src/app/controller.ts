@@ -99,7 +99,7 @@ export interface Controller {
   undoRun(runId: string): Promise<void>;
   /** Re-apply what {@link Controller.undoRun} reverted. */
   redoRun(runId: string): Promise<void>;
-  /** Store new API keys first, then the settings. Resolves to false (with a toast) if either fails. */
+  /** Validate and save settings before binding new keys to their connection. Reports failures with a toast. */
   saveSettings(draft: SettingsDraft): Promise<boolean>;
   /** Ask the server to re-check which providers are usable (for example after signing in to a CLI). */
   refreshProviders(): Promise<void>;
@@ -355,6 +355,11 @@ export function createController(deps: ControllerDeps): Controller {
     },
 
     async saveSettings({ settings, apiKeys, silent }) {
+      const saved = await client.putSettings(settings);
+      if (!saved.ok) {
+        toast("error", `Could not save settings: ${saved.error}`);
+        return false;
+      }
       for (const [kind, key] of Object.entries(apiKeys) as [ProviderKind, string | undefined][]) {
         if (!key) continue;
         const r = await client.setApiKey(kind, key);
@@ -362,11 +367,6 @@ export function createController(deps: ControllerDeps): Controller {
           toast("error", `Could not save the key: ${r.error}`);
           return false;
         }
-      }
-      const r = await client.putSettings(settings);
-      if (!r.ok) {
-        toast("error", `Could not save settings: ${r.error}`);
-        return false;
       }
       await refreshState();
       if (!silent) toast("success", "Settings saved.");

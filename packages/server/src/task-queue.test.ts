@@ -5,6 +5,56 @@ import { describe, expect, it, vi } from "vitest";
 import { startHarness } from "./test/harness.js";
 
 describe("chat task queue", () => {
+  it("captures queued credentials and never reuses a custom key at another address", async () => {
+    const captured: Array<{ url?: string; key?: string }> = [];
+    let release: (() => void) | undefined;
+    const h = await startHarness({
+      agentRunner: (env) => ({
+        async run(message) {
+          captured.push({
+            url: env.settings.providers["openai-compatible"]?.baseUrl,
+            key: await env.getApiKey("openai-compatible"),
+          });
+          if (message === "first")
+            await new Promise<void>((resolve) => {
+              release = resolve;
+            });
+        },
+      }),
+    });
+    const settings = (baseUrl: string) => ({
+      activeProvider: "openai-compatible",
+      providers: { "openai-compatible": { baseUrl, model: "test" } },
+    });
+    try {
+      await h.post("/api/settings", settings("https://first.example/v1"));
+      await h.post("/api/settings/api-key", {
+        kind: "openai-compatible",
+        apiKey: "test-key-first",
+      });
+      await h.post("/api/chat", { message: "first" });
+      await vi.waitFor(() => expect(captured).toHaveLength(1));
+      await h.post("/api/chat", { message: "second", queue: true });
+      await h.post("/api/settings", settings("https://second.example/v1"));
+      expect((await h.req("/api/state")).text()).not.toContain("test-key-first");
+      await h.post("/api/chat", { message: "without-new-key", queue: true });
+      await h.post("/api/settings/api-key", {
+        kind: "openai-compatible",
+        apiKey: "test-key-second",
+      });
+      release?.();
+      await vi.waitFor(() => expect(captured).toHaveLength(3));
+      expect(captured).toEqual([
+        { url: "https://first.example/v1", key: "test-key-first" },
+        { url: "https://first.example/v1", key: "test-key-first" },
+        { url: "https://second.example/v1", key: undefined },
+      ]);
+      expect(await readFile(`${h.dataDir}/tasks.json`, "utf8")).not.toContain("test-key-");
+    } finally {
+      release?.();
+      await h.cleanup();
+    }
+  });
   it("captures the provider at submission even if settings change before dispatch", async () => {
     const providers: string[] = [];
     let release: (() => void) | undefined;

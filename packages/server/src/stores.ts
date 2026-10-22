@@ -60,14 +60,16 @@ export class SettingsStore {
 
   /** Validate, store and persist new settings. Throws a ZodError if `next` is invalid. */
   async set(next: unknown): Promise<Settings> {
-    this.value = SettingsSchema.parse(next);
-    await writeFileAtomic(this.file, JSON.stringify(this.value, null, 2));
+    const parsed = SettingsSchema.parse(next);
+    await writeFileAtomic(this.file, JSON.stringify(parsed, null, 2));
+    this.value = parsed;
     return this.get();
   }
 }
 
 const SecretsSchema = z.object({
   apiKeys: z.record(z.enum(PROVIDER_KINDS), z.string().min(1)).default({}),
+  targets: z.record(z.enum(PROVIDER_KINDS), z.string()).default({}),
 });
 
 /**
@@ -77,6 +79,7 @@ const SecretsSchema = z.object({
  */
 export class SecretStore {
   private keys: Partial<Record<ProviderKind, string>> = {};
+  private targets: Partial<Record<ProviderKind, string>> = {};
   private readonly file: string;
 
   constructor(
@@ -89,7 +92,9 @@ export class SecretStore {
   /** Load from disk, registering every key with the logger's redactor. Tightens loose file permissions. */
   async load(): Promise<void> {
     try {
-      this.keys = SecretsSchema.parse(JSON.parse(await readFile(this.file, "utf8"))).apiKeys;
+      const parsed = SecretsSchema.parse(JSON.parse(await readFile(this.file, "utf8")));
+      this.keys = parsed.apiKeys;
+      this.targets = parsed.targets;
       await chmod(this.file, 0o600).catch(() => undefined);
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
@@ -110,10 +115,22 @@ export class SecretStore {
     return this.keys[kind];
   }
 
+  /** Endpoint a compatible-provider key belongs to; legacy keys have no binding until migrated once. */
+  target(kind: ProviderKind): string | undefined {
+    return this.targets[kind];
+  }
+
+  /** Bind a legacy key without changing its value; never returned by the public API. */
+  async bind(kind: ProviderKind, target: string): Promise<void> {
+    this.targets = { ...this.targets, [kind]: target };
+    await this.persist();
+  }
+
   /** Store or replace a key and persist the file with mode 0600. */
-  async set(kind: ProviderKind, apiKey: string): Promise<void> {
+  async set(kind: ProviderKind, apiKey: string, target?: string): Promise<void> {
     this.log.addSecret(apiKey);
     this.keys = { ...this.keys, [kind]: apiKey };
+    if (target !== undefined) this.targets = { ...this.targets, [kind]: target };
     await this.persist();
   }
 
@@ -121,11 +138,16 @@ export class SecretStore {
   async remove(kind: ProviderKind): Promise<void> {
     const { [kind]: _removed, ...rest } = this.keys;
     this.keys = rest;
+    delete this.targets[kind];
     await this.persist();
   }
 
   private async persist(): Promise<void> {
-    await writeFileAtomic(this.file, JSON.stringify({ apiKeys: this.keys }, null, 2), 0o600);
+    await writeFileAtomic(
+      this.file,
+      JSON.stringify({ apiKeys: this.keys, targets: this.targets }, null, 2),
+      0o600,
+    );
   }
 }
 

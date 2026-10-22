@@ -97,6 +97,7 @@ export class Engine {
   private readonly tasks: TaskStore;
   private readonly chatQueue: TaskInfo[] = [];
   private readonly queuedSettings = new Map<string, Settings>();
+  private readonly queuedKeys = new Map<string, string | undefined>();
   private readonly processes = new ProcessRegistry();
   private chat: ChatRun | undefined;
   private localTask: AbortController | undefined;
@@ -177,6 +178,15 @@ export class Engine {
       if (legacy) await this.secrets.set("openai", legacy);
     }
     if (this.settings.legacyOpenAiKeyMigration) await this.settings.set(this.settings.get());
+    const legacyTarget = this.settings
+      .get()
+      .providers["openai-compatible"]?.baseUrl?.replace(/\/$/, "");
+    if (
+      legacyTarget &&
+      this.secrets.has("openai-compatible") &&
+      this.secrets.target("openai-compatible") === undefined
+    )
+      await this.secrets.bind("openai-compatible", legacyTarget);
     await this.projects.init();
   }
 
@@ -256,10 +266,20 @@ export class Engine {
   }
 
   private runnerEnv(): RunnerEnv {
+    const settings = this.settings.get();
     return {
-      settings: this.settings.get(),
-      getApiKey: async (kind) => this.secrets.get(kind),
+      settings,
+      getApiKey: async (kind) => this.keyForSettings(kind, settings),
     };
+  }
+
+  private keyForSettings(kind: ProviderKind, settings: Settings): string | undefined {
+    if (
+      kind === "openai-compatible" &&
+      this.secrets.target(kind) !== settings.providers[kind]?.baseUrl?.replace(/\/$/, "")
+    )
+      return undefined;
+    return this.secrets.get(kind);
   }
 
   /** Provider availability from the injected registry, cached briefly, with `hasApiKey` filled in from the secret store. Never exposes keys. */
@@ -360,7 +380,13 @@ export class Engine {
 
   /** Store an API key for a provider. The key is registered for log redaction. */
   async setApiKey(kind: ProviderKind, apiKey: string): Promise<void> {
-    await this.secrets.set(kind, apiKey);
+    await this.secrets.set(
+      kind,
+      apiKey,
+      kind === "openai-compatible"
+        ? (this.settings.get().providers[kind]?.baseUrl?.replace(/\/$/, "") ?? "")
+        : undefined,
+    );
     this.invalidateProviders();
   }
 
@@ -728,6 +754,10 @@ export class Engine {
     };
     this.tasks.put(task);
     this.queuedSettings.set(task.id, this.settings.get());
+    this.queuedKeys.set(
+      task.id,
+      this.keyForSettings(this.settings.get().activeProvider, this.settings.get()),
+    );
     if (options.steer) {
       this.chatQueue.unshift(task);
     } else this.chatQueue.push(task);
@@ -745,6 +775,7 @@ export class Engine {
     if (!task) return false;
     this.chatQueue.splice(index, 1);
     this.queuedSettings.delete(id);
+    this.queuedKeys.delete(id);
     this.tasks.put({ ...task, status: "cancelled" });
     this.scheduleBroadcast();
     return true;
@@ -806,8 +837,10 @@ export class Engine {
           ...(failure ? { error: failure } : {}),
         });
       for (const steering of joined) this.queuedSettings.delete(steering.id);
+      for (const steering of joined) this.queuedKeys.delete(steering.id);
       if (this.chat?.runId === runId) this.chat = undefined;
       this.queuedSettings.delete(runId);
+      this.queuedKeys.delete(runId);
       this.dispatchChat();
       this.scheduleBroadcast();
     };
@@ -835,7 +868,12 @@ export class Engine {
             if (!imported.ok) throw new Error(imported.error);
           }
         }
-        const runner = await this.resolveRunner(task.mode, this.queuedSettings.get(task.id));
+        const runner = await this.resolveRunner(
+          task.mode,
+          this.queuedSettings.get(task.id),
+          this.queuedKeys.get(task.id),
+          abort.signal,
+        );
         if (this.chat?.runId === runId) this.chat.manualEdits = runner.supportsManualEdits === true;
         if (finished || abort.signal.aborted) return;
         const session = this.projects.session;
@@ -939,10 +977,25 @@ export class Engine {
     return true;
   }
 
-  private async resolveRunner(mode: "edit" | "plan", settings?: Settings): Promise<AgentRunner> {
+  private async resolveRunner(
+    mode: "edit" | "plan",
+    settings?: Settings,
+    key?: string,
+    signal?: AbortSignal,
+  ): Promise<AgentRunner> {
     const r = this.cfg.runner;
     if (typeof r === "function")
-      return r({ ...this.runnerEnv(), ...(settings ? { settings } : {}), mode });
+      return r({
+        ...this.runnerEnv(),
+        ...(settings
+          ? {
+              settings,
+              getApiKey: async (kind) => (kind === settings.activeProvider ? key : undefined),
+            }
+          : {}),
+        mode,
+        ...(signal ? { signal } : {}),
+      });
     return r;
   }
 
