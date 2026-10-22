@@ -43,6 +43,8 @@ Heavy rendering/transcription is bounded to one job on the target laptop. Local 
 
 ## Verification and release decision
 
+T05 workspace foundation uses an overlay tool drawer at laptop widths, readable preset cards, labelled tabs, larger composer and top-bar task access. Fresh browser screenshot: `artifacts/functional-audit/02-workspace-rebuilt.png`. Initial waiting/media states resolved after connection and proxy loading; do not record transient capture states as persistent defects. Evidence: `artifacts/workspace-ui-build.log`; broader viewport/keyboard checks remain required.
+
 T04 manual tools add output format/fit, titles, caption style and editing-template controls without AI. Clip properties expose source-time trim fields. Media relinking uses a picker/upload and the registry, preserving IDs/cuts/transcript only for matching source metadata; transcript word correction preserves timing and undo. Evidence: `artifacts/manual-tools-build.log` and `artifacts/project-commands-tests.log`. Broader manual feature coverage remains part of release acceptance.
 
 T04 project foundation exposes New/Open/Recent/Save/Save As over existing project operations. Browsers open an uploaded validated copy and download project JSON; desktop uses native dialogs. Media stays referenced, not embedded. Scratch projects remain in recents and can be reopened without broadening allowed roots. Copy imports validate all asset paths before adopting the project. Project/task conflicts are refused. Evidence: `artifacts/project-workflows-build.log` and `artifacts/project-workflows-tests.log`.

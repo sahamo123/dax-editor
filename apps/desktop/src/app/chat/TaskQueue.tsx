@@ -35,6 +35,20 @@ export function TaskQueue(): ReactElement {
             </strong>{" "}
             · <span>{task.status}</span>
             <p>{task.title}</p>
+            <small>
+              {task.origin ?? "ai"}
+              {task.provider ? ` · ${task.provider}` : ""}
+              {task.phase ? ` · ${task.phase}` : ""}
+            </small>
+            {task.progress !== undefined && task.status === "running" ? (
+              <progress max={1} value={task.progress} aria-label={`${task.title} progress`} />
+            ) : null}
+            {task.startStateId !== undefined ? (
+              <p className="muted">
+                History #{task.startStateId}
+                {task.endStateId !== undefined ? ` → #${task.endStateId}` : ""}
+              </p>
+            ) : null}
             {task.error ? <p className="note note--warn">{task.error}</p> : null}
             {task.status === "queued" || (task.status === "running" && !task.steersRunId) ? (
               <button
