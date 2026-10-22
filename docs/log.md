@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Update**: T02 task foundation captures provider settings at submission, records command/history references and export/transcription work, and adds per-open project identity plus monotonic revision checks. Guarded AI tool calls share the engine queue; manual changes during inference are preserved and stale AI edits fail. Queue/recovery tests include provider switching and edit/undo conflicts.
+
 * **Creation**: functional desktop release contract and GitHub delivery index #8 with T01–T09 issues #9–#17. Fresh visual audit captured the current timeout/ready contradiction and narrow-window clipping; baseline checks are recorded separately from historical evidence. Native signing/validation and live hosted-provider checks remain explicit gates.
 
 ## 2026-10-20

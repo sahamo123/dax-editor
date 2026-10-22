@@ -4,6 +4,7 @@
 import {
   COMMANDS,
   type CommandContext,
+  type CommandOutcome,
   getCommand,
   type Session,
   type ToolSpec,
@@ -29,6 +30,12 @@ export type ToolOutcome =
 
 /** What the runner needs to execute calls. */
 export interface ToolRunnerContext {
+  /** Execute validated commands through the owner's serialization/revision guard when provided. */
+  executeCommand?(
+    context: CommandContext,
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<CommandOutcome>;
   session: Session;
   allowedRoots: string[] | undefined;
   /** Speech-to-text for `transcribe` and the cut commands; absent when none is installed. */
@@ -147,7 +154,7 @@ export async function runToolCall(
   if (ctx.allowedRoots) commandCtx.allowedRoots = ctx.allowedRoots;
   if (ctx.transcriber) commandCtx.transcriber = ctx.transcriber;
   if (ctx.signal) commandCtx.signal = ctx.signal;
-  const result = await tryRunCommand(commandCtx, name, args);
+  const result = await (ctx.executeCommand ?? tryRunCommand)(commandCtx, name, args);
   if (!result.ok) return { kind: "failed", error: result.error, args, repaired };
   return { kind: "ok", summary: result.summary, data: result.data, args, repaired };
 }

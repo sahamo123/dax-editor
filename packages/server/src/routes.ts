@@ -48,7 +48,7 @@ export function buildRouter(engine: Engine): Router {
 
   r.add("POST", API.command, async ({ body, json }) => {
     const req = parseWith(CommandRequestSchema, await body());
-    json(200, await engine.runCommand(req.name, req.args));
+    json(200, await engine.runCommand(req.name, req.args, req));
   });
 
   r.add("POST", API.importMedia, async ({ body, json }) => {

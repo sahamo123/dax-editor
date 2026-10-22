@@ -43,6 +43,8 @@ Heavy rendering/transcription is bounded to one job on the target laptop. Local 
 
 ## Verification and release decision
 
+T02 foundation adds per-open project identity and monotonic revisions (including undo), optional request guards, manual command history attribution, queued provider/settings capture, AI history boundaries, and task records for export/transcription jobs. Production API/local runners use the engine command seam: a manual edit during inference preserves manual work and fails the next stale AI call. Runners without this seam retain exclusive editing. Project switching is refused with unfinished chat work. Task restart recovery remains non-replaying. Verification: `artifacts/task-revisions-tests.log` and `artifacts/task-revisions-build.log`; broader acceptance and native gates remain separate.
+
 Required: manual-only import/edit/undo/save/reopen/export; real local AI editing suite; live hosted edits when configured; queue/steering/restart/conflict tests; read-only Planning in chat and MCP; speech correction and synchronized export; individually checked external clients; Blender template render/regenerate/cancel; native dialogs/playback/install/upgrade/cleanup; pnpm check and scribe completion.
 
 Native Windows release remains blocked by Application Control until a policy-authorized executable can run. An unsigned build or browser test is not native validation. No security policy change is part of this plan. Remote connector hosting, public plugin-store publication and arbitrary Blender scenes are outside this release.

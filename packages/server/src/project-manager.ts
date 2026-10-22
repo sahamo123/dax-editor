@@ -1,7 +1,7 @@
 // The one open project: an engine Session that autosaves, tells the server when anything changes, and the new/open/save operations.
 // Project files live under <data>/projects unless the user saves elsewhere; they never contain API keys (core's Project has no place for them).
 
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import { mkdir, readFile, stat } from "node:fs/promises";
 import { basename, join } from "node:path";
 import { emptyProject, isPathInside, type Project, ProjectSchema, Session } from "@dax/core";
@@ -22,6 +22,10 @@ const PROJECT_EXTENSION = ".dax.json";
  * only way to observe changes made by code that holds the session, such as the agent.
  */
 export class EngineSession extends Session {
+  /** Identity of this open session; never reused after switching projects. */
+  readonly projectId = randomUUID();
+  /** Monotonic project revision, including undo/redo, for stale command detection. */
+  revision = 0;
   /** Where the project is autosaved. */
   savePath: string;
   /** True once the user chose the location (open or save-as); false for scratch projects in the data folder. */
@@ -61,36 +65,44 @@ export class EngineSession extends Session {
 
   /** See {@link Session.apply}; also notifies the server. */
   override async apply(...args: Parameters<Session["apply"]>): ReturnType<Session["apply"]> {
+    const before = this.project;
     try {
       return await super.apply(...args);
     } finally {
+      if (this.project !== before) this.revision++;
       this.onChange();
     }
   }
 
   /** See {@link Session.undo}; also notifies the server. */
   override async undo(): ReturnType<Session["undo"]> {
+    const before = this.project;
     try {
       return await super.undo();
     } finally {
+      if (this.project !== before) this.revision++;
       this.onChange();
     }
   }
 
   /** See {@link Session.redo}; also notifies the server. */
   override async redo(): ReturnType<Session["redo"]> {
+    const before = this.project;
     try {
       return await super.redo();
     } finally {
+      if (this.project !== before) this.revision++;
       this.onChange();
     }
   }
 
   /** See {@link Session.restore}; also notifies the server. */
   override async restore(id: number): ReturnType<Session["restore"]> {
+    const before = this.project;
     try {
       return await super.restore(id);
     } finally {
+      if (this.project !== before) this.revision++;
       this.onChange();
     }
   }

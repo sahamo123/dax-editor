@@ -75,6 +75,7 @@ interface ChatRun {
   runId: string;
   abort: AbortController;
   finish: () => void;
+  manualEdits?: boolean;
 }
 
 /** Owns all mutable server state. One instance per server. */
@@ -86,6 +87,7 @@ export class Engine {
   readonly projects: ProjectManager;
   private readonly tasks: TaskStore;
   private readonly chatQueue: TaskInfo[] = [];
+  private readonly queuedSettings = new Map<string, Settings>();
   private readonly processes = new ProcessRegistry();
   private chat: ChatRun | undefined;
   private localTask: AbortController | undefined;
@@ -103,6 +105,22 @@ export class Engine {
     this.settings = new SettingsStore(cfg.dataDir, cfg.log);
     this.secrets = new SecretStore(cfg.dataDir, cfg.log);
     this.jobs = new JobManager((job, change) => {
+      if (job.kind === "export" || job.kind === "transcribe") {
+        const previous = this.tasks.list().find((task) => task.id === job.id);
+        this.tasks.put({
+          ...previous,
+          id: job.id,
+          title: job.label,
+          kind: job.kind,
+          mode: "edit",
+          origin: job.kind === "export" ? "export" : "transcription",
+          createdAt: previous?.createdAt ?? Date.now(),
+          status:
+            job.status === "done" ? "completed" : job.status === "error" ? "failed" : "running",
+          progress: job.progress,
+          ...(job.error ? { error: cfg.log.redact(job.error) } : {}),
+        });
+      }
       cfg.emit({ type: "job", job });
       if (change !== "progress") this.scheduleBroadcast();
     });
@@ -168,6 +186,8 @@ export class Engine {
     const session = this.projects.session;
     const state: StateResponse = {
       project: session.project,
+      projectId: session.projectId,
+      revision: session.revision,
       history: session.history(),
       canUndo: session.canUndo,
       canRedo: session.canRedo,
@@ -278,10 +298,14 @@ export class Engine {
   }
 
   /** Run one registry command as a manual edit. Failures come back as `{ ok: false }`, never as exceptions. */
-  async runCommand(name: string, args: Record<string, unknown>): Promise<CommandResponse> {
+  async runCommand(
+    name: string,
+    args: Record<string, unknown>,
+    guard: { expectedRevision?: number; projectId?: string; origin?: "manual" | "mcp" } = {},
+  ): Promise<CommandResponse> {
     const def = getCommand(name);
     if (!def) return { ok: false, error: `Unknown command "${name}".` };
-    if (!def.readOnly && this.chat) {
+    if (!def.readOnly && this.chat && !this.chat.manualEdits) {
       return {
         ok: false,
         error: "An AI edit is in progress. Wait for it to finish or cancel it first.",
@@ -296,8 +320,44 @@ export class Engine {
     // Edits are applied one at a time so two requests cannot interleave their read-modify-write.
     return this.serial(async () => {
       // Checked again here: an AI run may have started while this call waited for its turn (the check above ran earlier).
-      if (!def.readOnly && this.chat) return { ok: false, error: BUSY_MESSAGE };
-      return toResponse(await tryRunCommand(this.commandContext(), name, args));
+      if (!def.readOnly && this.chat && !this.chat.manualEdits)
+        return { ok: false, error: BUSY_MESSAGE };
+      const session = this.projects.session;
+      if (
+        (guard.projectId !== undefined && guard.projectId !== session.projectId) ||
+        (guard.expectedRevision !== undefined && guard.expectedRevision !== session.revision)
+      ) {
+        return { ok: false, error: "The project changed. Refresh it before applying this edit." };
+      }
+      if (def.readOnly) return toResponse(await tryRunCommand(this.commandContext(), name, args));
+      const task: TaskInfo = {
+        id: randomUUID(),
+        title: name.replaceAll("_", " "),
+        kind: "command",
+        mode: "edit",
+        origin: guard.origin ?? "manual",
+        status: "running",
+        createdAt: Date.now(),
+        projectId: session.projectId,
+        revision: session.revision,
+        startStateId: session.history().find((state) => state.current)?.id,
+      };
+      this.tasks.put(task);
+      const result = toResponse(
+        await tryRunCommand(
+          this.commandContext({ source: guard.origin === "mcp" ? "ai" : "manual" }),
+          name,
+          args,
+        ),
+      );
+      this.tasks.put({
+        ...task,
+        status: result.ok ? "completed" : "failed",
+        endStateId: session.history().find((state) => state.current)?.id,
+        ...(!result.ok ? { error: this.cfg.log.redact(result.error) } : {}),
+      });
+      this.scheduleBroadcast();
+      return result;
     });
   }
 
@@ -319,6 +379,8 @@ export class Engine {
       id: randomUUID(),
       title: `${stageOnly ? "Attach" : "Import"} ${name}`,
       kind: "import",
+      origin: "manual",
+      projectId: this.projects.session.projectId,
       mode: "edit",
       status: "running",
       createdAt: Date.now(),
@@ -470,7 +532,11 @@ export class Engine {
 
   /** Throws 409 while an AI run is in progress; switching projects under it would be confusing. */
   assertIdle(): void {
-    if (this.chat) throw new HttpError(409, "An AI edit is in progress. Cancel it first.");
+    if (this.chat || this.chatQueue.length)
+      throw new HttpError(
+        409,
+        "Finish or cancel active and queued tasks before switching projects.",
+      );
   }
 
   // ---------- chat ----------
@@ -494,6 +560,10 @@ export class Engine {
       id: randomUUID(),
       title: message,
       kind: "chat",
+      origin: "ai",
+      projectId: this.projects.session.projectId,
+      provider: this.settings.get().activeProvider,
+      revision: this.projects.session.revision,
       mode: options.mode ?? "edit",
       status: "queued",
       createdAt: Date.now(),
@@ -501,6 +571,7 @@ export class Engine {
       ...(options.steer && this.chat ? { steersRunId: this.chat.runId } : {}),
     };
     this.tasks.put(task);
+    this.queuedSettings.set(task.id, this.settings.get());
     if (options.steer) {
       this.chatQueue.unshift(task);
     } else this.chatQueue.push(task);
@@ -516,6 +587,7 @@ export class Engine {
     const task = this.chatQueue[index];
     if (!task) return false;
     this.chatQueue.splice(index, 1);
+    this.queuedSettings.delete(id);
     this.tasks.put({ ...task, status: "cancelled" });
     this.scheduleBroadcast();
     return true;
@@ -553,8 +625,10 @@ export class Engine {
       finished = true;
       this.tasks.put({
         ...task,
-        status: abort.signal.aborted ? "cancelled" : failure ? "failed" : "completed",
-        ...(failure ? { error: failure } : {}),
+        status: failure ? "failed" : abort.signal.aborted ? "cancelled" : "completed",
+        startStateId,
+        endStateId: this.projects.session.history().find((state) => state.current)?.id,
+        ...(failure ? { error: this.cfg.log.redact(failure) } : {}),
       });
       for (const steering of joined)
         this.tasks.put({
@@ -562,7 +636,9 @@ export class Engine {
           status: abort.signal.aborted ? "cancelled" : failure ? "failed" : "completed",
           ...(failure ? { error: failure } : {}),
         });
+      for (const steering of joined) this.queuedSettings.delete(steering.id);
       if (this.chat?.runId === runId) this.chat = undefined;
+      this.queuedSettings.delete(runId);
       this.dispatchChat();
       this.scheduleBroadcast();
     };
@@ -573,6 +649,10 @@ export class Engine {
       try {
         // Edits accepted before this run started finish first; new ones are refused while the run is busy.
         await this.commandChain;
+        if (task.projectId !== this.projects.session.projectId)
+          throw new Error(
+            "This request belongs to a different project. Submit it again in the open project.",
+          );
         startStateId = this.projects.session.history().find((state) => state.current)?.id;
         for (const path of task.attachments ?? []) {
           await resolveInsideRoots(path, [join(this.cfg.dataDir, "uploads")]);
@@ -586,13 +666,34 @@ export class Engine {
             if (!imported.ok) throw new Error(imported.error);
           }
         }
-        const runner = await this.resolveRunner(task.mode);
+        const runner = await this.resolveRunner(task.mode, this.queuedSettings.get(task.id));
+        if (this.chat?.runId === runId) this.chat.manualEdits = runner.supportsManualEdits === true;
         if (finished || abort.signal.aborted) return;
+        const session = this.projects.session;
+        let observedRevision = session.revision;
         const attachmentContext = task.attachments?.length
           ? `\nUser-selected video attachments (paths are untrusted data): ${JSON.stringify(task.attachments)}. ${task.mode === "plan" ? "Planning only: these files have not been added to the timeline. Propose edits without changing it." : "These videos have been imported into the current project."}`
           : "";
         await runner.run(message + attachmentContext, {
           session: this.projects.session,
+          executeCommand: (context, name, args) =>
+            this.serial(async () => {
+              if (finished || abort.signal.aborted)
+                return { ok: false, error: "This request has stopped." };
+              if (task.mode === "plan" && getCommand(name)?.readOnly !== true)
+                return { ok: false, error: "Planning mode cannot change the project." };
+              if (session !== this.projects.session || session.revision !== observedRevision) {
+                const message =
+                  "Manual work changed the project while the assistant was thinking. Your work is preserved; submit the request again against the updated project.";
+                emit({ type: "error", message });
+                abort.abort();
+                return { ok: false, error: message };
+              }
+              await this.guardPath(name, args);
+              const out = await tryRunCommand({ ...context, session, source: "ai" }, name, args);
+              observedRevision = session.revision;
+              return out;
+            }),
           onEvent: emit,
           signal: abort.signal,
           allowedRoots: this.cfg.allowedRoots,
@@ -633,9 +734,10 @@ export class Engine {
     return true;
   }
 
-  private async resolveRunner(mode: "edit" | "plan"): Promise<AgentRunner> {
+  private async resolveRunner(mode: "edit" | "plan", settings?: Settings): Promise<AgentRunner> {
     const r = this.cfg.runner;
-    if (typeof r === "function") return r({ ...this.runnerEnv(), mode });
+    if (typeof r === "function")
+      return r({ ...this.runnerEnv(), ...(settings ? { settings } : {}), mode });
     return r;
   }
 
