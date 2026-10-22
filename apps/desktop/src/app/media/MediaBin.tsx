@@ -116,6 +116,15 @@ export function MediaBin(): ReactElement {
                   >
                     Add
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn--small"
+                    disabled={!online}
+                    aria-label={`Relink ${basename(a.path)}`}
+                    onClick={() => void controller.relinkMedia(a.id)}
+                  >
+                    Relink
+                  </button>
                 </div>
               </div>
             </li>

@@ -27,6 +27,7 @@ import {
   updateOverlay,
 } from "./overlays.js";
 import { getPreset, OVERLAY_PRESETS, overlayFromPreset } from "./presets.js";
+import { PROJECT_COMMANDS } from "./project-commands.js";
 import { exportProject } from "./render.js";
 import {
   ANIMATIONS,
@@ -1114,6 +1115,7 @@ export const COMMANDS: readonly CommandDef[] = [
   }),
   ...EFFECT_COMMANDS,
   ...TEMPLATE_COMMANDS,
+  ...PROJECT_COMMANDS,
 ];
 
 /** Look up a command by name. */

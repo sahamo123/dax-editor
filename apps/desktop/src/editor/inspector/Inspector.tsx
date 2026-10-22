@@ -235,6 +235,7 @@ function OverlayInspector({ overlay }: { overlay: Overlay }) {
 }
 
 function ClipInspector({ clip, name }: { clip: Clip; name: string }) {
+  const api = useEditorApi();
   const exec = useExec();
   const actions = useEditActions();
   const dur = clipDur(clip);
@@ -253,6 +254,26 @@ function ClipInspector({ clip, name }: { clip: Clip; name: string }) {
           {clip.in.toFixed(2)}s to {clip.out.toFixed(2)}s
         </dd>
       </dl>
+      <NumberSlider
+        label="Source in"
+        testId="clip-source-in"
+        value={clip.in}
+        min={0}
+        max={Math.max(0, clip.out - 0.04)}
+        step={0.01}
+        unit="s"
+        onCommit={(value) => exec("trim_clip", { clipId: clip.id, in: value })}
+      />
+      <NumberSlider
+        label="Source out"
+        testId="clip-source-out"
+        value={clip.out}
+        min={clip.in + 0.04}
+        max={api.state.project.assets[clip.assetId]?.duration ?? clip.out}
+        step={0.01}
+        unit="s"
+        onCommit={(value) => exec("trim_clip", { clipId: clip.id, out: value })}
+      />
       <NumberSlider
         label="Volume"
         testId="clip-volume"

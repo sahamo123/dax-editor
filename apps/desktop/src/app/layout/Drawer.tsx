@@ -8,8 +8,10 @@ import { HistoryPanel } from "../history/HistoryPanel";
 import { MediaBin } from "../media/MediaBin";
 import { type DrawerTab, rememberDrawerTab } from "../store";
 import { Icon, type IconName } from "../ui/icons";
+import { ProjectTools } from "./ProjectTools";
 
 const TABS: { id: DrawerTab; label: string; icon: IconName }[] = [
+  { id: "tools", label: "Tools", icon: "settings" },
   { id: "presets", label: "Presets", icon: "presets" },
   { id: "inspector", label: "Inspector", icon: "inspector" },
   { id: "media", label: "Media", icon: "media" },
@@ -77,6 +79,7 @@ export function Drawer(): ReactElement {
         {tab === "inspector" ? <Inspector /> : null}
         {tab === "media" ? <MediaBin /> : null}
         {tab === "history" ? <HistoryPanel /> : null}
+        {tab === "tools" ? <ProjectTools /> : null}
       </div>
     </aside>
   );

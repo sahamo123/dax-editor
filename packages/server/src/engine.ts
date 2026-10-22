@@ -528,7 +528,10 @@ export class Engine {
 
   /** Check, with symlinks resolved, that a command's file path is inside the allowed folders. The command re-checks lexically as well. */
   private async guardPath(name: string, args: Record<string, unknown>): Promise<void> {
-    if ((name === "import_media" || name === "export_video") && typeof args.path === "string") {
+    if (
+      (name === "import_media" || name === "export_video" || name === "relink_media") &&
+      typeof args.path === "string"
+    ) {
       await resolveInsideRoots(args.path, this.cfg.allowedRoots);
     }
   }

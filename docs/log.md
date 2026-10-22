@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Creation**: manual output-format/title/caption/template controls and source trim fields. New registry operations relink matching media and correct a transcript word while preserving its source timing; both are undoable and shared with external tools. Relinking checks allowed paths and media compatibility.
+
 * **Creation**: project lifecycle menu, recent scratch/saved projects, native project pickers and browser upload/download copies. Project uploads validate schema and media roots before replacing the active session. Tests cover reopening an autosave and refusing an uploaded out-of-root source.
 
 * **Creation**: direct OpenAI connection/key namespace, one-time legacy migration, explicit non-editing tool diagnostics, opt-in model discovery and configured/testing/connected/error UI. Diagnostic tests mock fetch and check endpoint/key isolation, synthetic tools, invalid tool responses and cleartext credential refusal. Hosted readiness still requires a real configured-provider edit.

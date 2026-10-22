@@ -20,7 +20,7 @@ import {
 } from "./chat-model";
 
 /** Tabs of the side drawer. */
-export type DrawerTab = "presets" | "inspector" | "media" | "history";
+export type DrawerTab = "presets" | "inspector" | "media" | "history" | "tools";
 
 /** Where the link to the engine stands. */
 interface ConnectionState {
@@ -110,7 +110,8 @@ const DRAWER_KEY = "dax.drawerTab";
 function readDrawerTab(): DrawerTab {
   try {
     const v = window.localStorage.getItem(DRAWER_KEY);
-    if (v === "presets" || v === "inspector" || v === "media" || v === "history") return v;
+    if (v === "presets" || v === "inspector" || v === "media" || v === "history" || v === "tools")
+      return v;
   } catch {
     // Storage unavailable: use the default.
   }

@@ -43,6 +43,8 @@ Heavy rendering/transcription is bounded to one job on the target laptop. Local 
 
 ## Verification and release decision
 
+T04 manual tools add output format/fit, titles, caption style and editing-template controls without AI. Clip properties expose source-time trim fields. Media relinking uses a picker/upload and the registry, preserving IDs/cuts/transcript only for matching source metadata; transcript word correction preserves timing and undo. Evidence: `artifacts/manual-tools-build.log` and `artifacts/project-commands-tests.log`. Broader manual feature coverage remains part of release acceptance.
+
 T04 project foundation exposes New/Open/Recent/Save/Save As over existing project operations. Browsers open an uploaded validated copy and download project JSON; desktop uses native dialogs. Media stays referenced, not embedded. Scratch projects remain in recents and can be reopened without broadening allowed roots. Copy imports validate all asset paths before adopting the project. Project/task conflicts are refused. Evidence: `artifacts/project-workflows-build.log` and `artifacts/project-workflows-tests.log`.
 
 T03 adds a separate direct OpenAI configuration/key namespace without removing the old compatible connection. Legacy official-endpoint settings and keys are copied once. Provider diagnostics explicitly request a synthetic tool call and never execute it; model discovery is opt-in. Status distinguishes configured from tested/connected and invalidates on settings/key changes. No paid request is made by automated tests. Evidence: `artifacts/provider-diagnostics-tests.log`, `artifacts/provider-server-tests.log`, `artifacts/provider-ui-build.log`. Multiple named profiles for the same custom endpoint family remain follow-up work within T03.
