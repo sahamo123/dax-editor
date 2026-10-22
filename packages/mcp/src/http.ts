@@ -47,6 +47,8 @@ export interface HttpServerOptions extends McpServerOptions {
 
 /** A running HTTP server. */
 export interface RunningHttpServer {
+  /** Number of initialized stateful client sessions, not inference processes. */
+  readonly clients: number;
   /** Full endpoint URL, for example `http://127.0.0.1:53918/mcp`. Contains no secret. */
   url: string;
   /** Port actually bound. */
@@ -261,6 +263,9 @@ export async function startHttpServer(options: HttpServerOptions = {}): Promise<
 
   return {
     url: `http://${hostPart}:${port}${MCP_PATH}`,
+    get clients() {
+      return live.size;
+    },
     port,
     host,
     token,
