@@ -128,6 +128,21 @@ export async function pickSavePath(defaultName: string): Promise<string | null> 
   return picked ?? "";
 }
 
+/** Native project open/save dialog. Browsers return null and use upload/download instead. Empty string means cancelled. */
+export async function pickProjectPath(save = false): Promise<string | null> {
+  if (!isTauri()) return null;
+  const { invoke } = await import("@tauri-apps/api/core");
+  const value = await invoke<string | null>(save ? "plugin:dialog|save" : "plugin:dialog|open", {
+    options: {
+      title: save ? "Save project as" : "Open project",
+      multiple: false,
+      ...(save ? { defaultPath: "project.dax.json" } : {}),
+      filters: [{ name: "Dax project", extensions: ["json"] }],
+    },
+  });
+  return value ?? "";
+}
+
 /** Callbacks for {@link onFileDrop}. */
 export interface FileDropHandlers {
   /** Browser-selected bytes for local upload; native drops continue to use absolute paths. */

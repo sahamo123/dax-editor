@@ -11,6 +11,7 @@ import {
   MAX_UPLOAD_BYTES,
   type MediaKind,
   PROVIDER_KINDS,
+  ProjectCopyRequestSchema,
   ProjectNewRequestSchema,
   ProjectPathRequestSchema,
   ProviderDiagnosticRequestSchema,
@@ -67,6 +68,17 @@ export function buildRouter(engine: Engine): Router {
   });
 
   // ----- projects -----
+  r.add("GET", API.projectRecent, async ({ json }) =>
+    json(200, { paths: await engine.projects.recentProjects() }),
+  );
+  r.add("POST", API.projectCopy, async ({ body, json }) => {
+    const req = parseWith(ProjectCopyRequestSchema, await body());
+    engine.assertIdle();
+    await engine.projects.openCopy(req.project).catch((e) => {
+      throw projectError(e);
+    });
+    json(200, await engine.buildState());
+  });
   r.add("POST", API.projectNew, async ({ body, json }) => {
     const req = parseWith(ProjectNewRequestSchema, await body());
     engine.assertIdle();

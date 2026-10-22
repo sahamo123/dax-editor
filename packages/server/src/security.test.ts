@@ -47,6 +47,8 @@ describe("authentication", () => {
       ["POST", "/api/project/new"],
       ["POST", "/api/project/open"],
       ["POST", "/api/project/save"],
+      ["POST", "/api/project/copy"],
+      ["GET", "/api/project/recent"],
       ["POST", "/api/chat"],
       ["POST", "/api/chat/cancel"],
       ["GET", "/api/settings"],

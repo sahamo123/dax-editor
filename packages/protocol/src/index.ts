@@ -17,6 +17,8 @@ export const API = {
   projectNew: "/api/project/new",
   projectOpen: "/api/project/open",
   projectSave: "/api/project/save",
+  projectRecent: "/api/project/recent",
+  projectCopy: "/api/project/copy",
   chat: "/api/chat",
   chatCancel: "/api/chat/cancel",
   taskCancel: "/api/tasks/:taskId/cancel",
@@ -139,6 +141,9 @@ export type ProjectNewRequest = z.infer<typeof ProjectNewRequestSchema>;
 export const ProjectPathRequestSchema = z.object({ path: z.string().min(1).optional() });
 /** A validated {@link ProjectPathRequestSchema} value. */
 export type ProjectPathRequest = z.infer<typeof ProjectPathRequestSchema>;
+
+/** Open an uploaded project as an app-owned copy; asset paths are independently validated. */
+export const ProjectCopyRequestSchema = z.object({ project: z.unknown() });
 
 /** Send a chat message to the active AI provider. The reply streams over the WebSocket as `chat` events. */
 export const ChatRequestSchema = z.object({

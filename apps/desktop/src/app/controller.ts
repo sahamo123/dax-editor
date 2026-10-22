@@ -6,6 +6,7 @@ import type { CommandResponse, ImportResult, ProviderKind, Settings } from "@dax
 import type { StoreApi } from "zustand/vanilla";
 import type { DaxClient, LiveSocket, LocalModelAction, SocketStatus } from "../api";
 import { openLiveSocket } from "../api";
+import { pickBrowserFiles, pickFiles } from "../platform";
 import { aiStepsSince } from "./chat-model";
 import { basename } from "./format";
 import type { AppStore } from "./store";
@@ -44,6 +45,12 @@ export interface Controller {
   retryNow(): void;
   /** Re-read the full state over REST. */
   refreshState(): Promise<void>;
+  /** New/open/save/save-as or uploaded copy; updates the visible project only after server success. */
+  project(action: "new" | "open" | "save" | "copy", value?: string | unknown): Promise<boolean>;
+  /** Recent project locations from the engine, never browser storage. */
+  recentProjects(): Promise<string[]>;
+  /** Select the original source using native/browser file selection and preserve the asset identity. */
+  relinkMedia(assetId: string): Promise<void>;
   /** Run a registry command as a manual edit. Failures also raise a toast. Never throws. */
   run(name: string, args?: Record<string, unknown>): Promise<CommandResponse>;
   /** Same as {@link Controller.run} but without a failure toast (the caller shows its own message). */
@@ -344,6 +351,60 @@ export function createController(deps: ControllerDeps): Controller {
       const current = store.getState().state;
       if (!r.ok) toast("error", r.error);
       else if (current) store.getState().applyState({ ...current, providers: r.value });
+    },
+
+    async project(action, value) {
+      const r =
+        action === "new"
+          ? await client.projectNew({ name: typeof value === "string" ? value : "Untitled" })
+          : action === "open" && typeof value === "string"
+            ? await client.projectOpen(value)
+            : action === "copy"
+              ? await client.projectCopy(value)
+              : await client.projectSave(typeof value === "string" ? value : undefined);
+      if (!r.ok) {
+        toast("error", r.error);
+        return false;
+      }
+      store.getState().applyState(r.value);
+      toast("success", action === "save" ? "Project saved." : "Project opened.");
+      return true;
+    },
+
+    async recentProjects() {
+      const r = await client.projectRecent();
+      if (!r.ok) {
+        toast("error", r.error);
+        return [];
+      }
+      return r.value.paths;
+    },
+
+    async relinkMedia(assetId) {
+      try {
+        const paths = await pickFiles();
+        let path = paths?.[0];
+        if (paths === null) {
+          const file = (await pickBrowserFiles())[0];
+          if (!file) return;
+          const uploaded = await client.uploadMedia(file, true);
+          if (!uploaded.ok) {
+            toast("error", uploaded.error);
+            return;
+          }
+          const data = uploaded.data;
+          if (
+            typeof data === "object" &&
+            data !== null &&
+            "path" in data &&
+            typeof data.path === "string"
+          )
+            path = data.path;
+        }
+        if (path) await run("relink_media", { assetId, path });
+      } catch {
+        toast("error", "Could not select replacement media.");
+      }
     },
 
     async testProvider(kind) {

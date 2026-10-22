@@ -212,6 +212,16 @@ export class DaxClient {
     return this.request("POST", API.projectNew, req);
   }
 
+  /** Recently opened projects, including app-owned autosaves. */
+  async projectRecent(): Promise<ApiResult<{ paths: string[] }>> {
+    return this.request("GET", API.projectRecent);
+  }
+
+  /** Open an uploaded project in engine storage; asset paths are validated by the server. */
+  async projectCopy(project: unknown): Promise<ApiResult<StateResponse>> {
+    return this.request("POST", API.projectCopy, { project });
+  }
+
   /** `POST /api/project/open` with a project file path (it must end in `.dax.json`); answers with the full state. */
   async projectOpen(path: string): Promise<ApiResult<StateResponse>> {
     return this.request("POST", API.projectOpen, { path });

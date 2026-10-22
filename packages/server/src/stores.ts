@@ -130,7 +130,10 @@ export class SecretStore {
 }
 
 /** Small bookkeeping the app remembers between launches. */
-const AppStateSchema = z.object({ lastProject: z.string().optional() });
+const AppStateSchema = z.object({
+  lastProject: z.string().optional(),
+  recentProjects: z.array(z.string()).max(20).default([]),
+});
 
 /** Reads and writes `state.json`: which project to reopen on the next launch. */
 export class AppStateStore {
@@ -151,6 +154,22 @@ export class AppStateStore {
 
   /** Record the project that is open now. */
   async setLastProject(path: string): Promise<void> {
-    await writeFileAtomic(this.file, JSON.stringify({ lastProject: path }, null, 2));
+    const recentProjects = [
+      path,
+      ...(await this.recentProjects()).filter((old) => old !== path),
+    ].slice(0, 20);
+    await writeFileAtomic(
+      this.file,
+      JSON.stringify({ lastProject: path, recentProjects }, null, 2),
+    );
+  }
+
+  /** Recent saved and scratch projects in most-recently-opened order; missing state yields an empty list. */
+  async recentProjects(): Promise<string[]> {
+    try {
+      return AppStateSchema.parse(JSON.parse(await readFile(this.file, "utf8"))).recentProjects;
+    } catch {
+      return [];
+    }
   }
 }
