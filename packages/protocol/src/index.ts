@@ -234,6 +234,8 @@ export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 
 /** Settings the UI can read and write. */
 export const SettingsSchema = z.object({
+  /** Minutes without chat before unloading local inference; defaults to five for older settings. */
+  localIdleMinutes: z.number().int().min(1).max(60).optional(),
   activeProvider: z.enum(PROVIDER_KINDS),
   providers: z.record(z.enum(PROVIDER_KINDS), ProviderConfigSchema),
 });

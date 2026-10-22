@@ -2,6 +2,10 @@
 
 ## 2026-10-22
 
+* **Update**: local AI loads on the first chat request instead of during editor startup, and unloads after configurable inactivity. Manual-only use retains the model on disk without loading weights. Launcher and idle-timer regressions cover this resource lifecycle; no automatic model downloads or hosted fallback.
+
+* **Update**: compact-model requests add relevant transcript, caption, template and Blender tools while retaining everyday controls for non-cancelling steering. Unknown requests keep the established tool list. Command validation and Planning restrictions remain in the shared engine.
+
 * **Correction**: queued requests retain their submitted credential in memory as well as settings. Compatible API keys bind to the saved server address; changing an address never sends the previous key to the new host. Settings persist before new keys bind, and failed settings writes retain the old in-memory value. Regression covers queued settings/key changes without persisting credentials in tasks. Full check exposed and corrected a controller assertion for the safer save order; MCP documentation links and CSS formatting also corrected.
 
 * **Creation**: bounded Blender motion templates (title card, logo intro, 3D text), separate-process CPU rendering, progress/cancel, generated-asset recipes and in-place regeneration with undo. Core tests use generated video and an injected renderer. Official Blender 4.5.14 portable bytes matched upstream SHA-256, but execution on this laptop was blocked by Windows Application Control event 3077. Real Blender rendering is unverified; no security policy changed.

@@ -209,18 +209,23 @@ describe("launch and the embedded local model", () => {
   it("sends the local provider's chat to the injected model's endpoint, with its key", async () => {
     dataDir = mkdtempSync(join(tmpdir(), "dax-launch-"));
     const model = await mockModel();
+    let loaded = false;
+    let starts = 0;
     const controller: EmbeddedModelController = {
       async status() {
         return {
           installed: true,
-          running: true,
+          running: loaded,
           detail: "Running",
           baseUrl: model.url,
           modelId: "gemma-4-e2b-qat-q4_0",
         };
       },
       async install() {},
-      async start() {},
+      async start() {
+        loaded = true;
+        starts++;
+      },
       async stop() {},
       async connection() {
         return { baseUrl: model.url, apiKey: "engine-test-key", modelId: "gemma-4-e2b-qat-q4_0" };
@@ -233,6 +238,11 @@ describe("launch and the embedded local model", () => {
       localModelController: controller,
     });
     running = server;
+    expect(starts).toBe(0);
+    expect((await providers(server.info)).find((p) => p.kind === "local")).toMatchObject({
+      available: true,
+      connectionState: "configured",
+    });
     const put = await fetch(`${server.info.url}${API.settings}`, {
       method: "PUT",
       headers: authed(server.info),
@@ -250,5 +260,6 @@ describe("launch and the embedded local model", () => {
       await new Promise((r) => setTimeout(r, 50));
     }
     expect(model.authorizations[0]).toBe("Bearer engine-test-key");
+    expect(starts).toBe(1);
   });
 });

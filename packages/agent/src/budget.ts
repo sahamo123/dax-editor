@@ -35,9 +35,41 @@ export const SMALL_MODEL_TOOL_NAMES: readonly string[] = [
   "redo",
 ];
 
-/** The commands a small model is offered: {@link SMALL_MODEL_TOOL_NAMES}, in registry order. */
-export function smallModelTools(): ToolSpec[] {
-  return commandTools({ names: [...SMALL_MODEL_TOOL_NAMES] });
+/** Everyday tools plus requested speech/motion/template tools, in registry order. Retains everyday controls for steering. */
+export function smallModelTools(message?: string): ToolSpec[] {
+  const names = new Set(SMALL_MODEL_TOOL_NAMES);
+  const groups: Array<[RegExp, string[]]> = [
+    [
+      /\b(format|portrait|landscape|square|aspect|resolution|fit|vertical|horizontal)\b/i,
+      ["set_format"],
+    ],
+    [
+      /\b(title|text|overlay|lower.third|callout)\b/i,
+      ["list_presets", "add_overlay", "update_overlay", "remove_overlay"],
+    ],
+    [/\b(volume|audio|mute|louder|quieter|fade)\b/i, ["set_volume", "set_fades"]],
+    [
+      /\b(trim|split|cut|delete|remove|keep|move|reorder|clip)\b/i,
+      ["split", "delete_range", "keep_only", "trim_clip", "move_clip", "remove_clip"],
+    ],
+    [
+      /\b(speech|transcri\w*|caption\w*|subtitle\w*|filler\w*|silence\w*)\b/i,
+      [
+        "transcribe",
+        "get_transcript",
+        "correct_transcript_word",
+        "set_captions",
+        "plan_cuts",
+        "apply_cut_plan",
+      ],
+    ],
+    [/\b(blender|3d|motion|intro|logo)\b/i, ["list_motion_templates", "render_motion_template"]],
+    [/\b(template|preset|style)\b/i, ["list_templates", "apply_template", "list_presets"]],
+    [/\b(import|upload|footage)\b/i, ["import_media"]],
+  ];
+  for (const [pattern, tools] of groups)
+    if (message && pattern.test(message)) for (const tool of tools) names.add(tool);
+  return commandTools({ names: [...names] });
 }
 
 /** Tokens kept free for the model's reply and its tool-call syntax. */

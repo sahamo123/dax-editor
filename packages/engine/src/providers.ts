@@ -12,6 +12,8 @@ export interface RegistryOptions {
   localEndpoint?: LocalEndpoint;
   /** True when the embedded model is installed and running. */
   localReady?: () => Promise<boolean>;
+  /** Installed weights can start on demand without requiring network access. */
+  localInstalled?: () => Promise<boolean>;
   /**
    * Real status of the `cli-*` providers (not installed / not signed in / ready), from `@dax/bridges`. Omit it and
    * they report that no bridge is installed. A rejection is reported per provider as "could not check", never thrown.
@@ -60,11 +62,16 @@ export function createProviderRegistry(options: RegistryOptions = {}): ProviderR
           });
         } else if (kind === "local") {
           const ready = (await options.localReady?.()) ?? false;
+          const installed = (await options.localInstalled?.()) ?? ready;
           out.push({
             kind,
-            available: ready,
-            connectionState: ready ? "connected" : "unavailable",
-            detail: ready ? "Ready" : "Download and start the built-in model",
+            available: ready || installed,
+            connectionState: ready ? "connected" : installed ? "configured" : "unavailable",
+            detail: ready
+              ? "Running locally"
+              : installed
+                ? "Installed · starts when messaged"
+                : "Download the built-in model",
           });
         } else {
           const found = cli?.find((s) => s.kind === kind);

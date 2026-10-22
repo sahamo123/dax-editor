@@ -3,18 +3,22 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Engine } from "./engine.js";
+import type { LocalModelController } from "./interfaces.js";
 import { createLogger } from "./logger.js";
 import { NullLocalModelController, NullProviderRegistry, ScriptedRunner } from "./stubs.js";
 
 const dirs: string[] = [];
 afterEach(async () => {
+  vi.useRealTimers();
   for (const d of dirs.splice(0)) await rm(d, { recursive: true, force: true });
 });
 
 /** A started engine on a fresh data folder, with an AI runner that answers at once. */
-async function makeEngine(): Promise<Engine> {
+async function makeEngine(
+  localModel: LocalModelController = new NullLocalModelController(),
+): Promise<Engine> {
   const dir = await mkdtemp(join(tmpdir(), "dax-engine-"));
   dirs.push(dir);
   const engine = new Engine({
@@ -22,7 +26,7 @@ async function makeEngine(): Promise<Engine> {
     allowedRoots: [dir],
     runner: new ScriptedRunner(),
     providers: new NullProviderRegistry(),
-    localModel: new NullLocalModelController(),
+    localModel,
     log: createLogger(() => undefined),
     emit: () => undefined,
     hasListeners: () => false,
@@ -32,6 +36,25 @@ async function makeEngine(): Promise<Engine> {
 }
 
 describe("Engine ordering of manual edits and AI runs", () => {
+  it("unloads inference after the configured idle interval and clears its timer on shutdown", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const model = new NullLocalModelController();
+    const stop = vi.spyOn(model, "stop");
+    const engine = await makeEngine(model);
+    try {
+      await engine.updateSettings({ activeProvider: "local", providers: {}, localIdleMinutes: 1 });
+      await vi.advanceTimersByTimeAsync(59_999);
+      expect(stop).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1);
+      expect(stop).toHaveBeenCalledTimes(1);
+      await engine.shutdown();
+      const calls = stop.mock.calls.length;
+      await vi.advanceTimersByTimeAsync(600_000);
+      expect(stop).toHaveBeenCalledTimes(calls);
+    } finally {
+      await engine.shutdown();
+    }
+  });
   it("refuses a manual edit that was requested before an AI run started but ran after it", async () => {
     const engine = await makeEngine();
     const widthBefore = engine.projects.session.project.timeline.width;
