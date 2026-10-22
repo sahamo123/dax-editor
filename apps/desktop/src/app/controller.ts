@@ -78,6 +78,10 @@ export interface Controller {
   saveSettings(draft: SettingsDraft): Promise<boolean>;
   /** Ask the server to re-check which providers are usable (for example after signing in to a CLI). */
   refreshProviders(): Promise<void>;
+  /** Explicitly probe the saved connection; may use configured hosted-provider credits. */
+  testProvider(kind: ProviderKind): Promise<void>;
+  /** Discover model IDs on demand; failures are shown without removing manual entry. */
+  providerModels(kind: ProviderKind): Promise<string[]>;
   /** Read the local model's status; the store gets `"unavailable"` if the engine has no such endpoint. */
   loadLocalModel(): Promise<void>;
   /** Download, start, stop, cancel or remove the local model. Progress arrives as `job` events. */
@@ -340,6 +344,24 @@ export function createController(deps: ControllerDeps): Controller {
       const current = store.getState().state;
       if (!r.ok) toast("error", r.error);
       else if (current) store.getState().applyState({ ...current, providers: r.value });
+    },
+
+    async testProvider(kind) {
+      const r = await client.testProvider(kind);
+      toast(
+        r.ok && r.value.status === "connected" ? "success" : "error",
+        r.ok ? r.value.detail : r.error,
+      );
+      await refreshState();
+    },
+
+    async providerModels(kind) {
+      const r = await client.providerModels(kind);
+      if (!r.ok) {
+        toast("error", r.error);
+        return [];
+      }
+      return r.value.models;
     },
 
     loadLocalModel,

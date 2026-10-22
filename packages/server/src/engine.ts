@@ -23,6 +23,7 @@ import {
   MAX_UPLOAD_BYTES,
   PROVIDER_KINDS,
   type PresetInfo,
+  type ProviderDiagnostic,
   type ProviderKind,
   type ProviderStatus,
   type Settings,
@@ -95,6 +96,11 @@ export class Engine {
   private exportAbort: AbortController | undefined;
   private exportTask: Promise<void> | undefined;
   private providerCache: { at: number; value: ProviderStatus[] } | undefined;
+  private providerEpoch = 0;
+  private readonly providerChecks = new Map<
+    ProviderKind,
+    Pick<ProviderStatus, "connectionState" | "detail" | "checkedAt">
+  >();
   private broadcastScheduled = false;
   private broadcastChain: Promise<void> = Promise.resolve();
   private commandChain: Promise<unknown> = Promise.resolve();
@@ -144,6 +150,11 @@ export class Engine {
   /** Load settings and secrets and open the last (or a new) project. */
   async init(): Promise<void> {
     await Promise.all([this.settings.load(), this.secrets.load(), this.tasks.load()]);
+    if (this.settings.legacyOpenAiKeyMigration && !this.secrets.has("openai")) {
+      const legacy = this.secrets.get("openai-compatible");
+      if (legacy) await this.secrets.set("openai", legacy);
+    }
+    if (this.settings.legacyOpenAiKeyMigration) await this.settings.set(this.settings.get());
     await this.projects.init();
   }
 
@@ -250,12 +261,68 @@ export class Engine {
   }
 
   private withKeyFlags(list: ProviderStatus[]): ProviderStatus[] {
-    return list.map((s) => ({ ...s, hasApiKey: this.secrets.has(s.kind) }));
+    return list.map((s) => ({
+      ...s,
+      ...this.providerChecks.get(s.kind),
+      hasApiKey: this.secrets.has(s.kind),
+    }));
+  }
+
+  /** Explicitly verify inference and synthetic tool calling, without exposing editor tools or media. */
+  async testProvider(kind: ProviderKind): Promise<ProviderDiagnostic> {
+    if (!this.cfg.providers.test)
+      throw new HttpError(501, "Connection testing is unavailable in this build.");
+    if (this.providerChecks.get(kind)?.connectionState === "testing")
+      throw new HttpError(409, "A connection test is already running.");
+    const epoch = this.providerEpoch;
+    this.providerChecks.set(kind, {
+      connectionState: "testing",
+      detail: "Testing connection and tool support…",
+    });
+    this.scheduleBroadcast();
+    let result: ProviderDiagnostic;
+    try {
+      result = await this.cfg.providers.test(this.runnerEnv(), kind);
+    } catch {
+      result = {
+        kind,
+        status: "error",
+        toolsSupported: false,
+        checkedAt: Date.now(),
+        detail: "Connection test failed. Check settings and try again.",
+      };
+    }
+    result = { ...result, detail: this.cfg.log.redact(result.detail) };
+    if (epoch !== this.providerEpoch)
+      throw new HttpError(
+        409,
+        "Settings changed during the test. Test the saved connection again.",
+      );
+    this.providerChecks.set(kind, {
+      connectionState: result.status,
+      checkedAt: result.checkedAt,
+      detail: result.detail,
+    });
+    this.scheduleBroadcast();
+    return result;
+  }
+
+  /** Discover model IDs on explicit request; unsupported endpoints keep manual model entry available. */
+  async providerModels(kind: ProviderKind): Promise<string[]> {
+    if (!this.cfg.providers.models)
+      throw new HttpError(501, "Model discovery is unavailable. Enter a model ID manually.");
+    try {
+      return await this.cfg.providers.models(this.runnerEnv(), kind);
+    } catch (error) {
+      throw new HttpError(400, this.cfg.log.redact(errorMessage(error)));
+    }
   }
 
   /** Forget cached provider status (after settings, key or local-model changes). */
   invalidateProviders(): void {
     this.providerCache = undefined;
+    this.providerEpoch++;
+    this.providerChecks.clear();
     this.scheduleBroadcast();
   }
 

@@ -22,8 +22,13 @@ export const PROVIDERS: readonly ProviderInfo[] = [
   {
     kind: "openai-compatible",
     label: "OpenAI-compatible API",
+    blurb: "Connect LM Studio, Ollama or a custom server that speaks the OpenAI chat format.",
+  },
+  {
+    kind: "openai",
+    label: "OpenAI",
     blurb:
-      "OpenAI, OpenRouter, Ollama, LM Studio or any server that speaks the OpenAI chat format.",
+      "Connect directly with your OpenAI API key and a tool-capable model. API billing is separate from assistant subscriptions.",
   },
   {
     kind: "openrouter",

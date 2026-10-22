@@ -13,6 +13,7 @@ import {
   PROVIDER_KINDS,
   ProjectNewRequestSchema,
   ProjectPathRequestSchema,
+  ProviderDiagnosticRequestSchema,
   SettingsSchema,
   UploadNameSchema,
 } from "@dax/protocol";
@@ -123,6 +124,14 @@ export function buildRouter(engine: Engine): Router {
   });
   // Always a fresh check: the UI's "Check again" button (after signing in to a CLI, say) must not get a cached answer.
   r.add("GET", API.providers, async ({ json }) => json(200, await engine.providerStatuses(true)));
+  r.add("POST", API.providerTest, async ({ body, json }) => {
+    const req = parseWith(ProviderDiagnosticRequestSchema, await body());
+    json(200, await engine.testProvider(req.kind));
+  });
+  r.add("POST", API.providerModels, async ({ body, json }) => {
+    const req = parseWith(ProviderDiagnosticRequestSchema, await body());
+    json(200, { models: await engine.providerModels(req.kind) });
+  });
 
   // ----- local model (delegated to the injected controller) -----
   r.add("GET", API.localModel, async ({ json }) => json(200, await engine.localModelStatus()));

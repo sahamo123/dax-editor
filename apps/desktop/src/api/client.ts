@@ -19,6 +19,7 @@ import {
   LocalModelStatusSchema,
   MAX_UPLOAD_BYTES,
   type ProjectNewRequest,
+  type ProviderDiagnostic,
   type ProviderKind,
   type ProviderStatus,
   type Settings,
@@ -266,6 +267,16 @@ export class DaxClient {
   /** `GET /api/providers`: which providers can be used right now. */
   async getProviders(): Promise<ApiResult<ProviderStatus[]>> {
     return this.request("GET", API.providers);
+  }
+
+  /** Run an explicit non-editing tool probe using saved connection settings. */
+  async testProvider(kind: ProviderKind): Promise<ApiResult<ProviderDiagnostic>> {
+    return this.request("POST", API.providerTest, { kind }, 100_000);
+  }
+
+  /** Fetch model IDs without selecting one or changing connection settings. */
+  async providerModels(kind: ProviderKind): Promise<ApiResult<{ models: string[] }>> {
+    return this.request("POST", API.providerModels, { kind });
   }
 
   /** `GET /api/local-model`: state of the embedded model. */

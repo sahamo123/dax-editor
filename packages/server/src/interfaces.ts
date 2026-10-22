@@ -5,6 +5,7 @@ import type { CommandContext, CommandOutcome, Session } from "@dax/core";
 import type {
   AgentEvent,
   LocalModelStatus,
+  ProviderDiagnostic,
   ProviderKind,
   ProviderStatus,
   Settings,
@@ -56,6 +57,10 @@ export type AgentRunnerFactory = (env: RunnerEnv) => AgentRunner | Promise<Agent
 
 /** Reports which AI providers are usable right now. Implemented by the launcher (checks CLIs, local model, keys). */
 export interface ProviderRegistry {
+  /** Explicit, non-editing inference probe with a bounded synthetic tool call. May incur configured provider charges. */
+  test?(env: RunnerEnv, kind: ProviderKind): Promise<ProviderDiagnostic>;
+  /** Discover model IDs only when the user explicitly requests them. */
+  models?(env: RunnerEnv, kind: ProviderKind): Promise<string[]>;
   /** Status of every provider kind the registry knows about. Called at most every few seconds; may spawn processes. */
   list(env: RunnerEnv): Promise<ProviderStatus[]>;
 }

@@ -3,9 +3,13 @@
 import type { ProviderKind, ProviderStatus } from "@dax/protocol";
 import { PROVIDER_KINDS } from "@dax/protocol";
 import type { ProviderRegistry, RunnerEnv } from "@dax/server";
+import { discoverModels, testProvider } from "./provider-diagnostics.js";
+import type { LocalEndpoint } from "./runner.js";
 
 /** What the launcher knows about the optional pieces. */
 export interface RegistryOptions {
+  /** Running local endpoint, used only by an explicit connection test. */
+  localEndpoint?: LocalEndpoint;
   /** True when the embedded model is installed and running. */
   localReady?: () => Promise<boolean>;
   /**
@@ -16,11 +20,13 @@ export interface RegistryOptions {
 }
 
 /** Providers that need only an API key (plus a base URL for the generic one). */
-const KEYED: readonly ProviderKind[] = ["anthropic", "openai-compatible", "openrouter"];
+const KEYED: readonly ProviderKind[] = ["anthropic", "openai", "openai-compatible", "openrouter"];
 
 /** The registry used by the real app. CLI-based providers report what `cliStatuses` says, or "not installed in this build" without it. */
 export function createProviderRegistry(options: RegistryOptions = {}): ProviderRegistry {
   return {
+    test: (env, kind) => testProvider(env, kind, options),
+    models: (env, kind) => discoverModels(env, kind, options),
     async list(env: RunnerEnv): Promise<ProviderStatus[]> {
       const out: ProviderStatus[] = [];
       // One check for all CLI providers; the bridge answers quickly and caches, so this is cheap on repeat calls.
@@ -42,6 +48,7 @@ export function createProviderRegistry(options: RegistryOptions = {}): ProviderR
           out.push({
             kind,
             available,
+            connectionState: available ? "configured" : "unavailable",
             hasApiKey,
             detail: available
               ? "Configured (connection not tested)"
@@ -56,6 +63,7 @@ export function createProviderRegistry(options: RegistryOptions = {}): ProviderR
           out.push({
             kind,
             available: ready,
+            connectionState: ready ? "connected" : "unavailable",
             detail: ready ? "Ready" : "Download and start the built-in model",
           });
         } else {

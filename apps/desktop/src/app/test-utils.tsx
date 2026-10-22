@@ -120,6 +120,8 @@ export function fakeController(): { [K in keyof Controller]: ReturnType<typeof v
     redoRun: vi.fn(async () => {}),
     saveSettings: vi.fn(async () => true),
     refreshProviders: vi.fn(async () => {}),
+    testProvider: vi.fn(async () => {}),
+    providerModels: vi.fn(async () => []),
     loadLocalModel: vi.fn(async () => {}),
     localModel: vi.fn(async () => {}),
   };
