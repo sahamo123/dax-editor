@@ -10,6 +10,7 @@ export type {
   LocalModelTask,
   ProviderRegistry,
   RunnerEnv,
+  SpeechController,
 } from "./interfaces.js";
 export { createLogger, type Logger, type LogLevel, type LogSink } from "./logger.js";
 export { filmstripFrames, waveformRate } from "./media-pipeline.js";

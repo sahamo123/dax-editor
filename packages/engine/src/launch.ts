@@ -16,9 +16,11 @@ import {
 import type { CreateTranscriberOptions } from "@dax/stt";
 import { createLocalModelController, localConnection } from "./local-model.js";
 import { seedOfflineBundle } from "./offline-bundle.js";
+import { seedOfflineSpeech } from "./offline-speech.js";
 import { createProviderRegistry } from "./providers.js";
 import { createRunnerFactory, type RunnerFactoryOptions } from "./runner.js";
 import { createSpeechTranscriber } from "./speech.js";
+import { createSpeechFeature } from "./speech-controller.js";
 
 /** Options for {@link launch}. */
 export interface LaunchOptions
@@ -114,6 +116,8 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
         server.dataDir,
         offlineBundleDir ? { bundleDir: offlineBundleDir } : {},
       );
+      if (transcriberOption === undefined)
+        await seedOfflineSpeech(server.dataDir, offlineBundleDir || undefined);
     } catch (error) {
       // A damaged offline seed must not stop the manual editor from opening.
       process.stderr.write(
@@ -122,10 +126,16 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
     }
   }
   // Speech-to-text is on by default. It sets itself up only on first use and reports what is missing instead of failing.
+  const speechFeature =
+    transcriberOption === undefined
+      ? createSpeechFeature(server.dataDir, speechOptions)
+      : undefined;
   const transcriber: Transcriber | undefined =
     transcriberOption === false
       ? undefined
-      : (transcriberOption ?? createSpeechTranscriber(server.dataDir, speechOptions));
+      : (transcriberOption ??
+        speechFeature?.transcriber ??
+        createSpeechTranscriber(server.dataDir, speechOptions));
   // The built-in model is on by default; `false` leaves the server's own "not supported in this build" controller in place.
   const local: LocalModelController | undefined =
     localModelController === false
@@ -184,6 +194,7 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
       ...(bridges ? { cliStatuses: bridges.statuses } : {}),
     }),
     ...(local ? { localModel: local } : {}),
+    ...(speechFeature ? { speech: speechFeature.controller } : {}),
     ...(transcriber ? { transcriber } : {}),
   });
   if (!bridges) return started;

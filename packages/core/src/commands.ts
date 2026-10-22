@@ -514,6 +514,9 @@ export const COMMANDS: readonly CommandDef[] = [
       const asset = pickAsset(ctx.session.project, a.assetId);
       const transcript = await ctx.transcriber.transcribe(asset.path, {
         ...(a.language ? { language: a.language } : {}),
+        ...(ctx.onProgress
+          ? { onProgress: (progress: { fraction: number }) => ctx.onProgress?.(progress.fraction) }
+          : {}),
         ...cancellable(ctx),
       });
       await edit(ctx, `Transcribe ${basename(asset.path)}`, (p) =>

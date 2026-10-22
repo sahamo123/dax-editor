@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Creation**: offline speech installation/status/removal, cancellable transcription jobs, transcript corrections and reviewed cleanup selection. Windows packaging includes pinned model/runtime/licence provenance and seeds speech without outbound requests. Real generated narration passed recognition, word correction and captioned export; evidence in `artifacts/speech-live/`. Native UI remains a separate gate.
+
 * **Update**: laptop workspace keeps chat and preview visible and moves tools into an overlay drawer below 1180 pixels. Tools have labels, preset descriptions wrap, and the composer has a larger input. The top bar exposes task history with origin/progress/history references. Fresh screenshot: `artifacts/functional-audit/02-workspace-rebuilt.png`; preview footage loaded after reconnect/proxy preparation. Full native validation remains outstanding.
 
 * **Creation**: manual output-format/title/caption/template controls and source trim fields. New registry operations relink matching media and correct a transcript word while preserving its source timing; both are undoable and shared with external tools. Relinking checks allowed paths and media compatibility.

@@ -9,6 +9,7 @@ import type {
   ProviderKind,
   ProviderStatus,
   Settings,
+  SpeechStatus,
 } from "@dax/protocol";
 
 /** Everything an {@link AgentRunner} gets for one run. */
@@ -71,6 +72,16 @@ export interface LocalModelTask {
   onProgress(fraction: number): void;
   /** Aborted by `POST /api/local-model/cancel` or on shutdown. */
   signal: AbortSignal;
+}
+
+/** Provisioning for optional offline speech, implemented by the launcher without server runtime dependencies. */
+export interface SpeechController {
+  /** Inspect runtime/model presence without downloading. */
+  status(): Promise<SpeechStatus>;
+  /** Install pinned runtime/model with hash checks and cancellable progress. */
+  install(task: LocalModelTask): Promise<void>;
+  /** Remove the app-owned speech model; user-installed runtimes remain untouched. */
+  remove(): Promise<void>;
 }
 
 /** Controls the embedded local model. Implemented by the launcher on top of `@dax/local-llm`. */

@@ -27,6 +27,11 @@ export const API = {
   providers: "/api/providers",
   providerTest: "/api/providers/test",
   providerModels: "/api/providers/models",
+  speech: "/api/speech",
+  speechInstall: "/api/speech/install",
+  speechRemove: "/api/speech/remove",
+  transcribe: "/api/speech/transcribe",
+  jobCancel: "/api/jobs/:jobId/cancel",
   localModel: "/api/local-model",
   /** `POST`: download the local model as a `model-download` job. Body: {@link LocalModelInstallRequestSchema}. */
   localModelInstall: "/api/local-model/install",
@@ -276,6 +281,20 @@ export const LocalModelStatusSchema = z.object({
 /** A validated {@link LocalModelStatusSchema} value. */
 export type LocalModelStatus = z.infer<typeof LocalModelStatusSchema>;
 
+/** Offline speech setup snapshot; no installation happens while reading status. */
+export const SpeechStatusSchema = z.object({
+  ready: z.boolean(),
+  runtimeInstalled: z.boolean(),
+  modelInstalled: z.boolean(),
+  modelId: z.string(),
+  sizeBytes: z.number().nonnegative(),
+  detail: z.string(),
+});
+/** Validated offline speech setup status. */
+export type SpeechStatus = z.infer<typeof SpeechStatusSchema>;
+/** Start transcription for one existing media asset. */
+export const TranscribeRequestSchema = z.object({ assetId: z.string().min(1).max(64) });
+
 /** Reply (HTTP 202) to `POST /api/local-model/install` and `/start`: the id of the `model-download` or `model-start` job to follow. */
 export const JobStartedSchema = z.object({ jobId: z.string().min(1) });
 /** A validated {@link JobStartedSchema} value. */
@@ -343,7 +362,14 @@ export interface ProviderStatus {
 /** A background task such as making a preview proxy, exporting, or downloading a model. */
 export interface JobInfo {
   id: string;
-  kind: "proxy" | "export" | "transcribe" | "model-download" | "model-start";
+  kind:
+    | "proxy"
+    | "export"
+    | "transcribe"
+    | "model-download"
+    | "model-start"
+    | "speech-setup"
+    | "blender";
   label: string;
   /** 0 to 1. */
   progress: number;

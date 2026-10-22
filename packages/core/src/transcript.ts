@@ -8,7 +8,14 @@ export interface Transcriber {
    * Transcribe `path`; `language` is an ISO code such as `en`, or omitted to auto-detect. An implementation should
    * stop and reject with an `AbortError`-named error when `signal` fires.
    */
-  transcribe(path: string, opts?: { language?: string; signal?: AbortSignal }): Promise<Transcript>;
+  transcribe(
+    path: string,
+    opts?: {
+      language?: string;
+      signal?: AbortSignal;
+      onProgress?: (progress: { fraction: number }) => void;
+    },
+  ): Promise<Transcript>;
 }
 
 /** Filler words removed by default. Matching ignores case and punctuation. */
