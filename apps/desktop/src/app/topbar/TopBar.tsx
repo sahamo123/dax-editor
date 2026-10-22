@@ -6,6 +6,7 @@ import { useApp, useController } from "../context";
 import { runningExport } from "../selectors";
 import { Icon } from "../ui/icons";
 import { useImport } from "../use-import";
+import { ProjectMenu } from "./ProjectMenu";
 
 /** The application's top bar. */
 export function TopBar(): ReactElement {
@@ -32,6 +33,7 @@ export function TopBar(): ReactElement {
       </h1>
 
       <div className="topbar__spacer" />
+      <ProjectMenu />
 
       <button type="button" className="btn" onClick={() => void startImport()} disabled={!online}>
         <Icon name="import" /> Import

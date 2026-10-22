@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Creation**: project lifecycle menu, recent scratch/saved projects, native project pickers and browser upload/download copies. Project uploads validate schema and media roots before replacing the active session. Tests cover reopening an autosave and refusing an uploaded out-of-root source.
+
 * **Creation**: direct OpenAI connection/key namespace, one-time legacy migration, explicit non-editing tool diagnostics, opt-in model discovery and configured/testing/connected/error UI. Diagnostic tests mock fetch and check endpoint/key isolation, synthetic tools, invalid tool responses and cleartext credential refusal. Hosted readiness still requires a real configured-provider edit.
 
 * **Update**: T02 task foundation captures provider settings at submission, records command/history references and export/transcription work, and adds per-open project identity plus monotonic revision checks. Guarded AI tool calls share the engine queue; manual changes during inference are preserved and stale AI edits fail. Queue/recovery tests include provider switching and edit/undo conflicts.

@@ -193,8 +193,32 @@ export class ProjectManager {
 
   /** Open a project file chosen by the user. Throws a user-safe `Error` if the path is not allowed, is not a project, or is invalid. */
   async open(path: string): Promise<void> {
+    if (
+      (await this.cfg.appState.recentProjects()).includes(path) &&
+      isPathInside(this.projectsDir, path)
+    ) {
+      await resolveInsideRoots(path, [this.projectsDir]);
+      await this.adopt(await this.load(path, false));
+      return;
+    }
     const abs = await this.checkProjectPath(path);
     await this.adopt(await this.load(abs, true));
+  }
+
+  /** Return recently opened project locations, including autosaved scratch projects. */
+  recentProjects(): Promise<string[]> {
+    return this.cfg.appState.recentProjects();
+  }
+
+  /** Validate uploaded project data and open a private autosaved copy without overwriting its source. */
+  async openCopy(value: unknown): Promise<void> {
+    const project = ProjectSchema.parse(value);
+    for (const asset of Object.values(project.assets))
+      await resolveInsideRoots(asset.path, this.cfg.allowedRoots);
+    const file = join(this.projectsDir, `import-${randomBytes(8).toString("hex")}.dax.json`);
+    const session = new EngineSession(project, file, false);
+    await session.save();
+    await this.adopt(session);
   }
 
   /** Save the open project. With `path`, "save as": the project now lives there and autosaves to it. */
