@@ -101,6 +101,7 @@ export class Engine {
   private readonly processes = new ProcessRegistry();
   private chat: ChatRun | undefined;
   private localTask: AbortController | undefined;
+  private idleTimer: ReturnType<typeof setTimeout> | undefined;
   /** Set from the moment an export is accepted until it ends; aborting it kills FFmpeg. */
   private exportAbort: AbortController | undefined;
   private exportTask: Promise<void> | undefined;
@@ -188,6 +189,7 @@ export class Engine {
     )
       await this.secrets.bind("openai-compatible", legacyTarget);
     await this.projects.init();
+    this.armIdleUnload();
   }
 
   /** The folders imports and exports are limited to. */
@@ -374,6 +376,7 @@ export class Engine {
   /** Replace the settings (validated) and push state. */
   async updateSettings(next: unknown): Promise<Settings> {
     const saved = await this.settings.set(next);
+    this.armIdleUnload();
     this.invalidateProviders();
     return saved;
   }
@@ -842,6 +845,7 @@ export class Engine {
       this.queuedSettings.delete(runId);
       this.queuedKeys.delete(runId);
       this.dispatchChat();
+      this.armIdleUnload();
       this.scheduleBroadcast();
     };
     this.chat = { runId, abort, finish };
@@ -873,6 +877,7 @@ export class Engine {
           this.queuedSettings.get(task.id),
           this.queuedKeys.get(task.id),
           abort.signal,
+          task.title,
         );
         if (this.chat?.runId === runId) this.chat.manualEdits = runner.supportsManualEdits === true;
         if (finished || abort.signal.aborted) return;
@@ -982,11 +987,13 @@ export class Engine {
     settings?: Settings,
     key?: string,
     signal?: AbortSignal,
+    message?: string,
   ): Promise<AgentRunner> {
     const r = this.cfg.runner;
     if (typeof r === "function")
       return r({
         ...this.runnerEnv(),
+        ...(message ? { message } : {}),
         ...(settings
           ? {
               settings,
@@ -1151,6 +1158,7 @@ export class Engine {
 
   /** Stop the local model. */
   async stopLocalModel(): Promise<void> {
+    clearTimeout(this.idleTimer);
     await this.cfg.localModel.stop();
     this.invalidateProviders();
   }
@@ -1189,6 +1197,7 @@ export class Engine {
       .catch((err) => job.fail(abort.signal.aborted ? "Cancelled" : errorMessage(err)))
       .finally(() => {
         this.localTask = undefined;
+        this.armIdleUnload();
         this.invalidateProviders();
       });
     return job.id;
@@ -1196,9 +1205,29 @@ export class Engine {
 
   // ---------- shutdown ----------
 
+  private armIdleUnload(): void {
+    clearTimeout(this.idleTimer);
+    if (this.closing) return;
+    this.idleTimer = setTimeout(
+      () => {
+        if (this.chat || this.chatQueue.length || this.localTask) {
+          this.armIdleUnload();
+          return;
+        }
+        void this.cfg.localModel
+          .stop()
+          .then(() => this.invalidateProviders())
+          .catch(() => undefined);
+      },
+      (this.settings.get().localIdleMinutes ?? 5) * 60_000,
+    );
+    this.idleTimer.unref();
+  }
+
   /** Stop everything: abort AI and model tasks, kill FFmpeg children, stop the local model and flush the project. Safe to call once. */
   async shutdown(): Promise<void> {
     this.closing = true;
+    clearTimeout(this.idleTimer);
     this.chat?.abort.abort();
     this.localTask?.abort();
     this.exportAbort?.abort();

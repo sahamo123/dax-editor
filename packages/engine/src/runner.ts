@@ -68,6 +68,8 @@ export function localProviderSettings(
 
 /** Everything {@link createRunnerFactory} needs besides the server's own settings. */
 export interface RunnerFactoryOptions {
+  /** Start installed inference on demand; must respect cancellation and never download implicitly. */
+  prepareLocal?: (signal?: AbortSignal) => Promise<void>;
   /** Optional bounded motion-template renderer. */
   motion?: MotionRenderer;
   /** Folder of `<name>/SKILL.md` editing skills. Missing or unreadable means no skills, not a failure. */
@@ -188,6 +190,7 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       };
     }
     if (kind === "local") {
+      await options.prepareLocal?.(env.signal);
       const connection = await options.localEndpoint?.();
       if (!connection)
         return "The built-in model is not running. Download and start it in Settings.";
@@ -236,12 +239,12 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
       toolStyle: budget.compact ? "compact" : "full",
       ...(planning
         ? {
-            tools: (budget.compact ? smallModelTools() : commandTools()).filter(
+            tools: (budget.compact ? smallModelTools(env.message) : commandTools()).filter(
               (tool) => getCommand(tool.name)?.readOnly === true,
             ),
           }
         : budget.compact
-          ? { tools: smallModelTools() }
+          ? { tools: smallModelTools(env.message) }
           : {}),
       contextProvider: (message) =>
         [

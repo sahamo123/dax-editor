@@ -43,6 +43,22 @@ describe("contextBudget", () => {
 });
 
 describe("smallModelTools", () => {
+  it("retains everyday steering tools and adds requested speech and motion capabilities", () => {
+    expect(
+      smallModelTools("make it portrait")
+        .map((tool) => tool.name)
+        .sort(),
+    ).toEqual([...SMALL_MODEL_TOOL_NAMES].sort());
+    expect(smallModelTools("add a Blender intro").map((tool) => tool.name)).toContain(
+      "render_motion_template",
+    );
+    expect(smallModelTools("correct captions").map((tool) => tool.name)).toContain(
+      "correct_transcript_word",
+    );
+    expect(smallModelTools("trim the clip and lower the volume").map((tool) => tool.name)).toEqual(
+      expect.arrayContaining(["trim_clip", "set_volume"]),
+    );
+  });
   it("offers only commands that exist, and a short list", () => {
     const tools = smallModelTools();
     expect(tools.map((t) => t.name).sort()).toEqual([...SMALL_MODEL_TOOL_NAMES].sort());

@@ -45,6 +45,8 @@ export interface AgentRunner {
 
 /** What a {@link AgentRunnerFactory} may look at when choosing a runner for the active provider. */
 export interface RunnerEnv {
+  /** Submitted request for selecting relevant tools; untrusted text, never executed directly. */
+  message?: string;
   /** Cancellation while preparing a provider, including cold local-model startup. */
   signal?: AbortSignal;
   /** Planning runners must expose only read-only tools; defaults to editing. */

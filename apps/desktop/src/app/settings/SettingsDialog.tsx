@@ -411,6 +411,23 @@ export function SettingsDialog(): ReactElement | null {
           </header>
 
           {selected === "local" ? <LocalModelCard /> : null}
+          {selected === "local" ? (
+            <label className="field">
+              Unload after inactivity
+              <select
+                value={draft.localIdleMinutes ?? 5}
+                onChange={(event) =>
+                  setDraft({ ...draft, localIdleMinutes: Number(event.target.value) })
+                }
+              >
+                {[1, 5, 10, 30, 60].map((minutes) => (
+                  <option key={minutes} value={minutes}>
+                    {minutes} minutes
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
           {selected === "openai-compatible" ||
           selected === "openai" ||
           selected === "anthropic" ||

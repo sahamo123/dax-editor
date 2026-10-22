@@ -1,7 +1,6 @@
 // Starts the server with everything wired: agent, skills, providers, and (when supplied) local model and speech-to-text.
 
 import { existsSync, readdirSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { type CliBridges, createCliBridges } from "@dax/bridges";
@@ -149,26 +148,6 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
             ...localModelOptions,
           }),
         }));
-  const savedSettings: unknown = bundled
-    ? await readFile(join(server.dataDir, "settings.json"), "utf8")
-        .then(JSON.parse)
-        .catch(() => undefined)
-    : undefined;
-  const wantsLocal =
-    !(
-      typeof savedSettings === "object" &&
-      savedSettings !== null &&
-      "activeProvider" in savedSettings
-    ) || savedSettings.activeProvider === "local";
-  if (bundled && local && wantsLocal) {
-    try {
-      await local.start({ signal: AbortSignal.timeout(90_000), onProgress: () => undefined });
-    } catch (error) {
-      process.stderr.write(
-        `Offline AI start failed: ${error instanceof Error ? error.message : String(error)}\n`,
-      );
-    }
-  }
   const dir = skillsDir ?? defaultSkillsDir();
   // Bridges are on by default. They spawn nothing until the Settings screen or a chat run asks.
   const bridges: CliBridges | undefined =
@@ -186,6 +165,19 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
         : {}),
     // The `local` provider reads the running model's address and key on every run, so a restart is picked up at once.
     ...(local ? { localEndpoint: () => localConnection(local) } : {}),
+    ...(local
+      ? {
+          prepareLocal: async (signal?: AbortSignal) => {
+            if (!(await local.status()).running)
+              await local.start({
+                signal: signal
+                  ? AbortSignal.any([signal, AbortSignal.timeout(90_000)])
+                  : AbortSignal.timeout(90_000),
+                onProgress: () => undefined,
+              });
+          },
+        }
+      : {}),
   });
   const started = await startServer({
     ...server,
@@ -199,6 +191,7 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
     providers: createProviderRegistry({
       ...(local ? { localEndpoint: () => localConnection(local) } : {}),
       ...(local ? { localReady: async () => (await local.status()).running } : {}),
+      ...(local ? { localInstalled: async () => (await local.status()).installed } : {}),
       ...(bridges ? { cliStatuses: bridges.statuses } : {}),
     }),
     ...(local ? { localModel: local } : {}),
