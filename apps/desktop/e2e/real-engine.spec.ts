@@ -115,7 +115,16 @@ test("saves settings and an API key, lists the providers, and never shows the ke
   await expect(page.getByTestId("provider-status")).toBeVisible();
   const before = await engine.api.providers();
   expect(before.map((p) => p.kind).sort()).toEqual(
-    ["anthropic", "cli-claude", "cli-codex", "cli-gemini", "local", "openai-compatible"].sort(),
+    [
+      "anthropic",
+      "cli-claude",
+      "cli-codex",
+      "cli-gemini",
+      "local",
+      "openai",
+      "openai-compatible",
+      "openrouter",
+    ].sort(),
   );
   expect(before.every((p) => !p.available && !p.hasApiKey)).toBe(true);
 
@@ -136,11 +145,11 @@ test("saves settings and an API key, lists the providers, and never shows the ke
   // An OpenAI-compatible provider, pointed at the fake model server.
   await dialog.getByRole("button", { name: /OpenAI-compatible API/ }).click();
   await dialog.getByLabel("Base URL").fill(model.baseUrl);
-  await dialog.getByLabel("Model").fill("scripted-model");
+  await dialog.getByLabel("Model", { exact: true }).fill("scripted-model");
   await dialog.getByLabel("API key").fill("sk-real-engine-key");
   await dialog.getByLabel(/Use OpenAI-compatible API for chat/).check();
   await shot("11-real-engine-settings");
-  await dialog.getByRole("button", { name: "Save" }).click();
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByText("Settings saved.")).toBeVisible();
   await expect(dialog).toBeHidden();
 
@@ -171,7 +180,9 @@ test("saves settings and an API key, lists the providers, and never shows the ke
   expect(everything).not.toContain("sk-real-engine-key");
 
   // The UI caught up: chat unlocked, and reopening Settings shows "Key saved" with an empty box.
-  await expect(page.getByTestId("provider-status")).toContainText("is ready");
+  await expect(page.getByTestId("provider-status")).toContainText(
+    "Configured (connection not tested)",
+  );
   await expect(chatInput(page)).toBeEnabled();
   await page.getByRole("button", { name: "Settings" }).click();
   const again = page.getByRole("dialog", { name: "Settings" });
@@ -192,24 +203,26 @@ test("a chat message goes through the real agent, edits the project, and can be 
   // Configure the provider the way Settings does, so this test is about chat and not about the dialog.
   expect(
     (
-      await engine.api.call("POST", "/api/settings/api-key", {
-        kind: "openai-compatible",
-        apiKey: "sk-chat-key",
-      })
-    ).status,
-  ).toBe(200);
-  expect(
-    (
       await engine.api.call("PUT", "/api/settings", {
         activeProvider: "openai-compatible",
         providers: { "openai-compatible": { baseUrl: model.baseUrl, model: "scripted-model" } },
       })
     ).status,
   ).toBe(200);
+  expect(
+    (
+      await engine.api.call("POST", "/api/settings/api-key", {
+        kind: "openai-compatible",
+        apiKey: "sk-chat-key",
+      })
+    ).status,
+  ).toBe(200);
   expect(await engine.api.importPaths([sampleVideo])).toMatchObject({ ok: true });
   await openApp(engine);
 
-  await expect(page.getByTestId("provider-status")).toContainText("is ready");
+  await expect(page.getByTestId("provider-status")).toContainText(
+    "Configured (connection not tested)",
+  );
   await chatInput(page).fill("Add a title");
   await chatInput(page).press("Enter");
 

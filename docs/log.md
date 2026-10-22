@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Correction**: stronger offline acceptance reproduced a 90-second local-provider timeout on a real format request. Compact requests now advertise only relevant tools and refresh that selection for steering without expanding permissions. Small-model follow-ups omit old tool payloads and retain bounded conversational intent; skills are capped separately. Initial recheck passes cold/warm format changes at approximately 70/26 seconds on the i5-8265U; the remaining suite is still running. Browser checks update expected configured states, key-binding order and revision synchronization, and add laptop project-copy/manual workflow coverage.
+
 * **Update**: local AI loads on the first chat request instead of during editor startup, and unloads after configurable inactivity. Manual-only use retains the model on disk without loading weights. Launcher and idle-timer regressions cover this resource lifecycle; no automatic model downloads or hosted fallback.
 
 * **Update**: compact-model requests add relevant transcript, caption, template and Blender tools while retaining everyday controls for non-cancelling steering. Unknown requests keep the established tool list. Command validation and Planning restrictions remain in the shared engine.

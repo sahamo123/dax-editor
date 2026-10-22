@@ -27,6 +27,8 @@ export interface CreateAgentOptions {
   provider: AgentProvider;
   /** Commands offered to the model. Default: every command from `commandTools()`. Each must exist in the registry. */
   tools?: ToolSpec[];
+  /** Select advertised names per model step from the fixed authorized tools; receives original request plus steering. Cannot grant permissions. */
+  selectToolNames?: (guidance: string) => readonly string[];
   /**
    * How tools are described to the model. Default: `"compact"` when `contextTokens` is small (see {@link contextBudget}),
    * otherwise `"full"`. Set it explicitly to override.
@@ -206,6 +208,7 @@ class Loop {
   private readonly repeatLimit: number;
   /** Limits derived from the model's context window; explicit options override them. */
   private readonly budget: ContextBudget;
+  private guidance = "";
 
   constructor(
     private readonly options: CreateAgentOptions,
@@ -223,6 +226,7 @@ class Loop {
   }
 
   async go(message: string): Promise<AgentRunResult> {
+    this.guidance = message;
     this.messages = [...(this.run.history ?? []), { role: "user", content: message }];
     const system = buildSystemPrompt({
       ...(this.options.systemPrompt !== undefined ? { base: this.options.systemPrompt } : {}),
@@ -245,7 +249,7 @@ class Loop {
         response = await this.options.provider.chat({
           system,
           messages: this.shortenOldResults(),
-          tools: this.prepared.definitions,
+          tools: this.advertisedTools(),
           ...(this.run.signal ? { signal: this.run.signal } : {}),
           ...(streamer ? { onTextDelta: (d: string) => streamer.push(d) } : {}),
         });
@@ -301,6 +305,7 @@ class Loop {
   /** Incorporate newly submitted user guidance without interrupting in-flight work. */
   private takeSteering(): boolean {
     const messages = this.run.takeSteering?.() ?? [];
+    if (messages.length) this.guidance += `\n${messages.join("\n")}`;
     for (const message of messages)
       this.messages.push({
         role: "user",
@@ -309,6 +314,13 @@ class Loop {
     if (messages.length)
       this.emit({ type: "status", text: "Continuing with your steering guidance." });
     return messages.length > 0;
+  }
+
+  private advertisedTools(): ToolDefinition[] {
+    const selected = this.options.selectToolNames?.(this.guidance);
+    if (!selected) return this.prepared.definitions;
+    const names = new Set(selected);
+    return this.prepared.definitions.filter((tool) => names.has(tool.name));
   }
 
   /** Ask the contextProvider for guidance; a failure is reported but never stops the run. */

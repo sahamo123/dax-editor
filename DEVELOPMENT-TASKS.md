@@ -4,19 +4,19 @@
 
 The owner approved the expanded [functional release contract](docs/specs/functional-desktop-release.md). [Delivery issue #8](https://github.com/sahamo123/dax-editor/issues/8) indexes T01–T09 (issues #9–#17). The connector has no milestone-creation operation; the delivery issue is the tracking index until that capability is available.
 
-T01 is running. Fresh visual evidence: `artifacts/functional-audit/01-existing-workspace.png` shows a timeout beneath a ready status, clipped preset descriptions and a compressed composer. Fresh full-check output: `artifacts/functional-baseline-check.log`; inspect its final result before marking verified. Historical phases below retain their original evidence.
+Current implementation is published as dependent draft PRs #18–#33. The full repository check passed at 5196e95 (`artifacts/functional-full-check.log`); follow-up local inference/context and browser corrections require a final rerun. Current visual evidence: `artifacts/functional-audit/03-current-tools.png` and `04-current-workspace.png`. Historical phases below retain their original evidence and are not final-release certification.
 
 | Stage | State | Remaining |
 |---|---|---|
-| T01 baseline | RUNNING | Fresh checks and walkthrough |
-| T02 tasks/revisions | TODO | Attribution, captured provider/project, history and conflict protection |
-| T03 providers | TODO | Independent profiles, diagnostics, honest status |
-| T04 projects/manual | TODO | Project UI, relink and manual capability coverage |
-| T05 UX | TODO | AI-first layout, task detail and laptop checks |
-| T06 speech | TODO | Provisioning, correction and offline evidence |
-| T07 MCP | TODO | Live-engine bridge and individual client checks |
-| T08 Blender | TODO | Optional bounded template renderer |
-| T09 release | BLOCKED | Native validation needs a policy-authorized executable; other build work can proceed |
+| T01 baseline | IMPLEMENTED / VERIFYING | Final current-source gate and evidence reconciliation |
+| T02 tasks/revisions | IMPLEMENTED | Broader native task acceptance; shared queue/recovery/conflict tests pass |
+| T03 providers | IMPLEMENTED / PARTIAL | Live hosted credentials and multiple named profiles of the same family |
+| T04 projects/manual | IMPLEMENTED / PARTIAL | Native dialogs and complete manual feature parity; laptop project-copy workflow passes |
+| T05 UX | IMPLEMENTED / VERIFYING | Final common-size/scaling walkthrough; resizable saved layouts retained |
+| T06 speech | IMPLEMENTED / LIVE VERIFIED | Longer edited-speech/native UI acceptance; 23-word narration/caption export passes |
+| T07 MCP | IMPLEMENTED / TRANSPORT VERIFIED | Actual Claude/Codex sessions and external cancellation acceptance |
+| T08 Blender | IMPLEMENTED / BLOCKED | Real render/regenerate/cancel needs policy-authorized Blender; event 3077 blocks verified official executable |
+| T09 release | IN PROGRESS / BLOCKED | Final AI correctness/latency suite, installer rebuild and native install/upgrade validation |
 
 Plan: [Windows implementation plan](docs/engineering/windows-desktop-plan.md).
 GitHub delivery tracking: [issue #2](https://github.com/sahamo123/dax-editor/issues/2).

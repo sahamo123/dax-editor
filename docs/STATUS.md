@@ -13,7 +13,12 @@ generated:
 
 ## Functional desktop release — October 22, 2026
 
-The owner approved the [functional release contract](specs/functional-desktop-release.md), tracked by [issue #8](https://github.com/sahamo123/dax-editor/issues/8) and issues #9–#17. Manual editing and local AI have historical passing evidence; hosted providers are mock-tested, speech setup and Blender integration are incomplete, and general MCP still needs a live desktop bridge. Fresh checks and a visual audit are in progress. The narrow preview shows an old timeout below a ready status and clipped preset descriptions. Native release remains NOT READY; no security policy has been changed.
+The owner approved the [functional release contract](specs/functional-desktop-release.md), tracked by [issue #8](https://github.com/sahamo123/dax-editor/issues/8), issues #9–#17 and dependent draft PRs #18–#33. Implemented: task/revision guards, captured queued settings/credentials, provider probes and independent provider namespaces, project lifecycle/relink/manual controls, responsive tools, offline speech, live-session MCP, and optional bounded Blender templates. The full repository gate passed at 5196e95; final performance/browser corrections still need the current-source gate. Native release remains **NOT READY**; no security policy has been changed.
+
+- **Verified now:** real speech transcription/correction/captioned export (23 words; stream durations differ by under 1 ms), MCP transport/read-only/revision/batch tests, and laptop manual project-copy/undo/redo controls. See the contract and root tracker for evidence paths.
+- **Local AI:** on-demand startup and configurable idle unload are implemented. Stronger real tests exposed 90-second request timeouts; relevant advertised tools and compact conversation history improve measured format edits to roughly 70 seconds cold / 26 seconds warm on the i5-8265U. Title/follow-up/volume/trim correctness and performance remain under test. Earlier isolated successes are not the full suite.
+- **Blocked or pending:** actual hosted-provider edits without owner-configured keys; actual Claude/Codex sessions; multiple named same-family connections; complete manual parity; final installer and native clean install/upgrade/dialogs. The verified official Blender 4.5.14 executable is also blocked by Code Integrity event 3077, so real template renders are unverified.
+- **Preview:** `Start Development Preview.cmd` uses persistent `.dax-data/`. Fresh screenshots `artifacts/functional-audit/03-current-tools.png` and `04-current-workspace.png` show the current layout. The local model stays unloaded until chat needs it; the currently running process must restart after further engine changes.
 
 ## Windows laptop checkpoint — October 20, 2026
 

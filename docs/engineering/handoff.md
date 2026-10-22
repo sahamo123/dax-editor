@@ -11,6 +11,18 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## October 22 functional release checkpoint
+
+Start with `docs/specs/functional-desktop-release.md`, `docs/STATUS.md` and `DEVELOPMENT-TASKS.md`. Delivery issue #8 indexes #9–#17. Dependent draft PRs #18–#33 publish the implementation through `codex/local-ai-resources`; follow-up validation/performance changes are on `codex/functional-browser-validation`. Local and connector-created commit IDs differ, but published Git trees were checked against local trees. Do not force-push the older provider branch or main.
+
+New capabilities include task/revision guards, captured queued credentials, per-provider diagnostics, project UI/relink/manual tools, offline speech and review controls, active-project MCP with a private stdio proxy, and three optional controlled Blender templates. Native and Blender execution remain blocked by Code Integrity event 3077. Preserve `.dax-data/` and all ignored artifact evidence; no Windows policy has been changed.
+
+The full repository check passed at local 5196e95. Later real-model tests exposed timeouts; do not treat old isolated AI successes as the broader suite. The current correction narrows advertised tools per request/steering and removes old tool payloads from compact-model conversation context. `scripts/verify-offline-bundle.mjs` now checks actual format/title/follow-up/volume/trim/unsupported behavior, manual-only export and restart cleanup. Inspect its newest result before claiming success. Use the pinned toolchain from `scripts/Enter-Dev.ps1`.
+
+Actual hosted API calls, individual Claude/Codex sessions, multiple named same-family provider profiles, complete manual parity, final installer and native clean-install/upgrade checks remain acceptance items. Browser JSON project copies reference existing media; they are not portable media bundles. Never expose tokens from `.dax-data/live-mcp.json`, engine startup lines or preview connection URLs.
+
+Historical checkpoints follow.
+
 Provider continuation is on `codex/lightweight-ai-providers`, issue #6. OpenRouter now has its own settings/key namespace and fixed endpoint; generic APIs have endpoint presets and generation settings. No hosted API call was made. The smaller local model was tested but rejected as the default because real command execution failed; preserve the current 2B bundle and the ignored trial evidence. See `docs/specs/lightweight-ai-providers.md`.
 
 Steering was corrected after the initial task-queue delivery: `Steer task` now adds guidance at the next model boundary in the same active run, without cancellation. Stop is separate. Modes/attachments or older runners continue after current work finishes. See the updated ADR 0013 and `packages/agent/src/steering.test.ts`.
