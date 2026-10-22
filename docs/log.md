@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Creation**: live-session MCP execution seams and atomic bounded edit batches, with per-client revision guards and a separate read-only Planning transport (ADR 0014). The server reuses the existing MCP workspace package; no new external runtime dependency. External client setup uses a stable stdio proxy with secrets in private discovery storage.
+
 * **Creation**: offline speech installation/status/removal, cancellable transcription jobs, transcript corrections and reviewed cleanup selection. Windows packaging includes pinned model/runtime/licence provenance and seeds speech without outbound requests. Real generated narration passed recognition, word correction and captioned export; evidence in `artifacts/speech-live/`. Native UI remains a separate gate.
 
 * **Update**: laptop workspace keeps chat and preview visible and moves tools into an overlay drawer below 1180 pixels. Tools have labels, preset descriptions wrap, and the composer has a larger input. The top bar exposes task history with origin/progress/history references. Fresh screenshot: `artifacts/functional-audit/02-workspace-rebuilt.png`; preview footage loaded after reconnect/proxy preparation. Full native validation remains outstanding.

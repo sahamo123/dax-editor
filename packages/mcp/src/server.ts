@@ -33,6 +33,10 @@ const MAX_TEXT_DATA = 16_000;
 
 /** Options for {@link createMcpServer}. */
 export interface McpServerOptions {
+  /** Resolve the current desktop session for every call/resource instead of retaining an old project. */
+  getSession?: () => Session;
+  /** Per-client validated command executor, used by live desktop bridges for task/revision guards. */
+  createExecutor?: () => typeof tryRunCommand;
   /**
    * The session every tool edits. Pass one to share a project with other front doors (for example one opened with
    * `Session.open`). When omitted a new in-memory, unsaved project is created and returned as {@link DaxMcpServer.session}.
@@ -195,6 +199,7 @@ function raceAbort<T>(promise: Promise<T>, signal: AbortSignal): Promise<T | typ
 interface Runtime {
   session: Session;
   options: McpServerOptions;
+  execute: typeof tryRunCommand;
 }
 
 /**
@@ -234,7 +239,7 @@ async function runCommandTool(
     signal,
   };
   const exec = async () => {
-    const outcome = await tryRunCommand(cmdCtx, spec.name, rawArgs);
+    const outcome = await rt.execute(cmdCtx, spec.name, rawArgs);
     // Edits save themselves, but a few commands (save_checkpoint) only change the in-memory history; persist it
     // so a project file shared with the CLI or the app sees it. A no-op for sessions without a file.
     if (outcome.ok && !spec.readOnly && !spec.irreversible) await rt.session.save();
@@ -358,7 +363,13 @@ function selectedTools(options: McpServerOptions): ToolSpec[] {
  */
 export function createMcpServer(options: McpServerOptions = {}): DaxMcpServer {
   const session = options.session ?? new Session(emptyProject("Untitled"));
-  const rt: Runtime = { session, options };
+  const rt: Runtime = {
+    get session() {
+      return options.getSession?.() ?? session;
+    },
+    options,
+    execute: options.createExecutor?.() ?? tryRunCommand,
+  };
   const server = new McpServer(
     { name: SERVER_NAME, version: options.version ?? SERVER_VERSION },
     { instructions: INSTRUCTIONS },
@@ -420,7 +431,7 @@ export function createMcpServer(options: McpServerOptions = {}): DaxMcpServer {
         {
           uri: uri.href,
           mimeType: "application/json",
-          text: JSON.stringify(session.project, null, 2),
+          text: JSON.stringify(rt.session.project, null, 2),
         },
       ],
     }),
@@ -439,7 +450,7 @@ export function createMcpServer(options: McpServerOptions = {}): DaxMcpServer {
         {
           uri: uri.href,
           mimeType: "application/json",
-          text: JSON.stringify(session.history(), null, 2),
+          text: JSON.stringify(rt.session.history(), null, 2),
         },
       ],
     }),

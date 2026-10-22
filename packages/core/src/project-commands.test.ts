@@ -5,6 +5,41 @@ import { Session } from "./session.js";
 import { addAsset, emptyProject } from "./timeline.js";
 
 describe("project recovery commands", () => {
+  it("commits a successful batch as one undo step and leaves no partial edits after failure", async () => {
+    const original = emptyProject("Batch");
+    const session = new Session(original);
+    expect(
+      (
+        await tryRunCommand({ session }, "apply_edit_batch", {
+          operations: [
+            { name: "set_format", args: { width: 1080, height: 1080 } },
+            { name: "set_format", args: { fit: "cover" } },
+          ],
+        })
+      ).ok,
+    ).toBe(true);
+    expect(session.history()).toHaveLength(2);
+    await session.undo();
+    expect(session.project).toEqual(original);
+    expect(
+      (
+        await tryRunCommand({ session }, "apply_edit_batch", {
+          operations: [
+            { name: "set_format", args: { width: 720, height: 1280 } },
+            { name: "trim_clip", args: { clipId: "missing", in: 1 } },
+          ],
+        })
+      ).ok,
+    ).toBe(false);
+    expect(session.project).toEqual(original);
+    expect(
+      (
+        await tryRunCommand({ session }, "apply_edit_batch", {
+          operations: [{ name: "export_video", args: { path: "bad.mp4" } }],
+        })
+      ).ok,
+    ).toBe(false);
+  });
   it("corrects one word while preserving timing and supports undo", async () => {
     const original = addAsset(emptyProject("Speech"), {
       id: "a1",
