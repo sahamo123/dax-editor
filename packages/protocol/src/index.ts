@@ -1,7 +1,7 @@
 // The contract between the engine server and everything that talks to it (desktop UI, CLI, MCP, tests).
 // Types and zod schemas only; no behaviour. If you change a shape here, both sides get a compile error.
 
-import type { HistoryItem, OverlayStyle, Project } from "@dax/core";
+import type { HistoryItem, MotionRequest, OverlayStyle, Project } from "@dax/core";
 import { z } from "zod";
 
 /** Name of the HTTP header carrying the per-launch token: `Authorization: Bearer <token>`. */
@@ -33,6 +33,8 @@ export const API = {
   transcribe: "/api/speech/transcribe",
   jobCancel: "/api/jobs/:jobId/cancel",
   mcp: "/api/mcp",
+  blender: "/api/blender",
+  blenderRender: "/api/blender/render",
   localModel: "/api/local-model",
   /** `POST`: download the local model as a `model-download` job. Body: {@link LocalModelInstallRequestSchema}. */
   localModelInstall: "/api/local-model/install",
@@ -293,6 +295,14 @@ export const SpeechStatusSchema = z.object({
 });
 /** Validated offline speech setup status. */
 export type SpeechStatus = z.infer<typeof SpeechStatusSchema>;
+/** Parameters for a bounded motion render, using the core contract. */
+export type BlenderRenderRequest = MotionRequest;
+/** Optional Blender availability; reading it never starts a render. */
+export interface BlenderStatus {
+  available: boolean;
+  version?: string;
+  detail: string;
+}
 /** Start transcription for one existing media asset. */
 export const TranscribeRequestSchema = z.object({ assetId: z.string().min(1).max(64) });
 

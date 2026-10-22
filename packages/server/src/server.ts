@@ -7,7 +7,7 @@ import type { AddressInfo } from "node:net";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 import type { Duplex } from "node:stream";
-import type { Transcriber } from "@dax/core";
+import type { MotionRenderer, Transcriber } from "@dax/core";
 import { API, type ServerInfo } from "@dax/protocol";
 import { Engine } from "./engine.js";
 import { HttpError, readJsonBody, sendError, sendJson } from "./http-util.js";
@@ -62,6 +62,8 @@ export interface ServerOptions {
   transcriber?: Transcriber;
   /** Optional offline speech installation controls. */
   speech?: SpeechController;
+  /** Optional separate-process bounded motion renderer. */
+  motion?: MotionRenderer;
   /** Where to log. Defaults to stderr; stdout is reserved for the startup line. */
   logger?: Logger;
   /** Log every request (method, path, status; never the query string). */
@@ -100,6 +102,7 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
   );
   // Browser uploads are app-owned sources, even when external path imports use a narrower allow-list.
   allowedRoots.push(resolve(dataDir, "uploads"));
+  allowedRoots.push(resolve(dataDir, "renders"));
   const maxBody = options.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES;
 
   const hub = new WsHub();
@@ -111,6 +114,7 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
     localModel: options.localModel ?? new NullLocalModelController(),
     ...(options.transcriber ? { transcriber: options.transcriber } : {}),
     ...(options.speech ? { speech: options.speech } : {}),
+    ...(options.motion ? { motion: options.motion } : {}),
     log,
     emit: (event) => hub.broadcast(event),
     hasListeners: () => hub.size > 0,

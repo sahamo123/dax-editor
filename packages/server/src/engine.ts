@@ -11,6 +11,8 @@ import {
   type CommandContext,
   type CommandOutcome,
   getCommand,
+  type MotionRenderer,
+  MotionRequestSchema,
   OVERLAY_PRESETS,
   type Transcriber,
   tryRunCommand,
@@ -69,6 +71,8 @@ export interface EngineConfig {
   transcriber?: Transcriber;
   /** Optional offline speech provisioning, injected by the launcher. */
   speech?: SpeechController;
+  /** Optional application-owned Blender template renderer. */
+  motion?: MotionRenderer;
   log: Logger;
   /** Sends an event to every connected WebSocket client. */
   emit: (event: WsEvent) => void;
@@ -379,6 +383,7 @@ export class Engine {
       source: "manual",
       allowedRoots: [...this.cfg.allowedRoots],
       ...(this.cfg.transcriber ? { transcriber: this.cfg.transcriber } : {}),
+      ...(this.cfg.motion ? { motion: this.cfg.motion } : {}),
       ...extra,
     };
   }
@@ -401,6 +406,23 @@ export class Engine {
       await this.guardPath(name, args);
     } catch (err) {
       return { ok: false, error: errorMessage(err) };
+    }
+    if (name === "render_motion_template") {
+      const session = this.projects.session;
+      if (
+        (guard.projectId !== undefined && guard.projectId !== session.projectId) ||
+        (guard.expectedRevision !== undefined && guard.expectedRevision !== session.revision)
+      )
+        return { ok: false, error: "The project changed. Inspect it before rendering." };
+      try {
+        return {
+          ok: true,
+          summary: "Blender render queued. Follow the job in Tasks.",
+          data: { jobId: this.startMotion(args) },
+        };
+      } catch (error) {
+        return { ok: false, error: errorMessage(error) };
+      }
     }
     if (name === "export_video") {
       const session = this.projects.session;
@@ -463,7 +485,19 @@ export class Engine {
   ): Promise<CommandResponse> {
     if (!stageOnly) this.assertIdle();
     const extension = extname(name).toLowerCase();
-    if (!new Set([".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v", ".mpg", ".mpeg"]).has(extension))
+    if (
+      !new Set([
+        ".mp4",
+        ".mov",
+        ".mkv",
+        ".webm",
+        ".avi",
+        ".m4v",
+        ".mpg",
+        ".mpeg",
+        ...(stageOnly ? [".png", ".jpg", ".jpeg"] : []),
+      ]).has(extension)
+    )
       throw new HttpError(400, "Choose a supported video file (MP4, MOV, MKV or WebM).");
     const parent = join(this.cfg.dataDir, "uploads");
     await mkdir(parent, { recursive: true, mode: 0o700 });
@@ -735,6 +769,18 @@ export class Engine {
       if (finished) return;
       if (event.type === "done" || event.type === "error") terminal = true;
       if (event.type === "error") failure = event.message;
+      if (event.type === "tool_call" || event.type === "status") {
+        this.tasks.put({
+          ...task,
+          status: "running",
+          startStateId,
+          phase:
+            event.type === "tool_call"
+              ? event.name.replaceAll("_", " ")
+              : this.cfg.log.redact(event.text),
+        });
+        this.scheduleBroadcast();
+      }
       this.cfg.emit({
         type: "chat",
         runId,
@@ -813,7 +859,43 @@ export class Engine {
                 return { ok: false, error: message };
               }
               await this.guardPath(name, args);
-              const out = await tryRunCommand({ ...context, session, source: "ai" }, name, args);
+              const job =
+                name === "render_motion_template"
+                  ? this.jobs.create("blender", "Render motion template")
+                  : undefined;
+              if (job && (this.work.size || this.exportAbort)) {
+                job.fail("Another heavy job is active.");
+                return {
+                  ok: false,
+                  error: "Wait for background rendering or transcription to finish.",
+                };
+              }
+              const pending = tryRunCommand(
+                {
+                  ...context,
+                  session,
+                  source: "ai",
+                  ...(job ? { onProgress: (fraction: number) => job.progress(fraction) } : {}),
+                },
+                name,
+                args,
+              );
+              const work = job
+                ? pending
+                    .then((result) => {
+                      if (result.ok) job.done();
+                      else
+                        job.fail(
+                          abort.signal.aborted ? "Cancelled" : this.cfg.log.redact(result.error),
+                        );
+                    })
+                    .finally(() => {
+                      this.work.delete(job.id);
+                    })
+                : undefined;
+              if (job && work) this.work.set(job.id, { abort, promise: work });
+              const out = await pending;
+              await work;
               observedRevision = session.revision;
               return out;
             }),
@@ -881,6 +963,35 @@ export class Engine {
   }
 
   // ---------- local model ----------
+
+  /** Inspect installed speech components without starting setup. */
+  motionStatus(): Promise<{ available: boolean; version?: string; detail: string }> {
+    return (
+      this.cfg.motion?.status() ??
+      Promise.resolve({
+        available: false,
+        detail: "Blender rendering is unavailable in this build.",
+      })
+    );
+  }
+
+  /** Render/import a validated template as a cancellable job on the current project. */
+  startMotion(value: unknown): string {
+    if (!this.cfg.motion)
+      throw new HttpError(501, "Blender rendering is unavailable in this build.");
+    const request = MotionRequestSchema.parse(value);
+    const session = this.projects.session;
+    return this.startWork("blender", `Render ${request.template}`, async (signal, onProgress) => {
+      const result = await this.serial(() =>
+        tryRunCommand(
+          this.commandContext({ session, signal, onProgress }),
+          "render_motion_template",
+          request,
+        ),
+      );
+      if (!result.ok) throw new Error(result.error);
+    });
+  }
 
   /** Inspect installed speech components without starting setup. */
   speechStatus(): Promise<SpeechStatus> {

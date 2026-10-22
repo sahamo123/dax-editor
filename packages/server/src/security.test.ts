@@ -54,6 +54,8 @@ describe("authentication", () => {
       ["POST", "/api/speech/remove"],
       ["POST", "/api/speech/transcribe"],
       ["POST", "/api/jobs/test/cancel"],
+      ["GET", "/api/blender"],
+      ["POST", "/api/blender/render"],
       ["POST", "/api/chat"],
       ["POST", "/api/chat/cancel"],
       ["GET", "/api/settings"],

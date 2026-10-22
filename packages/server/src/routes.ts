@@ -1,6 +1,7 @@
 // The HTTP API: maps each @dax/protocol path onto an Engine method. Authentication, Host and Origin checks already happened in server.ts.
 // Rule of thumb: problems with the request itself are HTTP errors ({ error }); a command that ran and failed is 200 { ok: false }.
 
+import { MotionRequestSchema } from "@dax/core";
 import {
   API,
   ApiKeyRequestSchema,
@@ -156,6 +157,11 @@ export function buildRouter(engine: Engine): Router {
   });
 
   // ----- local model (delegated to the injected controller) -----
+  r.add("GET", API.blender, async ({ json }) => json(200, await engine.motionStatus()));
+  r.add("POST", API.blenderRender, async ({ body, json }) => {
+    const req = parseWith(MotionRequestSchema, await body());
+    json(202, { jobId: engine.startMotion(req) });
+  });
   r.add("GET", API.speech, async ({ json }) => json(200, await engine.speechStatus()));
   r.add("POST", API.speechInstall, ({ json }) => json(202, { jobId: engine.installSpeech() }));
   r.add("POST", API.speechRemove, async ({ json }) => {
