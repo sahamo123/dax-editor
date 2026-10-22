@@ -16,3 +16,4 @@
 * [ADR 0012: Ship a verified offline AI model in the Windows installer](0012-offline-ai-installer.md) - Bundle a small Qwen model and MIT llama.cpp runtime with the Windows editor, initialize them locally without network access, and retain LM Studio as an optional compatible endpoint.
 * [Engine-owned local chat tasks and read-only planning](0013-local-chat-task-queue.md) - Keep queued work in the local engine and enforce Planning mode through the command allow-list.
 * [ADR 0014: Live desktop tools and bounded background integrations](0014-functional-desktop-integrations.md) - Share one authoritative session with local MCP clients and run speech and Blender as bounded jobs.
+* [Preserve omitted format options in live editor sessions](0015-editor-format-preservation.md) - Keep footage fit and frame rate during editor format changes while retaining standalone CLI preset defaults.

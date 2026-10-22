@@ -2,6 +2,12 @@
 
 ## 2026-10-22
 
+* **Correction**: a final saved-state audit found the initial expanded smoke had not asserted fit preservation. The existing square-preset default changed contain to blur despite an instruction to preserve it. Editor command contexts now preserve omitted fit/fps, including live MCP and batches; standalone CLI defaults remain compatible (ADR 0015). Smoke checks now assert fit/fps/title timing. Prior narrow PASS is superseded until this stronger check passes. Windows Application Control also blocked the Tauri native binding during rebuild; shell checks fail on a platform-specific test and are being reconciled separately.
+
+* **Verification**: corrected Windows SIGTERM expectations; all 11 shell-script and 25 Rust checks pass. The official pinned Cargo CLI alternative was checked against Tauri's documented install path, but Application Control also blocked a generated Windows build helper (OS error 4551). No further execution workaround or security-policy change was attempted. Native installer rebuilding remains blocked. Development-preview smoke now verifies installed/unloaded AI instead of requiring eager startup.
+
+* **Correction**: the existing desktop release workflow now builds the wired engine and prepares verified Windows offline AI/speech assets before bundling. Building only the server omitted the engine input. Workflow permissions, signing and release publication behavior remain unchanged; no cloud release has been dispatched.
+
 * **Correction**: rapid manual controls now dispatch in order after refreshing the previous operation's revision. They no longer conflict with their own immediately preceding edit. Queued controls are refused if the project changes before dispatch, and genuine external revision conflicts are still refused without automatic replay.
 
 * **Correction**: stronger offline acceptance reproduced a 90-second local-provider timeout on a real format request. Compact requests now advertise only relevant tools and refresh that selection for steering without expanding permissions. Small-model follow-ups omit old tool payloads and retain bounded conversational intent; skills are capped separately. Initial recheck passes cold/warm format changes at approximately 70/26 seconds on the i5-8265U; the remaining suite is still running. Browser checks update expected configured states, key-binding order and revision synchronization, and add laptop project-copy/manual workflow coverage.

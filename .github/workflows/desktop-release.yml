@@ -87,13 +87,19 @@ jobs:
       - name: Install JavaScript dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build the engine server bundle input
+      - name: Build the fully wired engine bundle input
         # Builds packages/server and what it depends on. If the package is missing, skip here;
         # prepare-sidecars then fails the job with a clear message (no stand-in in releases).
         run: |
-          if [ -f packages/server/package.json ]; then
-            pnpm --filter "@dax/server..." build
+          if [ -f packages/engine/package.json ]; then
+            pnpm --filter "@dax/engine..." build
           fi
+
+      - name: Prepare verified Windows offline AI and speech assets
+        if: runner.os == 'Windows'
+        run: |
+          node apps/desktop/scripts/prepare-offline-ai.mjs
+          node apps/desktop/scripts/prepare-offline-speech.mjs
 
       # ---- macOS: no prebuilt LGPL FFmpeg exists, so build it from the pinned source.
       - name: Cache LGPL FFmpeg (macOS)

@@ -4,6 +4,30 @@ import { describe, expect, it } from "vitest";
 import { startHarness } from "./test/harness.js";
 
 describe("project lifecycle", () => {
+  it("preserves unspecified editor format properties through the shared API", async () => {
+    const h = await startHarness();
+    try {
+      await h.command("set_format", { fit: "cover", fps: 24 });
+      await h.command("set_format", { preset: "square-1080" });
+      expect((await h.req("/api/state")).json<StateResponse>().project.timeline).toMatchObject({
+        width: 1080,
+        height: 1080,
+        fit: "cover",
+        fps: 24,
+      });
+      await h.command("apply_edit_batch", {
+        operations: [{ name: "set_format", args: { preset: "landscape-720p" } }],
+      });
+      expect((await h.req("/api/state")).json<StateResponse>().project.timeline).toMatchObject({
+        width: 1280,
+        height: 720,
+        fit: "cover",
+        fps: 24,
+      });
+    } finally {
+      await h.cleanup();
+    }
+  });
   it("records scratch projects and reopens one after creating another", async () => {
     const h = await startHarness();
     try {

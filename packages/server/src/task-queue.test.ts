@@ -5,6 +5,33 @@ import { describe, expect, it, vi } from "vitest";
 import { startHarness } from "./test/harness.js";
 
 describe("chat task queue", () => {
+  it("preserves omitted fit and frame rate for guarded assistant preset calls", async () => {
+    let done = false;
+    const h = await startHarness({
+      agentRunner: {
+        supportsManualEdits: true,
+        async run(_message, ctx) {
+          await ctx.executeCommand?.({ session: ctx.session }, "set_format", {
+            preset: "square-1080",
+          });
+          done = true;
+        },
+      },
+    });
+    try {
+      await h.command("set_format", { fit: "cover", fps: 24 });
+      await h.post("/api/chat", { message: "square; preserve other settings" });
+      await vi.waitFor(() => expect(done).toBe(true));
+      expect((await h.req("/api/state")).json<StateResponse>().project.timeline).toMatchObject({
+        width: 1080,
+        height: 1080,
+        fit: "cover",
+        fps: 24,
+      });
+    } finally {
+      await h.cleanup();
+    }
+  });
   it("captures queued credentials and never reuses a custom key at another address", async () => {
     const captured: Array<{ url?: string; key?: string }> = [];
     let release: (() => void) | undefined;

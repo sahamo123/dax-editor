@@ -17,8 +17,11 @@ test("manual project copy preserves edits and laptop panels remain reachable wit
   await expect.poll(async () => Object.keys((await engine.api.project()).assets).length).toBe(1);
   await page.getByRole("button", { name: "Show side panel", exact: true }).click();
   await page.getByRole("tab", { name: "Tools", exact: true }).click();
+  await page.getByLabel("Frame rate", { exact: true }).selectOption("24");
   await page.getByLabel("Output format", { exact: true }).selectOption("square-1080");
   await expect.poll(async () => (await engine.api.project()).timeline.width).toBe(1080);
+  await expect.poll(async () => (await engine.api.project()).timeline.fps).toBe(24);
+  expect((await engine.api.project()).timeline.fit).toBe("contain");
   await page.getByLabel("Title at playhead").fill("Manual release check");
   await page.getByRole("button", { name: "Add title", exact: true }).click();
   await expect

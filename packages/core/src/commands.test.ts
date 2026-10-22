@@ -318,6 +318,24 @@ describe("transcribe and set_format", () => {
 });
 
 describe("set_format fit", () => {
+  it("preserves editor fit/fps when omitted and accepts explicit updates", async () => {
+    const ctx = ctxWithClip({ preserveFormatOptions: true });
+    await runCommand(ctx, "set_format", { fps: 24, fit: "cover" });
+    await runCommand(ctx, "set_format", { preset: "square-1080" });
+    expect(ctx.session.project.timeline).toMatchObject({
+      width: 1080,
+      height: 1080,
+      fps: 24,
+      fit: "cover",
+    });
+    await runCommand(ctx, "set_format", { preset: "landscape-720p", fit: "contain", fps: 60 });
+    expect(ctx.session.project.timeline).toMatchObject({
+      width: 1280,
+      height: 720,
+      fps: 60,
+      fit: "contain",
+    });
+  });
   it("defaults vertical presets to a blurred background and landscape back to bars", async () => {
     const ctx = ctxWithClip();
     await runCommand(ctx, "set_format", { preset: "portrait-1080x1920" });
