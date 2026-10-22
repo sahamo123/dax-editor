@@ -1,5 +1,9 @@
 # Project log
 
+## 2026-10-22
+
+* **Creation**: functional desktop release contract and GitHub delivery index #8 with T01–T09 issues #9–#17. Fresh visual audit captured the current timeout/ready contradiction and narrow-window clipping; baseline checks are recorded separately from historical evidence. Native signing/validation and live hosted-provider checks remain explicit gates.
+
 ## 2026-10-20
 * **Feature**: added explicit OpenRouter setup, independent key storage and fixed official API routing with required parameter support. Generic API presets cover OpenAI, LM Studio and Ollama. Context window, maximum reply tokens and optional temperature now survive settings saves. Provider status distinguishes configured from connection-tested.
 * **Experiment**: verified the 533 MB 0.8B model and measured 17.74 generation tokens/second on this laptop. Real-agent format edits exposed a supported resize refusal and an unsolicited fit change, so the 2B bundled model remains. Trial artifacts are local and ignored; the durable outcome is in the lightweight AI/provider spec.
