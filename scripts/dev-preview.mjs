@@ -123,9 +123,11 @@ try {
     const status = await fetch(`${info.url}/api/local-model`, {
       headers: { Authorization: `Bearer ${info.token}` },
     }).then((response) => response.json());
-    if (!status.running) throw new Error("Offline AI did not start in the development preview.");
+    if (!status.installed)
+      throw new Error("Offline AI is not installed in the development preview.");
+    if (status.running) throw new Error("Manual startup unexpectedly loaded local inference.");
     console.log(
-      "Development preview smoke passed: frontend, authenticated engine and offline AI running.",
+      "Development preview smoke passed: frontend, authenticated engine and offline AI installed but unloaded.",
     );
     await stop();
   } else if (!process.argv.includes("--no-open")) {

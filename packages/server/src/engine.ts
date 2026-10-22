@@ -414,6 +414,7 @@ export class Engine {
       ...(this.cfg.transcriber ? { transcriber: this.cfg.transcriber } : {}),
       ...(this.cfg.motion ? { motion: this.cfg.motion } : {}),
       ...extra,
+      preserveFormatOptions: true,
     };
   }
 
@@ -918,6 +919,7 @@ export class Engine {
                   ...context,
                   session,
                   source: "ai",
+                  preserveFormatOptions: true,
                   ...(job ? { onProgress: (fraction: number) => job.progress(fraction) } : {}),
                 },
                 name,

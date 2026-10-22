@@ -148,11 +148,19 @@ try {
   }
   await request(
     "Set the output to square 1080 by 1080. Preserve the clips and fit setting.",
-    (p) => p.timeline.width === 1080 && p.timeline.height === 1080,
+    (p) =>
+      p.timeline.width === 1080 &&
+      p.timeline.height === 1080 &&
+      p.timeline.fit === "contain" &&
+      p.timeline.fps === 30,
   );
   await request(
     "Set the output to 640 by 360 at 30 fps. Preserve the clips and fit setting.",
-    (p) => p.timeline.width === 640 && p.timeline.height === 360,
+    (p) =>
+      p.timeline.width === 640 &&
+      p.timeline.height === 360 &&
+      p.timeline.fit === "contain" &&
+      p.timeline.fps === 30,
   );
   const chat = await engine.api.call("POST", "/api/chat", {
     message:
@@ -177,8 +185,9 @@ try {
   await request(
     'Change the title text to "Offline Revised". Keep its timing and all clips unchanged.',
     (p) =>
-      p.timeline.overlays.some((o) => /Offline Revised/i.test(o.text)) &&
-      p.timeline.tracks[0].clips.length === 1,
+      p.timeline.overlays.some(
+        (o) => /Offline Revised/i.test(o.text) && o.start === 0 && o.duration === 2,
+      ) && p.timeline.tracks[0].clips.length === 1,
   );
   await request(
     "Set the clip volume to 50 percent. Keep all other properties unchanged.",
@@ -210,6 +219,11 @@ try {
   assert.ok(metadata.streams.some((s) => s.codec_type === "video"));
   assert.ok(metadata.streams.some((s) => s.codec_type === "audio"));
   assert.ok(Math.abs(Number(metadata.format.duration) - 3) < 0.1);
+  assert.equal(
+    (await engine.api.project()).timeline.fit,
+    "contain",
+    "Unrequested footage fit changed",
+  );
   const record = JSON.parse(await readFile(join(dataDir, "run/llama-server.pid.json"), "utf8"));
   await engine.stop();
   assert.throws(() => process.kill(record.pid, 0), "Inference process survived shutdown");

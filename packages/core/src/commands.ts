@@ -67,6 +67,8 @@ import { findFillerRanges, formatTranscript, type Transcriber } from "./transcri
 
 /** What a command needs to run. */
 export interface CommandContext {
+  /** Editor sessions preserve omitted fit and fps on format changes; omitted/false retains standalone CLI preset defaults. */
+  preserveFormatOptions?: boolean;
   /** Optional separate-process motion-template renderer. */
   motion?: MotionRenderer;
   session: Session;
@@ -536,7 +538,7 @@ export const COMMANDS: readonly CommandDef[] = [
   define({
     name: "set_format",
     description:
-      "Change the output format: a preset (landscape-1080p, landscape-720p, portrait-1080x1920 for Shorts/Reels/TikTok, square-1080, portrait-4x5 for Instagram) or an explicit width, height and frame rate. `fit` says what to do when the footage is a different shape: contain (bars), cover (crop to fill), blur (blurred copy behind, popular for vertical). Choosing a portrait or square preset without a fit uses blur.",
+      "Change the output format: a preset (landscape-1080p, landscape-720p, portrait-1080x1920 for Shorts/Reels/TikTok, square-1080, portrait-4x5 for Instagram) or an explicit width, height and frame rate. Editor sessions preserve omitted fit and frame rate. `fit`: contain (bars), cover (crop to fill), blur (blurred background). Standalone CLI preset defaults retain automatic fit selection.",
     schema: z.object({
       preset: z
         .enum(
@@ -557,7 +559,12 @@ export const COMMANDS: readonly CommandDef[] = [
         ...fmtArgs,
       };
       const tall = a.preset !== undefined && !a.preset.startsWith("landscape");
+      if (ctx.preserveFormatOptions) {
+        size.fit = ctx.session.project.timeline.fit;
+        size.fps = ctx.session.project.timeline.fps;
+      }
       if (a.fit !== undefined) size.fit = a.fit;
+      else if (ctx.preserveFormatOptions) size.fit = ctx.session.project.timeline.fit;
       else if (tall && ctx.session.project.timeline.fit === "contain") size.fit = "blur";
       else if (a.preset?.startsWith("landscape")) size.fit = "contain";
       if (a.width !== undefined) size.width = a.width;

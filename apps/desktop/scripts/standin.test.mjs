@@ -52,12 +52,14 @@ test("prints a ServerInfo line using the token from the environment, and exits o
   }
 });
 
-test("exits cleanly on SIGTERM", async () => {
+test("exits on SIGTERM (graceful on POSIX, forced on Windows)", async () => {
   const { child, dir } = await start();
   try {
     const done = exited(child);
     child.kill("SIGTERM");
-    assert.equal((await done).code, 0);
+    const result = await done;
+    if (process.platform === "win32") assert.equal(result.sig, "SIGTERM");
+    else assert.equal(result.code, 0);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

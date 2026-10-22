@@ -13,7 +13,7 @@ test("saves OpenRouter separately and preserves model generation settings", asyn
   await openApp(server);
   await page.getByRole("button", { name: "Settings" }).click();
   const dialog = page.getByRole("dialog", { name: "Settings" });
-  await dialog.getByRole("button", { name: /Not set up OpenRouter/ }).click();
+  await dialog.getByRole("button", { name: /OpenRouter/ }).click();
   await expect(dialog.getByText(/Endpoint: https:\/\/openrouter/)).toBeVisible();
   await dialog.getByLabel("Model", { exact: true }).fill("vendor/chosen-model");
   await dialog.getByLabel("API key").fill("test-router-key");

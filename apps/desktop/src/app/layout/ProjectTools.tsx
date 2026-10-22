@@ -88,6 +88,42 @@ export function ProjectTools(): ReactElement {
           <option value="blur">Blur background</option>
         </select>
       </label>
+      <label className="field">
+        <span className="field__label">Frame rate</span>
+        <select
+          className="input"
+          aria-label="Frame rate"
+          value={project.timeline.fps}
+          disabled={!online}
+          onChange={(event) =>
+            void controller.run("set_format", { fps: Number(event.target.value) })
+          }
+        >
+          {[
+            ...new Set([
+              project.timeline.fps,
+              12,
+              15,
+              23.976,
+              24,
+              25,
+              29.97,
+              30,
+              48,
+              50,
+              59.94,
+              60,
+              120,
+            ]),
+          ]
+            .sort((a, b) => a - b)
+            .map((fps) => (
+              <option key={fps} value={fps}>
+                {fps} fps
+              </option>
+            ))}
+        </select>
+      </label>
       <form
         className="stack"
         onSubmit={(event) => {
