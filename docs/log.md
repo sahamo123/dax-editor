@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Creation**: bounded Blender motion templates (title card, logo intro, 3D text), separate-process CPU rendering, progress/cancel, generated-asset recipes and in-place regeneration with undo. Core tests use generated video and an injected renderer. Official Blender 4.5.14 portable bytes matched upstream SHA-256, but execution on this laptop was blocked by Windows Application Control event 3077. Real Blender rendering is unverified; no security policy changed.
+
 * **Creation**: live-session MCP execution seams and atomic bounded edit batches, with per-client revision guards and a separate read-only Planning transport (ADR 0014). The server reuses the existing MCP workspace package; no new external runtime dependency. External client setup uses a stable stdio proxy with secrets in private discovery storage.
 
 * **Creation**: offline speech installation/status/removal, cancellable transcription jobs, transcript corrections and reviewed cleanup selection. Windows packaging includes pinned model/runtime/licence provenance and seeds speech without outbound requests. Real generated narration passed recognition, word correction and captioned export; evidence in `artifacts/speech-live/`. Native UI remains a separate gate.

@@ -9,6 +9,7 @@ export { ffmpegBin, ffprobeBin, type RunOptions } from "./exec.js";
 export * from "./ids.js";
 export * from "./image-overlays.js";
 export * from "./media.js";
+export * from "./motion.js";
 export * from "./overlay-filters.js";
 export * from "./overlays.js";
 export * from "./presets.js";
