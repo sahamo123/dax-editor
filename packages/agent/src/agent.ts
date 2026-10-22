@@ -3,6 +3,8 @@
 // models live here. Never calls anything but the injected provider and the registry (source "ai").
 
 import {
+  type CommandContext,
+  type CommandOutcome,
   type CommandResult,
   commandTools,
   getCommand,
@@ -62,6 +64,12 @@ export interface CreateAgentOptions {
 
 /** Per-run inputs for {@link Agent.run}. */
 export interface AgentRunOptions {
+  /** Optional engine-owned serialization and revision guard; validation and tool allow-lists still apply. */
+  executeCommand?(
+    context: CommandContext,
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<CommandOutcome>;
   /** Drain newly submitted user guidance between steps. Existing calls finish; tools/permissions never expand. */
   takeSteering?: () => string[];
   /** The project to edit. Edits are recorded in its history with source `ai`. */
@@ -370,6 +378,7 @@ class Loop {
           transcriber: this.run.transcriber,
           available: this.prepared.available,
           signal: this.run.signal,
+          ...(this.run.executeCommand ? { executeCommand: this.run.executeCommand } : {}),
         },
         call,
         truncated,

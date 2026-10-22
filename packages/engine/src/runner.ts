@@ -243,6 +243,7 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
           .join("\n"),
     });
     return {
+      supportsManualEdits: true,
       async run(message, ctx) {
         const mine = ++generation;
         if (historySession !== ctx.session) {
@@ -252,6 +253,7 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
         // The run gets its own copy, so nothing it does to its array reaches the stored conversation.
         const result = await agent.run(message, {
           session: ctx.session,
+          ...(ctx.executeCommand ? { executeCommand: ctx.executeCommand } : {}),
           history: [...history],
           onEvent: ctx.onEvent,
           signal: ctx.signal,

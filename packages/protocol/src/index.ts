@@ -100,6 +100,10 @@ export function mediaUrl(
 export const CommandRequestSchema = z.object({
   name: z.string().min(1),
   args: z.record(z.unknown()).default({}),
+  /** Refuse an edit if the open project changed since the caller inspected it. */
+  expectedRevision: z.number().int().nonnegative().optional(),
+  /** Per-open session identity; prevents a revision from a different project matching. */
+  projectId: z.string().optional(),
 });
 /** A validated {@link CommandRequestSchema} value. */
 export type CommandRequest = z.infer<typeof CommandRequestSchema>;
@@ -149,7 +153,15 @@ export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 export const TaskInfoSchema = z.object({
   id: z.string(),
   title: z.string(),
-  kind: z.enum(["chat", "import"]),
+  kind: z.enum(["chat", "import", "command", "export", "transcribe", "blender"]),
+  origin: z.enum(["manual", "ai", "mcp", "transcription", "blender", "export"]).optional(),
+  projectId: z.string().optional(),
+  provider: z.string().optional(),
+  revision: z.number().int().nonnegative().optional(),
+  startStateId: z.number().int().nonnegative().optional(),
+  endStateId: z.number().int().nonnegative().optional(),
+  phase: z.string().optional(),
+  progress: z.number().min(0).max(1).optional(),
   mode: z.enum(["edit", "plan"]),
   status: z.enum(["queued", "running", "completed", "failed", "cancelled", "interrupted"]),
   createdAt: z.number(),
@@ -334,6 +346,10 @@ export interface PresetInfo {
 
 /** Everything the UI needs to draw itself. Pushed over the WebSocket after every change. */
 export interface StateResponse {
+  /** Per-open project identity and monotonic revision, including undo/redo movements. */
+  projectId?: string;
+  /** Changes whenever the project is edited or history moves; compare together with projectId. */
+  revision?: number;
   project: Project;
   history: HistoryItem[];
   canUndo: boolean;

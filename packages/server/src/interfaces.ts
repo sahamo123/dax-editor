@@ -1,7 +1,7 @@
 // The seams the server exposes for things built elsewhere: the AI agent, provider availability and the local model runtime.
 // The server never imports @dax/agent or @dax/local-llm; the launcher injects implementations of these interfaces.
 
-import type { Session } from "@dax/core";
+import type { CommandContext, CommandOutcome, Session } from "@dax/core";
 import type {
   AgentEvent,
   LocalModelStatus,
@@ -12,6 +12,12 @@ import type {
 
 /** Everything an {@link AgentRunner} gets for one run. */
 export interface AgentRunContext {
+  /** Validated command execution serialized by the engine, with stale-project protection. */
+  executeCommand?(
+    context: CommandContext,
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<CommandOutcome>;
   /** The open project's session. Run commands on it with source `ai` so the history says who did what. */
   session: Session;
   /** Report progress; each event is forwarded to the UI as a `chat` WebSocket event. */
@@ -29,6 +35,8 @@ export interface AgentRunContext {
  * (`@dax/agent`) is wired in by the launcher; tests use {@link ScriptedRunner}.
  */
 export interface AgentRunner {
+  /** True only if every tool uses the engine's executeCommand seam. Other runners keep exclusive editing. */
+  supportsManualEdits?: boolean;
   /** Resolve when the run is over (success, cancel or handled failure). A rejection is reported to the UI as an `error` event. */
   run(message: string, ctx: AgentRunContext): Promise<void>;
 }
