@@ -28,6 +28,7 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  archiveExtractor,
   findForbiddenFfmpegFlags,
   isWindowsTriple,
   looksLikeFfmpeg,
@@ -90,7 +91,13 @@ function extract(archive, name) {
   // A previous extraction can be a developer's active runtime on Windows. Never remove it
   // while preparing another build; each verified archive gets its own fresh extraction.
   const out = mkdtempSync(join(cacheDir, `x-${name}-`));
-  execFileSync("tar", ["-xf", archive, "-C", out], { stdio: "inherit" });
+  execFileSync(
+    archiveExtractor(process.platform, process.env.SystemRoot),
+    ["-xf", archive, "-C", out],
+    {
+      stdio: "inherit",
+    },
+  );
   return out;
 }
 

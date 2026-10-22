@@ -7,6 +7,7 @@ import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import {
+  archiveExtractor,
   findForbiddenFfmpegFlags,
   looksLikeFfmpeg,
   parseHostTriple,
@@ -16,6 +17,13 @@ import {
 } from "./sidecars-lib.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
+
+test("Windows archive extraction uses native bsdtar independently of PATH", () => {
+  assert.equal(archiveExtractor("win32", "D:\\Windows"), "D:\\Windows\\System32\\tar.exe");
+  assert.equal(archiveExtractor("win32"), "C:\\Windows\\System32\\tar.exe");
+  assert.equal(archiveExtractor("darwin"), "tar");
+  assert.equal(archiveExtractor("linux"), "tar");
+});
 const lock = JSON.parse(readFileSync(join(here, "..", "sidecars.lock.json"), "utf8"));
 
 test("sidecar file names carry the target triple and .exe only on Windows", () => {
