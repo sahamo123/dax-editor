@@ -6,6 +6,8 @@ import {
   API,
   type ApiKeyRequest,
   AUTH_SCHEME,
+  type BlenderRenderRequest,
+  type BlenderStatus,
   type CancelResponse,
   type ChatRequest,
   type ChatStarted,
@@ -289,6 +291,16 @@ export class DaxClient {
   async speechStatus(): Promise<ApiResult<SpeechStatus>> {
     const r = await this.request<unknown>("GET", API.speech);
     return r.ok ? parsed(SpeechStatusSchema, r.value, "speech status") : r;
+  }
+
+  /** Optional separate-program Blender availability. */
+  async blenderStatus(): Promise<ApiResult<BlenderStatus>> {
+    return this.request("GET", API.blender);
+  }
+
+  /** Queue a bounded template render; completion/import is reported through jobs and project state. */
+  async renderMotion(request: BlenderRenderRequest): Promise<ApiResult<JobStarted>> {
+    return this.request("POST", API.blenderRender, request);
   }
 
   /** Start installation/transcription or remove the speech model; progress arrives as jobs. */

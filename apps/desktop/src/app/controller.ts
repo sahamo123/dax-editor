@@ -3,6 +3,8 @@
 // chat, settings). Actions never throw; failures become toasts or transcript notices.
 
 import type {
+  BlenderRenderRequest,
+  BlenderStatus,
   CommandResponse,
   ImportResult,
   ProviderKind,
@@ -61,6 +63,12 @@ export interface Controller {
   speechStatus(): Promise<SpeechStatus | null>;
   /** Install/remove speech or begin an asynchronous transcription. */
   speech(action: "install" | "remove" | "transcribe", assetId?: string): Promise<void>;
+  /** Inspect optional Blender without running a render. */
+  blenderStatus(): Promise<BlenderStatus | null>;
+  /** Render a typed application-owned animation template. */
+  renderMotion(request: BlenderRenderRequest): Promise<void>;
+  /** Stage a user-selected small PNG/JPG logo locally for a template. */
+  stageLogo(file: File): Promise<string | undefined>;
   /** Run a registry command as a manual edit. Failures also raise a toast. Never throws. */
   run(name: string, args?: Record<string, unknown>): Promise<CommandResponse>;
   /** Same as {@link Controller.run} but without a failure toast (the caller shows its own message). */
@@ -429,6 +437,33 @@ export function createController(deps: ControllerDeps): Controller {
     async speechStatus() {
       const r = await client.speechStatus();
       return r.ok ? r.value : null;
+    },
+
+    async blenderStatus() {
+      const r = await client.blenderStatus();
+      return r.ok ? r.value : null;
+    },
+    async renderMotion(request) {
+      const r = await client.renderMotion(request);
+      if (!r.ok) toast("error", r.error);
+      await refreshState();
+    },
+    async stageLogo(file) {
+      if (file.size > 20 * 1024 * 1024 || !/\.(png|jpe?g)$/i.test(file.name)) {
+        toast("error", "Choose a PNG/JPG smaller than 20 MB.");
+        return;
+      }
+      const r = await client.uploadMedia(file, true);
+      if (!r.ok) {
+        toast("error", r.error);
+        return;
+      }
+      return typeof r.data === "object" &&
+        r.data !== null &&
+        "path" in r.data &&
+        typeof r.data.path === "string"
+        ? r.data.path
+        : undefined;
     },
 
     async speech(action, assetId) {

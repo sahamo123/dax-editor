@@ -9,6 +9,7 @@ import { MediaBin } from "../media/MediaBin";
 import { type DrawerTab, rememberDrawerTab } from "../store";
 import { Icon, type IconName } from "../ui/icons";
 import { ConnectionsPanel } from "./ConnectionsPanel";
+import { MotionPanel } from "./MotionPanel";
 import { ProjectTools } from "./ProjectTools";
 import { SpeechPanel } from "./SpeechPanel";
 
@@ -16,6 +17,7 @@ const TABS: { id: DrawerTab; label: string; icon: IconName }[] = [
   { id: "tools", label: "Tools", icon: "settings" },
   { id: "speech", label: "Speech", icon: "media" },
   { id: "connections", label: "Connect AI", icon: "settings" },
+  { id: "motion", label: "Motion", icon: "presets" },
   { id: "presets", label: "Presets", icon: "presets" },
   { id: "inspector", label: "Inspector", icon: "inspector" },
   { id: "media", label: "Media", icon: "media" },
@@ -86,6 +88,7 @@ export function Drawer(): ReactElement {
         {tab === "tools" ? <ProjectTools /> : null}
         {tab === "speech" ? <SpeechPanel /> : null}
         {tab === "connections" ? <ConnectionsPanel /> : null}
+        {tab === "motion" ? <MotionPanel /> : null}
       </div>
     </aside>
   );

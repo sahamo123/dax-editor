@@ -27,7 +27,8 @@ export type DrawerTab =
   | "history"
   | "tools"
   | "speech"
-  | "connections";
+  | "connections"
+  | "motion";
 
 /** Where the link to the engine stands. */
 interface ConnectionState {
@@ -124,7 +125,8 @@ function readDrawerTab(): DrawerTab {
       v === "history" ||
       v === "tools" ||
       v === "speech" ||
-      v === "connections"
+      v === "connections" ||
+      v === "motion"
     )
       return v;
   } catch {
