@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Creation**: artifact-only Windows candidate workflow on the dedicated review branch, using existing pinned build actions and read-only repository permissions. It prepares the wired engine, verified local AI/speech and LGPL-safe sidecars, then uploads an unsigned installer without publishing a release. Reason: local Application Control blocks both available native build-tool paths. A successful CI artifact still does not validate installation on this laptop.
+
 * **Correction**: a final saved-state audit found the initial expanded smoke had not asserted fit preservation. The existing square-preset default changed contain to blur despite an instruction to preserve it. Editor command contexts now preserve omitted fit/fps, including live MCP and batches; standalone CLI defaults remain compatible (ADR 0015). Smoke checks now assert fit/fps/title timing. Prior narrow PASS is superseded until this stronger check passes. Windows Application Control also blocked the Tauri native binding during rebuild; shell checks fail on a platform-specific test and are being reconciled separately.
 
 * **Verification**: corrected Windows SIGTERM expectations; all 11 shell-script and 25 Rust checks pass. The official pinned Cargo CLI alternative was checked against Tauri's documented install path, but Application Control also blocked a generated Windows build helper (OS error 4551). No further execution workaround or security-policy change was attempted. Native installer rebuilding remains blocked. Development-preview smoke now verifies installed/unloaded AI instead of requiring eager startup.
