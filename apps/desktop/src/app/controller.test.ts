@@ -275,7 +275,7 @@ describe("controller", () => {
     expect(store.getState().toasts[0]?.text).toContain("already running");
   });
 
-  it("saves API keys first, once, and never keeps them", async () => {
+  it("saves settings before binding keys, once, and never keeps the keys", async () => {
     const { client, controller, store } = setup();
     const ok = await controller.saveSettings({
       settings: { activeProvider: "anthropic", providers: { anthropic: { model: "m" } } },
@@ -285,6 +285,9 @@ describe("controller", () => {
     expect(client.setApiKey).toHaveBeenCalledTimes(1);
     expect(client.setApiKey).toHaveBeenCalledWith("anthropic", "sk-abc");
     expect(client.putSettings).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(client.putSettings).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(client.setApiKey).mock.invocationCallOrder[0] ?? 0,
+    );
     expect(JSON.stringify(store.getState())).not.toContain("sk-abc");
   });
 
@@ -297,7 +300,7 @@ describe("controller", () => {
       apiKeys: { anthropic: "k" },
     });
     expect(ok).toBe(false);
-    expect(client.putSettings).not.toHaveBeenCalled();
+    expect(client.putSettings).toHaveBeenCalledWith({ activeProvider: "anthropic", providers: {} });
     expect(store.getState().toasts[0]?.text).toContain("disk full");
   });
 });

@@ -45,6 +45,8 @@ export interface AgentRunner {
 
 /** What a {@link AgentRunnerFactory} may look at when choosing a runner for the active provider. */
 export interface RunnerEnv {
+  /** Cancellation while preparing a provider, including cold local-model startup. */
+  signal?: AbortSignal;
   /** Planning runners must expose only read-only tools; defaults to editing. */
   mode?: "edit" | "plan";
   /** Current settings, including `activeProvider`. */

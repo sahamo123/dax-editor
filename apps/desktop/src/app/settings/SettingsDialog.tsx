@@ -122,8 +122,8 @@ function ApiFields({
             <option value="http://127.0.0.1:11434/v1">Ollama</option>
           </select>
           <span className="field__hint">
-            For LM Studio or Ollama, start its local server and enter the loaded model name.
-            Changing this preset does not move or remove a previously saved key.
+            For LM Studio or Ollama, start its local server and enter the loaded model name. Keys
+            stay bound to their server address. Enter a key when changing servers.
           </span>
         </label>
       ) : null}

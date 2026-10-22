@@ -4,6 +4,11 @@
   "tsconfig": "tsconfig.json",
   "emit": "none",
   "treatWarningsAsErrors": true,
+  "externalSymbolLinkMappings": {
+    "@dax/core": {
+      "runCommand": "https://github.com/sahamo123/dax-editor/blob/main/packages/core/src/commands.ts"
+    }
+  },
   "validation": {
     "notExported": true,
     "invalidLink": true,
