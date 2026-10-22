@@ -109,6 +109,8 @@ export function fakeController(): { [K in keyof Controller]: ReturnType<typeof v
     project: vi.fn(async () => true),
     recentProjects: vi.fn(async () => []),
     relinkMedia: vi.fn(async () => {}),
+    speechStatus: vi.fn(async () => null),
+    speech: vi.fn(async () => {}),
     run: vi.fn(ok),
     runQuiet: vi.fn(ok),
     undo: vi.fn(async () => {}),

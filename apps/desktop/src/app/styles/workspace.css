@@ -1,4 +1,20 @@
 /* Functional workspace: readable panels, responsive tool drawer and persistent task access. */
+.speech-words li {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.speech-words span {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.project-tools .row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .drawer-host {
   display: flex;
   min-width: 0;
