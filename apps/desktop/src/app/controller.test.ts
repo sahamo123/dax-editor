@@ -61,6 +61,44 @@ it("uses the engine's actual undo boundary for a queued task instead of the earl
 });
 
 describe("controller", () => {
+  it("orders rapid manual edits using refreshed revisions and rejects queued edits after a project switch", async () => {
+    let revision = 0;
+    let release: (() => void) | undefined;
+    const guards: unknown[] = [];
+    const { controller, store } = setup({
+      getState: vi.fn(async () => ({
+        ok: true,
+        value: makeState({ projectId: "project-a", revision }),
+      })),
+      run: vi.fn(async (_name: string, _args: Record<string, unknown>, guard: unknown) => {
+        guards.push(guard);
+        if (!revision)
+          await new Promise<void>((resolve) => {
+            release = resolve;
+          });
+        revision++;
+        return { ok: true, summary: "Edited" };
+      }),
+    });
+    store.getState().applyState(makeState({ projectId: "project-a", revision: 0 }));
+    const first = controller.run("set_volume", { clipId: "clip", volume: 0.5 });
+    const second = controller.run("set_volume", { clipId: "clip", volume: 0.6 });
+    await vi.waitFor(() => expect(release).toBeTypeOf("function"));
+    expect(guards).toHaveLength(1);
+    release?.();
+    await Promise.all([first, second]);
+    expect(guards).toEqual([
+      { projectId: "project-a", expectedRevision: 0 },
+      { projectId: "project-a", expectedRevision: 1 },
+    ]);
+    const stale = controller.run("set_volume", { clipId: "clip", volume: 0.7 });
+    store.getState().applyState(makeState({ projectId: "project-b", revision: 0 }));
+    expect(await stale).toMatchObject({
+      ok: false,
+      error: expect.stringContaining("project changed"),
+    });
+    expect(guards).toHaveLength(2);
+  });
   it("goes online on open, loads state, and shows an offline banner state when the socket closes", async () => {
     const { store, client, socket } = setup();
     expect(store.getState().connection.status).toBe("connecting");

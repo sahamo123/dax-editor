@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Correction**: rapid manual controls now dispatch in order after refreshing the previous operation's revision. They no longer conflict with their own immediately preceding edit. Queued controls are refused if the project changes before dispatch, and genuine external revision conflicts are still refused without automatic replay.
+
 * **Correction**: stronger offline acceptance reproduced a 90-second local-provider timeout on a real format request. Compact requests now advertise only relevant tools and refresh that selection for steering without expanding permissions. Small-model follow-ups omit old tool payloads and retain bounded conversational intent; skills are capped separately. Initial recheck passes cold/warm format changes at approximately 70/26 seconds on the i5-8265U; the remaining suite is still running. Browser checks update expected configured states, key-binding order and revision synchronization, and add laptop project-copy/manual workflow coverage.
 
 * **Update**: local AI loads on the first chat request instead of during editor startup, and unloads after configurable inactivity. Manual-only use retains the model on disk without loading weights. Launcher and idle-timer regressions cover this resource lifecycle; no automatic model downloads or hosted fallback.

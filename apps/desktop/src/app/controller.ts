@@ -118,6 +118,7 @@ export function createController(deps: ControllerDeps): Controller {
   const { client, store } = deps;
   const openSocket = deps.openSocket ?? openLiveSocket;
   let live: LiveSocket | null = null;
+  let manualChain: Promise<unknown> = Promise.resolve();
 
   const toast = (tone: "info" | "success" | "error", text: string) =>
     store.getState().pushToast(tone, text);
@@ -153,7 +154,7 @@ export function createController(deps: ControllerDeps): Controller {
     store.getState().setLocalModel(r.ok ? r.value : "unavailable");
   }
 
-  const run = async (name: string, args: Record<string, unknown> = {}, quiet = false) => {
+  const execute = async (name: string, args: Record<string, unknown> = {}, quiet = false) => {
     const state = store.getState().state;
     const r = await client.run(
       name,
@@ -166,6 +167,23 @@ export function createController(deps: ControllerDeps): Controller {
     if (!r.ok && r.error.includes("project changed")) await refreshState();
     if (r.ok) await refreshState();
     return r;
+  };
+
+  const run = (name: string, args: Record<string, unknown> = {}, quiet = false) => {
+    const projectId = store.getState().state?.projectId;
+    const next = manualChain.then(() => {
+      if (projectId !== store.getState().state?.projectId) {
+        const error =
+          "The project changed before this edit could run. Submit it again in the intended project.";
+        if (!quiet) toast("error", error);
+        return { ok: false as const, error };
+      }
+      // Each local action sees the revision returned by its predecessor. External changes still
+      // use the server's conflict check; this never retries an already executed mutation.
+      return execute(name, args, quiet);
+    });
+    manualChain = next.catch(() => undefined);
+    return next;
   };
 
   /** Run `undo`/`redo` `times` times in a row, stopping at the first failure. */
