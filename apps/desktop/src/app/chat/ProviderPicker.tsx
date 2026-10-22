@@ -63,7 +63,11 @@ export function ProviderStatusLine(): ReactElement | null {
     >
       <span className="provider-status__dot" aria-hidden="true" />
       <span className="provider-status__text">
-        {ready ? `${providerLabel(kind)} is ready` : (active?.detail ?? "Not set up")}
+        {active?.connectionState
+          ? active.detail
+          : ready
+            ? `${providerLabel(kind)} is ready`
+            : (active?.detail ?? "Not set up")}
       </span>
       {!ready ? (
         <button

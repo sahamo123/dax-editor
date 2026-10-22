@@ -65,6 +65,7 @@ describe("startup and state", () => {
           "local",
           "openai-compatible",
           "openrouter",
+          "openai",
         ].sort(),
       );
       expect(s.providers.every((p) => !p.available && p.hasApiKey === false)).toBe(true);

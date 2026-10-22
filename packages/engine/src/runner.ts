@@ -30,6 +30,7 @@ const BUILT_IN_CONTEXT_TOKENS = 8192;
 
 /** Default model names per hosted provider; users can override them in Settings. */
 export const DEFAULT_MODELS: Partial<Record<ProviderKind, string>> = {
+  openai: "gpt-5-mini",
   anthropic: "claude-sonnet-5-5",
   "openai-compatible": "gpt-5-mini",
   local: "local",
@@ -146,11 +147,17 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
         ...(cfg.contextTokens ? { contextTokens: cfg.contextTokens } : {}),
       };
     }
-    if (kind === "openai-compatible" || kind === "openrouter") {
-      const baseUrl = kind === "openrouter" ? "https://openrouter.ai/api/v1" : cfg.baseUrl;
+    if (kind === "openai-compatible" || kind === "openrouter" || kind === "openai") {
+      const baseUrl =
+        kind === "openrouter"
+          ? "https://openrouter.ai/api/v1"
+          : kind === "openai"
+            ? "https://api.openai.com/v1"
+            : cfg.baseUrl;
       if (!baseUrl)
         return "Set the server address (base URL) for your OpenAI-compatible provider in Settings.";
       const apiKey = await env.getApiKey(kind);
+      if (kind === "openai" && !apiKey) return "Add your OpenAI API key in Settings.";
       if (kind === "openrouter" && !apiKey) return "Add your OpenRouter API key in Settings.";
       if (kind === "openrouter" && !model)
         return "Choose an OpenRouter model ID in Settings. Editing requires a model with tool calling.";
@@ -163,10 +170,13 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
         provider: createOpenAiProvider({
           baseUrl,
           model: model ?? "",
-          ...(cfg.maxTokens ? { maxTokens: cfg.maxTokens } : {}),
+          ...(cfg.maxTokens && kind !== "openai" ? { maxTokens: cfg.maxTokens } : {}),
           ...(cfg.temperature !== undefined ? { temperature: cfg.temperature } : {}),
           ...(kind === "openrouter"
             ? { extraBody: { provider: { require_parameters: true } } }
+            : {}),
+          ...(kind === "openai" && cfg.maxTokens
+            ? { extraBody: { max_completion_tokens: cfg.maxTokens } }
             : {}),
           ...(apiKey ? { apiKey } : {}),
         }),

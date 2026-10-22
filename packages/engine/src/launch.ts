@@ -179,6 +179,7 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
     ...server,
     agentRunner: runner,
     providers: createProviderRegistry({
+      ...(local ? { localEndpoint: () => localConnection(local) } : {}),
       ...(local ? { localReady: async () => (await local.status()).running } : {}),
       ...(bridges ? { cliStatuses: bridges.statuses } : {}),
     }),

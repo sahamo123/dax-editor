@@ -21,6 +21,8 @@ const DEFAULT_SETTINGS: Settings = { activeProvider: "local", providers: {} };
 
 /** Reads and writes `settings.json`. Unreadable or invalid files fall back to defaults instead of blocking startup. */
 export class SettingsStore {
+  /** True only during the first load that copies a legacy direct OpenAI configuration. */
+  legacyOpenAiKeyMigration = false;
   private value: Settings = structuredClone(DEFAULT_SETTINGS);
   private readonly file: string;
 
@@ -35,6 +37,14 @@ export class SettingsStore {
   async load(): Promise<void> {
     try {
       this.value = SettingsSchema.parse(JSON.parse(await readFile(this.file, "utf8")));
+      const legacy = this.value.providers["openai-compatible"];
+      if (
+        !this.value.providers.openai &&
+        legacy?.baseUrl?.replace(/\/$/, "") === "https://api.openai.com/v1"
+      ) {
+        this.value.providers.openai = { ...legacy };
+        this.legacyOpenAiKeyMigration = true;
+      }
     } catch (err) {
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
         this.log.warn("settings.json is unreadable or invalid; using defaults");

@@ -23,6 +23,8 @@ export const API = {
   settings: "/api/settings",
   apiKey: "/api/settings/api-key",
   providers: "/api/providers",
+  providerTest: "/api/providers/test",
+  providerModels: "/api/providers/models",
   localModel: "/api/local-model",
   /** `POST`: download the local model as a `model-download` job. Body: {@link LocalModelInstallRequestSchema}. */
   localModelInstall: "/api/local-model/install",
@@ -176,6 +178,7 @@ export type TaskInfo = z.infer<typeof TaskInfoSchema>;
 /** Where chat messages go. */
 export const PROVIDER_KINDS = [
   "local",
+  "openai",
   "openai-compatible",
   "openrouter",
   "anthropic",
@@ -185,6 +188,17 @@ export const PROVIDER_KINDS = [
 ] as const;
 /** One of {@link PROVIDER_KINDS}. `local` is the embedded model; `cli-*` drive the user's own signed-in command-line agents. */
 export type ProviderKind = (typeof PROVIDER_KINDS)[number];
+
+/** Non-editing provider diagnostic request; uses saved settings and secrets only. */
+export const ProviderDiagnosticRequestSchema = z.object({ kind: z.enum(PROVIDER_KINDS) });
+/** A saved provider's connection/tool probe result, never a guarantee of editing correctness. */
+export interface ProviderDiagnostic {
+  kind: ProviderKind;
+  status: "connected" | "error";
+  detail: string;
+  checkedAt: number;
+  toolsSupported: boolean;
+}
 
 /** Non-secret settings for one provider. API keys are never part of this. */
 export const ProviderConfigSchema = z.object({
@@ -315,6 +329,10 @@ export interface ProviderStatus {
    * signed out. Omitted when the tool is not installed or its state is unknown (for example no bridge in this build).
    */
   signedIn?: boolean;
+  /** Configuration alone does not prove a working inference connection. */
+  connectionState?: "configured" | "testing" | "connected" | "loading" | "unavailable" | "error";
+  /** Time of the last explicit successful/failed probe, in Unix milliseconds. */
+  checkedAt?: number;
 }
 
 /** A background task such as making a preview proxy, exporting, or downloading a model. */

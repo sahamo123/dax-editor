@@ -52,6 +52,8 @@ describe("authentication", () => {
       ["GET", "/api/settings"],
       ["POST", "/api/settings/api-key"],
       ["GET", "/api/providers"],
+      ["POST", "/api/providers/test"],
+      ["POST", "/api/providers/models"],
       ["GET", "/api/local-model"],
       ["POST", "/api/local-model/install"],
       ["POST", "/api/local-model/start"],

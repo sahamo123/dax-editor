@@ -15,6 +15,64 @@ const CLI_COMMAND: Record<string, string> = {
   "cli-gemini": "gemini",
 };
 
+function ConnectionTools({
+  kind,
+  onSave,
+  onModel,
+}: {
+  kind: ProviderKind;
+  onSave(): Promise<boolean>;
+  onModel(model: string): void;
+}): ReactElement | null {
+  const controller = useController();
+  const status = useApp((s) => s.state?.providers.find((provider) => provider.kind === kind));
+  const [working, setWorking] = useState(false);
+  const [models, setModels] = useState<string[]>([]);
+  if (!["local", "openai", "openrouter", "openai-compatible"].includes(kind)) return null;
+  const act = async (discover: boolean) => {
+    setWorking(true);
+    try {
+      if (!(await onSave())) return;
+      if (discover) setModels(await controller.providerModels(kind));
+      else await controller.testProvider(kind);
+    } finally {
+      setWorking(false);
+    }
+  };
+  return (
+    <section className="stack" aria-label="Connection diagnostics">
+      <p role="status" className="muted">
+        {status?.detail ?? "Not configured"}
+      </p>
+      <div className="row">
+        <button type="button" className="btn" disabled={working} onClick={() => void act(false)}>
+          {working ? "Checking…" : "Save and test connection"}
+        </button>
+        <button type="button" className="btn" disabled={working} onClick={() => void act(true)}>
+          Load models
+        </button>
+      </div>
+      <small className="muted">
+        Tests send a short synthetic request with no project media. Hosted providers may charge for
+        it.
+      </small>
+      {models.length ? (
+        <label className="field">
+          <span className="field__label">Discovered models</span>
+          <select className="input" value="" onChange={(e) => onModel(e.target.value)}>
+            <option value="">Choose a model</option>
+            {models.map((model) => (
+              <option key={model} value={model}>
+                {model}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+    </section>
+  );
+}
+
 function validUrl(text: string): boolean {
   try {
     const u = new URL(text);
@@ -270,7 +328,8 @@ export function SettingsDialog(): ReactElement | null {
   const patchConfig = (patch: Partial<ProviderConfig>) =>
     setDraft({ ...draft, providers: { ...draft.providers, [selected]: { ...config, ...patch } } });
 
-  const save = async () => {
+  const save = async (closeAfter = true) => {
+    if (baseUrlBad || numbersBad) return false;
     setSaving(true);
     // Drop empty strings: the server's schema wants a real URL / model name or no field at all.
     const providers: Settings["providers"] = {};
@@ -291,7 +350,8 @@ export function SettingsDialog(): ReactElement | null {
     setSaving(false);
     // The typed keys are cleared whether or not saving worked; they never stay in memory longer than needed.
     setApiKeys({});
-    if (ok) close();
+    if (ok && closeAfter) close();
+    return ok;
   };
 
   return (
@@ -352,6 +412,7 @@ export function SettingsDialog(): ReactElement | null {
 
           {selected === "local" ? <LocalModelCard /> : null}
           {selected === "openai-compatible" ||
+          selected === "openai" ||
           selected === "anthropic" ||
           selected === "openrouter" ? (
             <ApiFields
@@ -363,6 +424,12 @@ export function SettingsDialog(): ReactElement | null {
               onApiKey={(v) => setApiKeys({ ...apiKeys, [selected]: v })}
             />
           ) : null}
+          <ConnectionTools
+            key={selected}
+            kind={selected}
+            onSave={() => save(false)}
+            onModel={(model) => patchConfig({ model })}
+          />
           {isCliProvider(selected) ? <CliPane kind={selected} status={status} /> : null}
 
           <label className="check check--card">
