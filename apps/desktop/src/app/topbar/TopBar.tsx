@@ -2,6 +2,7 @@
 // Every control has a text label or aria-label and a visible focus ring.
 
 import type { ReactElement } from "react";
+import { TaskQueue } from "../chat/TaskQueue";
 import { useApp, useController } from "../context";
 import { runningExport } from "../selectors";
 import { Icon } from "../ui/icons";
@@ -18,6 +19,10 @@ export function TopBar(): ReactElement {
   const drawerTab = useApp((s) => s.ui.drawerTab);
   const patchUi = useApp((s) => s.patchUi);
   const startImport = useImport();
+  const tasks = useApp((s) => s.state?.tasks);
+  const unfinished = (tasks ?? []).filter(
+    (task) => task.status === "running" || task.status === "queued",
+  );
 
   const exporting = runningExport(jobs);
   const percent = exporting ? Math.round(exporting.progress * 100) : 0;
@@ -34,6 +39,14 @@ export function TopBar(): ReactElement {
 
       <div className="topbar__spacer" />
       <ProjectMenu />
+      <details className="project-menu work-menu">
+        <summary className="btn" aria-label="Work status">
+          Work · {unfinished.length ? `${unfinished.length} active/queued` : "idle"}
+        </summary>
+        <div className="project-menu__panel">
+          <TaskQueue />
+        </div>
+      </details>
 
       <button type="button" className="btn" onClick={() => void startImport()} disabled={!online}>
         <Icon name="import" /> Import

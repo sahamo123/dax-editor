@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Update**: laptop workspace keeps chat and preview visible and moves tools into an overlay drawer below 1180 pixels. Tools have labels, preset descriptions wrap, and the composer has a larger input. The top bar exposes task history with origin/progress/history references. Fresh screenshot: `artifacts/functional-audit/02-workspace-rebuilt.png`; preview footage loaded after reconnect/proxy preparation. Full native validation remains outstanding.
+
 * **Creation**: manual output-format/title/caption/template controls and source trim fields. New registry operations relink matching media and correct a transcript word while preserving its source timing; both are undoable and shared with external tools. Relinking checks allowed paths and media compatibility.
 
 * **Creation**: project lifecycle menu, recent scratch/saved projects, native project pickers and browser upload/download copies. Project uploads validate schema and media roots before replacing the active session. Tests cover reopening an autosave and refusing an uploaded out-of-root source.

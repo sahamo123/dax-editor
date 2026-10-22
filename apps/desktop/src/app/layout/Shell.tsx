@@ -25,9 +25,10 @@ import { useUndoRedoKeys } from "../use-shortcuts";
 import { ConnectionBanner } from "./ConnectionBanner";
 import { Drawer } from "./Drawer";
 import { EmptyState } from "./EmptyState";
+import "../styles/workspace.css";
 
 const SPLITTER_PX = 6;
-const MIN_CENTER = 460;
+const MIN_CENTER = 320;
 
 function useViewportWidth(): number {
   const [w, setW] = useState(() => window.innerWidth);
@@ -127,6 +128,11 @@ export function Shell(): ReactElement {
   const exportOpen = useApp((s) => s.ui.exportOpen);
   const dropHover = useApp((s) => s.ui.dropHover);
   const viewport = useViewportWidth();
+  const compact = viewport < 1180;
+  const patchUi = useApp((s) => s.patchUi);
+  useEffect(() => {
+    if (compact) patchUi({ drawerOpen: false });
+  }, [compact, patchUi]);
   const [chatW, setChatW] = useStoredNumber("dax.chatWidth", 380);
   const [drawerW, setDrawerW] = useStoredNumber("dax.drawerWidth", 320);
   const [timelineH, setTimelineH] = useStoredNumber("dax.timelineHeight", 300);
@@ -135,14 +141,15 @@ export function Shell(): ReactElement {
   // Keep the middle column usable: panels may not squeeze it below MIN_CENTER.
   // The drawer hosts editor panels that need server state, so it waits for the first state.
   const showDrawer = drawerOpen && hasState;
-  const drawerSpace = showDrawer ? drawerW + SPLITTER_PX : 0;
+  const inlineDrawer = showDrawer && !compact;
+  const drawerSpace = inlineDrawer ? drawerW + SPLITTER_PX : 0;
   const chatMax = Math.max(260, Math.min(600, viewport - drawerSpace - MIN_CENTER - SPLITTER_PX));
   const drawerMax = Math.max(240, Math.min(560, viewport - chatW - MIN_CENTER - 2 * SPLITTER_PX));
   const chat = Math.min(chatW, chatMax);
   const drawer = Math.min(drawerW, drawerMax);
   const maxTimeline = Math.max(160, window.innerHeight - 48 - 180 - SPLITTER_PX);
 
-  const columns = showDrawer
+  const columns = inlineDrawer
     ? `${chat}px ${SPLITTER_PX}px minmax(0, 1fr) ${SPLITTER_PX}px ${drawer}px`
     : `${chat}px ${SPLITTER_PX}px minmax(0, 1fr)`;
 
@@ -172,16 +179,29 @@ export function Shell(): ReactElement {
           )}
           {showDrawer ? (
             <>
-              <Splitter
-                orientation="vertical"
-                label="Resize side panel"
-                value={drawer}
-                min={240}
-                max={drawerMax}
-                grow="toward-start"
-                onChange={setDrawerW}
-              />
-              <Drawer />
+              {!compact ? (
+                <Splitter
+                  orientation="vertical"
+                  label="Resize side panel"
+                  value={drawer}
+                  min={240}
+                  max={drawerMax}
+                  grow="toward-start"
+                  onChange={setDrawerW}
+                />
+              ) : null}
+              <div className={compact ? "drawer-overlay" : "drawer-host"}>
+                {compact ? (
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => patchUi({ drawerOpen: false })}
+                  >
+                    Close tools panel
+                  </button>
+                ) : null}
+                <Drawer />
+              </div>
             </>
           ) : null}
         </div>
