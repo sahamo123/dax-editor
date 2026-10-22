@@ -187,6 +187,11 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
   });
   const started = await startServer({
     ...server,
+    liveMcp: {
+      shimPath: existsSync(fileURLToPath(new URL("./editor-proxy.mjs", import.meta.url)))
+        ? fileURLToPath(new URL("./editor-proxy.mjs", import.meta.url))
+        : fileURLToPath(new URL("../../mcp/dist/editor-proxy.js", import.meta.url)),
+    },
     agentRunner: runner,
     providers: createProviderRegistry({
       ...(local ? { localEndpoint: () => localConnection(local) } : {}),

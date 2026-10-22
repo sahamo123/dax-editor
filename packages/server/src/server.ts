@@ -19,6 +19,7 @@ import type {
   ProviderRegistry,
   SpeechController,
 } from "./interfaces.js";
+import { startLiveMcp } from "./live-mcp.js";
 import { createLogger, type Logger } from "./logger.js";
 import { buildRouter } from "./routes.js";
 import {
@@ -65,6 +66,8 @@ export interface ServerOptions {
   logger?: Logger;
   /** Log every request (method, path, status; never the query string). */
   verbose?: boolean;
+  /** Enable authenticated external-client MCP listeners on the active desktop project. */
+  liveMcp?: { shimPath: string };
 }
 
 /** A started server. */
@@ -275,11 +278,18 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
     version: SERVER_VERSION,
   };
   log.info(`listening on ${info.url}`);
+  const mcp = options.liveMcp
+    ? await startLiveMcp(engine, dataDir, options.liveMcp.shimPath).catch((error) => {
+        log.warn(`Live MCP unavailable: ${String(error)}`);
+        return undefined;
+      })
+    : undefined;
 
   let closed: Promise<void> | undefined;
   const close = () => {
     closed ??= (async () => {
       closing = true;
+      await mcp?.close();
       await engine.shutdown();
       hub.close();
       await new Promise<void>((done) => {

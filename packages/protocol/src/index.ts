@@ -32,6 +32,7 @@ export const API = {
   speechRemove: "/api/speech/remove",
   transcribe: "/api/speech/transcribe",
   jobCancel: "/api/jobs/:jobId/cancel",
+  mcp: "/api/mcp",
   localModel: "/api/local-model",
   /** `POST`: download the local model as a `model-download` job. Body: {@link LocalModelInstallRequestSchema}. */
   localModelInstall: "/api/local-model/install",
@@ -395,6 +396,8 @@ export interface PresetInfo {
 
 /** Everything the UI needs to draw itself. Pushed over the WebSocket after every change. */
 export interface StateResponse {
+  /** Local MCP setup hints. Secrets remain in an owner-only discovery file. */
+  mcp?: { enabled: boolean; clients: number; command: string; args: string[]; planArgs: string[] };
   /** Per-open project identity and monotonic revision, including undo/redo movements. */
   projectId?: string;
   /** Changes whenever the project is edited or history moves; compare together with projectId. */

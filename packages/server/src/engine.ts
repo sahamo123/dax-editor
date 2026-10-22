@@ -110,6 +110,7 @@ export class Engine {
   private commandChain: Promise<unknown> = Promise.resolve();
   private closing = false;
   private readonly work = new Map<string, { abort: AbortController; promise: Promise<void> }>();
+  private mcpInfo?: () => NonNullable<StateResponse["mcp"]>;
 
   constructor(private readonly cfg: EngineConfig) {
     this.tasks = new TaskStore(cfg.dataDir, cfg.log);
@@ -214,6 +215,7 @@ export class Engine {
     const session = this.projects.session;
     const state: StateResponse = {
       project: session.project,
+      ...(this.mcpInfo ? { mcp: this.mcpInfo() } : {}),
       projectId: session.projectId,
       revision: session.revision,
       history: session.history(),
@@ -400,7 +402,15 @@ export class Engine {
     } catch (err) {
       return { ok: false, error: errorMessage(err) };
     }
-    if (name === "export_video") return this.startExport(args);
+    if (name === "export_video") {
+      const session = this.projects.session;
+      if (
+        (guard.projectId !== undefined && guard.projectId !== session.projectId) ||
+        (guard.expectedRevision !== undefined && guard.expectedRevision !== session.revision)
+      )
+        return { ok: false, error: "The project changed. Refresh it before exporting." };
+      return this.startExport(args);
+    }
     // Edits are applied one at a time so two requests cannot interleave their read-modify-write.
     return this.serial(async () => {
       // Checked again here: an AI run may have started while this call waited for its turn (the check above ran earlier).
@@ -621,6 +631,19 @@ export class Engine {
   }
 
   // ---------- project operations (guarded against AI runs) ----------
+
+  /** Serialize project replacement/save with edits and recheck unfinished work inside the queue. */
+  withIdleProject(action: () => Promise<void>): Promise<void> {
+    return this.serial(async () => {
+      this.assertIdle();
+      await action();
+    });
+  }
+
+  /** Attach non-secret connection hints for the live MCP bridge owned by this server. */
+  setMcpInfo(reader: () => NonNullable<StateResponse["mcp"]>): void {
+    this.mcpInfo = reader;
+  }
 
   /** Throws 409 while an AI run is in progress; switching projects under it would be confusing. */
   assertIdle(): void {

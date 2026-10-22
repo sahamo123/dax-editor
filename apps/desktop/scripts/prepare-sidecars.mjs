@@ -237,6 +237,16 @@ async function prepareServer() {
       logLevel: "warning",
     });
     console.log(`[sidecars] bundled ${realEntry} -> resources/server/cli.mjs`);
+    await build({
+      entryPoints: [join(repoRoot, "packages/mcp/dist/editor-proxy.js")],
+      outfile: join(outDir, "editor-proxy.mjs"),
+      bundle: true,
+      platform: "node",
+      target: "node22",
+      format: "esm",
+      legalComments: "linked",
+      logLevel: "warning",
+    });
   } else if (mode === "dev" || flag("--allow-standin")) {
     copyFileSync(
       join(desktopDir, "shell-placeholder", "dax-server-standin.mjs"),
