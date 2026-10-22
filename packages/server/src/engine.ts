@@ -27,6 +27,7 @@ import {
   type ProviderKind,
   type ProviderStatus,
   type Settings,
+  type SpeechStatus,
   type StateResponse,
   type TaskInfo,
   type WsEvent,
@@ -39,6 +40,7 @@ import type {
   LocalModelController,
   ProviderRegistry,
   RunnerEnv,
+  SpeechController,
 } from "./interfaces.js";
 import { JobManager } from "./jobs.js";
 import type { Logger } from "./logger.js";
@@ -65,6 +67,8 @@ export interface EngineConfig {
   localModel: LocalModelController;
   /** Speech-to-text used by `transcribe` and the cut commands; absent means those commands report that transcription is unavailable. */
   transcriber?: Transcriber;
+  /** Optional offline speech provisioning, injected by the launcher. */
+  speech?: SpeechController;
   log: Logger;
   /** Sends an event to every connected WebSocket client. */
   emit: (event: WsEvent) => void;
@@ -105,24 +109,37 @@ export class Engine {
   private broadcastChain: Promise<void> = Promise.resolve();
   private commandChain: Promise<unknown> = Promise.resolve();
   private closing = false;
+  private readonly work = new Map<string, { abort: AbortController; promise: Promise<void> }>();
 
   constructor(private readonly cfg: EngineConfig) {
     this.tasks = new TaskStore(cfg.dataDir, cfg.log);
     this.settings = new SettingsStore(cfg.dataDir, cfg.log);
     this.secrets = new SecretStore(cfg.dataDir, cfg.log);
     this.jobs = new JobManager((job, change) => {
-      if (job.kind === "export" || job.kind === "transcribe") {
+      if (
+        job.kind === "export" ||
+        job.kind === "transcribe" ||
+        job.kind === "speech-setup" ||
+        job.kind === "blender"
+      ) {
         const previous = this.tasks.list().find((task) => task.id === job.id);
         this.tasks.put({
           ...previous,
           id: job.id,
           title: job.label,
-          kind: job.kind,
+          kind: job.kind === "speech-setup" ? "transcribe" : job.kind,
           mode: "edit",
-          origin: job.kind === "export" ? "export" : "transcription",
+          origin:
+            job.kind === "export" ? "export" : job.kind === "blender" ? "blender" : "transcription",
           createdAt: previous?.createdAt ?? Date.now(),
           status:
-            job.status === "done" ? "completed" : job.status === "error" ? "failed" : "running",
+            job.status === "done"
+              ? "completed"
+              : job.status === "error"
+                ? job.error === "Cancelled"
+                  ? "cancelled"
+                  : "failed"
+                : "running",
           progress: job.progress,
           ...(job.error ? { error: cfg.log.redact(job.error) } : {}),
         });
@@ -547,6 +564,11 @@ export class Engine {
    * answered directly; once FFmpeg is running the HTTP response says "started" and the job reports progress.
    */
   private startExport(args: Record<string, unknown>): Promise<CommandResponse> {
+    if (this.work.size)
+      return Promise.resolve({
+        ok: false,
+        error: "Wait for background processing to finish before exporting.",
+      });
     // A synchronous flag, not the job list: the job is only created at the first progress tick, 1-2 s after the
     // start, and two exports requested in that window would both pass an `isRunning` check.
     if (this.exportAbort || this.jobs.isRunning("export")) {
@@ -602,6 +624,8 @@ export class Engine {
 
   /** Throws 409 while an AI run is in progress; switching projects under it would be confusing. */
   assertIdle(): void {
+    if (this.work.size)
+      throw new HttpError(409, "Finish or cancel background work before switching projects.");
     if (this.chat || this.chatQueue.length)
       throw new HttpError(
         409,
@@ -622,6 +646,11 @@ export class Engine {
     } = {},
   ): string {
     if (this.closing) throw new HttpError(503, "Editor is shutting down.");
+    if (this.work.size)
+      throw new HttpError(
+        409,
+        "Finish or cancel background processing before starting an assistant request.",
+      );
     if (this.chat && !options.queue && !options.steer)
       throw new HttpError(409, "An AI run is already in progress.");
     if (this.chatQueue.length >= 20)
@@ -652,6 +681,7 @@ export class Engine {
 
   /** Cancel queued work by its task id, or signal the active task. Returns false for finished/unknown work. */
   cancelTask(id: string): boolean {
+    if (this.cancelJob(id)) return true;
     if (this.chat?.runId === id) return this.cancelChat();
     const index = this.chatQueue.findIndex((task) => task.id === id);
     const task = this.chatQueue[index];
@@ -829,6 +859,90 @@ export class Engine {
 
   // ---------- local model ----------
 
+  /** Inspect installed speech components without starting setup. */
+  speechStatus(): Promise<SpeechStatus> {
+    if (!this.cfg.speech) throw new HttpError(501, "Speech setup is unavailable in this build.");
+    return this.cfg.speech.status();
+  }
+
+  /** Install verified speech components as a visible cancellable job. */
+  installSpeech(): string {
+    if (!this.cfg.speech) throw new HttpError(501, "Speech setup is unavailable in this build.");
+    const speech = this.cfg.speech;
+    return this.startWork("speech-setup", "Install offline speech", (signal, progress) =>
+      speech.install({ signal, onProgress: progress }),
+    );
+  }
+
+  /** Remove only the app-managed speech model when no processing is active. */
+  async removeSpeech(): Promise<void> {
+    this.assertIdle();
+    if (!this.cfg.speech) throw new HttpError(501, "Speech setup is unavailable in this build.");
+    await this.cfg.speech.remove();
+  }
+
+  /** Transcribe an existing asset without holding an HTTP request open. */
+  startTranscription(assetId: string): string {
+    if (!Object.hasOwn(this.projects.session.project.assets, assetId))
+      throw new HttpError(404, "Unknown media asset.");
+    if (!this.cfg.transcriber)
+      throw new HttpError(501, "Speech recognition is unavailable in this build.");
+    const session = this.projects.session;
+    return this.startWork("transcribe", "Transcribe speech", async (signal, onProgress) => {
+      const result = await this.serial(() =>
+        tryRunCommand(this.commandContext({ session, signal, onProgress }), "transcribe", {
+          assetId,
+        }),
+      );
+      if (!result.ok) throw new Error(result.error);
+    });
+  }
+
+  /** Cancel one explicitly identified background job, including export. */
+  cancelJob(id: string): boolean {
+    const work = this.work.get(id);
+    if (work) {
+      work.abort.abort();
+      return true;
+    }
+    if (
+      this.jobs
+        .list()
+        .some((job) => job.id === id && job.kind === "export" && job.status === "running") &&
+      this.exportAbort
+    ) {
+      this.exportAbort.abort();
+      return true;
+    }
+    return false;
+  }
+
+  private startWork(
+    kind: JobInfo["kind"],
+    label: string,
+    fn: (signal: AbortSignal, progress: (fraction: number) => void) => Promise<void>,
+  ): string {
+    this.assertIdle();
+    if (this.exportAbort) throw new HttpError(409, "Wait for the current export to finish.");
+    const abort = new AbortController();
+    const job = this.jobs.create(kind, label);
+    const promise = Promise.resolve()
+      .then(() => fn(abort.signal, (value) => job.progress(value)))
+      .then(() => {
+        if (abort.signal.aborted) job.fail("Cancelled");
+        else job.done();
+      })
+      .catch((error) =>
+        job.fail(abort.signal.aborted ? "Cancelled" : this.cfg.log.redact(errorMessage(error))),
+      )
+      .finally(() => {
+        this.work.delete(job.id);
+        this.scheduleBroadcast();
+      });
+    this.work.set(job.id, { abort, promise });
+    return job.id;
+  }
+
   /** Current local-model status from the injected controller. */
   localModelStatus(): Promise<LocalModelStatus> {
     return this.cfg.localModel.status();
@@ -901,6 +1015,8 @@ export class Engine {
     this.chat?.abort.abort();
     this.localTask?.abort();
     this.exportAbort?.abort();
+    for (const work of this.work.values()) work.abort.abort();
+    await Promise.all([...this.work.values()].map((work) => work.promise));
     const mediaStopped = this.media.shutdown();
     await this.processes.killAll();
     await mediaStopped;

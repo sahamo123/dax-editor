@@ -17,6 +17,7 @@ import type {
   AgentRunnerFactory,
   LocalModelController,
   ProviderRegistry,
+  SpeechController,
 } from "./interfaces.js";
 import { createLogger, type Logger } from "./logger.js";
 import { buildRouter } from "./routes.js";
@@ -58,6 +59,8 @@ export interface ServerOptions {
   localModel?: LocalModelController;
   /** Speech-to-text engine for transcription; omit when none is installed. */
   transcriber?: Transcriber;
+  /** Optional offline speech installation controls. */
+  speech?: SpeechController;
   /** Where to log. Defaults to stderr; stdout is reserved for the startup line. */
   logger?: Logger;
   /** Log every request (method, path, status; never the query string). */
@@ -104,6 +107,7 @@ export async function startServer(options: ServerOptions): Promise<RunningServer
     providers: options.providers ?? new NullProviderRegistry(),
     localModel: options.localModel ?? new NullLocalModelController(),
     ...(options.transcriber ? { transcriber: options.transcriber } : {}),
+    ...(options.speech ? { speech: options.speech } : {}),
     log,
     emit: (event) => hub.broadcast(event),
     hasListeners: () => hub.size > 0,

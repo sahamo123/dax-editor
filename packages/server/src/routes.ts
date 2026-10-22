@@ -16,6 +16,7 @@ import {
   ProjectPathRequestSchema,
   ProviderDiagnosticRequestSchema,
   SettingsSchema,
+  TranscribeRequestSchema,
   UploadNameSchema,
 } from "@dax/protocol";
 import { z } from "zod";
@@ -146,6 +147,19 @@ export function buildRouter(engine: Engine): Router {
   });
 
   // ----- local model (delegated to the injected controller) -----
+  r.add("GET", API.speech, async ({ json }) => json(200, await engine.speechStatus()));
+  r.add("POST", API.speechInstall, ({ json }) => json(202, { jobId: engine.installSpeech() }));
+  r.add("POST", API.speechRemove, async ({ json }) => {
+    await engine.removeSpeech();
+    json(200, { ok: true });
+  });
+  r.add("POST", API.transcribe, async ({ body, json }) => {
+    const req = parseWith(TranscribeRequestSchema, await body());
+    json(202, { jobId: engine.startTranscription(req.assetId) });
+  });
+  r.add("POST", API.jobCancel, ({ params, json }) =>
+    json(200, { cancelled: engine.cancelJob(params.jobId ?? "") }),
+  );
   r.add("GET", API.localModel, async ({ json }) => json(200, await engine.localModelStatus()));
   r.add("POST", API.localModelInstall, async ({ body, json }) => {
     const req = parseWith(LocalModelInstallRequestSchema, await body());
