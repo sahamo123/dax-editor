@@ -15,6 +15,7 @@ import {
   commandTools,
   getCommand,
   loadSkills,
+  type MotionRenderer,
   type Session,
   type Skill,
   selectSkills,
@@ -67,6 +68,8 @@ export function localProviderSettings(
 
 /** Everything {@link createRunnerFactory} needs besides the server's own settings. */
 export interface RunnerFactoryOptions {
+  /** Optional bounded motion-template renderer. */
+  motion?: MotionRenderer;
   /** Folder of `<name>/SKILL.md` editing skills. Missing or unreadable means no skills, not a failure. */
   skillsDir?: string;
   /** Speech-to-text engine handed to the agent's commands. */
@@ -270,6 +273,7 @@ export function createRunnerFactory(options: RunnerFactoryOptions = {}): AgentRu
           ...(ctx.takeSteering ? { takeSteering: ctx.takeSteering } : {}),
           allowedRoots: [...ctx.allowedRoots],
           ...(options.transcriber ? { transcriber: options.transcriber } : {}),
+          ...(options.motion ? { motion: options.motion } : {}),
         });
         // Only the newest run's conversation is kept, and only its most recent part (about the window the model can see).
         if (mine === generation) history = trimHistory(result.messages, budget.maxContextChars);

@@ -8,6 +8,7 @@ import {
   type CommandResult,
   commandTools,
   getCommand,
+  type MotionRenderer,
   type Session,
   type ToolSpec,
   type Transcriber,
@@ -64,6 +65,8 @@ export interface CreateAgentOptions {
 
 /** Per-run inputs for {@link Agent.run}. */
 export interface AgentRunOptions {
+  /** Optional bounded separate-process motion renderer. */
+  motion?: MotionRenderer;
   /** Optional engine-owned serialization and revision guard; validation and tool allow-lists still apply. */
   executeCommand?(
     context: CommandContext,
@@ -376,6 +379,7 @@ class Loop {
           session: this.run.session,
           allowedRoots: this.run.allowedRoots,
           transcriber: this.run.transcriber,
+          ...(this.run.motion ? { motion: this.run.motion } : {}),
           available: this.prepared.available,
           signal: this.run.signal,
           ...(this.run.executeCommand ? { executeCommand: this.run.executeCommand } : {}),

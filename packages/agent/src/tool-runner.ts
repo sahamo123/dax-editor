@@ -6,6 +6,7 @@ import {
   type CommandContext,
   type CommandOutcome,
   getCommand,
+  type MotionRenderer,
   type Session,
   type ToolSpec,
   type Transcriber,
@@ -30,6 +31,8 @@ export type ToolOutcome =
 
 /** What the runner needs to execute calls. */
 export interface ToolRunnerContext {
+  /** Optional bounded motion templates; no arbitrary script execution. */
+  motion?: MotionRenderer;
   /** Execute validated commands through the owner's serialization/revision guard when provided. */
   executeCommand?(
     context: CommandContext,
@@ -151,6 +154,7 @@ export async function runToolCall(
   }
 
   const commandCtx: CommandContext = { session: ctx.session, source: "ai" };
+  if (ctx.motion) commandCtx.motion = ctx.motion;
   if (ctx.allowedRoots) commandCtx.allowedRoots = ctx.allowedRoots;
   if (ctx.transcriber) commandCtx.transcriber = ctx.transcriber;
   if (ctx.signal) commandCtx.signal = ctx.signal;

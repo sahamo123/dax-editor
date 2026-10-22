@@ -14,6 +14,7 @@ import {
   startServer,
 } from "@dax/server";
 import type { CreateTranscriberOptions } from "@dax/stt";
+import { createBlenderRenderer } from "./blender.js";
 import { createLocalModelController, localConnection } from "./local-model.js";
 import { seedOfflineBundle } from "./offline-bundle.js";
 import { seedOfflineSpeech } from "./offline-speech.js";
@@ -175,6 +176,7 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
       ? undefined
       : (cliBridges ?? createCliBridges({ dataDir: options.dataDir, transcriber }));
   const runner = createRunnerFactory({
+    motion: server.motion ?? createBlenderRenderer(server.dataDir),
     ...(dir ? { skillsDir: dir } : {}),
     ...(transcriber ? { transcriber } : {}),
     ...(bridges
@@ -187,6 +189,7 @@ export async function launch(options: LaunchOptions): Promise<RunningServer> {
   });
   const started = await startServer({
     ...server,
+    motion: server.motion ?? createBlenderRenderer(server.dataDir),
     liveMcp: {
       shimPath: existsSync(fileURLToPath(new URL("./editor-proxy.mjs", import.meta.url)))
         ? fileURLToPath(new URL("./editor-proxy.mjs", import.meta.url))
