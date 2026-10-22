@@ -20,7 +20,14 @@ import {
 } from "./chat-model";
 
 /** Tabs of the side drawer. */
-export type DrawerTab = "presets" | "inspector" | "media" | "history" | "tools" | "speech";
+export type DrawerTab =
+  | "presets"
+  | "inspector"
+  | "media"
+  | "history"
+  | "tools"
+  | "speech"
+  | "connections";
 
 /** Where the link to the engine stands. */
 interface ConnectionState {
@@ -116,7 +123,8 @@ function readDrawerTab(): DrawerTab {
       v === "media" ||
       v === "history" ||
       v === "tools" ||
-      v === "speech"
+      v === "speech" ||
+      v === "connections"
     )
       return v;
   } catch {
