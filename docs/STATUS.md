@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Functional desktop release — October 22, 2026
+
+The owner approved the [functional release contract](specs/functional-desktop-release.md), tracked by [issue #8](https://github.com/sahamo123/dax-editor/issues/8) and issues #9–#17. Manual editing and local AI have historical passing evidence; hosted providers are mock-tested, speech setup and Blender integration are incomplete, and general MCP still needs a live desktop bridge. Fresh checks and a visual audit are in progress. The narrow preview shows an old timeout below a ready status and clipped preset descriptions. Native release remains NOT READY; no security policy has been changed.
+
 ## Windows laptop checkpoint — October 20, 2026
 
 The next continuation ([issue #6](https://github.com/sahamo123/dax-editor/issues/6), branch `codex/lightweight-ai-providers`) adds explicit OpenRouter setup with isolated key storage, model ID and context/output/temperature settings, plus generic OpenAI/LM Studio/Ollama endpoint presets. Hosted connection status is configuration only; no paid API was called. A verified 533 MB Qwen3.5 0.8B trial measured 17.74 tokens/second but failed a basic format edit and changed an unsolicited fit parameter. It is not promoted to the shipping catalogue; 2B remains bundled. MIT llama.cpp remains the embedded runtime, LM Studio is optional. See [the spec and trial outcome](specs/lightweight-ai-providers.md).
