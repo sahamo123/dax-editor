@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Correction**: the first Windows candidate build exposed a laptop-specific MSVC redistributable path. Packaging now locates complete release CRT/OpenMP layouts using the explicit override, laptop-local SDK or Microsoft's vswhere installation discovery. Component names and versions are discovered rather than pinned to one machine; debug layouts are excluded and bundled DLL hashes remain recorded. A synthetic-layout regression verifies selection and missing/debug rejection.
+
 * **Creation**: artifact-only Windows candidate workflow on the dedicated review branch, using existing pinned build actions and read-only repository permissions. It prepares the wired engine, verified local AI/speech and LGPL-safe sidecars, then uploads an unsigned installer without publishing a release. Reason: local Application Control blocks both available native build-tool paths. A successful CI artifact still does not validate installation on this laptop.
 
 * **Correction**: a final saved-state audit found the initial expanded smoke had not asserted fit preservation. The existing square-preset default changed contain to blur despite an instruction to preserve it. Editor command contexts now preserve omitted fit/fps, including live MCP and batches; standalone CLI defaults remain compatible (ADR 0015). Smoke checks now assert fit/fps/title timing. Prior narrow PASS is superseded until this stronger check passes. Windows Application Control also blocked the Tauri native binding during rebuild; shell checks fail on a platform-specific test and are being reconciled separately.
