@@ -54,6 +54,10 @@ export const AssetSchema = z.object({
   hasAudio: z.boolean(),
   /** Speech transcript, once one has been made. Times are in the asset's own time. */
   transcript: TranscriptSchema.optional(),
+  /** App-generated asset recipe, retained for explicit regeneration; never executable code. */
+  generation: z
+    .object({ kind: z.literal("blender"), parameters: z.record(z.unknown()) })
+    .optional(),
 });
 /** A validated {@link AssetSchema} value. */
 export type Asset = z.infer<typeof AssetSchema>;

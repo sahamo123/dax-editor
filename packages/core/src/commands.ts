@@ -19,6 +19,8 @@ import {
 } from "./cuts.js";
 import { describeEffects, EFFECT_COMMANDS } from "./effect-commands.js";
 import { detectScenes, detectSilence, padSilences, probe } from "./media.js";
+import type { MotionRenderer } from "./motion.js";
+import { MOTION_COMMANDS } from "./motion-commands.js";
 import {
   addOverlay,
   moveOverlay,
@@ -65,6 +67,8 @@ import { findFillerRanges, formatTranscript, type Transcriber } from "./transcri
 
 /** What a command needs to run. */
 export interface CommandContext {
+  /** Optional separate-process motion-template renderer. */
+  motion?: MotionRenderer;
   session: Session;
   /** If set, imports and exports are restricted to these folders. */
   allowedRoots?: string[];
@@ -1119,6 +1123,7 @@ export const COMMANDS: readonly CommandDef[] = [
   ...EFFECT_COMMANDS,
   ...TEMPLATE_COMMANDS,
   ...PROJECT_COMMANDS,
+  ...MOTION_COMMANDS,
 ];
 
 /** Look up a command by name. */
