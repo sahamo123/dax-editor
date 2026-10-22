@@ -1424,3 +1424,38 @@ textarea.input {
 .composer .chips {
   flex-wrap: wrap;
 }
+
+.project-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+.project-menu > summary {
+  list-style: none;
+}
+.project-menu__panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(340px, 90vw);
+  max-height: 75vh;
+  overflow: auto;
+  padding: 16px;
+  z-index: 60;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 36px #0008;
+}
+.project-menu__panel .btn {
+  white-space: normal;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.project-tools {
+  padding: 16px;
+}
+.project-tools details > summary {
+  padding: 10px 0;
+  cursor: pointer;
+}
+
