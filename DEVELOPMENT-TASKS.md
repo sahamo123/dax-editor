@@ -4,19 +4,19 @@
 
 The owner approved the expanded [functional release contract](docs/specs/functional-desktop-release.md). [Delivery issue #8](https://github.com/sahamo123/dax-editor/issues/8) indexes T01–T09 (issues #9–#17). The connector has no milestone-creation operation; the delivery issue is the tracking index until that capability is available.
 
-Current implementation is published as dependent draft PRs #18–#33. The full repository check passed at 5196e95 (`artifacts/functional-full-check.log`); follow-up local inference/context and browser corrections require a final rerun. Current visual evidence: `artifacts/functional-audit/03-current-tools.png` and `04-current-workspace.png`. Historical phases below retain their original evidence and are not final-release certification.
+Current implementation is published as dependent draft PRs #18–#37. Application source 0d1b7e7 passes `pnpm check` (1,780 package tests plus 14 root tests), all 37 browser workflows and 25 Rust tests. Portable packaging follow-up f42200a passes 13 shell-script tests, dead-code checks and local resource preparation. Final evidence: `artifacts/preservation-final-check.log`, `preservation-final-browser-tests.log`, `functional-rust-tests.log`, `redist-shell-tests.log` and `offline-smoke-1792707259245/result.json`. Historical phases below retain their original evidence and are not final-release certification.
 
 | Stage | State | Remaining |
 |---|---|---|
-| T01 baseline | IMPLEMENTED / VERIFYING | Final current-source gate and evidence reconciliation |
+| T01 baseline | VERIFIED | Current-source checks, visual walkthrough and evidence reconciliation recorded |
 | T02 tasks/revisions | IMPLEMENTED | Broader native task acceptance; shared queue/recovery/conflict tests pass |
 | T03 providers | IMPLEMENTED / PARTIAL | Live hosted credentials and multiple named profiles of the same family |
 | T04 projects/manual | IMPLEMENTED / PARTIAL | Native dialogs and complete manual feature parity; laptop project-copy workflow passes |
-| T05 UX | IMPLEMENTED / VERIFYING | Final common-size/scaling walkthrough; resizable saved layouts retained |
+| T05 UX | IMPLEMENTED / BROWSER VERIFIED | 37 browser workflows; native Windows scaling/dialog acceptance remains |
 | T06 speech | IMPLEMENTED / LIVE VERIFIED | Longer edited-speech/native UI acceptance; 23-word narration/caption export passes |
 | T07 MCP | IMPLEMENTED / TRANSPORT VERIFIED | Actual Claude/Codex sessions and external cancellation acceptance |
 | T08 Blender | IMPLEMENTED / BLOCKED | Real render/regenerate/cancel needs policy-authorized Blender; event 3077 blocks verified official executable |
-| T09 release | IN PROGRESS / BLOCKED | Final AI correctness/latency suite, installer rebuild and native install/upgrade validation |
+| T09 release | PARTIAL / BLOCKED | Stronger real offline suite passes; local installer tools blocked; artifact-only CI candidate in PR #37; native install/upgrade and full-app memory acceptance remain |
 
 Plan: [Windows implementation plan](docs/engineering/windows-desktop-plan.md).
 GitHub delivery tracking: [issue #2](https://github.com/sahamo123/dax-editor/issues/2).
