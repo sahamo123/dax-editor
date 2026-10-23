@@ -1,8 +1,8 @@
 // Standalone callers cannot accidentally invoke live task controls; malformed identifiers never reach the host.
 import { describe, expect, it, vi } from "vitest";
 import { tryRunCommand } from "./commands.js";
-import { emptyProject } from "./timeline.js";
 import { Session } from "./session.js";
+import { emptyProject } from "./timeline.js";
 
 describe("live cancellation command", () => {
   it("explains unsupported standalone use and validates UUIDs before calling a host", async () => {
