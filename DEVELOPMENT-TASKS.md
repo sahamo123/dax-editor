@@ -11,7 +11,7 @@ Dependent draft PRs #40–#50 close additional implementation gaps. The older Oc
 | T06 speech | 143.65 seconds of offline synthetic speech, 318 words/89 caption lines, correction/reviewed cut/trim/export pass | Human recordings, hours-long scaling and native UI acceptance |
 | T07 MCP | Active render cancellation, task ownership and Planning exclusion pass; installed Codex CLI parses both configurations | Actual individually verified Claude/Codex assistant editing sessions |
 | T08 Blender | Real Linux Blender 4.0.2 passes all three templates, nonblank output, import/regenerate/undo and cancel cleanup | Local Windows executable remains blocked by application control |
-| T09 release | Updated source/preview and fresh unsigned Windows candidate build in PR #49 | Final refreshed checks, current installer transfer, policy-authorized native install/upgrade/playback/shutdown and whole-app peak memory |
+| T09 release | Current `pnpm check` passes (1,788 package +14 script tests); all 39 browser workflows pass; final build/type/lint passes; latest unsigned candidate build in PR #51 | Current installer transfer, policy-authorized native install/upgrade/playback/shutdown and whole-app peak memory |
 
 Evidence: `artifacts/blender-real-evidence/result.json`, `speech-longform/result.json`, `codex-config-acceptance/result.json`, `mcp-cancellation-tests-final.log`, `manual-effects-browser-final.log` and `autonomous-preview-smoke.log` (all under `artifacts/`). The preview preserves `.dax-data/`; native release remains **NOT READY**. No Windows policy or global client configuration has been changed.
 
