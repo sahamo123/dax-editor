@@ -2,6 +2,10 @@
 
 ## 2026-10-23
 
+* **Verification**: longer offline speech acceptance passes on 143.65 seconds of locally synthesized narration (318 words, 89 caption lines). The script refuses network fetches, checks a timing-preserving correction, read-only cut planning, one explicitly approved pause removal, trimming and captioned export. Audio/video stream drift is 68.625 ms, below one 12 fps frame. This is synthetic speech evidence, not a claim about hours of recorded conversation. Reproduce after provisioning speech with `scripts/New-SpeechFixture.ps1` in a permitted PowerShell development host and `node scripts/verify-speech-longform.mjs`; evidence is `artifacts/speech-longform/result.json`.
+
+* **Verification**: real separate-process Blender acceptance passes in Linux run 39920503783: all three templates render nonblank output, import, regenerate with undo, and cancel with cleanup. Local Windows execution remains policy-blocked. Registry/agent assertions now explicitly cover both irreversible operations (export and cancellation), rather than assuming export is the only one.
+
 * **Creation**: external task cancellation is a typed shared-registry command, restricted to an explicit active-project UUID. Planning cannot discover or invoke it; unsupported standalone hosts explain the missing capability. Background tasks now retain their original project/revision/history context. Real loopback MCP regression cancels an active controlled render without changing project/history and reports finished work honestly.
 
 * **Correction**: first real Linux Blender run exposed a production template assumption: the system build has no OpenImageDenoiser. The bounded CPU templates now explicitly disable optional denoising so supported separate-process installations can render. Real acceptance reruns this correction rather than substituting mock-render success.

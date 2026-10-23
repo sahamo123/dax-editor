@@ -15,7 +15,11 @@ generated:
 
 T03 named connection snapshots and desktop Save/Load/Remove controls are implemented (PRs #40–#41). Same-family accounts retain isolated private keys; loading never invokes inference. Builds, 37 targeted server/security tests, 52 UI/controller tests and all nine settings browser scenarios pass. Existing settings remain compatible.
 
-T04 manual zoom, music/SFX, ducking and image controls are implemented. Seven media-upload regressions pass, including real WAV validation; the laptop browser workflow verifies zoom adjustment, actual WAV/PNG selection, undo/redo, manual tasks and playable video/audio export without AI. Exact effect appearance is reviewed through export while preview parity remains limited. Current full gates are next. Native, actual hosted/client and Blender acceptance remain separate. The October 22 evidence below is historical baseline, not certification of this continuation.
+T04 manual zoom, music/SFX, ducking and image controls are implemented. Seven media-upload regressions pass, including real WAV validation; the laptop browser workflow verifies zoom adjustment, actual WAV/PNG selection, undo/redo, manual tasks and playable video/audio export without AI. Exact effect appearance is reviewed through export while preview parity remains limited.
+
+Real Blender acceptance passes in Linux run [39920503783](https://github.com/sahamo123/dax-editor/actions/runs/39920503783): all three templates, import, regeneration/undo and cancellation cleanup. Evidence: `artifacts/blender-real-evidence/result.json`. Local Windows Blender execution remains blocked. Longer offline speech also passes on 143.65 seconds of synthetic narration, with 318 words, corrected captions, a reviewed pause cut, trim and synchronized export (68.625 ms drift, below one 12 fps frame); `artifacts/speech-longform/result.json`. This does not establish hours-long or human-recorded speech performance.
+
+T07 adds typed `cancel_task` through the shared registry, with active-project ownership and Planning exclusion; reads and cancellation no longer wait behind the render being stopped. Targeted live MCP/media/connection regressions pass. Full repository/browser gates are being refreshed. Native installation and actual hosted/client sessions remain separate. The October 22 evidence below is historical baseline, not certification of this continuation.
 
 ## Functional desktop release — October 22, 2026
 
