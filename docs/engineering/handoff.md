@@ -13,6 +13,8 @@ generated:
 
 ## October 23 autonomous continuation
 
+Final continuation is `codex/autonomous-release-final`, following draft PRs #40–#53. Application checks pass (1,788 package tests, 39 browser workflows); transport-only follow-up has all 15 root tests/lint/dead-code/OKF passing. Current unsigned installer build 39925892009 succeeds, including the client configuration correction. Its 1.7 GB archive and smaller transport parts remain on GitHub: connector downloads time out even at 64 MiB and the standard browser download also times out. Only the small hash receipt is verified locally. No current local installer is claimed. See the top of STATUS for exact hashes, current acceptance boundaries and native execution blocker. Local source ZIP, verified Git bundle, checksums and `artifacts/DELIVERY.json` capture this handoff. Main remains unchanged.
+
 Continue from the latest dependent draft PR after #47, not the older provider branch. PRs #40–#41 add named connection snapshots; #42–#45 add manual zoom/audio/ducking/image tools and browser/export validation; #46 verifies real Blender rendering in Linux; #47 adds shared-registry live task cancellation. Follow `docs/STATUS.md` for final gate results. Real longer speech evidence is `artifacts/speech-longform/result.json`; reproduce with the opt-in fixture/verification scripts after installing the offline speech assets. Native Windows execution and actual hosted/external-client edits remain unverified. Preserve `.dax-data/` and ignored evidence. Preview effect parity is limited; review exact zoom/music/image appearance in an export.
 
 ## October 22 functional release checkpoint
