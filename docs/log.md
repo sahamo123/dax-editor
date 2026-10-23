@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Update**: Windows candidate run 39867954073 succeeds and uploads a 1,705,211,086-byte artifact. Local artifact download is capped at 512 MiB, and browser transfer did not complete. The review workflow now also uploads four 450 MiB-or-smaller transport parts with whole-installer and per-part hashes. The official upload action is immutable-pinned; permissions remain read-only, with no release publication or signing secrets. This dependency is needed solely for bounded local artifact delivery. Reassembly must verify every hash before execution.
+
 * **Correction**: the first Windows candidate build exposed a laptop-specific MSVC redistributable path. Packaging now locates complete release CRT/OpenMP layouts using the explicit override, laptop-local SDK or Microsoft's vswhere installation discovery. Component names and versions are discovered rather than pinned to one machine; debug layouts are excluded and bundled DLL hashes remain recorded. A synthetic-layout regression verifies selection and missing/debug rejection.
 
 * **Creation**: artifact-only Windows candidate workflow on the dedicated review branch, using existing pinned build actions and read-only repository permissions. It prepares the wired engine, verified local AI/speech and LGPL-safe sidecars, then uploads an unsigned installer without publishing a release. Reason: local Application Control blocks both available native build-tool paths. A successful CI artifact still does not validate installation on this laptop.
