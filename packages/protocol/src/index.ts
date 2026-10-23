@@ -24,6 +24,7 @@ export const API = {
   taskCancel: "/api/tasks/:taskId/cancel",
   settings: "/api/settings",
   apiKey: "/api/settings/api-key",
+  connections: "/api/settings/connections",
   providers: "/api/providers",
   providerTest: "/api/providers/test",
   providerModels: "/api/providers/models",
@@ -232,8 +233,34 @@ export const ProviderConfigSchema = z.object({
 /** A validated {@link ProviderConfigSchema} value. */
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 
+/** API families supported by independently saved connection snapshots. */
+export const CONNECTION_KINDS = ["openai", "openrouter", "openai-compatible", "anthropic"] as const;
+/** Saved public connection metadata; credentials remain exclusively in private secret storage. */
+export const SavedConnectionSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().trim().min(1).max(80),
+  kind: z.enum(CONNECTION_KINDS),
+  config: ProviderConfigSchema,
+});
+/** An immutable saved settings snapshot; loading makes a working copy. */
+export type SavedConnection = z.infer<typeof SavedConnectionSchema>;
+/** Explicit save/load/remove actions; loading never sends a provider request. */
+export const ConnectionRequestSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("save"),
+    kind: z.enum(CONNECTION_KINDS),
+    name: z.string().trim().min(1).max(80),
+  }),
+  z.object({ action: z.literal("load"), id: z.string().uuid() }),
+  z.object({ action: z.literal("remove"), id: z.string().uuid() }),
+]);
+/** A validated saved-connection operation. */
+export type ConnectionRequest = z.infer<typeof ConnectionRequestSchema>;
+
 /** Settings the UI can read and write. */
 export const SettingsSchema = z.object({
+  /** Server-owned immutable snapshots. Ordinary settings writes cannot replace this list. */
+  savedConnections: z.array(SavedConnectionSchema).max(24).optional(),
   /** Minutes without chat before unloading local inference; defaults to five for older settings. */
   localIdleMinutes: z.number().int().min(1).max(60).optional(),
   activeProvider: z.enum(PROVIDER_KINDS),

@@ -20,6 +20,7 @@ import {
 import {
   type AgentEvent,
   type CommandResponse,
+  type ConnectionRequest,
   type JobInfo,
   type LocalModelStatus,
   MAX_UPLOAD_BYTES,
@@ -34,6 +35,7 @@ import {
   type TaskInfo,
   type WsEvent,
 } from "@dax/protocol";
+import { changeConnection } from "./connections.js";
 import { ProcessRegistry } from "./ffmpeg-run.js";
 import { HttpError } from "./http-util.js";
 import type {
@@ -375,28 +377,48 @@ export class Engine {
 
   /** Replace the settings (validated) and push state. */
   async updateSettings(next: unknown): Promise<Settings> {
-    const saved = await this.settings.set(next);
-    this.armIdleUnload();
-    this.invalidateProviders();
-    return saved;
+    return this.serial(async () => {
+      const saved = await this.settings.set(next);
+      this.armIdleUnload();
+      this.invalidateProviders();
+      return saved;
+    });
+  }
+
+  /** Save/load/remove an immutable named API connection without sending inference or editing the project. */
+  async connection(request: ConnectionRequest): Promise<Settings> {
+    return this.serial(async () => {
+      this.invalidateProviders();
+      try {
+        return await changeConnection(request, this.settings, this.secrets, (kind, settings) =>
+          this.keyForSettings(kind, settings),
+        );
+      } finally {
+        this.invalidateProviders();
+      }
+    });
   }
 
   /** Store an API key for a provider. The key is registered for log redaction. */
   async setApiKey(kind: ProviderKind, apiKey: string): Promise<void> {
-    await this.secrets.set(
-      kind,
-      apiKey,
-      kind === "openai-compatible"
-        ? (this.settings.get().providers[kind]?.baseUrl?.replace(/\/$/, "") ?? "")
-        : undefined,
-    );
-    this.invalidateProviders();
+    return this.serial(async () => {
+      await this.secrets.set(
+        kind,
+        apiKey,
+        kind === "openai-compatible"
+          ? (this.settings.get().providers[kind]?.baseUrl?.replace(/\/$/, "") ?? "")
+          : undefined,
+      );
+      this.invalidateProviders();
+    });
   }
 
   /** Delete the stored API key for a provider. */
   async removeApiKey(kind: ProviderKind): Promise<void> {
-    await this.secrets.remove(kind);
-    this.invalidateProviders();
+    return this.serial(async () => {
+      await this.secrets.remove(kind);
+      this.invalidateProviders();
+    });
   }
 
   // ---------- commands ----------

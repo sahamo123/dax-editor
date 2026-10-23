@@ -1,5 +1,9 @@
 # Project log
 
+## 2026-10-23
+
+* **Creation**: T03 named API connection snapshots, with immutable public configuration and independent keys only in secrets.json. Explicit save/load/remove runs through the engine serial queue; loading clears the previous working key before changing configuration, and never invokes inference. Ordinary/legacy settings writes preserve snapshots and cannot rebind their keys. Existing queued credentials remain captured. See the named-connections spec; hosted/native acceptance is separate.
+
 ## 2026-10-22
 
 * **Incident**: bounded installer run 39906232080 succeeds and uploads all four hashed transport parts, but the local connector times out on the 289,634,369-byte final-part ZIP; the full ZIP exceeds its 512 MiB cap and browser transfer did not complete. No verified local current installer copy is claimed. GitHub retains successful unsigned candidates; native execution/install acceptance remains unmet. The visible-directory transport-only follow-up remains separately tracked rather than being presented as required application validation.

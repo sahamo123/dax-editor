@@ -60,6 +60,7 @@ describe("authentication", () => {
       ["POST", "/api/chat/cancel"],
       ["GET", "/api/settings"],
       ["POST", "/api/settings/api-key"],
+      ["POST", "/api/settings/connections"],
       ["GET", "/api/providers"],
       ["POST", "/api/providers/test"],
       ["POST", "/api/providers/models"],

@@ -7,6 +7,7 @@ import {
   ApiKeyRequestSchema,
   ChatRequestSchema,
   CommandRequestSchema,
+  ConnectionRequestSchema,
   ImportRequestSchema,
   LocalModelInstallRequestSchema,
   MAX_UPLOAD_BYTES,
@@ -134,6 +135,9 @@ export function buildRouter(engine: Engine): Router {
   };
   r.add("PUT", API.settings, putSettings);
   r.add("POST", API.settings, putSettings);
+  r.add("POST", API.connections, async ({ body, json }) => {
+    json(200, await engine.connection(parseWith(ConnectionRequestSchema, await body())));
+  });
 
   r.add("POST", API.apiKey, async ({ body, json }) => {
     const req = parseWith(ApiKeyRequestSchema, await body());

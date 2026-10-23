@@ -4,7 +4,13 @@
 import { randomBytes } from "node:crypto";
 import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { PROVIDER_KINDS, type ProviderKind, type Settings, SettingsSchema } from "@dax/protocol";
+import {
+  PROVIDER_KINDS,
+  type ProviderKind,
+  type SavedConnection,
+  type Settings,
+  SettingsSchema,
+} from "@dax/protocol";
 import { z } from "zod";
 import type { Logger } from "./logger.js";
 
@@ -59,8 +65,10 @@ export class SettingsStore {
   }
 
   /** Validate, store and persist new settings. Throws a ZodError if `next` is invalid. */
-  async set(next: unknown): Promise<Settings> {
+  async set(next: unknown, connections?: SavedConnection[]): Promise<Settings> {
     const parsed = SettingsSchema.parse(next);
+    // Snapshots may only be created/removed by the explicit connection operation, not by old clients or config edits.
+    parsed.savedConnections = connections ?? this.value.savedConnections;
     await writeFileAtomic(this.file, JSON.stringify(parsed, null, 2));
     this.value = parsed;
     return this.get();
@@ -68,6 +76,7 @@ export class SettingsStore {
 }
 
 const SecretsSchema = z.object({
+  connections: z.record(z.string().uuid(), z.string().min(1)).default({}),
   apiKeys: z.record(z.enum(PROVIDER_KINDS), z.string().min(1)).default({}),
   targets: z.record(z.enum(PROVIDER_KINDS), z.string()).default({}),
 });
@@ -78,6 +87,7 @@ const SecretsSchema = z.object({
  * callers can only ask "is there a key" or fetch one key to hand to the AI provider.
  */
 export class SecretStore {
+  private connections: Record<string, string> = {};
   private keys: Partial<Record<ProviderKind, string>> = {};
   private targets: Partial<Record<ProviderKind, string>> = {};
   private readonly file: string;
@@ -94,6 +104,7 @@ export class SecretStore {
     try {
       const parsed = SecretsSchema.parse(JSON.parse(await readFile(this.file, "utf8")));
       this.keys = parsed.apiKeys;
+      this.connections = parsed.connections;
       this.targets = parsed.targets;
       await chmod(this.file, 0o600).catch(() => undefined);
     } catch (err) {
@@ -103,6 +114,28 @@ export class SecretStore {
       this.keys = {};
     }
     for (const key of Object.values(this.keys)) this.log.addSecret(key);
+    for (const key of Object.values(this.connections)) this.log.addSecret(key);
+  }
+
+  /** Private key for an immutable saved connection; never return it through the API. */
+  connectionKey(id: string): string | undefined {
+    return Object.hasOwn(this.connections, id) ? this.connections[id] : undefined;
+  }
+
+  /** Atomically save or forget a snapshot credential, outside settings/project/task files. */
+  async setConnectionKey(id: string, key: string | undefined): Promise<void> {
+    z.string().uuid().parse(id);
+    const next = { ...this.connections };
+    if (key) {
+      next[id] = key;
+      this.log.addSecret(key);
+    } else delete next[id];
+    await writeFileAtomic(
+      this.file,
+      JSON.stringify({ apiKeys: this.keys, targets: this.targets, connections: next }, null, 2),
+      0o600,
+    );
+    this.connections = next;
   }
 
   /** True if a key is stored for `kind`. */
@@ -145,7 +178,11 @@ export class SecretStore {
   private async persist(): Promise<void> {
     await writeFileAtomic(
       this.file,
-      JSON.stringify({ apiKeys: this.keys, targets: this.targets }, null, 2),
+      JSON.stringify(
+        { apiKeys: this.keys, targets: this.targets, connections: this.connections },
+        null,
+        2,
+      ),
       0o600,
     );
   }
