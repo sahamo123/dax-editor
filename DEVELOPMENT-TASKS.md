@@ -1,5 +1,20 @@
 # Dax Editor laptop delivery tracker
 
+## Autonomous continuation — October 23, 2026
+
+Dependent draft PRs #40–#50 close additional implementation gaps. The older October 22 table below is historical and is superseded by these current acceptance states:
+
+| Work | Current evidence | Remaining |
+|---|---|---|
+| T03 connections | Named same-family snapshots and Save/Load/Remove; private isolated keys; targeted security/UI/browser checks pass | Real hosted edits require owner-configured credentials |
+| T04 manual effects | Zoom/music/SFX/ducking/images exposed manually; actual WAV/PNG picker, undo/redo and playable export pass | Exact effect preview parity; native dialog/scaling verification |
+| T06 speech | 143.65 seconds of offline synthetic speech, 318 words/89 caption lines, correction/reviewed cut/trim/export pass | Human recordings, hours-long scaling and native UI acceptance |
+| T07 MCP | Active render cancellation, task ownership and Planning exclusion pass; installed Codex CLI parses both configurations | Actual individually verified Claude/Codex assistant editing sessions |
+| T08 Blender | Real Linux Blender 4.0.2 passes all three templates, nonblank output, import/regenerate/undo and cancel cleanup | Local Windows executable remains blocked by application control |
+| T09 release | Updated source/preview and fresh unsigned Windows candidate build in PR #49 | Final refreshed checks, current installer transfer, policy-authorized native install/upgrade/playback/shutdown and whole-app peak memory |
+
+Evidence: `artifacts/blender-real-evidence/result.json`, `speech-longform/result.json`, `codex-config-acceptance/result.json`, `mcp-cancellation-tests-final.log`, `manual-effects-browser-final.log` and `autonomous-preview-smoke.log` (all under `artifacts/`). The preview preserves `.dax-data/`; native release remains **NOT READY**. No Windows policy or global client configuration has been changed.
+
 ## Functional release continuation — October 22, 2026
 
 The owner approved the expanded [functional release contract](docs/specs/functional-desktop-release.md). [Delivery issue #8](https://github.com/sahamo123/dax-editor/issues/8) indexes T01–T09 (issues #9–#17). The connector has no milestone-creation operation; the delivery issue is the tracking index until that capability is available.
