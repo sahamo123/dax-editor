@@ -74,7 +74,7 @@ jobs:
             $index = 0
             while ($source.Position -lt $source.Length) {
               if ($index -ge 4) { throw 'Candidate exceeds four bounded download parts' }
-              $directory = Join-Path $PWD ".candidate-parts/part-$index"
+              $directory = Join-Path $PWD "candidate-parts/part-$index"
               New-Item -ItemType Directory -Path $directory -Force | Out-Null
               $path = Join-Path $directory 'installer.bin'
               $output = [IO.File]::Create($path)
@@ -94,28 +94,28 @@ jobs:
           if ($parts.Count -ne 4) { throw 'Expected four parts for this offline candidate' }
           $receipt = @{ source=$env:SOURCE_HEAD; installer=$installer[0].Name; bytes=$installer[0].Length; sha256=(Get-FileHash $installer[0].FullName -Algorithm SHA256).Hash; parts=$parts }
           $json = $receipt | ConvertTo-Json -Depth 6
-          0..3 | ForEach-Object { $json | Set-Content -LiteralPath ".candidate-parts/part-$_/receipt.json" }
+          0..3 | ForEach-Object { $json | Set-Content -LiteralPath "candidate-parts/part-$_/receipt.json" }
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dax-functional-part-0
-          path: .candidate-parts/part-0/
+          path: candidate-parts/part-0/
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dax-functional-part-1
-          path: .candidate-parts/part-1/
+          path: candidate-parts/part-1/
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dax-functional-part-2
-          path: .candidate-parts/part-2/
+          path: candidate-parts/part-2/
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dax-functional-part-3
-          path: .candidate-parts/part-3/
+          path: candidate-parts/part-3/
           compression-level: 0
           if-no-files-found: error
