@@ -13,7 +13,9 @@ generated:
 
 ## Autonomous continuation — October 23, 2026
 
-T03 named connection snapshots are being added on `codex/named-connections-api`, followed by their desktop controls. Public metadata is in settings; credentials remain in private secrets storage. Existing settings are retained and requests never auto-switch to hosted inference. This continuation does not claim native, hosted or Blender acceptance. The October 22 evidence below remains the application baseline until current gates finish.
+T03 named connection snapshots and desktop Save/Load/Remove controls are implemented (PRs #40–#41). Same-family accounts retain isolated private keys; loading never invokes inference. Builds, 37 targeted server/security tests, 52 UI/controller tests and all nine settings browser scenarios pass. Existing settings remain compatible.
+
+T04 manual zoom, music/SFX, ducking and image controls are implemented. Seven media-upload regressions pass, including real WAV validation; the laptop browser workflow verifies zoom adjustment, actual WAV/PNG selection, undo/redo, manual tasks and playable video/audio export without AI. Exact effect appearance is reviewed through export while preview parity remains limited. Current full gates are next. Native, actual hosted/client and Blender acceptance remain separate. The October 22 evidence below is historical baseline, not certification of this continuation.
 
 ## Functional desktop release — October 22, 2026
 
