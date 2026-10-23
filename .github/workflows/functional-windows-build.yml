@@ -1,6 +1,7 @@
 name: Windows functional candidate
 
 # Review-branch build only: uploads an unsigned candidate, never publishes a release.
+# October 23 candidate includes named connections, manual effects and live task cancellation.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
