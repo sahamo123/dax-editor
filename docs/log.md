@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Incident**: bounded installer run 39906232080 succeeds and uploads all four hashed transport parts, but the local connector times out on the 289,634,369-byte final-part ZIP; the full ZIP exceeds its 512 MiB cap and browser transfer did not complete. No verified local current installer copy is claimed. GitHub retains successful unsigned candidates; native execution/install acceptance remains unmet. The visible-directory transport-only follow-up remains separately tracked rather than being presented as required application validation.
+
 * **Correction**: bounded transport files use visible generated directories because the pinned artifact action excludes dot-prefixed folders. Only the four generated installer parts and their receipts are uploaded; source/project/credential directories are never included. This transport correction does not change the verified application.
 
 * **Verification**: the final full pnpm check passes after packaging portability fixes and the evidence handoff, with 1,780 package tests and 14 root tests (`artifacts/functional-delivery-final-check.log`). The separate packaging-script suite passes 13 checks; existing 37 browser and 25 Rust checks remain current because application behavior has not changed. Documentation indexes/OKF pass after recording experimental macOS failures. Installer assembly is a separate acceptance step.
