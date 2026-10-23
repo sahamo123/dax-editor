@@ -15,6 +15,8 @@ scene = bpy.context.scene
 scene.render.engine = "CYCLES"
 scene.cycles.device = "CPU"
 scene.cycles.samples = 8
+# Optional denoising is absent from some supported system builds; these bounded templates must render without it.
+scene.cycles.use_denoising = False
 scene.render.resolution_x = p["width"]
 scene.render.resolution_y = p["height"]
 scene.render.resolution_percentage = 100
