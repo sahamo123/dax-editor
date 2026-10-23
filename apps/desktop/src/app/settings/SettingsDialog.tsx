@@ -8,6 +8,7 @@ import { isCliProvider, PROVIDERS, providerLabel } from "../providers";
 import { Icon } from "../ui/icons";
 import { Modal } from "../ui/Modal";
 import { LocalModelCard } from "./LocalModelCard";
+import { SavedConnections } from "./SavedConnections";
 
 const CLI_COMMAND: Record<string, string> = {
   "cli-claude": "claude",
@@ -298,6 +299,7 @@ export function SettingsDialog(): ReactElement | null {
   );
   const [apiKeys, setApiKeys] = useState<Partial<Record<ProviderKind, string>>>({});
   const [saving, setSaving] = useState(false);
+  const [connectionBusy, setConnectionBusy] = useState(false);
 
   const close = () => patchUi({ settingsOpen: false, settingsKind: null });
 
@@ -367,7 +369,7 @@ export function SettingsDialog(): ReactElement | null {
           <button
             type="button"
             className="btn btn--primary"
-            disabled={saving || baseUrlBad || numbersBad}
+            disabled={saving || connectionBusy || baseUrlBad || numbersBad}
             onClick={() => void save()}
           >
             {saving ? "Saving..." : "Save"}
@@ -450,6 +452,23 @@ export function SettingsDialog(): ReactElement | null {
             onModel={(model) => patchConfig({ model })}
           />
           {isCliProvider(selected) ? <CliPane kind={selected} status={status} /> : null}
+          <SavedConnections
+            key={`connections-${selected}`}
+            kind={selected}
+            settings={draft}
+            onSave={() => save(false)}
+            onBusy={setConnectionBusy}
+            onApply={(saved, loaded) => {
+              if (loaded) {
+                setDraft(saved);
+                setSelected(saved.activeProvider);
+                setApiKeys({});
+              } else
+                setDraft((current) =>
+                  current ? { ...current, savedConnections: saved.savedConnections } : saved,
+                );
+            }}
+          />
 
           <label className="check check--card">
             <input

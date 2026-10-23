@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Update**: named connections now have desktop Save/Load/Remove controls per API family. Loading explicitly discards unsaved dialog settings, restores an independent account configuration/key and selects it for future chat; it does not test a provider or send inference. Typed keys remain password-input-only and are cleared on load/save. UI and browser regressions cover this workflow without hosted requests.
+
 * **Creation**: T03 named API connection snapshots, with immutable public configuration and independent keys only in secrets.json. Explicit save/load/remove runs through the engine serial queue; loading clears the previous working key before changing configuration, and never invokes inference. Ordinary/legacy settings writes preserve snapshots and cannot rebind their keys. Existing queued credentials remain captured. See the named-connections spec; hosted/native acceptance is separate.
 
 ## 2026-10-22

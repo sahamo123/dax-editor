@@ -127,6 +127,7 @@ export function fakeController(): { [K in keyof Controller]: ReturnType<typeof v
     undoRun: vi.fn(async () => {}),
     redoRun: vi.fn(async () => {}),
     saveSettings: vi.fn(async () => true),
+    connection: vi.fn(async () => null),
     refreshProviders: vi.fn(async () => {}),
     testProvider: vi.fn(async () => {}),
     providerModels: vi.fn(async () => []),

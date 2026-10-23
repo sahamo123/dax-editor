@@ -12,6 +12,7 @@ import {
   type ChatRequest,
   type ChatStarted,
   type CommandResponse,
+  type ConnectionRequest,
   type ErrorResponse,
   type HealthResponse,
   type JobStarted,
@@ -271,6 +272,11 @@ export class DaxClient {
   /** `PUT /api/settings`: replace the non-secret settings. */
   async putSettings(settings: Settings): Promise<ApiResult<Settings>> {
     return this.request("PUT", API.settings, settings);
+  }
+
+  /** Explicitly save, load or remove an immutable named connection; never returns credentials. */
+  async connection(request: ConnectionRequest): Promise<ApiResult<Settings>> {
+    return this.request("POST", API.connections, request);
   }
 
   /**
