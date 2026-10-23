@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Autonomous continuation — October 23, 2026
+
+T03 named connection snapshots are being added on `codex/named-connections-api`, followed by their desktop controls. Public metadata is in settings; credentials remain in private secrets storage. Existing settings are retained and requests never auto-switch to hosted inference. This continuation does not claim native, hosted or Blender acceptance. The October 22 evidence below remains the application baseline until current gates finish.
+
 ## Functional desktop release — October 22, 2026
 
 The owner approved the [functional release contract](specs/functional-desktop-release.md), tracked by [issue #8](https://github.com/sahamo123/dax-editor/issues/8), issues #9–#17 and dependent draft PRs #18–#37. Implemented: task/revision guards, captured queued settings/credentials, provider probes and independent provider namespaces, project lifecycle/relink/manual controls, responsive tools, offline speech, live-session MCP, and optional bounded Blender templates. Current application source (0d1b7e7) passes `pnpm check`, 37 browser workflows and 25 Rust tests. Packaging follow-up f42200a passes 13 shell-script tests, dead-code checks and actual local offline-resource preparation. Native release remains **NOT READY**; no security policy has been changed.

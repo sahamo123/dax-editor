@@ -8,4 +8,5 @@
 * [Effects layers (zoom, music with ducking, image overlays)](effects-layers.md) - How the engine zooms the picture, mixes music and sound effects under speech with automatic ducking, and draws logos and stickers, and how templates use them.
 * [Functional desktop release](functional-desktop-release.md) - Delivery contract and acceptance gates for manual editing, optional AI providers, speech, live MCP and Blender templates.
 * [Lightweight local AI and API provider setup](lightweight-ai-providers.md) - Measure a smaller local model and provide explicit OpenRouter and direct API configuration without making hosted services mandatory.
+* [Named API connections](named-connections.md) - Explicit immutable snapshots of provider configuration and isolated private credentials.
 * [Product v1 specification](product-v1.md) - How the desktop editor fits together and what each package must deliver: agent, local model runtime, server, desktop UI and Tauri shell.
