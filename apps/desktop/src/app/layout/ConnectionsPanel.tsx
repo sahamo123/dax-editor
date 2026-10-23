@@ -30,7 +30,13 @@ export function ConnectionsPanel(): ReactElement {
     },
     {
       label: "Codex",
-      text: `[mcp_servers.dax_editor]\ncommand = ${JSON.stringify(mcp.command)}\nargs = ${JSON.stringify(mcp.args)}\n\n[mcp_servers.dax_planning]\ncommand = ${JSON.stringify(mcp.command)}\nargs = ${JSON.stringify(mcp.planArgs)}`,
+      text: `[mcp_servers.dax_editor]
+command = ${JSON.stringify(mcp.command)}
+args = ${JSON.stringify(mcp.args)}
+
+[mcp_servers.dax_planning]
+command = ${JSON.stringify(mcp.command)}
+args = ${JSON.stringify(mcp.planArgs)}`,
     },
   ];
   return (

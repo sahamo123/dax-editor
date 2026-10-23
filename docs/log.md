@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Correction**: the Codex MCP helper now emits real TOML line breaks rather than literal backslash-n text. The component regression checks separate editable/Planning entries and Windows path escaping. No client credentials or global client configuration are changed.
+
 * **Verification**: longer offline speech acceptance passes on 143.65 seconds of locally synthesized narration (318 words, 89 caption lines). The script refuses network fetches, checks a timing-preserving correction, read-only cut planning, one explicitly approved pause removal, trimming and captioned export. Audio/video stream drift is 68.625 ms, below one 12 fps frame. This is synthetic speech evidence, not a claim about hours of recorded conversation. Reproduce after provisioning speech with `scripts/New-SpeechFixture.ps1` in a permitted PowerShell development host and `node scripts/verify-speech-longform.mjs`; evidence is `artifacts/speech-longform/result.json`.
 
 * **Verification**: real separate-process Blender acceptance passes in Linux run 39920503783: all three templates render nonblank output, import, regenerate with undo, and cancel with cleanup. Local Windows execution remains policy-blocked. Registry/agent assertions now explicitly cover both irreversible operations (export and cancellation), rather than assuming export is the only one.
