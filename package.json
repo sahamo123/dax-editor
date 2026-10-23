@@ -25,6 +25,7 @@
     "bootstrap": "bash scripts/bootstrap.sh",
     "test:scripts": "node --test \"scripts/*.test.mjs\"",
     "test:offline": "node scripts/verify-offline-bundle.mjs",
+    "test:speech:acceptance": "node scripts/verify-speech-longform.mjs",
     "docs:okf": "node scripts/okf.mjs check docs && node scripts/okf.mjs index docs --check",
     "docs:index": "node scripts/okf.mjs index docs"
   },
