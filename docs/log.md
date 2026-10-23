@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Delivery result**: current Windows candidate 39925892009 succeeds (source 4e019ae). Transport-only run 39927794724 produces 26 hashed pieces from that exact installer; all 15 root tests and lint/dead-code/OKF pass. Local connector transfer still times out at 64 MiB; the standard browser download also times out. The small receipt is hash-verified locally, but no current local installer or native installation is claimed. Current artifact/installer hashes and reproducible source/history backups are recorded in STATUS and the local delivery receipt.
+
 * **Delivery**: current unsigned Windows candidate run 39925892009 passes and publishes the 1.7 GB installer archive. Large local connector transfers previously failed, so a transport-only follow-up splits that exact existing artifact into independently hashed 64 MiB parts. It never rebuilds or executes the installer. The proposed workflow needs only contents/actions read to retrieve this repository's existing artifact, with pinned official download/upload actions and no new runtime dependency. Native execution remains unverified.
 
 * **Verification**: final autonomous gates pass: `pnpm check` (1,788 package tests plus 14 root script tests), 39 browser workflows, and the final build/type/lint refresh. Windows junction fixtures and browser teardown pass in the authorized host after sandbox restrictions were isolated. Installed Codex CLI parses the copied edit/Planning configurations without inference or global configuration writes. Current preview is saved/rebundled/reconnected. Native clean-install acceptance remains blocked separately; the latest unsigned candidate is PR #51.
