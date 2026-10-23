@@ -57,3 +57,65 @@ jobs:
           uploadUpdaterJson: false
           uploadWorkflowArtifacts: true
           workflowArtifactNamePattern: dax-functional-[platform]-[arch]-[bundle]
+      # The local artifact connector caps each ZIP at 512 MiB. Preserve the full candidate
+      # above and provide four independently hashed, uncompressed transport parts as well.
+      - name: Split candidate for bounded local download
+        shell: pwsh
+        env:
+          SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          $installer = @(Get-ChildItem -LiteralPath apps/desktop/src-tauri/target/release/bundle/nsis -Filter '*-setup.exe')
+          if ($installer.Count -ne 1) { throw 'Expected one candidate installer' }
+          $partBytes = 450MB
+          $source = [IO.File]::OpenRead($installer[0].FullName)
+          $parts = @()
+          try {
+            $buffer = New-Object byte[] 1MB
+            $index = 0
+            while ($source.Position -lt $source.Length) {
+              if ($index -ge 4) { throw 'Candidate exceeds four bounded download parts' }
+              $directory = Join-Path $PWD ".candidate-parts/part-$index"
+              New-Item -ItemType Directory -Path $directory -Force | Out-Null
+              $path = Join-Path $directory 'installer.bin'
+              $output = [IO.File]::Create($path)
+              try {
+                $remaining = $partBytes
+                while ($remaining -gt 0) {
+                  $read = $source.Read($buffer, 0, [int][Math]::Min($buffer.Length, $remaining))
+                  if ($read -eq 0) { break }
+                  $output.Write($buffer, 0, $read)
+                  $remaining -= $read
+                }
+              } finally { $output.Dispose() }
+              $parts += @{ index=$index; bytes=(Get-Item $path).Length; sha256=(Get-FileHash $path -Algorithm SHA256).Hash }
+              $index++
+            }
+          } finally { $source.Dispose() }
+          if ($parts.Count -ne 4) { throw 'Expected four parts for this offline candidate' }
+          $receipt = @{ source=$env:SOURCE_HEAD; installer=$installer[0].Name; bytes=$installer[0].Length; sha256=(Get-FileHash $installer[0].FullName -Algorithm SHA256).Hash; parts=$parts }
+          $json = $receipt | ConvertTo-Json -Depth 6
+          0..3 | ForEach-Object { $json | Set-Content -LiteralPath ".candidate-parts/part-$_/receipt.json" }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-0
+          path: .candidate-parts/part-0/
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-1
+          path: .candidate-parts/part-1/
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-2
+          path: .candidate-parts/part-2/
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-3
+          path: .candidate-parts/part-3/
+          compression-level: 0
+          if-no-files-found: error
