@@ -547,10 +547,17 @@ export class Engine {
         ".m4v",
         ".mpg",
         ".mpeg",
-        ...(stageOnly ? [".png", ".jpg", ".jpeg"] : []),
+        ...(stageOnly
+          ? [".png", ".jpg", ".jpeg", ".wav", ".mp3", ".m4a", ".aac", ".ogg", ".flac", ".opus"]
+          : []),
       ]).has(extension)
     )
-      throw new HttpError(400, "Choose a supported video file (MP4, MOV, MKV or WebM).");
+      throw new HttpError(
+        400,
+        stageOnly
+          ? "Choose a supported video, audio or PNG/JPG file."
+          : "Choose a supported video file (MP4, MOV, MKV or WebM).",
+      );
     const parent = join(this.cfg.dataDir, "uploads");
     await mkdir(parent, { recursive: true, mode: 0o700 });
     await resolveInsideRoots(parent, this.cfg.allowedRoots);

@@ -114,6 +114,7 @@ export function fakeController(): { [K in keyof Controller]: ReturnType<typeof v
     blenderStatus: vi.fn(async () => null),
     renderMotion: vi.fn(async () => {}),
     stageLogo: vi.fn(async () => undefined),
+    stageAudio: vi.fn(async () => undefined),
     run: vi.fn(ok),
     runQuiet: vi.fn(ok),
     undo: vi.fn(async () => {}),

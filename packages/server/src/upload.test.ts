@@ -13,6 +13,53 @@ afterEach(async () => {
 });
 describe("browser upload", () => {
   it.skipIf(!HAS_FFMPEG)(
+    "stages audio without importing video, then validates it through the shared audio command",
+    async () => {
+      h = await startHarness();
+      const video = await makeVideo(h.workDir, "base.mp4");
+      await h.post("/api/import", { paths: [video] });
+      const wave = Buffer.alloc(44 + 16000);
+      wave.write("RIFF", 0);
+      wave.writeUInt32LE(wave.length - 8, 4);
+      wave.write("WAVEfmt ", 8);
+      wave.writeUInt32LE(16, 16);
+      wave.writeUInt16LE(1, 20);
+      wave.writeUInt16LE(1, 22);
+      wave.writeUInt32LE(8000, 24);
+      wave.writeUInt32LE(16000, 28);
+      wave.writeUInt16LE(2, 32);
+      wave.writeUInt16LE(16, 34);
+      wave.write("data", 36);
+      wave.writeUInt32LE(16000, 40);
+      const staged = await h.req("/api/import/upload?name=music.wav&stage=true", {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: wave,
+      });
+      expect(staged.json().ok).toBe(true);
+      const path = staged.json<{ data: { path: string } }>().data.path;
+      expect((await h.command("add_audio", { path, role: "music", start: 0 })).ok).toBe(true);
+      expect(
+        (
+          await h.req("/api/import/upload?name=music.wav", {
+            method: "POST",
+            headers: { "Content-Type": "application/octet-stream" },
+            body: wave,
+          })
+        ).status,
+      ).toBe(400);
+      const bad = await h.req("/api/import/upload?name=bad.wav&stage=true", {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body: "not audio",
+      });
+      expect(
+        (await h.command("add_audio", { path: bad.json<{ data: { path: string } }>().data.path }))
+          .ok,
+      ).toBe(false);
+    },
+  );
+  it.skipIf(!HAS_FFMPEG)(
     "allows app-owned uploads while preserving a restrictive external-path policy",
     async () => {
       h = await startHarness({ allowRoots: [join(tmpdir(), "dax-external-imports-disabled")] });
