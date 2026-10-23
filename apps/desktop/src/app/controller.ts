@@ -70,6 +70,8 @@ export interface Controller {
   renderMotion(request: BlenderRenderRequest): Promise<void>;
   /** Stage a user-selected small PNG/JPG logo locally for a template. */
   stageLogo(file: File): Promise<string | undefined>;
+  /** Stage a bounded local audio file for a validated music/SFX operation; never executes an edit itself. */
+  stageAudio(file: File): Promise<string | undefined>;
   /** Run a registry command as a manual edit. Failures also raise a toast. Never throws. */
   run(name: string, args?: Record<string, unknown>): Promise<CommandResponse>;
   /** Same as {@link Controller.run} but without a failure toast (the caller shows its own message). */
@@ -494,6 +496,24 @@ export function createController(deps: ControllerDeps): Controller {
         "path" in r.data &&
         typeof r.data.path === "string"
         ? r.data.path
+        : undefined;
+    },
+
+    async stageAudio(file) {
+      if (file.size > 100 * 1024 * 1024 || !/\.(wav|mp3|m4a|aac|ogg|flac|opus)$/i.test(file.name)) {
+        toast("error", "Choose a supported audio file smaller than 100 MiB.");
+        return;
+      }
+      const result = await client.uploadMedia(file, true);
+      if (!result.ok) {
+        toast("error", result.error);
+        return;
+      }
+      return typeof result.data === "object" &&
+        result.data !== null &&
+        "path" in result.data &&
+        typeof result.data.path === "string"
+        ? result.data.path
         : undefined;
     },
 
