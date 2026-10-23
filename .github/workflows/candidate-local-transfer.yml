@@ -1,0 +1,290 @@
+name: Existing Windows candidate local transfer
+# Read-only transport of a fixed, already successful build; never rebuild or run it.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: [".github/workflows/candidate-local-transfer.yml"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  transfer:
+    if: github.head_ref == 'codex/candidate-local-transfer'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: dax-functional-windows-x64-nsis
+          run-id: 39925892009
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: candidate-input
+      - name: Split and hash the existing installer
+        id: split
+        run: node scripts/candidate-transfer.mjs candidate-input candidate-transfer
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 0
+        with:
+          name: dax-local-part-0
+          path: candidate-transfer/part-0/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 1
+        with:
+          name: dax-local-part-1
+          path: candidate-transfer/part-1/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 2
+        with:
+          name: dax-local-part-2
+          path: candidate-transfer/part-2/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 3
+        with:
+          name: dax-local-part-3
+          path: candidate-transfer/part-3/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 4
+        with:
+          name: dax-local-part-4
+          path: candidate-transfer/part-4/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 5
+        with:
+          name: dax-local-part-5
+          path: candidate-transfer/part-5/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 6
+        with:
+          name: dax-local-part-6
+          path: candidate-transfer/part-6/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 7
+        with:
+          name: dax-local-part-7
+          path: candidate-transfer/part-7/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 8
+        with:
+          name: dax-local-part-8
+          path: candidate-transfer/part-8/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 9
+        with:
+          name: dax-local-part-9
+          path: candidate-transfer/part-9/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 10
+        with:
+          name: dax-local-part-10
+          path: candidate-transfer/part-10/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 11
+        with:
+          name: dax-local-part-11
+          path: candidate-transfer/part-11/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 12
+        with:
+          name: dax-local-part-12
+          path: candidate-transfer/part-12/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 13
+        with:
+          name: dax-local-part-13
+          path: candidate-transfer/part-13/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 14
+        with:
+          name: dax-local-part-14
+          path: candidate-transfer/part-14/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 15
+        with:
+          name: dax-local-part-15
+          path: candidate-transfer/part-15/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 16
+        with:
+          name: dax-local-part-16
+          path: candidate-transfer/part-16/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 17
+        with:
+          name: dax-local-part-17
+          path: candidate-transfer/part-17/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 18
+        with:
+          name: dax-local-part-18
+          path: candidate-transfer/part-18/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 19
+        with:
+          name: dax-local-part-19
+          path: candidate-transfer/part-19/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 20
+        with:
+          name: dax-local-part-20
+          path: candidate-transfer/part-20/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 21
+        with:
+          name: dax-local-part-21
+          path: candidate-transfer/part-21/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 22
+        with:
+          name: dax-local-part-22
+          path: candidate-transfer/part-22/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 23
+        with:
+          name: dax-local-part-23
+          path: candidate-transfer/part-23/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 24
+        with:
+          name: dax-local-part-24
+          path: candidate-transfer/part-24/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 25
+        with:
+          name: dax-local-part-25
+          path: candidate-transfer/part-25/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 26
+        with:
+          name: dax-local-part-26
+          path: candidate-transfer/part-26/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 27
+        with:
+          name: dax-local-part-27
+          path: candidate-transfer/part-27/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 28
+        with:
+          name: dax-local-part-28
+          path: candidate-transfer/part-28/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 29
+        with:
+          name: dax-local-part-29
+          path: candidate-transfer/part-29/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 30
+        with:
+          name: dax-local-part-30
+          path: candidate-transfer/part-30/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: fromJSON(steps.split.outputs.parts) > 31
+        with:
+          name: dax-local-part-31
+          path: candidate-transfer/part-31/installer.bin
+          compression-level: 0
+          retention-days: 7
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-local-receipt
+          path: candidate-transfer/receipt.json
+          retention-days: 7
+          if-no-files-found: error
