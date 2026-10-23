@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Verification**: final autonomous gates pass: `pnpm check` (1,788 package tests plus 14 root script tests), 39 browser workflows, and the final build/type/lint refresh. Windows junction fixtures and browser teardown pass in the authorized host after sandbox restrictions were isolated. Installed Codex CLI parses the copied edit/Planning configurations without inference or global configuration writes. Current preview is saved/rebundled/reconnected. Native clean-install acceptance remains blocked separately; the latest unsigned candidate is PR #51.
+
 * **Correction**: the Codex MCP helper now emits real TOML line breaks rather than literal backslash-n text. The component regression checks separate editable/Planning entries and Windows path escaping. No client credentials or global client configuration are changed.
 
 * **Verification**: longer offline speech acceptance passes on 143.65 seconds of locally synthesized narration (318 words, 89 caption lines). The script refuses network fetches, checks a timing-preserving correction, read-only cut planning, one explicitly approved pause removal, trimming and captioned export. Audio/video stream drift is 68.625 ms, below one 12 fps frame. This is synthetic speech evidence, not a claim about hours of recorded conversation. Reproduce after provisioning speech with `scripts/New-SpeechFixture.ps1` in a permitted PowerShell development host and `node scripts/verify-speech-longform.mjs`; evidence is `artifacts/speech-longform/result.json`.
