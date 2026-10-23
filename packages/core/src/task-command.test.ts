@@ -1,7 +1,7 @@
 // Standalone callers cannot accidentally invoke live task controls; malformed identifiers never reach the host.
 import { describe, expect, it, vi } from "vitest";
 import { tryRunCommand } from "./commands.js";
-import { emptyProject } from "./schema.js";
+import { emptyProject } from "./timeline.js";
 import { Session } from "./session.js";
 
 describe("live cancellation command", () => {
