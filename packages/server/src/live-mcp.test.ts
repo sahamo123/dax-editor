@@ -52,6 +52,71 @@ async function connect(endpoint: Endpoint) {
 }
 
 describe("live desktop MCP", () => {
+  it("cancels an explicit active job through the registry and refuses Planning cancellation", async () => {
+    const h = await startHarness({
+      liveMcp: { shimPath: "test-proxy.js" },
+      motion: {
+        async status() {
+          return { available: true, detail: "test renderer" };
+        },
+        async render(_request, { signal }) {
+          return new Promise((_resolve, reject) => {
+            if (signal?.aborted) reject(new Error("Cancelled"));
+            else
+              signal?.addEventListener("abort", () => reject(new Error("Cancelled")), {
+                once: true,
+              });
+          });
+        },
+      },
+    });
+    try {
+      const config = JSON.parse(await readFile(join(h.dataDir, "live-mcp.json"), "utf8")) as {
+        edit: Endpoint;
+        plan: Endpoint;
+      };
+      const edit = await connect(config.edit),
+        plan = await connect(config.plan);
+      const before = (await h.req("/api/state")).json<StateResponse>();
+      await edit.tool("get_project");
+      const queued = await edit.tool("render_motion_template", {
+        template: "title-card",
+        text: "Cancel me",
+      });
+      expect(queued.isError).not.toBe(true);
+      const state = (await h.req("/api/state")).json<StateResponse>();
+      const task = state.tasks?.find(
+        (item) => item.kind === "blender" && item.status === "running",
+      );
+      expect(task?.projectId).toBe(state.projectId);
+      expect(JSON.stringify(await edit.tool("get_project"))).toContain('"status":"running"');
+      expect(task?.id).toBeDefined();
+      expect(JSON.stringify(await plan.rpc("tools/list", {}))).not.toContain(
+        '"name":"cancel_task"',
+      );
+      const refused = await plan.tool("cancel_task", { taskId: task?.id });
+      expect(refused.isError === true || record(refused.error)).toBe(true);
+      expect(JSON.stringify(await edit.tool("cancel_task", { taskId: task?.id }))).toContain(
+        '"cancelled":true',
+      );
+      await expect
+        .poll(
+          async () =>
+            (await h.req("/api/state"))
+              .json<StateResponse>()
+              .tasks?.find((item) => item.id === task?.id)?.status,
+        )
+        .toBe("cancelled");
+      const final = (await h.req("/api/state")).json<StateResponse>();
+      expect(final.project).toEqual(before.project);
+      expect(final.history).toEqual(before.history);
+      expect(JSON.stringify(await edit.tool("cancel_task", { taskId: task?.id }))).toContain(
+        '"cancelled":false',
+      );
+    } finally {
+      await h.cleanup();
+    }
+  });
   it("shares edits/history, rejects stale work, follows project switches and keeps Planning read-only", async () => {
     const h = await startHarness({ liveMcp: { shimPath: "test-proxy.js" } });
     try {

@@ -37,6 +37,10 @@ Speech is required: setup, verified runtime/model provisioning, transcript corre
 
 ## Architecture and compatibility
 
+External cancellation uses a typed `cancel_task` command in the existing registry, never a parallel MCP edit API. Only live hosts provide its cancellation capability. It accepts an explicit task UUID, signals only work belonging to the current project, and reports whether cancellation was requested; clients poll task status to observe completion. Completed/unknown tasks are unchanged. It is non-read-only and irreversible, so Planning connections cannot discover or invoke it. Job metadata captures project/revision/history context when work begins rather than adopting a later project's identity.
+
+Read-only inspection and cancellation execute outside the project-mutation lock: otherwise a client cannot poll or stop a render holding that lock. Cancellation itself records a task but applies no project edit. Project writes retain serialized revision checks, and an aborted long operation cannot commit a late edit.
+
 Extend the existing protocol with task origin/revisions/history references, provider diagnostics, live MCP jobs, speech status and bounded Blender render requests. New settings must preserve old configuration and secrets. Project files never include credentials. Reject stale mutations instead of overwriting newer work. Project switching resolves queued work explicitly; restart marks interrupted work rather than replaying it.
 
 Heavy rendering/transcription is bounded to one job on the target laptop. Local inference loads on demand, avoids duplicate servers and supports idle unloading. Measure end-to-end latency and peak memory, not only token throughput.
