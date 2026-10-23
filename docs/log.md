@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Creation**: labelled numeric and finite-choice manual-effect fields. Number changes commit on blur/Enter rather than per digit, and invalid/unchanged values never submit. Regression verifies the history boundary and range validation before wiring the full effects panel.
+
 * **Creation**: manual effects media staging supports bounded local audio selection through the existing authenticated upload route. Audio suffixes are accepted only for staging; ordinary video import stays unchanged. The shared core probes bytes when adding music/SFX, including a regression with a real WAV and invalid audio bytes. No shell or encoder arguments are exposed.
 
 * **Update**: named connections now have desktop Save/Load/Remove controls per API family. Loading explicitly discards unsaved dialog settings, restores an independent account configuration/key and selects it for future chat; it does not test a provider or send inference. Typed keys remain password-input-only and are cleared on load/save. UI and browser regressions cover this workflow without hosted requests.
