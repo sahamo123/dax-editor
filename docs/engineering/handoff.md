@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## October 23 autonomous continuation
+
+Continue from the latest dependent draft PR after #47, not the older provider branch. PRs #40–#41 add named connection snapshots; #42–#45 add manual zoom/audio/ducking/image tools and browser/export validation; #46 verifies real Blender rendering in Linux; #47 adds shared-registry live task cancellation. Follow `docs/STATUS.md` for final gate results. Real longer speech evidence is `artifacts/speech-longform/result.json`; reproduce with the opt-in fixture/verification scripts after installing the offline speech assets. Native Windows execution and actual hosted/external-client edits remain unverified. Preserve `.dax-data/` and ignored evidence. Preview effect parity is limited; review exact zoom/music/image appearance in an export.
+
 ## October 22 functional release checkpoint
 
 Start with `docs/specs/functional-desktop-release.md`, `docs/STATUS.md` and `DEVELOPMENT-TASKS.md`. Delivery issue #8 indexes #9–#17. Dependent draft PRs #18–#37 publish the implementation through `codex/functional-windows-build`; the final evidence handoff is on `codex/functional-release-handoff`. Local and connector-created commit IDs differ, but published Git trees were checked against local trees. Do not force-push the older provider branch or main. The artifact-only candidate run is linked from PR #37; it does not publish a release.
