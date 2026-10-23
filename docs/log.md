@@ -2,6 +2,8 @@
 
 ## 2026-10-22
 
+* **Correction**: bounded transport files use visible generated directories because the pinned artifact action excludes dot-prefixed folders. Only the four generated installer parts and their receipts are uploaded; source/project/credential directories are never included. This transport correction does not change the verified application.
+
 * **Verification**: the final full pnpm check passes after packaging portability fixes and the evidence handoff, with 1,780 package tests and 14 root tests (`artifacts/functional-delivery-final-check.log`). The separate packaging-script suite passes 13 checks; existing 37 browser and 25 Rust checks remain current because application behavior has not changed. Documentation indexes/OKF pass after recording experimental macOS failures. Installer assembly is a separate acceptance step.
 
 * **Verification**: cloud Windows/Linux pnpm check and oracle evaluation pass in run 39867954167. Experimental macOS fails: missing FFmpeg drawtext/subtitles plus local-model fallback, process exit and canonical workspace-path assertions. Issue #39 records this separate platform follow-up. No macOS release readiness is claimed.
