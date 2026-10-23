@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Correction**: first real Linux Blender run exposed a production template assumption: the system build has no OpenImageDenoiser. The bounded CPU templates now explicitly disable optional denoising so supported separate-process installations can render. Real acceptance reruns this correction rather than substituting mock-render success.
+
 * **Creation**: opt-in real Blender acceptance script and read-only Linux CI workflow. The repository's application-owned templates render as a separate Blender process; checks cover all three templates, decoded nonblank frames/dimensions/duration, import, regeneration with stable identity/undo and active cancellation cleanup. The system Blender/FFmpeg packages are test tools only, never linked or bundled; the installation reason is real adapter validation where Windows execution is policy-blocked. CI results and Windows acceptance remain distinct.
 
 * **Verification**: reproducible browser regression for manual zoom/music/images passes on a 1024×700 laptop layout. It verifies actual project state, source file selection, undo/redo, task attribution and an exported file with video/audio streams. An initial drawer-state assumption was corrected to use the intended laptop viewport. Evidence: artifacts/manual-effects-browser-final.log.
