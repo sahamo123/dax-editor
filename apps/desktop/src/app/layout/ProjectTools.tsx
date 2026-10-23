@@ -2,6 +2,7 @@
 import { type ReactElement, useState } from "react";
 import { useEditor } from "../../editor";
 import { useApp, useController } from "../context";
+import { EffectsTools } from "./EffectsTools";
 
 /** Manual output-format, title, captions and template controls over the same command registry as chat. */
 export function ProjectTools(): ReactElement {
@@ -216,6 +217,7 @@ export function ProjectTools(): ReactElement {
           </button>
         </div>
       </details>
+      <EffectsTools />
       <details>
         <summary>Keyboard shortcuts</summary>
         <p className="muted">
