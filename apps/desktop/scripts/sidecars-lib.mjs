@@ -3,6 +3,12 @@
 
 import { createHash } from "node:crypto";
 import { createReadStream } from "node:fs";
+import { win32 } from "node:path";
+
+/** Select the host archive extractor. Windows uses its ZIP-capable bsdtar, never Git's GNU tar that treats drive letters as remote hosts. */
+export function archiveExtractor(platform, systemRoot = "C:\\Windows") {
+  return platform === "win32" ? win32.join(systemRoot, "System32", "tar.exe") : "tar";
+}
 
 /** FFmpeg configure flags that make a build GPL or non-redistributable; none may appear. */
 const FORBIDDEN_FFMPEG_FLAGS = [

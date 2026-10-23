@@ -1,0 +1,121 @@
+name: Windows functional candidate
+
+# Review-branch build only: uploads an unsigned candidate, never publishes a release.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: [".github/workflows/functional-windows-build.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-candidate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'codex/functional-windows-build')
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable
+        with:
+          toolchain: stable
+          targets: x86_64-pc-windows-msvc
+      - uses: swatinem/rust-cache@8cbdedb5103daa674dcf46d3590fe06a76645684 # v2.8.0
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+          key: functional-windows
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build the wired engine
+        run: pnpm --filter "@dax/engine..." build
+      - name: Prepare verified offline AI and speech
+        run: |
+          node apps/desktop/scripts/prepare-offline-ai.mjs
+          node apps/desktop/scripts/prepare-offline-speech.mjs
+      - name: Prepare LGPL-safe Windows sidecars
+        run: node apps/desktop/scripts/prepare-sidecars.mjs --release --target x86_64-pc-windows-msvc
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/desktop
+          tauriScript: pnpm exec tauri
+          args: --bundles nsis
+          uploadUpdaterJson: false
+          uploadWorkflowArtifacts: true
+          workflowArtifactNamePattern: dax-functional-[platform]-[arch]-[bundle]
+      # The local artifact connector caps each ZIP at 512 MiB. Preserve the full candidate
+      # above and provide four independently hashed, uncompressed transport parts as well.
+      - name: Split candidate for bounded local download
+        shell: pwsh
+        env:
+          SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          $installer = @(Get-ChildItem -LiteralPath apps/desktop/src-tauri/target/release/bundle/nsis -Filter '*-setup.exe')
+          if ($installer.Count -ne 1) { throw 'Expected one candidate installer' }
+          $partBytes = 450MB
+          $source = [IO.File]::OpenRead($installer[0].FullName)
+          $parts = @()
+          try {
+            $buffer = New-Object byte[] 1MB
+            $index = 0
+            while ($source.Position -lt $source.Length) {
+              if ($index -ge 4) { throw 'Candidate exceeds four bounded download parts' }
+              $directory = Join-Path $PWD "candidate-parts/part-$index"
+              New-Item -ItemType Directory -Path $directory -Force | Out-Null
+              $path = Join-Path $directory 'installer.bin'
+              $output = [IO.File]::Create($path)
+              try {
+                $remaining = $partBytes
+                while ($remaining -gt 0) {
+                  $read = $source.Read($buffer, 0, [int][Math]::Min($buffer.Length, $remaining))
+                  if ($read -eq 0) { break }
+                  $output.Write($buffer, 0, $read)
+                  $remaining -= $read
+                }
+              } finally { $output.Dispose() }
+              $parts += @{ index=$index; bytes=(Get-Item $path).Length; sha256=(Get-FileHash $path -Algorithm SHA256).Hash }
+              $index++
+            }
+          } finally { $source.Dispose() }
+          if ($parts.Count -ne 4) { throw 'Expected four parts for this offline candidate' }
+          $receipt = @{ source=$env:SOURCE_HEAD; installer=$installer[0].Name; bytes=$installer[0].Length; sha256=(Get-FileHash $installer[0].FullName -Algorithm SHA256).Hash; parts=$parts }
+          $json = $receipt | ConvertTo-Json -Depth 6
+          0..3 | ForEach-Object { $json | Set-Content -LiteralPath "candidate-parts/part-$_/receipt.json" }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-0
+          path: candidate-parts/part-0/
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-1
+          path: candidate-parts/part-1/
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-2
+          path: candidate-parts/part-2/
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dax-functional-part-3
+          path: candidate-parts/part-3/
+          compression-level: 0
+          if-no-files-found: error
