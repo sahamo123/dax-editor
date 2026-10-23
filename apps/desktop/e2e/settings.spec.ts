@@ -3,6 +3,38 @@
 
 import { chatInput, expect, test } from "./fixtures";
 
+test("saves and loads independent named API connections without inference", async ({
+  page,
+  startServer,
+  openApp,
+  shot,
+}) => {
+  const server = await startServer();
+  await openApp(server);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  await dialog.getByRole("button", { name: /OpenAI-compatible API/ }).click();
+  for (const [name, endpoint, key] of [
+    ["Server A", "https://a.example/v1", "test-profile-a"],
+    ["Server B", "https://b.example/v1", "test-profile-b"],
+  ]) {
+    await dialog.getByLabel("Base URL").fill(endpoint ?? "");
+    await dialog.getByLabel("Model", { exact: true }).fill("test-model");
+    await dialog.getByLabel("API key").fill(key ?? "");
+    await dialog.getByLabel("Connection name", { exact: true }).fill(name ?? "");
+    await dialog.getByRole("button", { name: "Save named connection", exact: true }).click();
+    await expect(dialog.getByRole("button", { name: `Load ${name}`, exact: true })).toBeVisible();
+  }
+  await dialog.getByRole("button", { name: "Load Server A", exact: true }).click();
+  await expect(dialog.getByLabel("Base URL")).toHaveValue("https://a.example/v1");
+  expect(server.secrets["openai-compatible"]).toBe("test-profile-a");
+  expect(await page.content()).not.toContain("test-profile-a");
+  await shot("named-api-connections");
+  await dialog.getByRole("button", { name: "Remove Server A", exact: true }).click();
+  await expect(dialog.getByRole("button", { name: "Load Server A", exact: true })).toHaveCount(0);
+  expect(server.secrets["openai-compatible"]).toBe("test-profile-a");
+});
+
 test("saves OpenRouter separately and preserves model generation settings", async ({
   page,
   startServer,

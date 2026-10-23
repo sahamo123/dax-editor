@@ -6,6 +6,7 @@ import type {
   BlenderRenderRequest,
   BlenderStatus,
   CommandResponse,
+  ConnectionRequest,
   ImportResult,
   ProviderKind,
   Settings,
@@ -101,6 +102,8 @@ export interface Controller {
   redoRun(runId: string): Promise<void>;
   /** Validate and save settings before binding new keys to their connection. Reports failures with a toast. */
   saveSettings(draft: SettingsDraft): Promise<boolean>;
+  /** Save/load/remove a named connection and refresh status; never invokes inference. */
+  connection(request: ConnectionRequest): Promise<Settings | null>;
   /** Ask the server to re-check which providers are usable (for example after signing in to a CLI). */
   refreshProviders(): Promise<void>;
   /** Explicitly probe the saved connection; may use configured hosted-provider credits. */
@@ -370,6 +373,16 @@ export function createController(deps: ControllerDeps): Controller {
       if (item?.kind !== "run" || !item.undoneSteps) return;
       if (await repeat("redo", item.undoneSteps))
         store.getState().patchRun(runId, { undoneSteps: 0 });
+    },
+
+    async connection(request) {
+      const result = await client.connection(request);
+      if (!result.ok) {
+        toast("error", result.error);
+        return null;
+      }
+      await refreshState();
+      return result.value;
     },
 
     async saveSettings({ settings, apiKeys, silent }) {
