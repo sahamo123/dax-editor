@@ -2,6 +2,8 @@
 
 ## 2026-10-23
 
+* **Creation**: external task cancellation is a typed shared-registry command, restricted to an explicit active-project UUID. Planning cannot discover or invoke it; unsupported standalone hosts explain the missing capability. Background tasks now retain their original project/revision/history context. Real loopback MCP regression cancels an active controlled render without changing project/history and reports finished work honestly.
+
 * **Correction**: first real Linux Blender run exposed a production template assumption: the system build has no OpenImageDenoiser. The bounded CPU templates now explicitly disable optional denoising so supported separate-process installations can render. Real acceptance reruns this correction rather than substituting mock-render success.
 
 * **Creation**: opt-in real Blender acceptance script and read-only Linux CI workflow. The repository's application-owned templates render as a separate Blender process; checks cover all three templates, decoded nonblank frames/dimensions/duration, import, regeneration with stable identity/undo and active cancellation cleanup. The system Blender/FFmpeg packages are test tools only, never linked or bundled; the installation reason is real adapter validation where Windows execution is policy-blocked. CI results and Windows acceptance remain distinct.

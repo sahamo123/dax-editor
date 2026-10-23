@@ -11,6 +11,8 @@ generated:
 
 # CLI and MCP server
 
+The live desktop host also provides `cancel_task` through the shared registry. Clients inspect `get_project` tasks, submit an explicit current-project task UUID and poll until cancellation completes. Finished/unknown work reports `cancelled: false`; completed edits remain in undo history. Standalone CLI/MCP hosts without a task controller explain the unavailable capability. Planning/read-only MCP excludes this non-read-only, irreversible command. Read-only inspection and cancellation bypass a long render's project-write lock; project mutations keep their existing serialization and revision guards.
+
 Two of the three front doors are thin shells over the command registry in `@dax/core`. Neither has its own edit logic: they validate nothing themselves, they hand a command name and arguments to `tryRunCommand` and report the result. See the [architecture overview](overview.md) for the registry and the [MCP design research](../research/mcp-server-design.md) for the sources behind the security choices.
 
 ```mermaid

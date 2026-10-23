@@ -141,6 +141,14 @@ export class Engine {
           origin:
             job.kind === "export" ? "export" : job.kind === "blender" ? "blender" : "transcription",
           createdAt: previous?.createdAt ?? Date.now(),
+          projectId: previous?.projectId ?? this.projects.session.projectId,
+          revision: previous?.revision ?? this.projects.session.revision,
+          startStateId:
+            previous?.startStateId ??
+            this.projects.session.history().find((state) => state.current)?.id,
+          ...(job.status !== "running"
+            ? { endStateId: this.projects.session.history().find((state) => state.current)?.id }
+            : {}),
           status:
             job.status === "done"
               ? "completed"
@@ -431,6 +439,10 @@ export class Engine {
   private commandContext(extra: Partial<CommandContext> = {}): CommandContext {
     return {
       session: this.projects.session,
+      cancelTask: (id) => {
+        const task = this.tasks.list().find((item) => item.id === id);
+        return task?.projectId === this.projects.session.projectId && this.cancelTask(id);
+      },
       source: "manual",
       allowedRoots: [...this.cfg.allowedRoots],
       ...(this.cfg.transcriber ? { transcriber: this.cfg.transcriber } : {}),
@@ -448,7 +460,40 @@ export class Engine {
   ): Promise<CommandResponse> {
     const def = getCommand(name);
     if (!def) return { ok: false, error: `Unknown command "${name}".` };
-    if (!def.readOnly && this.chat && !this.chat.manualEdits) {
+    if (def.readOnly || name === "cancel_task") {
+      // Inspection/cancellation must not wait behind the render they inspect/stop.
+      // Project writes retain the serial path below; cancellation only signals owned work.
+      const session = this.projects.session;
+      if (
+        (guard.projectId !== undefined && guard.projectId !== session.projectId) ||
+        (guard.expectedRevision !== undefined && guard.expectedRevision !== session.revision)
+      )
+        return { ok: false, error: "The project changed. Inspect it before continuing." };
+      if (def.readOnly) return toResponse(await tryRunCommand(this.commandContext(), name, args));
+      const task: TaskInfo = {
+        id: randomUUID(),
+        title: "Cancel task",
+        kind: "command",
+        mode: "edit",
+        origin: guard.origin ?? "manual",
+        status: "running",
+        createdAt: Date.now(),
+        projectId: session.projectId,
+        revision: session.revision,
+        startStateId: session.history().find((state) => state.current)?.id,
+      };
+      this.tasks.put(task);
+      const result = toResponse(await tryRunCommand(this.commandContext(), name, args));
+      this.tasks.put({
+        ...task,
+        status: result.ok ? "completed" : "failed",
+        endStateId: session.history().find((state) => state.current)?.id,
+        ...(!result.ok ? { error: this.cfg.log.redact(result.error) } : {}),
+      });
+      this.scheduleBroadcast();
+      return result;
+    }
+    if (name !== "cancel_task" && !def.readOnly && this.chat && !this.chat.manualEdits) {
       return {
         ok: false,
         error: "An AI edit is in progress. Wait for it to finish or cancel it first.",
@@ -488,7 +533,7 @@ export class Engine {
     // Edits are applied one at a time so two requests cannot interleave their read-modify-write.
     return this.serial(async () => {
       // Checked again here: an AI run may have started while this call waited for its turn (the check above ran earlier).
-      if (!def.readOnly && this.chat && !this.chat.manualEdits)
+      if (name !== "cancel_task" && !def.readOnly && this.chat && !this.chat.manualEdits)
         return { ok: false, error: BUSY_MESSAGE };
       const session = this.projects.session;
       if (

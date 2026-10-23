@@ -67,6 +67,8 @@ import { findFillerRanges, formatTranscript, type Transcriber } from "./transcri
 
 /** What a command needs to run. */
 export interface CommandContext {
+  /** Optional live-host cancellation capability. Must restrict the task UUID to the active project; returns whether cancellation was signalled. */
+  cancelTask?: (taskId: string) => boolean;
   /** Editor sessions preserve omitted fit and fps on format changes; omitted/false retains standalone CLI preset defaults. */
   preserveFormatOptions?: boolean;
   /** Optional separate-process motion-template renderer. */
@@ -1093,6 +1095,26 @@ export const COMMANDS: readonly CommandDef[] = [
     },
   }),
 
+  define({
+    name: "cancel_task",
+    description:
+      "Request cancellation of one queued or running task from get_project tasks. Poll get_project until its status is cancelled/completed/failed. Does not undo completed changes.",
+    schema: z.object({
+      taskId: z.string().uuid().describe("Explicit task UUID from get_project tasks"),
+    }),
+    irreversible: true,
+    async run(ctx, args) {
+      if (!ctx.cancelTask)
+        throw new CommandError("Task cancellation is available only in a live editor session.");
+      const cancelled = ctx.cancelTask(args.taskId);
+      return {
+        summary: cancelled
+          ? "Cancellation requested; poll task status."
+          : "Task is already finished or unavailable in this project.",
+        data: { cancelled },
+      };
+    },
+  }),
   define({
     name: "export_video",
     description:
