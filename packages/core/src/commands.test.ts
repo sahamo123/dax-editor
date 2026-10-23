@@ -35,12 +35,15 @@ describe("registry shape", () => {
     }
   });
 
-  it("flags only export as irreversible, and read-only commands never edit", () => {
+  it("flags export and task cancellation as irreversible, excluding both from read-only tools", () => {
     expect(
       commandTools()
         .filter((t) => t.irreversible)
         .map((t) => t.name),
-    ).toEqual(["export_video"]);
+    ).toEqual(["cancel_task", "export_video"]);
+    expect(commandTools({ readOnlyOnly: true }).map((t) => t.name)).not.toEqual(
+      expect.arrayContaining(["cancel_task"]),
+    );
     expect(commandTools({ readOnlyOnly: true }).map((t) => t.name)).toEqual(
       expect.arrayContaining(["get_project", "list_presets", "detect_silence", "get_history"]),
     );

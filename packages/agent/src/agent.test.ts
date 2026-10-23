@@ -427,7 +427,12 @@ describe("irreversible commands", () => {
     await run("export it");
     const req = provider.requests[0];
     expect(req?.tools.map((t) => t.name)).not.toContain("export_video");
-    expect(req?.tools.length).toBe(commandTools().length - 1);
+    expect(req?.tools.map((t) => t.name)).not.toContain("cancel_task");
+    expect(req?.tools.map((t) => t.name)).toEqual(
+      commandTools()
+        .filter((tool) => !tool.irreversible)
+        .map((tool) => tool.name),
+    );
     expect(req?.system).toMatch(/cannot export/);
   });
 
