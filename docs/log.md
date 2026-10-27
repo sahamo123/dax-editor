@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Candidate refresh**: rebuild the unsigned Windows installer after the application job-state correction, using the unchanged locked build and permissions. The previous candidate does not contain that fix; the new artifact still requires installed-native acceptance. The stated rebuild reason is recorded in PR #61 before the workflow-comment update.
+
 * **Job completion ordering**: five UI regressions and a delayed-provider server regression fail before the fix and pass afterward. Job events now update editor state as well as the index; terminal jobs resist delayed running data. Server state captures current project/history/jobs after asynchronous provider discovery. No protocol or project schema changes. Full verification and rebuilt native acceptance remain required.
 
 * **Native workflow extension result**: real native file selection/import and interactive H.264 playback now pass, followed by manual title/undo/redo. The extended flow reaches review rendering but remains at 100% until its UI deadline. Add bounded backend job/format and renderer-process diagnostics to separate rendering from UI task delivery. The prior baseline review/export/restart pass remains scoped to its tested workflow.
