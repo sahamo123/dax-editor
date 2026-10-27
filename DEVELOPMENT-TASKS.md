@@ -1,5 +1,17 @@
 # Dax Editor laptop delivery tracker
 
+## Current acceptance — October 27, 2026
+
+The current task matrix is at the top of [STATUS](docs/STATUS.md) and [delivery issue #8](https://github.com/sahamo123/dax-editor/issues/8). This supersedes the historical checkpoints below.
+
+- **Verified:** full repository check (1,793 package +17 root tests), 39 browser workflows, refreshed actual offline AI editing/export/restart/cleanup and longer synthetic speech/caption/cut/export. Windows/Linux CI 40510678429 passes; experimental macOS remains issue #39.
+- **Implemented:** named same-family provider connections, manual zoom/music/SFX/ducking/image tools, complete-effects WebM review with actual playback, and shared-registry MCP cancellation. Draft PRs #55–#60 contain the newest continuation.
+- **Built:** current unsigned Windows candidate 40505507400 includes complete-effects review. No verified current installer exists locally; previous large transfers failed.
+- **Native baseline PASS:** actual installed Tauri startup/title/undo/redo/effects-review/export/restart/shutdown/same-version reinstall/uninstall preservation pass in 40514781942. The next extension checks native open/save file dialogs and interactive preview playback. PR #60 reduces only CI worker privileges/integrity, preserving laptop/machine policy.
+- **Still pending:** complete native install/upgrade/dialog/playback/scaling acceptance and owner-laptop execution; actual hosted calls with configured credentials; individual external-assistant sessions; human-recorded/hours-long and whole-app peak-memory checks.
+
+Development launch: `Start Development Preview - System FFmpeg.cmd`, preserving `.dax-data/`. It explicitly uses the already-installed system renderer because Code Integrity now blocks the packaged renderer too. Local-model checks need normal Windows socket visibility; the restricted coding host hid the owned listener. The live WebM effects review decodes in IAB, while its H.264 editing proxy is unavailable there. Native release remains **NOT READY**.
+
 ## Autonomous continuation — October 23, 2026
 
 Dependent draft PRs #40–#50 close additional implementation gaps. The older October 22 table below is historical and is superseded by these current acceptance states:

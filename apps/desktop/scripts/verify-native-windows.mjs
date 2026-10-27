@@ -51,9 +51,17 @@ async function find(directory, names) {
   }
   return null;
 }
-async function run(binary, args, timeout = 180_000) {
+async function run(binary, args, timeout = 180_000, env = safeEnv) {
   await new Promise((done, fail) => {
-    const child = spawn(binary, args, { env: safeEnv, windowsHide: true, stdio: "ignore" });
+    const child = spawn(binary, args, {
+      env,
+      windowsHide: true,
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+    let errors = "";
+    child.stderr.on("data", (chunk) => {
+      errors = (errors + chunk.toString()).slice(-3000);
+    });
     const timer = setTimeout(() => {
       child.kill();
       fail(new Error("Native installation operation timed out"));
@@ -64,7 +72,7 @@ async function run(binary, args, timeout = 180_000) {
     });
     child.once("close", (code) => {
       clearTimeout(timer);
-      code === 0 ? done() : fail(new Error(`Native installation operation exited ${code}`));
+      code === 0 ? done() : fail(new Error(`Native test operation exited ${code}: ${errors}`));
     });
   });
 }
@@ -95,6 +103,27 @@ async function request(path, body) {
 }
 async function command(name, args = {}) {
   return request("/api/command", { name, args });
+}
+async function nativeDialog(title, path, action) {
+  assert.ok(Number.isSafeInteger(app.pid));
+  await run(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-File",
+      resolve("apps/desktop/scripts/native-file-dialog.ps1"),
+      "-DialogProcessId",
+      String(app.pid),
+      "-Title",
+      title,
+      "-Path",
+      path,
+      "-Action",
+      action,
+    ],
+    30_000,
+    { ...safeEnv, GITHUB_ACTIONS: "true", DAX_NATIVE_SMOKE: "1" },
+  );
 }
 async function launch(binary, phase) {
   mark(`launch ${phase}`);
@@ -214,8 +243,22 @@ try {
   mark("manual editing");
   await page.setViewportSize({ width: 1024, height: 700 });
   await request("/api/project/new", { name: "Native Windows acceptance" });
-  await request("/api/import", { paths: [source] });
+  await page.getByRole("banner").getByRole("button", { name: "Import", exact: true }).click();
+  await nativeDialog("Import video", source, "Open");
+  await expect
+    .poll(async () => Object.keys((await request("/api/state")).project.assets).length, {
+      timeout: 60_000,
+    })
+    .toBe(1);
   await command("set_format", { width: 320, height: 180, fps: 12 });
+  const preview = page.getByTestId("video-a");
+  await expect
+    .poll(() => preview.evaluate((video) => video.readyState), { timeout: 60_000 })
+    .toBeGreaterThanOrEqual(2);
+  await page.getByTestId("preview").getByRole("button", { name: "Play", exact: true }).click();
+  await expect.poll(() => preview.evaluate((video) => video.currentTime)).toBeGreaterThan(0.1);
+  await page.getByTestId("preview").getByRole("button", { name: "Pause", exact: true }).click();
+  await page.getByRole("button", { name: "Go to start", exact: true }).click();
   const showTools = page.getByRole("button", { name: "Show side panel", exact: true });
   if (await showTools.isVisible()) await showTools.click();
   await page.getByRole("tab", { name: "Tools", exact: true }).click();
@@ -245,12 +288,19 @@ try {
   await page.getByRole("button", { name: "Back to editing" }).click();
   const exported = join(work, "native-export.mp4");
   mark("export");
-  const exportResult = await command("export_video", { path: exported });
+  const previousJobs = new Set((await request("/api/state")).jobs.map((job) => job.id));
+  await page.getByRole("banner").getByRole("button", { name: "Export", exact: true }).click();
+  const exportDialog = page.getByRole("dialog", { name: "Export video", exact: true });
+  await exportDialog.getByRole("button", { name: "Browse...", exact: true }).click();
+  await nativeDialog("Export video", exported, "Save");
+  await expect(exportDialog.getByRole("textbox")).toHaveValue(exported);
+  await exportDialog.getByRole("button", { name: "Export", exact: true }).click();
   await expect
     .poll(
       async () =>
-        (await request("/api/state")).jobs.find((job) => job.id === exportResult.data.jobId)
-          ?.status,
+        (await request("/api/state")).jobs.find(
+          (job) => job.kind === "export" && !previousJobs.has(job.id),
+        )?.status,
       { timeout: 120_000 },
     )
     .toBe("done");
@@ -291,7 +341,8 @@ try {
     gracefulShutdown: true,
     sameVersionReinstallPersistence: true,
     uninstallPreservesProject: true,
-    nativeDialogsVerified: false,
+    nativeDialogsVerified: true,
+    interactivePreviewPlayback: true,
     ownerLaptopPolicyVerified: false,
     binarySha256,
   };

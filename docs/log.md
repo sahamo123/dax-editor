@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native acceptance PASS**: run 40514781942 exercises the exact installed candidate through real Tauri/WebView2: clean install/startup, manual title/undo/redo, effects-review playback, audio/video export, saved restart, graceful shutdown, same-version reinstall persistence and uninstall project preservation. The result/screenshot archive is hash-verified locally. The next extension tests owned native open/save dialogs through bounded Windows UI Automation and decoded interactive proxy playback. Owner-laptop execution and cross-version upgrades remain independent.
+
 * **Native test-host continuation**: Basic User launches the harness but CDP still times out. Lower the CI worker's own mandatory integrity label to Medium before launching children, retaining the non-admin assertion. Preserve stderr separately so Windows PowerShell cannot interrupt the JavaScript failure/cleanup record. No application permissions, registry or machine policy changes are involved; actual acceptance remains unverified.
 
 * **Native test-host result**: run 40512619612 correctly refuses the Limited-task trial because the runner still gives it an administrative token. Replace that attempt with the documented Windows Basic User `runas /trustlevel:0x20000` launch and keep the non-admin assertion. The final helper creates no scheduled task/account or stored credentials; native acceptance remains pending a real result.
