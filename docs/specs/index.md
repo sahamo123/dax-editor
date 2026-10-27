@@ -10,5 +10,6 @@
 * [Lightweight local AI and API provider setup](lightweight-ai-providers.md) - Measure a smaller local model and provide explicit OpenRouter and direct API configuration without making hosted services mandatory.
 * [Manual effects controls](manual-effects.md) - Manual zoom, music, sound effect and image controls over the existing validated editing registry.
 * [Named API connections](named-connections.md) - Explicit immutable snapshots of provider configuration and isolated private credentials.
+* [Native Windows candidate acceptance](native-windows-acceptance.md) - Validate the installed candidate on an isolated Windows runner without changing the owner's application-control policy.
 * [Product v1 specification](product-v1.md) - How the desktop editor fits together and what each package must deliver: agent, local model runtime, server, desktop UI and Tauri shell.
 * [Rendered effects preview](rendered-effects-preview.md) - Review the complete edit through the existing renderer without exporting a user-managed file or changing the project.
