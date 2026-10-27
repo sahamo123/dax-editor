@@ -11,6 +11,12 @@ generated:
 
 # Project status
 
+## Complete-effects review continuation — October 27, 2026
+
+The new Review effects dialog renders the complete current edit through the shared export renderer: zooms, images, audio mixing/ducking and captions. Review copies use VP9/Opus WebM for browser compatibility; final MP4 export remains unchanged. Real generated-media and browser tests verify review playback followed by MP4 export, unchanged project/history, authenticated Range serving, revision invalidation and shutdown cleanup. Component tests cover progress, cancellation, failure/retry and keyboard focus. Full repository verification is running; evidence is in `artifacts/render-preview-*` and `artifacts/oct27-full-check.log`.
+
+Current Code Integrity event 3077 also blocks the bundled FFmpeg executable. The independently installed system FFmpeg works. `Start Development Preview - System FFmpeg.cmd` explicitly uses that runtime for browser development, with no automatic fallback or Windows policy change; packaged/native readiness remains **NOT READY**. API provider availability remains false for OpenAI/OpenRouter/custom connections; no live hosted call is claimed. Actual external-client edit sessions, native installation and whole-native-app memory/scaling acceptance remain separate. The October 23 installer below predates the new review feature.
+
 ## Autonomous continuation — October 23, 2026
 
 T03 named connection snapshots and desktop Save/Load/Remove controls are implemented (PRs #40–#41). Same-family accounts retain isolated private keys; loading never invokes inference. Builds, 37 targeted server/security tests, 52 UI/controller tests and all nine settings browser scenarios pass. Existing settings remain compatible.
