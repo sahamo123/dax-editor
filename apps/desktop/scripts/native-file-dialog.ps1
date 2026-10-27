@@ -1,23 +1,30 @@
-# Exercise only the named owned application's common file dialog on the isolated native CI runner.
+# Select a generated fixture through an owned Windows common dialog on the isolated native CI runner.
 param([int]$DialogProcessId, [string]$Title, [string]$Path, [ValidateSet('Open','Save')][string]$Action)
 $ErrorActionPreference = 'Stop'
 if ($env:GITHUB_ACTIONS -ne 'true' -or $env:DAX_NATIVE_SMOKE -ne '1' -or $DialogProcessId -le 0) {
   throw 'Native file-dialog automation is restricted to the opt-in CI test'
 }
-Add-Type -AssemblyName UIAutomationClient
-Add-Type -AssemblyName UIAutomationTypes
-# Desktop-wide UIA discovery can block on unrelated providers. Resolve only an owned native HWND first.
+# Resolve only owned HWNDs. UIA providers on this runner block while enumerating dialog descendants.
 Add-Type -TypeDefinition @'
 using System;
 using System.Text;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 public static class NativeFileDialogWindow {
   delegate bool Callback(IntPtr window, IntPtr data);
   [DllImport("user32.dll")] static extern bool EnumWindows(Callback callback, IntPtr data);
+  [DllImport("user32.dll")] static extern bool EnumChildWindows(IntPtr parent, Callback callback, IntPtr data);
   [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
   [DllImport("user32.dll", CharSet=CharSet.Unicode)] static extern int GetWindowText(IntPtr window, StringBuilder text, int length);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode)] static extern int GetClassName(IntPtr window, StringBuilder text, int length);
   [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr window, uint command);
+  [DllImport("user32.dll")] static extern IntPtr GetParent(IntPtr window);
+  [DllImport("user32.dll")] static extern int GetDlgCtrlID(IntPtr window);
+  [DllImport("user32.dll")] static extern IntPtr GetDlgItem(IntPtr window, int id);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern IntPtr SendMessageTimeout(IntPtr window, uint message, IntPtr param, string text, uint flags, uint timeout, out IntPtr result);
+  [DllImport("user32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern bool PostMessage(IntPtr window, uint message, IntPtr param, IntPtr data);
   public static string Seen;
+  static string Class(IntPtr window) { var s=new StringBuilder(256); GetClassName(window,s,s.Capacity); return s.ToString(); }
   public static IntPtr Find(int process, string title) {
     IntPtr found=IntPtr.Zero; Seen="";
     EnumWindows(delegate(IntPtr window, IntPtr data) {
@@ -29,66 +36,42 @@ public static class NativeFileDialogWindow {
         if (owner!=(uint)process) return true;
       }
       var text=new StringBuilder(512); GetWindowText(window, text, text.Capacity);
-      Seen=(Seen+text.ToString()+"; ");
       if (!String.Equals(text.ToString(), title, StringComparison.Ordinal)) return true;
       found=window; return false;
     }, IntPtr.Zero);
     return found;
   }
+  public static bool Select(IntPtr dialog, string path) {
+    if (Class(dialog)!="#32770") throw new InvalidOperationException("Expected an owned Windows common dialog");
+    IntPtr edit=IntPtr.Zero; Seen="";
+    EnumChildWindows(dialog, delegate(IntPtr window, IntPtr data) {
+      int id=GetDlgCtrlID(window); string kind=Class(window);
+      if (Seen.Length<2000) Seen+=kind+":"+id+"; ";
+      if (kind!="Edit") return true;
+      bool filename=id==1152;
+      for (IntPtr parent=GetParent(window); parent!=IntPtr.Zero && parent!=dialog; parent=GetParent(parent))
+        if (GetDlgCtrlID(parent)==1148) { filename=true; break; }
+      if (!filename) return true;
+      edit=window; return false;
+    }, IntPtr.Zero);
+    if (edit==IntPtr.Zero) return false;
+    IntPtr button=GetDlgItem(dialog,1);
+    if (button==IntPtr.Zero || Class(button)!="Button") throw new InvalidOperationException("Common dialog confirmation button missing");
+    IntPtr result;
+    if (SendMessageTimeout(edit,0xC,IntPtr.Zero,path,2,3000,out result)==IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error());
+    if (!PostMessage(button,0xF5,IntPtr.Zero,IntPtr.Zero)) throw new Win32Exception(Marshal.GetLastWin32Error());
+    return true;
+  }
 }
 '@
-[Console]::Error.WriteLine('Native dialog: searching owned native handle')
-$deadline = (Get-Date).AddSeconds(8)
-$dialogHandle = [IntPtr]::Zero
-$reported = $false
-while ($dialogHandle -eq [IntPtr]::Zero) {
-  $dialogHandle = [NativeFileDialogWindow]::Find($DialogProcessId, $Title)
-  if (-not $reported) {
-    [Console]::Error.WriteLine("Native dialog: owned windows: $([NativeFileDialogWindow]::Seen)")
-    $reported = $true
-  }
-  if ((Get-Date) -gt $deadline) { throw "Native dialog did not open: $Title; owned windows: $([NativeFileDialogWindow]::Seen)" }
-  if ($dialogHandle -eq [IntPtr]::Zero) { Start-Sleep -Milliseconds 100 }
-}
-$dialog = [System.Windows.Automation.AutomationElement]::FromHandle($dialogHandle)
-[Console]::Error.WriteLine('Native dialog: window found; locating file name input')
-$filename = $null
-$value = $null
-$inputDeadline = (Get-Date).AddSeconds(8)
-while ($null -eq $filename -and (Get-Date) -lt $inputDeadline) {
-  $controls = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
-  for ($index=0; $index -lt $controls.Count; $index++) {
-    $candidate = $controls.Item($index)
-    if ($candidate.Current.Name -match '^\s*File\s+name\b' -or $candidate.Current.AutomationId -in @('1001','1148','FileNameControlHost')) {
-      $pattern = $null
-      if ($candidate.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$pattern) -and -not $pattern.Current.IsReadOnly) {
-        $filename = $candidate
-        $value = $pattern
-        break
-      }
-    }
-  }
-  if ($null -eq $filename) { Start-Sleep -Milliseconds 150 }
-}
-if ($null -eq $filename) {
-  for ($index=0; $index -lt [Math]::Min($controls.Count,24); $index++) {
-    $item=$controls.Item($index).Current
-    [Console]::Error.WriteLine("Native dialog control: $($item.Name); $($item.AutomationId); $($item.ControlType.ProgrammaticName)")
-  }
-  throw 'Native writable file name input was not found'
-}
-[Console]::Error.WriteLine('Native dialog: setting file name')
-$value.SetValue($Path)
-$buttons = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,
-  [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button))
-for ($index=0; $index -lt $buttons.Count; $index++) {
-  $button = $buttons.Item($index)
-  if ($button.Current.Name.TrimStart('&') -eq $Action) {
-    [Console]::Error.WriteLine('Native dialog: invoking selection')
-    $invoke = $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern)
-    $invoke.Invoke()
-    Write-Output "Native $Action file selection completed."
+[Console]::Error.WriteLine('Native dialog: resolving owned common-dialog controls')
+$deadline = (Get-Date).AddSeconds(10)
+while ((Get-Date) -lt $deadline) {
+  $dialog = [NativeFileDialogWindow]::Find($DialogProcessId, $Title)
+  if ($dialog -ne [IntPtr]::Zero -and [NativeFileDialogWindow]::Select($dialog,$Path)) {
+    Write-Output "Native $Action file selection submitted."
     exit 0
   }
+  Start-Sleep -Milliseconds 150
 }
-throw "Native $Action button was not found"
+throw "Owned common-dialog filename control unavailable: $([NativeFileDialogWindow]::Seen)"
