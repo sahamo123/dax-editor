@@ -64,7 +64,7 @@ async function run(binary, args, timeout = 180_000, env = safeEnv) {
     });
     const timer = setTimeout(() => {
       child.kill();
-      fail(new Error("Native installation operation timed out"));
+      fail(new Error(`Native test operation timed out: ${errors}`));
     }, timeout);
     child.once("error", (error) => {
       clearTimeout(timer);
@@ -110,6 +110,7 @@ async function nativeDialog(title, path, action) {
     "powershell.exe",
     [
       "-NoProfile",
+      "-MTA",
       "-File",
       resolve("apps/desktop/scripts/native-file-dialog.ps1"),
       "-DialogProcessId",

@@ -6,6 +6,7 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:DAX_NATIVE_SMOKE -ne '1' -or $Dialog
 }
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
+[Console]::Error.WriteLine('Native dialog: searching owned window')
 $condition = [System.Windows.Automation.AndCondition]::new([System.Windows.Automation.Condition[]]@(
   [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ProcessIdProperty, $DialogProcessId),
   [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::NameProperty, $Title)
@@ -17,6 +18,7 @@ while ($null -eq $dialog) {
   if ((Get-Date) -gt $deadline) { throw "Native dialog did not open: $Title" }
   if ($null -eq $dialog) { Start-Sleep -Milliseconds 100 }
 }
+[Console]::Error.WriteLine('Native dialog: window found; locating file name input')
 $edits = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,
   [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Edit))
 $filename = $null
@@ -28,6 +30,7 @@ for ($index=0; $index -lt $edits.Count; $index++) {
   }
 }
 if ($null -eq $filename) { throw 'Native file name input was not found' }
+[Console]::Error.WriteLine('Native dialog: setting file name')
 $value = $filename.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern)
 $value.SetValue($Path)
 $buttons = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,
@@ -35,6 +38,7 @@ $buttons = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,
 for ($index=0; $index -lt $buttons.Count; $index++) {
   $button = $buttons.Item($index)
   if ($button.Current.Name.TrimStart('&') -eq $Action) {
+    [Console]::Error.WriteLine('Native dialog: invoking selection')
     $invoke = $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern)
     $invoke.Invoke()
     Write-Output "Native $Action file selection completed."
