@@ -135,7 +135,8 @@ async function launch(binary, phase) {
       WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}`,
       WEBVIEW2_USER_DATA_FOLDER: join(work, `webview-${phase}`),
     },
-    windowsHide: true,
+    // This is the GUI under test on an isolated runner; OS dialogs require its normal visible window.
+    windowsHide: false,
     stdio: "ignore",
   });
   app.on("error", () => {});

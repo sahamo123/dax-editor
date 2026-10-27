@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native GUI precondition**: launch the actual GUI under test with a normal visible window on the isolated runner; keep console helpers hidden. The native-dialog extension must exercise the normal window/owner relationship rather than a hidden launch. This never opens a window or changes policy on the owner's laptop.
+
 * **Native dialog diagnostics**: keep the dialog-search deadline below the outer helper timeout and report only owned native window captions. Also record non-secret installed/supported/unloaded model status from the installed engine, separating offline asset provisioning from manual-native acceptance.
 
 * **Native dialog discovery**: MTA evidence isolates the timeout to desktop-wide UIA discovery. Resolve the exact owned native window handle using bounded Win32 enumeration first, then query only that dialog's accessibility controls. PID/owner and exact-title restrictions remain; no desktop-wide actions or production changes are added.
