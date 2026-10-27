@@ -198,6 +198,17 @@ export function buildRouter(engine: Engine): Router {
   );
 
   // ----- media -----
+  r.add(
+    "GET",
+    `${API.media}/previews/:previewId/proxy.mp4`,
+    async ({ req, res, params, headers }) => {
+      await sendFile(req, res, engine.previewFile(params.previewId ?? ""), {
+        contentType: "video/mp4",
+        cacheControl: "private, no-store",
+        headers,
+      });
+    },
+  );
   r.add("GET", `${API.media}/:assetId/:file`, async ({ req, res, url, params, headers }) => {
     const { assetId = "", file = "" } = params;
     const kind = MEDIA_KINDS.find((k) => k === file);

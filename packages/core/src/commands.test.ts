@@ -35,12 +35,12 @@ describe("registry shape", () => {
     }
   });
 
-  it("flags export and task cancellation as irreversible, excluding both from read-only tools", () => {
+  it("flags file rendering and task cancellation as irreversible, excluding them from read-only tools", () => {
     expect(
       commandTools()
         .filter((t) => t.irreversible)
         .map((t) => t.name),
-    ).toEqual(["cancel_task", "export_video"]);
+    ).toEqual(["cancel_task", "render_preview", "export_video"]);
     expect(commandTools({ readOnlyOnly: true }).map((t) => t.name)).not.toEqual(
       expect.arrayContaining(["cancel_task"]),
     );

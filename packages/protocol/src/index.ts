@@ -109,6 +109,11 @@ export function mediaUrl(
 
 // ---------- requests ----------
 
+/** Authenticated complete-edit review video for a host-generated preview UUID, with no client-selected file path. */
+export function renderedPreviewUrl(base: string, token: string, previewId: string): string {
+  return `${base.replace(/\/$/, "")}${API.media}/previews/${encodeURIComponent(previewId)}/proxy.mp4?${new URLSearchParams({ token })}`;
+}
+
 /** Run one command from the registry (see `COMMANDS` in `@dax/core`). Used by the UI for every manual edit. */
 export const CommandRequestSchema = z.object({
   name: z.string().min(1),
