@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Verification design**: an opt-in isolated Windows acceptance harness installs the fixed current candidate and controls its actual Tauri WebView using a child-only loopback CDP connection. Proposed CI needs contents/actions read only to retrieve the existing artifact, with no security-policy, signing, release or dependency changes. Same-version reinstall is distinguished from cross-version upgrade; laptop execution and native dialogs remain separate gates.
+
 * **Development runtime**: `--system-ffmpeg` explicitly selects the user's already-installed FFmpeg/ffprobe for browser development, with a separate labelled launcher. Default and packaged runtime paths remain bundled; there is no automatic fallback or policy change. Two selector regressions and all 17 root script tests pass. This enables development checks while the packaged FFmpeg is blocked by Code Integrity event 3077; it does not validate an installed desktop build.
 
 * **Implementation**: complete-edit review starts a cancellable shared export task, serves only finished authenticated revision-bound media, bounds retained outputs and removes files on shutdown. Desktop controls expose progress, explicit Stop, failure/retry, stale-result rejection, keyboard focus handling and playback without editing history. Core/security/real-render and desktop component regressions pass with the already-installed system FFmpeg. The packaged FFmpeg executable is now also blocked by Application Control; it has not been replaced or relabelled, and packaged readiness remains unverified.
