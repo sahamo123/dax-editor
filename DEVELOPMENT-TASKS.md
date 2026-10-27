@@ -2,6 +2,8 @@
 
 ## Current acceptance — October 27, 2026
 
+Additional real-footage MCP gate PASS: actual stdio proxy/SDK client imports a real clip into the visible live editor, makes one grouped trim/title/volume edit, verifies undo/redo and Planning refusal, and exports/fully decodes audio/video plus WebM review. Private result and reopenable test/previous projects: artifacts/real-video-mcp/. Actual Claude/Codex assistant inference remains pending.
+
 Current matrix: [STATUS](docs/STATUS.md), [delivery issue #8](https://github.com/sahamo123/dax-editor/issues/8).
 
 - **Verified:** pnpm check (1,799 package plus 17 root tests), 39 browser workflows, real offline AI editing/export/restart/cleanup, longer synthetic speech/caption/cut/export, and real Linux Blender templates.

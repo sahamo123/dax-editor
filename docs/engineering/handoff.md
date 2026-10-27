@@ -13,6 +13,8 @@ generated:
 
 ## October 27 continuation
 
+The latest manual acceptance uses authorized real footage through an MCP SDK client over the actual stdio editor proxy. Import, grouped trim/title/volume, actual timeline undo/redo, Planning refusal, full-decode MP4 export and WebM review pass in the visible live project. The editor is left on this separate test project; artifacts/real-video-mcp/edited-project.dax.json reopens it, and previous-project.dax.json preserves the prior project. Result/log and media remain private ignored artifacts. This is live MCP protocol verification, without a natural-language external assistant inference claim.
+
 Current application gates pass: pnpm check (1,799 package plus 17 root tests) and all 39 browser workflows. PR #61 fixes completed render jobs stuck at 100%, with six red/green regressions. The rebuilt live editor completes review and returns idle; saved .dax-data/ is preserved. Logs: artifacts/job-state-full-check.log and job-state-browser.log. See STATUS for exact current results and remaining gates.
 
 Corrected installer 40528351026 (source 4de7ce832591efbcad6625a0ecdb3cf981db1314) builds successfully. Installed-native [40532196608](https://github.com/sahamo123/dax-editor/actions/runs/40532196608) PASSES actual Open/Save dialogs, interactive playback, manual title/undo/redo, effects review, audio/video export, saved restart, graceful shutdown, same-version reinstall and uninstall preservation. Hash-verified local evidence: artifacts/native-windows-acceptance/pass-18/. Older native #16 was a false workflow pass with a FAIL result; its wrapper/Save driver are repaired, and #18 is the final authoritative PASS. No cross-version upgrade or owner-laptop execution is claimed.
