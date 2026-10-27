@@ -49,9 +49,12 @@ public static class NativeAcceptanceToken {
     $env:RUNNER_TEMP = $config.temp
     $env:DAX_NATIVE_INSTALLER_DIR = $config.installer
     $child = Start-Process -FilePath $config.node -ArgumentList 'apps/desktop/scripts/verify-native-windows.mjs' -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $config.output 'worker.log') -RedirectStandardError (Join-Path $config.output 'worker.stderr.log')
+    # Windows PowerShell can lose ExitCode if the Process handle was never retained.
+    $null = $child.Handle
     # Wait for the harness itself; Start-Process -Wait also waits for shared Windows shell descendants.
     $child.WaitForExit()
-    $code = $child.ExitCode
+    if ($null -eq $child.ExitCode) { throw 'Native harness exit code unavailable' }
+    $code = [int]$child.ExitCode
   } catch {
     $_.Exception.Message | Set-Content -LiteralPath (Join-Path $config.output 'worker-launch-error.txt')
   } finally {
@@ -85,5 +88,9 @@ foreach ($name in @('worker.log','worker.stderr.log','worker-launch-error.txt'))
   $path = Join-Path $output $name
   if (Test-Path -LiteralPath $path) { Get-Content -LiteralPath $path }
 }
-$code = [int](Get-Content -LiteralPath $completion -Raw)
+$marker = (Get-Content -LiteralPath $completion -Raw).Trim()
+if ($marker -notmatch '^[0-9]+$') { throw 'Invalid native acceptance completion marker' }
+$code = [int]$marker
 if ($code -ne 0) { throw "Native acceptance failed with exit code $code" }
+$result = Get-Content -LiteralPath (Join-Path $output 'result.json') -Raw | ConvertFrom-Json
+if ($result.status -ne 'PASS') { throw 'Native acceptance result did not pass' }

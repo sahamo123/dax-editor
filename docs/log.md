@@ -2,6 +2,14 @@
 
 ## 2026-10-27
 
+* **Native Save change notification**: 40531328404 correctly fails after the repaired result gate. Its owned Save control closes but returns the suggested filename instead of the selected path. Use EM_SETSEL/EM_REPLACESEL on the exact filename edit to deliver normal edit-change notifications; keep the strict returned-path assertion. No global keyboard input or application changes.
+
+* **Native test truthfulness**: 40530091909 verifies corrected native review playback, then fails in the Save-dialog driver (modern filename Edit 1001). Its job conclusion is a false pass because Windows PowerShell lost the child exit code and cast an empty marker to zero. Retain the process handle, reject unknown markers and independently require result.json PASS. Extend only the owned Save filename selector. The application candidate is unchanged; a full rerun is still required.
+
+* **Corrected state verification**: full `pnpm check` passes with 1,799 package and 17 root tests; all 39 browser workflows pass. The rebuilt live development editor completes review playback and returns to idle, preserving its saved project. Evidence: `artifacts/job-state-full-check.log`, `job-state-browser.log`, `job-state-live-review.png`. The corrected installer still needs its separate native acceptance.
+
+* **Corrected candidate acceptance**: pin build 40528351026 in the existing isolated native harness and add its dedicated review branch. PR #62 records the reason before this workflow edit. The native file-dialog driver already verifies import/playback; the new run must additionally finish review and native Save/export with the corrected job state. Permissions, pinned actions and owner policy remain unchanged.
+
 * **Candidate refresh**: rebuild the unsigned Windows installer after the application job-state correction, using the unchanged locked build and permissions. The previous candidate does not contain that fix; the new artifact still requires installed-native acceptance. The stated rebuild reason is recorded in PR #61 before the workflow-comment update.
 
 * **Job completion ordering**: five UI regressions and a delayed-provider server regression fail before the fix and pass afterward. Job events now update editor state as well as the index; terminal jobs resist delayed running data. Server state captures current project/history/jobs after asynchronous provider discovery. No protocol or project schema changes. Full verification and rebuilt native acceptance remain required.

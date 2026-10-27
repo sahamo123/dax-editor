@@ -12,6 +12,10 @@ The current task matrix is at the top of [STATUS](docs/STATUS.md) and [delivery 
 
 Development launch: `Start Development Preview - System FFmpeg.cmd`, preserving `.dax-data/`. It explicitly uses the already-installed system renderer because Code Integrity now blocks the packaged renderer too. Local-model checks need normal Windows socket visibility; the restricted coding host hid the owned listener. The live WebM effects review decodes in IAB, while its H.264 editing proxy is unavailable there. Native release remains **NOT READY**.
 
+## Job-state correction — October 27, 2026
+
+Native file selection/import and interactive playback pass in 40522984066. Its review-at-100% failure is an application-state defect, with backend completion confirmed in 40526689690. PR #61 fixes it with six red/green regressions. Current `pnpm check` passes (1,799 package +17 root tests), all 39 browser workflows pass, and the rebuilt live editor completes review and returns to idle. Candidate 40528351026 requires a fresh complete installed-native run. The prior native baseline remains scoped to its old source. Logs/screenshots: `artifacts/job-state-full-check.log`, `job-state-browser.log`, `job-state-live-review.png`.
+
 ## Autonomous continuation — October 23, 2026
 
 Dependent draft PRs #40–#50 close additional implementation gaps. The older October 22 table below is historical and is superseded by these current acceptance states:

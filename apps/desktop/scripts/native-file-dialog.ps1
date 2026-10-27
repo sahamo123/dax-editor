@@ -22,6 +22,7 @@ public static class NativeFileDialogWindow {
   [DllImport("user32.dll")] static extern int GetDlgCtrlID(IntPtr window);
   [DllImport("user32.dll")] static extern IntPtr GetDlgItem(IntPtr window, int id);
   [DllImport("user32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern IntPtr SendMessageTimeout(IntPtr window, uint message, IntPtr param, string text, uint flags, uint timeout, out IntPtr result);
+  [DllImport("user32.dll", EntryPoint="SendMessageTimeoutW", SetLastError=true)] static extern IntPtr SelectText(IntPtr window, uint message, IntPtr start, IntPtr end, uint flags, uint timeout, out IntPtr result);
   [DllImport("user32.dll", CharSet=CharSet.Unicode, SetLastError=true)] static extern bool PostMessage(IntPtr window, uint message, IntPtr param, IntPtr data);
   public static string Seen;
   static string Class(IntPtr window) { var s=new StringBuilder(256); GetClassName(window,s,s.Capacity); return s.ToString(); }
@@ -41,7 +42,7 @@ public static class NativeFileDialogWindow {
     }, IntPtr.Zero);
     return found;
   }
-  public static bool Select(IntPtr dialog, string path) {
+  public static bool Select(IntPtr dialog, string path, bool save) {
     if (Class(dialog)!="#32770") throw new InvalidOperationException("Expected an owned Windows common dialog");
     IntPtr edit=IntPtr.Zero; Seen="";
     EnumChildWindows(dialog, delegate(IntPtr window, IntPtr data) {
@@ -49,6 +50,8 @@ public static class NativeFileDialogWindow {
       if (Seen.Length<2000) Seen+=kind+":"+id+"; ";
       if (kind!="Edit") return true;
       bool filename=id==1152;
+      // Modern Save dialogs use a filename Edit 1001 directly inside a ComboBox.
+      if (save && id==1001 && Class(GetParent(window))=="ComboBox") filename=true;
       for (IntPtr parent=GetParent(window); parent!=IntPtr.Zero && parent!=dialog; parent=GetParent(parent))
         if (GetDlgCtrlID(parent)==1148) { filename=true; break; }
       if (!filename) return true;
@@ -58,7 +61,9 @@ public static class NativeFileDialogWindow {
     IntPtr button=GetDlgItem(dialog,1);
     if (button==IntPtr.Zero || Class(button)!="Button") throw new InvalidOperationException("Common dialog confirmation button missing");
     IntPtr result;
-    if (SendMessageTimeout(edit,0xC,IntPtr.Zero,path,2,3000,out result)==IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error());
+    // Replace the selection as an edit so modern Save dialogs update their cached filename.
+    if (SelectText(edit,0xB1,IntPtr.Zero,new IntPtr(-1),2,3000,out result)==IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error());
+    if (SendMessageTimeout(edit,0xC2,new IntPtr(1),path,2,3000,out result)==IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error());
     if (!PostMessage(button,0xF5,IntPtr.Zero,IntPtr.Zero)) throw new Win32Exception(Marshal.GetLastWin32Error());
     return true;
   }
@@ -68,7 +73,7 @@ public static class NativeFileDialogWindow {
 $deadline = (Get-Date).AddSeconds(10)
 while ((Get-Date) -lt $deadline) {
   $dialog = [NativeFileDialogWindow]::Find($DialogProcessId, $Title)
-  if ($dialog -ne [IntPtr]::Zero -and [NativeFileDialogWindow]::Select($dialog,$Path)) {
+  if ($dialog -ne [IntPtr]::Zero -and [NativeFileDialogWindow]::Select($dialog,$Path,($Action -eq 'Save'))) {
     Write-Output "Native $Action file selection submitted."
     exit 0
   }
