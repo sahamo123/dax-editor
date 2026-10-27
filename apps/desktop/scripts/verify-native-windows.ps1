@@ -48,7 +48,9 @@ public static class NativeAcceptanceToken {
     $env:DAX_NATIVE_SMOKE = '1'
     $env:RUNNER_TEMP = $config.temp
     $env:DAX_NATIVE_INSTALLER_DIR = $config.installer
-    $child = Start-Process -FilePath $config.node -ArgumentList 'apps/desktop/scripts/verify-native-windows.mjs' -WindowStyle Hidden -Wait -PassThru -RedirectStandardOutput (Join-Path $config.output 'worker.log') -RedirectStandardError (Join-Path $config.output 'worker.stderr.log')
+    $child = Start-Process -FilePath $config.node -ArgumentList 'apps/desktop/scripts/verify-native-windows.mjs' -WindowStyle Hidden -PassThru -RedirectStandardOutput (Join-Path $config.output 'worker.log') -RedirectStandardError (Join-Path $config.output 'worker.stderr.log')
+    # Wait for the harness itself; Start-Process -Wait also waits for shared Windows shell descendants.
+    $child.WaitForExit()
     $code = $child.ExitCode
   } catch {
     $_.Exception.Message | Set-Content -LiteralPath (Join-Path $config.output 'worker-launch-error.txt')

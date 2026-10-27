@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native harness completion**: wait for the test harness process itself, rather than PowerShell's whole descendant-tree wait. Common dialogs may activate shared Windows shell services; the JavaScript harness separately verifies application/engine shutdown and must not wait for unrelated system-service lifetimes.
+
 * **Native common-dialog driver**: actual picker opening is confirmed, but this runner's UIA provider blocks while enumerating its children. Use bounded Win32 control discovery within the exact owned standard common dialog, set only its filename edit and activate its standard confirmation button. Backend import and export-path assertions still determine success; finding a dialog alone never counts as a passed file selection.
 
 * **Native picker evidence**: run 40519718711 confirms the actual owned Import video window opens, and bundled local AI is installed/supported/unloaded. The remaining failure is the test helper's filename selector. Accept the native filename combo's writable ValuePattern, allow delayed controls and retain bounded control-label diagnostics without field values.
