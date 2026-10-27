@@ -77,6 +77,11 @@ async function freePort() {
   return address.port;
 }
 let app, browser, page, connection, result;
+let phase = "initialization";
+function mark(value) {
+  phase = value;
+  console.log(`Native acceptance: ${phase}`);
+}
 async function request(path, body) {
   const response = await fetch(`${connection.url}${path}`, {
     method: body === undefined ? "GET" : "POST",
@@ -92,6 +97,7 @@ async function command(name, args = {}) {
   return request("/api/command", { name, args });
 }
 async function launch(binary, phase) {
+  mark(`launch ${phase}`);
   const port = await freePort();
   app = spawn(binary, [], {
     env: {
@@ -106,7 +112,8 @@ async function launch(binary, phase) {
   await expect
     .poll(
       async () => {
-        if (app.exitCode !== null) throw new Error(`Installed application exited ${app.exitCode}`);
+        if (app.exitCode !== null || app.signalCode !== null)
+          throw new Error(`Installed application exited ${app.exitCode ?? app.signalCode}`);
         try {
           return (await fetch(`http://127.0.0.1:${port}/json/version`)).ok;
         } catch {
@@ -117,6 +124,7 @@ async function launch(binary, phase) {
     )
     .toBe(true);
   browser = await chromium.connectOverCDP(`http://127.0.0.1:${port}`);
+  mark(`attach ${phase}`);
   await expect
     .poll(() => browser.contexts().flatMap((context) => context.pages()).length)
     .toBeGreaterThan(0);
@@ -131,6 +139,7 @@ async function launch(binary, phase) {
   return page;
 }
 async function closeNative() {
+  mark("graceful shutdown");
   const pid = app.pid;
   assert.ok(Number.isSafeInteger(pid));
   execFileSync(
@@ -166,6 +175,7 @@ try {
   const installer = await find(installerDirectory, ["dax editor_0.0.1_x64-setup.exe"]);
   assert.ok(installer, "Expected the fixed candidate installer");
   assert.equal(existsSync(install), false, "Clean-install target must not already exist");
+  mark("clean install");
   await run(installer, ["/S", `/D=${install}`]);
   const binary = await find(install, ["dax-editor.exe"]);
   assert.ok(binary, "Installed executable missing");
@@ -180,6 +190,7 @@ try {
   ]);
   assert.ok(ffprobe);
   const source = join(work, "source.mp4");
+  mark("generate footage");
   await run(ffmpeg, [
     "-y",
     "-v",
@@ -200,6 +211,7 @@ try {
     source,
   ]);
   await launch(binary, "initial");
+  mark("manual editing");
   await page.setViewportSize({ width: 1024, height: 700 });
   await request("/api/project/new", { name: "Native Windows acceptance" });
   await request("/api/import", { paths: [source] });
@@ -223,6 +235,7 @@ try {
   const closeTools = page.getByRole("button", { name: "Close tools panel" });
   if (await closeTools.isVisible()) await closeTools.click();
   await page.getByRole("button", { name: "Review effects", exact: true }).click();
+  mark("review playback");
   const review = page.getByLabel("Complete edit review", { exact: true });
   await expect(review).toBeVisible({ timeout: 120_000 });
   await expect.poll(() => review.evaluate((video) => video.readyState)).toBeGreaterThanOrEqual(2);
@@ -231,6 +244,7 @@ try {
   await page.screenshot({ path: join(output, "native-review.png") });
   await page.getByRole("button", { name: "Back to editing" }).click();
   const exported = join(work, "native-export.mp4");
+  mark("export");
   const exportResult = await command("export_video", { path: exported });
   await expect
     .poll(
@@ -255,12 +269,14 @@ try {
   const appState = join(process.env.APPDATA, "org.daxeditor.desktop", "server", "state.json");
   assert.ok(existsSync(appState));
   await closeNative();
+  mark("same-version reinstall");
   await run(installer, ["/S", `/D=${install}`]);
   await launch(binary, "reinstalled");
   assert.deepEqual((await request("/api/state")).project, saved);
   await closeNative();
   const uninstaller = await find(install, ["uninstall.exe"]);
   assert.ok(uninstaller);
+  mark("uninstall preserves project");
   await run(uninstaller, ["/S"]);
   assert.ok(existsSync(projectPath));
   assert.ok(existsSync(appState));
@@ -280,15 +296,21 @@ try {
     binarySha256,
   };
 } catch (error) {
-  result = { status: "FAIL", error: error.message, sourceRun: 40505507400 };
+  result = { status: "FAIL", phase, error: error.message, sourceRun: 40505507400 };
+  console.error(`Native acceptance failed during ${phase}: ${error.message}`);
   if (page) await page.screenshot({ path: join(output, "native-failure.png") }).catch(() => {});
 } finally {
   if (browser) await browser.close().catch(() => {});
-  if (app && app.exitCode === null && Number.isSafeInteger(app.pid))
-    execFileSync("taskkill.exe", ["/PID", String(app.pid), "/T", "/F"], {
-      windowsHide: true,
-      stdio: "ignore",
-    });
+  if (app && app.exitCode === null && app.signalCode === null && Number.isSafeInteger(app.pid)) {
+    try {
+      execFileSync("taskkill.exe", ["/PID", String(app.pid), "/T", "/F"], {
+        windowsHide: true,
+        stdio: "ignore",
+      });
+    } catch {
+      result = { ...result, cleanup: "Process already exited or tree termination failed" };
+    }
+  }
   await writeFile(join(output, "result.json"), JSON.stringify(result, null, 2));
 }
 console.log(`Native Windows acceptance: ${result.status}`);

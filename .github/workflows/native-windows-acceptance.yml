@@ -1,5 +1,6 @@
 name: Installed Windows candidate acceptance
 # Read-only retrieval and native testing of the fixed successful candidate; PR #59 records why.
+# Preserve phase/error evidence even when a failed launch has already exited during cleanup.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
