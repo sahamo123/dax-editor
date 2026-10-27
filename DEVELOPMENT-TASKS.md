@@ -2,19 +2,15 @@
 
 ## Current acceptance — October 27, 2026
 
-The current task matrix is at the top of [STATUS](docs/STATUS.md) and [delivery issue #8](https://github.com/sahamo123/dax-editor/issues/8). This supersedes the historical checkpoints below.
+Current matrix: [STATUS](docs/STATUS.md), [delivery issue #8](https://github.com/sahamo123/dax-editor/issues/8).
 
-- **Verified:** full repository check (1,793 package +17 root tests), 39 browser workflows, refreshed actual offline AI editing/export/restart/cleanup and longer synthetic speech/caption/cut/export. Windows/Linux CI 40510678429 passes; experimental macOS remains issue #39.
-- **Implemented:** named same-family provider connections, manual zoom/music/SFX/ducking/image tools, complete-effects WebM review with actual playback, and shared-registry MCP cancellation. Draft PRs #55–#60 contain the newest continuation.
-- **Built:** current unsigned Windows candidate 40505507400 includes complete-effects review. No verified current installer exists locally; previous large transfers failed.
-- **Native baseline PASS:** actual installed Tauri startup/title/undo/redo/effects-review/export/restart/shutdown/same-version reinstall/uninstall preservation pass in 40514781942. The next extension checks native open/save file dialogs and interactive preview playback. PR #60 reduces only CI worker privileges/integrity, preserving laptop/machine policy.
-- **Still pending:** complete native install/upgrade/dialog/playback/scaling acceptance and owner-laptop execution; actual hosted calls with configured credentials; individual external-assistant sessions; human-recorded/hours-long and whole-app peak-memory checks.
+- **Verified:** pnpm check (1,799 package plus 17 root tests), 39 browser workflows, real offline AI editing/export/restart/cleanup, longer synthetic speech/caption/cut/export, and real Linux Blender templates.
+- **Implemented:** independent named providers, manual zoom/music/SFX/ducking/images, complete-effects WebM review, shared MCP/task cancellation, and corrected job completion ordering (PR #61).
+- **Built:** corrected unsigned installer 40528351026; full archive is 1,705,302,024 bytes. No verified current installer copy is local.
+- **Installed-native PASS:** [40532196608](https://github.com/sahamo123/dax-editor/actions/runs/40532196608) verifies actual Open/Save dialogs, import and interactive playback, title/undo/redo, review, MP4 audio/video export, saved restart/shutdown, same-version reinstall and preservation after uninstall. Local evidence is hash-verified under artifacts/native-windows-acceptance/pass-18/.
+- **Pending:** owner-laptop Application Control execution and installer transfer; actual hosted calls and external-assistant sessions; cross-version upgrade, display scaling/peak memory and human/hours-long speech acceptance. Experimental macOS remains issue #39.
 
-Development launch: `Start Development Preview - System FFmpeg.cmd`, preserving `.dax-data/`. It explicitly uses the already-installed system renderer because Code Integrity now blocks the packaged renderer too. Local-model checks need normal Windows socket visibility; the restricted coding host hid the owned listener. The live WebM effects review decodes in IAB, while its H.264 editing proxy is unavailable there. Native release remains **NOT READY**.
-
-## Job-state correction — October 27, 2026
-
-Native file selection/import and interactive playback pass in 40522984066. Its review-at-100% failure is an application-state defect, with backend completion confirmed in 40526689690. PR #61 fixes it with six red/green regressions. Current `pnpm check` passes (1,799 package +17 root tests), all 39 browser workflows pass, and the rebuilt live editor completes review and returns to idle. Candidate 40528351026 requires a fresh complete installed-native run. The prior native baseline remains scoped to its old source. Logs/screenshots: `artifacts/job-state-full-check.log`, `job-state-browser.log`, `job-state-live-review.png`.
+Development testing is available at http://127.0.0.1:4175/ through Start Development Preview - System FFmpeg.cmd, with .dax-data/ preserved. WebM effects review plays in IAB; its H.264 interactive proxy does not. Actual native Windows WebView2 playback passes. No owner-laptop security policy was changed. Native owner-laptop release remains NOT READY until its execution gate is resolved.
 
 ## Autonomous continuation — October 23, 2026
 
