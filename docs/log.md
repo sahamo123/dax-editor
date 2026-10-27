@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native test-host continuation**: Basic User launches the harness but CDP still times out. Lower the CI worker's own mandatory integrity label to Medium before launching children, retaining the non-admin assertion. Preserve stderr separately so Windows PowerShell cannot interrupt the JavaScript failure/cleanup record. No application permissions, registry or machine policy changes are involved; actual acceptance remains unverified.
+
 * **Native test-host result**: run 40512619612 correctly refuses the Limited-task trial because the runner still gives it an administrative token. Replace that attempt with the documented Windows Basic User `runas /trustlevel:0x20000` launch and keep the non-admin assertion. The final helper creates no scheduled task/account or stored credentials; native acceptance remains pending a real result.
 
 * **Native test-host correction**: diagnostics prove the installed app, engine and WebView2 are responding. Microsoft's runtime 150 elevated-host filtering explains why environment-only CDP flags are ignored. The CI harness now uses an ephemeral current-user Interactive task at Limited privilege, verifies its non-admin token, waits for its result and removes the task. There is no registry/policy change, password, production-code change or recurring schedule. Native acceptance remains pending the standard-user rerun.
