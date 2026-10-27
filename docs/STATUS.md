@@ -13,6 +13,8 @@ generated:
 
 ## Complete-effects review continuation — October 27, 2026
 
+Real-footage acceptance also passes: an authorized 60.13-second Drive clip is imported through a real MCP SDK client over the stdio editor proxy into a separate live project. A grouped trim (source seconds 2–22), title and volume edit becomes one history entry; MCP undo/redo restores the actual timeline, and a separate Planning connection refuses edits. MCP export produces a fully decoded 20-second 1280 x 720 audio/video MP4; complete-effects WebM review also passes. Six MCP-origin tasks are recorded. Private local evidence: artifacts/real-video-mcp/result.json, run.log, edited-project.dax.json and edited-review.webm. Original Drive footage and previous-project backup remain intact. This verifies real MCP transport/tools against the visible live editor; it does not establish a Claude/Codex assistant inference session. Private footage, identifiers, titles and screenshots are excluded from GitHub.
+
 **Ready for development testing. Owner-laptop native release remains NOT READY because Application Control blocks unsigned app/rendering executables.** The development editor is running at http://127.0.0.1:4175/ using the explicit system-FFmpeg launcher, with saved data retained in .dax-data/. No machine policy was changed.
 
 Current pnpm check passes: **1,799 package tests plus 17 root tests**, followed by all **39 browser workflows**. Evidence: artifacts/job-state-full-check.log and artifacts/job-state-browser.log. The rebuilt live preview completes review and returns to idle (artifacts/job-state-live-review.png). PRs #55–#63 contain the latest implementation and acceptance continuation; main is unchanged.

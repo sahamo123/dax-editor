@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Real-footage MCP acceptance PASS**: import a user-authorized real clip through the stdio editor proxy and an actual MCP SDK client, apply a grouped trim/title/volume edit, verify timeline undo/redo and separate Planning refusal, then export a fully decoded 20-second 1280 x 720 audio/video MP4 and complete-effects WebM review. Six MCP-origin tasks appear in the live editor. Original remote footage and a reopenable previous-project backup are preserved. Private evidence stays under ignored artifacts/real-video-mcp/; no footage, identifying metadata or screenshots are published. External-assistant inference remains separate.
+
 * **Corrected installed-native PASS**: 40532196608 validates installer 40528351026 through actual native Open/Save, import/interactive playback, manual title/undo/redo, effects review, audio/video export, saved restart, graceful shutdown, same-version reinstall and uninstall preservation. Bundled AI remains unloaded during manual editing. Result/screenshot archive 12747475077 is downloaded and SHA-256 verified locally. Full source checks remain 1,799 package plus 17 root tests and 39 browser workflows. STATUS, tracker, handoff and specifications now distinguish this completed gate from owner-laptop Application Control, installer transfer, hosted/external-client and broader-media/memory acceptance.
 
 * **Native Save change notification**: 40531328404 correctly fails after the repaired result gate. Its owned Save control closes but returns the suggested filename instead of the selected path. Use EM_SETSEL/EM_REPLACESEL on the exact filename edit to deliver normal edit-change notifications; keep the strict returned-path assertion. No global keyboard input or application changes.
