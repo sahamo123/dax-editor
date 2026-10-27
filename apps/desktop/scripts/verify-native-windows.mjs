@@ -51,12 +51,20 @@ async function find(directory, names) {
   }
   return null;
 }
-async function run(binary, args, timeout = 180_000) {
+async function run(binary, args, timeout = 180_000, env = safeEnv) {
   await new Promise((done, fail) => {
-    const child = spawn(binary, args, { env: safeEnv, windowsHide: true, stdio: "ignore" });
+    const child = spawn(binary, args, {
+      env,
+      windowsHide: true,
+      stdio: ["ignore", "ignore", "pipe"],
+    });
+    let errors = "";
+    child.stderr.on("data", (chunk) => {
+      errors = (errors + chunk.toString()).slice(-3000);
+    });
     const timer = setTimeout(() => {
       child.kill();
-      fail(new Error("Native installation operation timed out"));
+      fail(new Error(`Native test operation timed out: ${errors}`));
     }, timeout);
     child.once("error", (error) => {
       clearTimeout(timer);
@@ -64,7 +72,7 @@ async function run(binary, args, timeout = 180_000) {
     });
     child.once("close", (code) => {
       clearTimeout(timer);
-      code === 0 ? done() : fail(new Error(`Native installation operation exited ${code}`));
+      code === 0 ? done() : fail(new Error(`Native test operation exited ${code}: ${errors}`));
     });
   });
 }
@@ -96,6 +104,28 @@ async function request(path, body) {
 async function command(name, args = {}) {
   return request("/api/command", { name, args });
 }
+async function nativeDialog(title, path, action) {
+  assert.ok(Number.isSafeInteger(app.pid));
+  await run(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-MTA",
+      "-File",
+      resolve("apps/desktop/scripts/native-file-dialog.ps1"),
+      "-DialogProcessId",
+      String(app.pid),
+      "-Title",
+      title,
+      "-Path",
+      path,
+      "-Action",
+      action,
+    ],
+    30_000,
+    { ...safeEnv, GITHUB_ACTIONS: "true", DAX_NATIVE_SMOKE: "1" },
+  );
+}
 async function launch(binary, phase) {
   mark(`launch ${phase}`);
   const port = await freePort();
@@ -105,7 +135,8 @@ async function launch(binary, phase) {
       WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-address=127.0.0.1 --remote-debugging-port=${port}`,
       WEBVIEW2_USER_DATA_FOLDER: join(work, `webview-${phase}`),
     },
-    windowsHide: true,
+    // This is the GUI under test on an isolated runner; OS dialogs require its normal visible window.
+    windowsHide: false,
     stdio: "ignore",
   });
   app.on("error", () => {});
@@ -133,6 +164,17 @@ async function launch(binary, phase) {
   await page.waitForFunction(() => !!window.__TAURI_INTERNALS__, undefined, { timeout: 30_000 });
   connection = await page.evaluate(() => window.__TAURI_INTERNALS__.invoke("get_server_info"));
   assert.equal(new URL(connection.url).hostname, "127.0.0.1");
+  const local = await request("/api/local-model");
+  console.log(
+    `Native bundled AI: ${JSON.stringify({
+      installed: local.installed,
+      supported: local.supported,
+      running: local.running,
+      detail: local.detail,
+    })}`,
+  );
+  assert.equal(local.installed, true, "The installer must provision its bundled model");
+  assert.equal(local.running, false, "Manual editing must not load local inference");
   await expect(
     page.getByRole("banner").getByRole("button", { name: "Import", exact: true }),
   ).toBeEnabled({ timeout: 60_000 });
@@ -214,8 +256,22 @@ try {
   mark("manual editing");
   await page.setViewportSize({ width: 1024, height: 700 });
   await request("/api/project/new", { name: "Native Windows acceptance" });
-  await request("/api/import", { paths: [source] });
+  await page.getByRole("banner").getByRole("button", { name: "Import", exact: true }).click();
+  await nativeDialog("Import video", source, "Open");
+  await expect
+    .poll(async () => Object.keys((await request("/api/state")).project.assets).length, {
+      timeout: 60_000,
+    })
+    .toBe(1);
   await command("set_format", { width: 320, height: 180, fps: 12 });
+  const preview = page.getByTestId("video-a");
+  await expect
+    .poll(() => preview.evaluate((video) => video.readyState), { timeout: 60_000 })
+    .toBeGreaterThanOrEqual(2);
+  await page.getByTestId("preview").getByRole("button", { name: "Play", exact: true }).click();
+  await expect.poll(() => preview.evaluate((video) => video.currentTime)).toBeGreaterThan(0.1);
+  await page.getByTestId("preview").getByRole("button", { name: "Pause", exact: true }).click();
+  await page.getByRole("button", { name: "Go to start", exact: true }).click();
   const showTools = page.getByRole("button", { name: "Show side panel", exact: true });
   if (await showTools.isVisible()) await showTools.click();
   await page.getByRole("tab", { name: "Tools", exact: true }).click();
@@ -245,12 +301,19 @@ try {
   await page.getByRole("button", { name: "Back to editing" }).click();
   const exported = join(work, "native-export.mp4");
   mark("export");
-  const exportResult = await command("export_video", { path: exported });
+  const previousJobs = new Set((await request("/api/state")).jobs.map((job) => job.id));
+  await page.getByRole("banner").getByRole("button", { name: "Export", exact: true }).click();
+  const exportDialog = page.getByRole("dialog", { name: "Export video", exact: true });
+  await exportDialog.getByRole("button", { name: "Browse...", exact: true }).click();
+  await nativeDialog("Export video", exported, "Save");
+  await expect(exportDialog.getByRole("textbox")).toHaveValue(exported);
+  await exportDialog.getByRole("button", { name: "Export", exact: true }).click();
   await expect
     .poll(
       async () =>
-        (await request("/api/state")).jobs.find((job) => job.id === exportResult.data.jobId)
-          ?.status,
+        (await request("/api/state")).jobs.find(
+          (job) => job.kind === "export" && !previousJobs.has(job.id),
+        )?.status,
       { timeout: 120_000 },
     )
     .toBe("done");
@@ -284,6 +347,8 @@ try {
     status: "PASS",
     sourceRun: 40505507400,
     nativeWebView: true,
+    bundledAIInstalled: true,
+    manualAIUnloaded: true,
     cleanInstall: true,
     manualTitleUndoRedo: true,
     reviewPlayback: true,
@@ -291,13 +356,52 @@ try {
     gracefulShutdown: true,
     sameVersionReinstallPersistence: true,
     uninstallPreservesProject: true,
-    nativeDialogsVerified: false,
+    nativeDialogsVerified: true,
+    interactivePreviewPlayback: true,
     ownerLaptopPolicyVerified: false,
     binarySha256,
   };
 } catch (error) {
   result = { status: "FAIL", phase, error: error.message, sourceRun: 40505507400 };
   console.error(`Native acceptance failed during ${phase}: ${error.message}`);
+  if (connection) {
+    try {
+      const state = await request("/api/state");
+      result.jobs = state.jobs.map(({ kind, status, progress, error }) => ({
+        kind,
+        status,
+        progress,
+        error,
+      }));
+      result.format = {
+        width: state.project.timeline.width,
+        height: state.project.timeline.height,
+        fps: state.project.timeline.fps,
+        clips: state.project.timeline.tracks[0]?.clips,
+      };
+      console.error(
+        `Native render state: ${JSON.stringify({ jobs: result.jobs, format: result.format })}`,
+      );
+    } catch {
+      console.error("Native job diagnostics unavailable");
+    }
+  }
+  // CI-only OS diagnostics omit command lines, environment and application data (which contain secrets).
+  try {
+    const diagnostics = execFileSync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-Command",
+        "$ErrorActionPreference='Stop'; Get-Process | Where-Object {$_.ProcessName -match 'dax|msedgewebview2|ffmpeg|ffprobe'} | Select-Object Id,ProcessName,SessionId,Responding,MainWindowHandle,CPU,WorkingSet64 | ConvertTo-Json; Get-WinEvent -FilterHashtable @{LogName='Application';Id=1000,1001;StartTime=(Get-Date).AddMinutes(-8)} -ErrorAction SilentlyContinue | Where-Object {$_.Message -match 'dax-editor|WebView2'} | Select-Object Id,Message | ConvertTo-Json",
+      ],
+      { encoding: "utf8", windowsHide: true, timeout: 15_000 },
+    );
+    console.error(diagnostics);
+    result = { ...result, diagnostics };
+  } catch {
+    console.error("Native OS diagnostics unavailable");
+  }
   if (page) await page.screenshot({ path: join(output, "native-failure.png") }).catch(() => {});
 } finally {
   if (browser) await browser.close().catch(() => {});

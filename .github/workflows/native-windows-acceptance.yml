@@ -4,13 +4,16 @@ name: Installed Windows candidate acceptance
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: [".github/workflows/native-windows-acceptance.yml"]
+    paths:
+      - ".github/workflows/native-windows-acceptance.yml"
+      - "apps/desktop/scripts/verify-native-windows.*"
+      - "apps/desktop/scripts/native-file-dialog.ps1"
 permissions:
   contents: read
   actions: read
 jobs:
   native:
-    if: github.head_ref == 'codex/native-windows-acceptance'
+    if: github.head_ref == 'codex/native-windows-acceptance' || github.head_ref == 'codex/oct27-acceptance-handoff'
     runs-on: windows-latest
     timeout-minutes: 20
     steps:
@@ -34,7 +37,7 @@ jobs:
           DAX_NATIVE_SMOKE: "1"
         run: |
           $env:DAX_NATIVE_INSTALLER_DIR = Join-Path $PWD 'candidate-input'
-          node apps/desktop/scripts/verify-native-windows.mjs
+          ./apps/desktop/scripts/verify-native-windows.ps1
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:

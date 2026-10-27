@@ -2,6 +2,32 @@
 
 ## 2026-10-27
 
+* **Native workflow extension result**: real native file selection/import and interactive H.264 playback now pass, followed by manual title/undo/redo. The extended flow reaches review rendering but remains at 100% until its UI deadline. Add bounded backend job/format and renderer-process diagnostics to separate rendering from UI task delivery. The prior baseline review/export/restart pass remains scoped to its tested workflow.
+
+* **Native harness completion**: wait for the test harness process itself, rather than PowerShell's whole descendant-tree wait. Common dialogs may activate shared Windows shell services; the JavaScript harness separately verifies application/engine shutdown and must not wait for unrelated system-service lifetimes.
+
+* **Native common-dialog driver**: actual picker opening is confirmed, but this runner's UIA provider blocks while enumerating its children. Use bounded Win32 control discovery within the exact owned standard common dialog, set only its filename edit and activate its standard confirmation button. Backend import and export-path assertions still determine success; finding a dialog alone never counts as a passed file selection.
+
+* **Native picker evidence**: run 40519718711 confirms the actual owned Import video window opens, and bundled local AI is installed/supported/unloaded. The remaining failure is the test helper's filename selector. Accept the native filename combo's writable ValuePattern, allow delayed controls and retain bounded control-label diagnostics without field values.
+
+* **Native GUI precondition**: launch the actual GUI under test with a normal visible window on the isolated runner; keep console helpers hidden. The native-dialog extension must exercise the normal window/owner relationship rather than a hidden launch. This never opens a window or changes policy on the owner's laptop.
+
+* **Native dialog diagnostics**: keep the dialog-search deadline below the outer helper timeout and report only owned native window captions. Also record non-secret installed/supported/unloaded model status from the installed engine, separating offline asset provisioning from manual-native acceptance.
+
+* **Native dialog discovery**: MTA evidence isolates the timeout to desktop-wide UIA discovery. Resolve the exact owned native window handle using bounded Win32 enumeration first, then query only that dialog's accessibility controls. PID/owner and exact-title restrictions remain; no desktop-wide actions or production changes are added.
+
+* **Native dialog test repair**: the extension reaches native editing but its dialog helper times out. Run Windows UI Automation in the documented MTA apartment and retain bounded stage diagnostics on timeout. The earlier installed-native baseline remains PASS; native dialog acceptance is not yet claimed.
+
+* **Native acceptance PASS**: run 40514781942 exercises the exact installed candidate through real Tauri/WebView2: clean install/startup, manual title/undo/redo, effects-review playback, audio/video export, saved restart, graceful shutdown, same-version reinstall persistence and uninstall project preservation. The result/screenshot archive is hash-verified locally. The next extension tests owned native open/save dialogs through bounded Windows UI Automation and decoded interactive proxy playback. Owner-laptop execution and cross-version upgrades remain independent.
+
+* **Native test-host continuation**: Basic User launches the harness but CDP still times out. Lower the CI worker's own mandatory integrity label to Medium before launching children, retaining the non-admin assertion. Preserve stderr separately so Windows PowerShell cannot interrupt the JavaScript failure/cleanup record. No application permissions, registry or machine policy changes are involved; actual acceptance remains unverified.
+
+* **Native test-host result**: run 40512619612 correctly refuses the Limited-task trial because the runner still gives it an administrative token. Replace that attempt with the documented Windows Basic User `runas /trustlevel:0x20000` launch and keep the non-admin assertion. The final helper creates no scheduled task/account or stored credentials; native acceptance remains pending a real result.
+
+* **Native test-host correction**: diagnostics prove the installed app, engine and WebView2 are responding. Microsoft's runtime 150 elevated-host filtering explains why environment-only CDP flags are ignored. The CI harness now uses an ephemeral current-user Interactive task at Limited privilege, verifies its non-admin token, waits for its result and removes the task. There is no registry/policy change, password, production-code change or recurring schedule. Native acceptance remains pending the standard-user rerun.
+
+* **Verification**: refreshed real offline AI editing/export/restart/cleanup suite passes, including format, title creation/revision, volume, unsupported request and trimming. Longer synthetic offline speech again passes (143.65 seconds, 318 words, 89 caption lines, 68.625 ms stream drift). Native run 40509708952 installs the candidate and runs its renderer, but times out connecting to the actual WebView2; focused CI-only process/crash diagnostics are added without command lines, environment or application data. The system `taskkill.exe` is declared in the existing OS-binary inventory so Knip can analyze the new workflow entry without treating it as an npm dependency.
+
 * **Acceptance investigation**: the first isolated native run downloaded and installed the candidate, but failed during launch/testing; a cleanup exception masked the original failure. The harness now preserves phase/error evidence and handles already-exited processes without losing the result. Native readiness remains unverified pending the rerun. The normal-host local-model connection/tool probe passes in 12.7 seconds; restricted socket visibility was isolated without changing ownership checks.
 
 * **Verification design**: an opt-in isolated Windows acceptance harness installs the fixed current candidate and controls its actual Tauri WebView using a child-only loopback CDP connection. Proposed CI needs contents/actions read only to retrieve the existing artifact, with no security-policy, signing, release or dependency changes. Same-version reinstall is distinguished from cross-version upgrade; laptop execution and native dialogs remain separate gates.
