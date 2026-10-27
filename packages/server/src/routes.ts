@@ -200,10 +200,10 @@ export function buildRouter(engine: Engine): Router {
   // ----- media -----
   r.add(
     "GET",
-    `${API.media}/previews/:previewId/proxy.mp4`,
+    `${API.media}/previews/:previewId/review.webm`,
     async ({ req, res, params, headers }) => {
       await sendFile(req, res, engine.previewFile(params.previewId ?? ""), {
-        contentType: "video/mp4",
+        contentType: "video/webm",
         cacheControl: "private, no-store",
         headers,
       });

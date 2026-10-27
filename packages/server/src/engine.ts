@@ -717,7 +717,11 @@ export class Engine {
    * Run `export_video` as a background job. Validation failures (path not allowed, file exists) are
    * answered directly; once FFmpeg is running the HTTP response says "started" and the job reports progress.
    */
-  private startExport(args: Record<string, unknown>, jobLabel?: string): Promise<CommandResponse> {
+  private startExport(
+    args: Record<string, unknown>,
+    jobLabel?: string,
+    privateOutputRoot?: string,
+  ): Promise<CommandResponse> {
     if (this.work.size)
       return Promise.resolve({
         ok: false,
@@ -746,6 +750,10 @@ export class Engine {
         return job;
       };
       const ctx = this.commandContext({
+        // Only the host-owned review directory is added for this private export; public import/export roots stay unchanged.
+        ...(privateOutputRoot
+          ? { allowedRoots: [...this.cfg.allowedRoots, privateOutputRoot], reviewWebM: true }
+          : {}),
         signal: abort.signal,
         // FFmpeg is tracked so shutdown kills it instead of orphaning it.
         onProcess: (child) => this.processes.add(child),
@@ -783,8 +791,8 @@ export class Engine {
     if (this.projects.session !== session || session.revision !== revision)
       throw new Error("The project changed. Render a new preview.");
     const id = randomUUID(),
-      path = join(directory, `${id}.mp4`);
-    const result = await this.startExport({ path }, "Render complete edit preview");
+      path = join(directory, `${id}.webm`);
+    const result = await this.startExport({ path }, "Render complete edit preview", directory);
     if (!result.ok) throw new Error(result.error);
     const data = asObject(result.data),
       jobId = data.jobId;

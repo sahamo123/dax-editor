@@ -228,7 +228,9 @@ export function createController(deps: ControllerDeps): Controller {
             ) {
               toast(
                 "success",
-                `Exported ${event.job.result ? basename(event.job.result) : "the video"}.`,
+                event.job.label === "Render complete edit preview"
+                  ? "Effects preview ready."
+                  : `Exported ${event.job.result ? basename(event.job.result) : "the video"}.`,
               );
             }
           } else {

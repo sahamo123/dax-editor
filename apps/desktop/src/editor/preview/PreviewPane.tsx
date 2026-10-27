@@ -16,6 +16,7 @@ import {
 import { Icon } from "../ui/icons";
 import { CaptionLayer } from "./CaptionLayer";
 import { OverlayLayer } from "./OverlayLayer";
+import { RenderedReview } from "./RenderedReview";
 
 /** Overlays at the live playhead. A separate component so only this subtree re-renders at 60 Hz. */
 function LiveOverlays() {
@@ -148,6 +149,7 @@ export function PreviewPane({ className }: { className?: string }) {
 
   return (
     <div className={`dx-preview${className ? ` ${className}` : ""}`} data-testid="preview">
+      <RenderedReview />
       <div className="dx-preview-viewport">
         <div
           className="dx-stage"

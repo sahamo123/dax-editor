@@ -41,9 +41,8 @@ describe("registry shape", () => {
         .filter((t) => t.irreversible)
         .map((t) => t.name),
     ).toEqual(["cancel_task", "render_preview", "export_video"]);
-    expect(commandTools({ readOnlyOnly: true }).map((t) => t.name)).not.toEqual(
-      expect.arrayContaining(["cancel_task"]),
-    );
+    for (const name of ["cancel_task", "render_preview", "export_video"])
+      expect(commandTools({ readOnlyOnly: true }).map((t) => t.name)).not.toContain(name);
     expect(commandTools({ readOnlyOnly: true }).map((t) => t.name)).toEqual(
       expect.arrayContaining(["get_project", "list_presets", "detect_silence", "get_history"]),
     );

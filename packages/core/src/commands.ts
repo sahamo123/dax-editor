@@ -69,6 +69,8 @@ import { findFillerRanges, formatTranscript, type Transcriber } from "./transcri
 export interface CommandContext {
   /** Optional live-host review rendering. Returns a tracked job and private preview identifier without editing project/history. */
   renderPreview?: () => Promise<CommandResult>;
+  /** Host-only WebM review output. Public export calls retain MP4 validation and normal encoder selection. */
+  reviewWebM?: boolean;
   /** Optional live-host cancellation capability. Must restrict the task UUID to the active project; returns whether cancellation was signalled. */
   cancelTask?: (taskId: string) => boolean;
   /** Editor sessions preserve omitted fit and fps on format changes; omitted/false retains standalone CLI preset defaults. */
@@ -1140,8 +1142,9 @@ export const COMMANDS: readonly CommandDef[] = [
     async run(ctx, a) {
       const out = await checkPath(ctx, a.path);
       await checkPath(ctx, dirname(out));
-      if (!out.toLowerCase().endsWith(".mp4"))
-        throw new CommandError("Export path must end in .mp4");
+      const extension = ctx.reviewWebM ? ".webm" : ".mp4";
+      if (!out.toLowerCase().endsWith(extension))
+        throw new CommandError(`Export path must end in ${extension}`);
       // The assistant may not replace a file: an overwrite cannot be undone from the history, and a chat
       // transcript or file name must not be able to make it happen. The user can overwrite by hand.
       if (existsSync(out) && a.overwrite && ctx.source === "ai") {
@@ -1155,6 +1158,7 @@ export const COMMANDS: readonly CommandDef[] = [
         );
       }
       const r = await exportProject(ctx.session.project, out, {
+        ...(ctx.reviewWebM ? { encoder: "libvpx-vp9" } : {}),
         ...(ctx.onProgress ? { onProgress: ctx.onProgress } : {}),
         ...(ctx.signal ? { signal: ctx.signal } : {}),
         ...(ctx.onProcess ? { onSpawn: ctx.onProcess } : {}),

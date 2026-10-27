@@ -71,6 +71,22 @@ test("manually edits zooms, music and images, undoes and exports without AI", as
   await page.getByRole("banner").getByRole("button", { name: "Redo", exact: true }).click();
   await expect.poll(async () => (await server.api.project()).timeline.images?.length).toBe(1);
   await server.api.settled();
+  const closeTools = page.getByRole("button", { name: "Close tools panel" });
+  if (await closeTools.isVisible()) await closeTools.click();
+  const beforeReview = await server.api.project();
+  await page.getByRole("button", { name: "Review effects", exact: true }).click();
+  const review = page.getByLabel("Complete edit review", { exact: true });
+  await expect(review).toBeVisible({ timeout: 30_000 });
+  await expect
+    .poll(() => review.evaluate((element: HTMLVideoElement) => element.readyState))
+    .toBeGreaterThanOrEqual(2);
+  await review.evaluate((element: HTMLVideoElement) => element.play());
+  await expect
+    .poll(() => review.evaluate((element: HTMLVideoElement) => element.currentTime))
+    .toBeGreaterThan(0.1);
+  expect(await server.api.project()).toEqual(beforeReview);
+  await shot("complete-effects-review");
+  await page.getByRole("button", { name: "Back to editing" }).click();
   const output = join(dirname(sampleVideo), "manual-effects-export.mp4");
   const result = await server.api.command("export_video", { path: output });
   expect(result.ok).toBe(true);

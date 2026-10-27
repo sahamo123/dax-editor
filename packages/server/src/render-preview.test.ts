@@ -58,7 +58,7 @@ it.skipIf(!HAS_FFMPEG)(
       output = job?.result;
       expect(state.project).toEqual(before.project);
       expect(state.history).toEqual(before.history);
-      const route = `/api/media/previews/${review.previewId}/proxy.mp4`;
+      const route = `/api/media/previews/${review.previewId}/review.webm`;
       expect((await h.req(route, { token: null })).status).toBe(401);
       const response = await h.req(`${route}?token=${h.token}`, {
         token: null,
@@ -67,15 +67,17 @@ it.skipIf(!HAS_FFMPEG)(
       expect(response.status).toBe(206);
       expect(response.body.length).toBe(100);
       const complete = await h.req(route);
-      const file = join(h.workDir, "review.mp4");
+      const file = join(h.workDir, "review.webm");
       await writeFile(file, complete.body);
       const info = await ffprobeJson(file);
       expect(info.streams.some((stream) => stream.codec_type === "audio")).toBe(true);
+      expect(info.streams.find((stream) => stream.codec_type === "video")?.codec_name).toBe("vp9");
+      expect(info.streams.find((stream) => stream.codec_type === "audio")?.codec_name).toBe("opus");
       expect(info.streams.find((stream) => stream.codec_type === "video")).toMatchObject({
         width: 320,
         height: 180,
       });
-      expect((await h.req("/api/media/previews/__proto__/proxy.mp4")).status).toBe(404);
+      expect((await h.req("/api/media/previews/__proto__/review.webm")).status).toBe(404);
       await command("set_format", { width: 320, height: 180, fps: 15 });
       expect((await h.req(route)).status).toBe(404);
       await h.server.close();

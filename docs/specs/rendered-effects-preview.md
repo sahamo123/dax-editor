@@ -19,6 +19,8 @@ The typed `render_preview` registry command requires an editor-host capability, 
 
 The desktop review dialog pauses interactive playback and shows job progress, cancellation, errors and the completed video with native playback controls. A revision/project change invalidates the video immediately and offers regeneration. Closing a dialog does not silently stop a job; Stop is explicit. Native interactive playback remains available without waiting for a render.
 
+Review copies use VP9/Opus WebM through the same effect filter graph. This avoids depending on proprietary MP4 codecs in browser/webview builds; MP4 export and its encoder selection remain unchanged. The live host alone selects this review format and its private path. Review encoding may differ from the final export while effect timing/composition remains shared.
+
 ## Acceptance
 
 - Real generated-media test renders combined edits, verifies playable audio/video, authenticated Range serving, unchanged project/history, stale project/revision rejection and shutdown cleanup.

@@ -42,7 +42,7 @@ describe("authentication", () => {
     for (const [method, path] of [
       ["GET", "/api/health"],
       ["GET", "/api/state"],
-      ["GET", "/api/media/previews/unknown/proxy.mp4"],
+      ["GET", "/api/media/previews/unknown/review.webm"],
       ["POST", "/api/command"],
       ["POST", "/api/import"],
       ["POST", "/api/project/new"],
