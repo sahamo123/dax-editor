@@ -163,6 +163,15 @@ async function launch(binary, phase) {
   await page.waitForFunction(() => !!window.__TAURI_INTERNALS__, undefined, { timeout: 30_000 });
   connection = await page.evaluate(() => window.__TAURI_INTERNALS__.invoke("get_server_info"));
   assert.equal(new URL(connection.url).hostname, "127.0.0.1");
+  const local = await request("/api/local-model");
+  console.log(
+    `Native bundled AI: ${JSON.stringify({
+      installed: local.installed,
+      supported: local.supported,
+      running: local.running,
+      detail: local.detail,
+    })}`,
+  );
   await expect(
     page.getByRole("banner").getByRole("button", { name: "Import", exact: true }),
   ).toBeEnabled({ timeout: 60_000 });

@@ -38,10 +38,15 @@ public static class NativeFileDialogWindow {
 }
 '@
 [Console]::Error.WriteLine('Native dialog: searching owned native handle')
-$deadline = (Get-Date).AddSeconds(25)
+$deadline = (Get-Date).AddSeconds(8)
 $dialogHandle = [IntPtr]::Zero
+$reported = $false
 while ($dialogHandle -eq [IntPtr]::Zero) {
   $dialogHandle = [NativeFileDialogWindow]::Find($DialogProcessId, $Title)
+  if (-not $reported) {
+    [Console]::Error.WriteLine("Native dialog: owned windows: $([NativeFileDialogWindow]::Seen)")
+    $reported = $true
+  }
   if ((Get-Date) -gt $deadline) { throw "Native dialog did not open: $Title; owned windows: $([NativeFileDialogWindow]::Seen)" }
   if ($dialogHandle -eq [IntPtr]::Zero) { Start-Sleep -Milliseconds 100 }
 }

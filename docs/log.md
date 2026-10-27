@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native dialog diagnostics**: keep the dialog-search deadline below the outer helper timeout and report only owned native window captions. Also record non-secret installed/supported/unloaded model status from the installed engine, separating offline asset provisioning from manual-native acceptance.
+
 * **Native dialog discovery**: MTA evidence isolates the timeout to desktop-wide UIA discovery. Resolve the exact owned native window handle using bounded Win32 enumeration first, then query only that dialog's accessibility controls. PID/owner and exact-title restrictions remain; no desktop-wide actions or production changes are added.
 
 * **Native dialog test repair**: the extension reaches native editing but its dialog helper times out. Run Windows UI Automation in the documented MTA apartment and retain bounded stage diagnostics on timeout. The earlier installed-native baseline remains PASS; native dialog acceptance is not yet claimed.
