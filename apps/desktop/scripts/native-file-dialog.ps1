@@ -52,19 +52,32 @@ while ($dialogHandle -eq [IntPtr]::Zero) {
 }
 $dialog = [System.Windows.Automation.AutomationElement]::FromHandle($dialogHandle)
 [Console]::Error.WriteLine('Native dialog: window found; locating file name input')
-$edits = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,
-  [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Edit))
 $filename = $null
-for ($index=0; $index -lt $edits.Count; $index++) {
-  $candidate = $edits.Item($index)
-  if ($candidate.Current.Name -match '^File name:?$' -or $candidate.Current.AutomationId -eq '1001') {
-    $filename = $candidate
-    break
+$value = $null
+$inputDeadline = (Get-Date).AddSeconds(8)
+while ($null -eq $filename -and (Get-Date) -lt $inputDeadline) {
+  $controls = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
+  for ($index=0; $index -lt $controls.Count; $index++) {
+    $candidate = $controls.Item($index)
+    if ($candidate.Current.Name -match '^\s*File\s+name\b' -or $candidate.Current.AutomationId -in @('1001','1148','FileNameControlHost')) {
+      $pattern = $null
+      if ($candidate.TryGetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern, [ref]$pattern) -and -not $pattern.Current.IsReadOnly) {
+        $filename = $candidate
+        $value = $pattern
+        break
+      }
+    }
   }
+  if ($null -eq $filename) { Start-Sleep -Milliseconds 150 }
 }
-if ($null -eq $filename) { throw 'Native file name input was not found' }
+if ($null -eq $filename) {
+  for ($index=0; $index -lt [Math]::Min($controls.Count,24); $index++) {
+    $item=$controls.Item($index).Current
+    [Console]::Error.WriteLine("Native dialog control: $($item.Name); $($item.AutomationId); $($item.ControlType.ProgrammaticName)")
+  }
+  throw 'Native writable file name input was not found'
+}
 [Console]::Error.WriteLine('Native dialog: setting file name')
-$value = $filename.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern)
 $value.SetValue($Path)
 $buttons = $dialog.FindAll([System.Windows.Automation.TreeScope]::Descendants,
   [System.Windows.Automation.PropertyCondition]::new([System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button))

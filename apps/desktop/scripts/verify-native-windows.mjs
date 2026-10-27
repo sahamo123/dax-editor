@@ -173,6 +173,8 @@ async function launch(binary, phase) {
       detail: local.detail,
     })}`,
   );
+  assert.equal(local.installed, true, "The installer must provision its bundled model");
+  assert.equal(local.running, false, "Manual editing must not load local inference");
   await expect(
     page.getByRole("banner").getByRole("button", { name: "Import", exact: true }),
   ).toBeEnabled({ timeout: 60_000 });
@@ -345,6 +347,8 @@ try {
     status: "PASS",
     sourceRun: 40505507400,
     nativeWebView: true,
+    bundledAIInstalled: true,
+    manualAIUnloaded: true,
     cleanInstall: true,
     manualTitleUndoRedo: true,
     reviewPlayback: true,
