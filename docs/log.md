@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native test-host result**: run 40512619612 correctly refuses the Limited-task trial because the runner still gives it an administrative token. Replace that attempt with the documented Windows Basic User `runas /trustlevel:0x20000` launch and keep the non-admin assertion. The final helper creates no scheduled task/account or stored credentials; native acceptance remains pending a real result.
+
 * **Native test-host correction**: diagnostics prove the installed app, engine and WebView2 are responding. Microsoft's runtime 150 elevated-host filtering explains why environment-only CDP flags are ignored. The CI harness now uses an ephemeral current-user Interactive task at Limited privilege, verifies its non-admin token, waits for its result and removes the task. There is no registry/policy change, password, production-code change or recurring schedule. Native acceptance remains pending the standard-user rerun.
 
 * **Verification**: refreshed real offline AI editing/export/restart/cleanup suite passes, including format, title creation/revision, volume, unsupported request and trimming. Longer synthetic offline speech again passes (143.65 seconds, 318 words, 89 caption lines, 68.625 ms stream drift). Native run 40509708952 installs the candidate and runs its renderer, but times out connecting to the actual WebView2; focused CI-only process/crash diagnostics are added without command lines, environment or application data. The system `taskkill.exe` is declared in the existing OS-binary inventory so Knip can analyze the new workflow entry without treating it as an npm dependency.

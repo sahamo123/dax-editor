@@ -36,32 +36,20 @@ $configFile = Join-Path $output 'worker-config.json'
 $config | ConvertTo-Json | Set-Content -LiteralPath $configFile
 $completion = Join-Path $output 'worker-exit.txt'
 if (Test-Path -LiteralPath $completion) { throw 'Acceptance completion marker already exists' }
-$taskName = 'DaxNativeAcceptance-' + [Guid]::NewGuid().ToString('N')
-$currentUser = [Security.Principal.WindowsIdentity]::GetCurrent().Name
-$principal = New-ScheduledTaskPrincipal -UserId $currentUser -LogonType Interactive -RunLevel Limited
 $powershell = Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/powershell.exe'
 $arguments = '-NoProfile -WindowStyle Hidden -File "' + $PSCommandPath + '" -Worker -ConfigPath "' + $configFile + '"'
-$action = New-ScheduledTaskAction -Execute $powershell -Argument $arguments -WorkingDirectory $root
-$settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 10) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
-$registered = $false
-try {
-  Register-ScheduledTask -TaskName $taskName -Action $action -Principal $principal -Settings $settings | Out-Null
-  $registered = $true
-  Start-ScheduledTask -TaskName $taskName
-  $deadline = (Get-Date).AddMinutes(10)
-  while (-not (Test-Path -LiteralPath $completion)) {
-    if ((Get-Date) -gt $deadline) { throw 'Standard-user native acceptance timed out' }
-    Start-Sleep -Seconds 2
-  }
-  foreach ($name in @('worker.log','worker-launch-error.txt')) {
-    $path = Join-Path $output $name
-    if (Test-Path -LiteralPath $path) { Get-Content -LiteralPath $path }
-  }
-  $code = [int](Get-Content -LiteralPath $completion -Raw)
-  if ($code -ne 0) { throw "Native acceptance failed with exit code $code" }
-} finally {
-  if ($registered) {
-    Stop-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
-    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
-  }
+$runas = Join-Path $env:SystemRoot 'System32/runas.exe'
+# Basic User restricts the existing token without a password, account or policy change.
+& $runas '/trustlevel:0x20000' ($powershell + ' ' + $arguments)
+if ($LASTEXITCODE -ne 0) { throw 'Windows refused the Basic User test launch' }
+$deadline = (Get-Date).AddMinutes(10)
+while (-not (Test-Path -LiteralPath $completion)) {
+  if ((Get-Date) -gt $deadline) { throw 'Standard-user native acceptance timed out' }
+  Start-Sleep -Seconds 2
 }
+foreach ($name in @('worker.log','worker-launch-error.txt')) {
+  $path = Join-Path $output $name
+  if (Test-Path -LiteralPath $path) { Get-Content -LiteralPath $path }
+}
+$code = [int](Get-Content -LiteralPath $completion -Raw)
+if ($code -ne 0) { throw "Native acceptance failed with exit code $code" }
