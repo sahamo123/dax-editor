@@ -1,0 +1,45 @@
+name: Installed Windows candidate acceptance
+# Read-only retrieval and native testing of the fixed successful candidate; PR #59 records why.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths: [".github/workflows/native-windows-acceptance.yml"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native:
+    if: github.head_ref == 'codex/native-windows-acceptance'
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - name: Enable pinned pnpm
+        run: corepack enable
+      - name: Install locked test dependencies
+        run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: dax-functional-windows-x64-nsis
+          run-id: 40505507400
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: candidate-input
+      - name: Test the installed native application
+        shell: pwsh
+        env:
+          DAX_NATIVE_SMOKE: "1"
+        run: |
+          $env:DAX_NATIVE_INSTALLER_DIR = Join-Path $PWD 'candidate-input'
+          node apps/desktop/scripts/verify-native-windows.mjs
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: native-windows-acceptance
+          path: |
+            artifacts/native-windows-acceptance/result.json
+            artifacts/native-windows-acceptance/native-*.png
+          if-no-files-found: warn
+          retention-days: 7
