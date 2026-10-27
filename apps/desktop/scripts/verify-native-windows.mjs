@@ -298,6 +298,22 @@ try {
 } catch (error) {
   result = { status: "FAIL", phase, error: error.message, sourceRun: 40505507400 };
   console.error(`Native acceptance failed during ${phase}: ${error.message}`);
+  // CI-only OS diagnostics omit command lines, environment and application data (which contain secrets).
+  try {
+    const diagnostics = execFileSync(
+      "powershell.exe",
+      [
+        "-NoProfile",
+        "-Command",
+        "$ErrorActionPreference='Stop'; Get-Process | Where-Object {$_.ProcessName -match 'dax|msedgewebview2'} | Select-Object Id,ProcessName,SessionId,Responding,MainWindowHandle | ConvertTo-Json; Get-WinEvent -FilterHashtable @{LogName='Application';Id=1000,1001;StartTime=(Get-Date).AddMinutes(-8)} -ErrorAction SilentlyContinue | Where-Object {$_.Message -match 'dax-editor|WebView2'} | Select-Object Id,Message | ConvertTo-Json",
+      ],
+      { encoding: "utf8", windowsHide: true, timeout: 15_000 },
+    );
+    console.error(diagnostics);
+    result = { ...result, diagnostics };
+  } catch {
+    console.error("Native OS diagnostics unavailable");
+  }
   if (page) await page.screenshot({ path: join(output, "native-failure.png") }).catch(() => {});
 } finally {
   if (browser) await browser.close().catch(() => {});

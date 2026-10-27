@@ -10,7 +10,7 @@ permissions:
   actions: read
 jobs:
   native:
-    if: github.head_ref == 'codex/native-windows-acceptance'
+    if: github.head_ref == 'codex/native-windows-acceptance' || github.head_ref == 'codex/oct27-acceptance-handoff'
     runs-on: windows-latest
     timeout-minutes: 20
     steps:

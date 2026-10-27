@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Verification**: refreshed real offline AI editing/export/restart/cleanup suite passes, including format, title creation/revision, volume, unsupported request and trimming. Longer synthetic offline speech again passes (143.65 seconds, 318 words, 89 caption lines, 68.625 ms stream drift). Native run 40509708952 installs the candidate and runs its renderer, but times out connecting to the actual WebView2; focused CI-only process/crash diagnostics are added without command lines, environment or application data. The system `taskkill.exe` is declared in the existing OS-binary inventory so Knip can analyze the new workflow entry without treating it as an npm dependency.
+
 * **Acceptance investigation**: the first isolated native run downloaded and installed the candidate, but failed during launch/testing; a cleanup exception masked the original failure. The harness now preserves phase/error evidence and handles already-exited processes without losing the result. Native readiness remains unverified pending the rerun. The normal-host local-model connection/tool probe passes in 12.7 seconds; restricted socket visibility was isolated without changing ownership checks.
 
 * **Verification design**: an opt-in isolated Windows acceptance harness installs the fixed current candidate and controls its actual Tauri WebView using a child-only loopback CDP connection. Proposed CI needs contents/actions read only to retrieve the existing artifact, with no security-policy, signing, release or dependency changes. Same-version reinstall is distinguished from cross-version upgrade; laptop execution and native dialogs remain separate gates.
