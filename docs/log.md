@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native dialog discovery**: MTA evidence isolates the timeout to desktop-wide UIA discovery. Resolve the exact owned native window handle using bounded Win32 enumeration first, then query only that dialog's accessibility controls. PID/owner and exact-title restrictions remain; no desktop-wide actions or production changes are added.
+
 * **Native dialog test repair**: the extension reaches native editing but its dialog helper times out. Run Windows UI Automation in the documented MTA apartment and retain bounded stage diagnostics on timeout. The earlier installed-native baseline remains PASS; native dialog acceptance is not yet claimed.
 
 * **Native acceptance PASS**: run 40514781942 exercises the exact installed candidate through real Tauri/WebView2: clean install/startup, manual title/undo/redo, effects-review playback, audio/video export, saved restart, graceful shutdown, same-version reinstall persistence and uninstall project preservation. The result/screenshot archive is hash-verified locally. The next extension tests owned native open/save dialogs through bounded Windows UI Automation and decoded interactive proxy playback. Owner-laptop execution and cross-version upgrades remain independent.
