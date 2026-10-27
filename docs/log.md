@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native Save change notification**: 40531328404 correctly fails after the repaired result gate. Its owned Save control closes but returns the suggested filename instead of the selected path. Use EM_SETSEL/EM_REPLACESEL on the exact filename edit to deliver normal edit-change notifications; keep the strict returned-path assertion. No global keyboard input or application changes.
+
 * **Native test truthfulness**: 40530091909 verifies corrected native review playback, then fails in the Save-dialog driver (modern filename Edit 1001). Its job conclusion is a false pass because Windows PowerShell lost the child exit code and cast an empty marker to zero. Retain the process handle, reject unknown markers and independently require result.json PASS. Extend only the owned Save filename selector. The application candidate is unchanged; a full rerun is still required.
 
 * **Corrected state verification**: full `pnpm check` passes with 1,799 package and 17 root tests; all 39 browser workflows pass. The rebuilt live development editor completes review playback and returns to idle, preserving its saved project. Evidence: `artifacts/job-state-full-check.log`, `job-state-browser.log`, `job-state-live-review.png`. The corrected installer still needs its separate native acceptance.
