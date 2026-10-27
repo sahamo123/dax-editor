@@ -3,9 +3,10 @@
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { ProviderStatus } from "@dax/protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Engine } from "./engine.js";
-import type { LocalModelController } from "./interfaces.js";
+import type { LocalModelController, ProviderRegistry } from "./interfaces.js";
 import { createLogger } from "./logger.js";
 import { NullLocalModelController, NullProviderRegistry, ScriptedRunner } from "./stubs.js";
 
@@ -18,6 +19,7 @@ afterEach(async () => {
 /** A started engine on a fresh data folder, with an AI runner that answers at once. */
 async function makeEngine(
   localModel: LocalModelController = new NullLocalModelController(),
+  providers: ProviderRegistry = new NullProviderRegistry(),
 ): Promise<Engine> {
   const dir = await mkdtemp(join(tmpdir(), "dax-engine-"));
   dirs.push(dir);
@@ -25,7 +27,7 @@ async function makeEngine(
     dataDir: dir,
     allowedRoots: [dir],
     runner: new ScriptedRunner(),
-    providers: new NullProviderRegistry(),
+    providers,
     localModel,
     log: createLogger(() => undefined),
     emit: () => undefined,
@@ -36,6 +38,28 @@ async function makeEngine(
 }
 
 describe("Engine ordering of manual edits and AI runs", () => {
+  it("captures current edits and completed jobs after a slow provider check", async () => {
+    let finish: (value: ProviderStatus[]) => void = () => {
+      throw new Error("Provider resolver missing");
+    };
+    const pending = new Promise<ProviderStatus[]>((resolve) => {
+      finish = resolve;
+    });
+    const engine = await makeEngine(undefined, { list: () => pending });
+    try {
+      const job = engine.jobs.create("export", "Review");
+      const snapshot = engine.buildState();
+      await engine.runCommand("set_format", { width: 640, height: 360 });
+      job.done();
+      finish([]);
+      const state = await snapshot;
+      expect(state.jobs.find((item) => item.id === job.id)?.status).toBe("done");
+      expect(state.project.timeline.width).toBe(640);
+    } finally {
+      finish([]);
+      await engine.shutdown();
+    }
+  });
   it("unloads inference after the configured idle interval and clears its timer on shutdown", async () => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
     const model = new NullLocalModelController();

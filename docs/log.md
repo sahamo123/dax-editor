@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Job completion ordering**: five UI regressions and a delayed-provider server regression fail before the fix and pass afterward. Job events now update editor state as well as the index; terminal jobs resist delayed running data. Server state captures current project/history/jobs after asynchronous provider discovery. No protocol or project schema changes. Full verification and rebuilt native acceptance remain required.
+
 * **Native workflow extension result**: real native file selection/import and interactive H.264 playback now pass, followed by manual title/undo/redo. The extended flow reaches review rendering but remains at 100% until its UI deadline. Add bounded backend job/format and renderer-process diagnostics to separate rendering from UI task delivery. The prior baseline review/export/restart pass remains scoped to its tested workflow.
 
 * **Native harness completion**: wait for the test harness process itself, rather than PowerShell's whole descendant-tree wait. Common dialogs may activate shared Windows shell services; the JavaScript harness separately verifies application/engine shutdown and must not wait for unrelated system-service lifetimes.

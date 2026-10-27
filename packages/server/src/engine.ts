@@ -243,6 +243,8 @@ export class Engine {
 
   /** Assemble everything the UI needs to draw itself. */
   async buildState(): Promise<StateResponse> {
+    // Finish asynchronous discovery before capturing the live project and job snapshot.
+    const providers = await this.providerStatuses();
     const session = this.projects.session;
     const state: StateResponse = {
       project: session.project,
@@ -267,7 +269,7 @@ export class Engine {
       ),
       jobs: this.jobs.list(),
       settings: this.settings.get(),
-      providers: await this.providerStatuses(),
+      providers,
       busy: this.chat !== undefined,
       tasks: this.tasks.list().map((task) => {
         const index = this.chatQueue.findIndex((queued) => queued.id === task.id);
