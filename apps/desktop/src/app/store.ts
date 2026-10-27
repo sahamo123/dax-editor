@@ -84,9 +84,9 @@ export interface AppStore {
   setServer(server: ServerConnection | null): void;
   /** Merge changes into the connection status. */
   setConnection(patch: Partial<ConnectionState>): void;
-  /** Replace the server state (a `state` push or a REST read). */
+  /** Apply a server snapshot while retaining newer job events and terminal outcomes. */
   applyState(state: StateResponse): void;
-  /** Record the latest progress of a background job. */
+  /** Update job progress in both store views; completed jobs cannot return to running. */
   applyJob(job: JobInfo): void;
   /** Fold one `chat` event into the transcript. */
   applyChat(runId: string, event: AgentEvent, startStateId?: number): void;
@@ -114,6 +114,13 @@ let nextId = 1;
 const uid = (prefix: string) => `${prefix}${nextId++}`;
 
 const DRAWER_KEY = "dax.drawerTab";
+
+function mergeJob(jobs: Record<string, JobInfo>, incoming: JobInfo): void {
+  const known = jobs[incoming.id];
+  // Provider checks can delay snapshots behind completion events. Job IDs are never reused.
+  if (known && known.status !== "running" && incoming.status === "running") return;
+  jobs[incoming.id] = incoming;
+}
 
 function readDrawerTab(): DrawerTab {
   try {
@@ -172,13 +179,17 @@ export function createAppStore(): StoreApi<AppStore> {
 
     applyState: (state) =>
       set((s) => {
-        // The state's job list is authoritative for jobs it names; job events fill in the gaps between pushes.
         const jobs = { ...s.jobs };
-        for (const j of state.jobs) jobs[j.id] = j;
-        return { state, jobs };
+        for (const job of state.jobs) mergeJob(jobs, job);
+        return { state: { ...state, jobs: Object.values(jobs) }, jobs };
       }),
 
-    applyJob: (job) => set((s) => ({ jobs: { ...s.jobs, [job.id]: job } })),
+    applyJob: (job) =>
+      set((s) => {
+        const jobs = { ...s.jobs };
+        mergeJob(jobs, job);
+        return { jobs, state: s.state ? { ...s.state, jobs: Object.values(jobs) } : null };
+      }),
 
     applyChat: (runId, event, startStateId) =>
       set((s) => {
