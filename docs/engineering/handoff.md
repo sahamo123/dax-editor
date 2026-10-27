@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## October 27 continuation
+
+Complete effects review is implemented through the shared registry/export renderer and a revision-bound private WebM copy, with progress, cancellation and error/retry controls. Real generated-media/browser playback tests pass using the installed system FFmpeg. The bundled FFmpeg executable is now blocked by Application Control as well as the previously blocked native shell. For development only, launch `Start Development Preview - System FFmpeg.cmd` (or `node scripts/dev-preview.mjs --system-ffmpeg`); this explicit option uses PATH tools, leaves packaged binaries untouched, and is not native acceptance. Preserve `.dax-data/`. Current full verification results belong at the top of STATUS; the October 23 installer predates this feature.
+
 ## October 23 autonomous continuation
 
 Final continuation is `codex/autonomous-release-final`, following draft PRs #40–#53. Application checks pass (1,788 package tests, 39 browser workflows); transport-only follow-up has all 15 root tests/lint/dead-code/OKF passing. Current unsigned installer build 39925892009 succeeds, including the client configuration correction. Its 1.7 GB archive and smaller transport parts remain on GitHub: connector downloads time out even at 64 MiB and the standard browser download also times out. Only the small hash receipt is verified locally. No current local installer is claimed. See the top of STATUS for exact hashes, current acceptance boundaries and native execution blocker. Local source ZIP, verified Git bundle, checksums and `artifacts/DELIVERY.json` capture this handoff. Main remains unchanged.

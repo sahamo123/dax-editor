@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { mkdir } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { previewRuntime } from "./preview-runtime.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const desktop = join(root, "apps/desktop");
@@ -47,6 +48,11 @@ const web = await preview({
 const origin = "http://127.0.0.1:4175";
 const dataDir = join(root, ".dax-data");
 await mkdir(dataDir, { recursive: true });
+const useSystemRuntime = process.argv.includes("--system-ffmpeg");
+if (useSystemRuntime)
+  console.log(
+    "Development preview uses the installed system FFmpeg/ffprobe; packaged binaries are unchanged.",
+  );
 const child = spawn(
   join(binaries, "dax-node-x86_64-pc-windows-msvc.exe"),
   [engineFile, "--data-dir", dataDir, "--origin", origin],
@@ -54,8 +60,7 @@ const child = spawn(
     cwd: resources,
     env: {
       ...process.env,
-      DAX_FFMPEG: join(binaries, "dax-ffmpeg-x86_64-pc-windows-msvc.exe"),
-      DAX_FFPROBE: join(binaries, "dax-ffprobe-x86_64-pc-windows-msvc.exe"),
+      ...previewRuntime(binaries, useSystemRuntime),
     },
     stdio: ["pipe", "pipe", "pipe"],
     windowsHide: true,
