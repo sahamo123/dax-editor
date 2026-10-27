@@ -1,7 +1,7 @@
 name: Windows functional candidate
 
 # Review-branch build only: uploads an unsigned candidate, never publishes a release.
-# October 27 candidate adds complete-effects WebM review and the explicit development-runtime option.
+# October 27 refresh includes the regression-tested job completion ordering correction.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
