@@ -13,6 +13,8 @@ generated:
 
 ## October 27 continuation
 
+Current application gates pass (1,793 package tests, 17 root tests, 39 browser workflows). Real offline AI editing/export/restart/cleanup and longer synthetic speech pass again; see STATUS for evidence. Current unsigned installer is run 40505507400, source `63e900fe200b7c5d8b9c58a32288896418174818`, superseding October 23. PR #59 and its bounded follow-up test that exact installer on isolated Windows; installation/rendering work, but the WebView2 test connection has timed out, so do not claim native acceptance. Preserve the local project and keep native policy unchanged. Development model ownership checks need normal Windows socket visibility; the restricted coding host hid the real listener and also prevented cleanup. Normal-host preview/inference succeeds without weakening checks.
+
 Complete effects review is implemented through the shared registry/export renderer and a revision-bound private WebM copy, with progress, cancellation and error/retry controls. Real generated-media/browser playback tests pass using the installed system FFmpeg. The bundled FFmpeg executable is now blocked by Application Control as well as the previously blocked native shell. For development only, launch `Start Development Preview - System FFmpeg.cmd` (or `node scripts/dev-preview.mjs --system-ffmpeg`); this explicit option uses PATH tools, leaves packaged binaries untouched, and is not native acceptance. Preserve `.dax-data/`. Current full verification results belong at the top of STATUS; the October 23 installer predates this feature.
 
 ## October 23 autonomous continuation

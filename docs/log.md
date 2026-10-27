@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native test-host correction**: diagnostics prove the installed app, engine and WebView2 are responding. Microsoft's runtime 150 elevated-host filtering explains why environment-only CDP flags are ignored. The CI harness now uses an ephemeral current-user Interactive task at Limited privilege, verifies its non-admin token, waits for its result and removes the task. There is no registry/policy change, password, production-code change or recurring schedule. Native acceptance remains pending the standard-user rerun.
+
 * **Verification**: refreshed real offline AI editing/export/restart/cleanup suite passes, including format, title creation/revision, volume, unsupported request and trimming. Longer synthetic offline speech again passes (143.65 seconds, 318 words, 89 caption lines, 68.625 ms stream drift). Native run 40509708952 installs the candidate and runs its renderer, but times out connecting to the actual WebView2; focused CI-only process/crash diagnostics are added without command lines, environment or application data. The system `taskkill.exe` is declared in the existing OS-binary inventory so Knip can analyze the new workflow entry without treating it as an npm dependency.
 
 * **Acceptance investigation**: the first isolated native run downloaded and installed the candidate, but failed during launch/testing; a cleanup exception masked the original failure. The harness now preserves phase/error evidence and handles already-exited processes without losing the result. Native readiness remains unverified pending the rerun. The normal-host local-model connection/tool probe passes in 12.7 seconds; restricted socket visibility was isolated without changing ownership checks.

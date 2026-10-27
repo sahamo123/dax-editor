@@ -4,7 +4,9 @@ name: Installed Windows candidate acceptance
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: [".github/workflows/native-windows-acceptance.yml"]
+    paths:
+      - ".github/workflows/native-windows-acceptance.yml"
+      - "apps/desktop/scripts/verify-native-windows.*"
 permissions:
   contents: read
   actions: read
@@ -34,7 +36,7 @@ jobs:
           DAX_NATIVE_SMOKE: "1"
         run: |
           $env:DAX_NATIVE_INSTALLER_DIR = Join-Path $PWD 'candidate-input'
-          node apps/desktop/scripts/verify-native-windows.mjs
+          ./apps/desktop/scripts/verify-native-windows.ps1
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
