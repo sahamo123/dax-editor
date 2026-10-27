@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Implementation**: complete-edit review starts a cancellable shared export task, serves only finished authenticated revision-bound media, bounds retained outputs and removes files on shutdown. Desktop controls expose progress, explicit Stop, failure/retry, stale-result rejection, keyboard focus handling and playback without editing history. Core/security/real-render and desktop component regressions pass with the already-installed system FFmpeg. The packaged FFmpeg executable is now also blocked by Application Control; it has not been replaced or relabelled, and packaged readiness remains unverified.
+
 * **Design**: explicit rendered review copies use the existing export renderer for complete zoom/image/music/ducking/caption behavior, with private bounded host-managed output, shared tasks and no project/history edit. The typed capability refuses injected paths and unsupported standalone hosts; Planning excludes it. See the rendered-effects-preview spec. Native and live-provider acceptance remain separate.
 
 ## 2026-10-23

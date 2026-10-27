@@ -72,8 +72,8 @@ export function EffectsTools(): ReactElement | null {
     <section className="stack" aria-label="Manual effects">
       <h3>Effects and sound</h3>
       <p className="muted">
-        All times are timeline seconds. Export a short sample to review exact zoom, image and music
-        rendering; the preview may not show every effect.
+        All times are timeline seconds. Use Review effects above the preview to render the complete
+        edit with zooms, images and music before exporting.
       </p>
       <fieldset disabled={!online || total <= 0 || processing} className="stack">
         <legend>Manual effects controls</legend>

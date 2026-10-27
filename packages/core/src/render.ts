@@ -18,6 +18,8 @@ import { zoomFilters, zoomsOf } from "./zoom.js";
 
 function encoderArgs(encoder: string): string[] {
   switch (encoder) {
+    case "libvpx-vp9":
+      return ["-c:v", encoder, "-crf", "24", "-b:v", "0", "-deadline", "good", "-cpu-used", "4"];
     case "libx264":
       return ["-c:v", encoder, "-crf", "20", "-preset", "medium"];
     case "mpeg4":
@@ -272,12 +274,9 @@ export function buildRenderPlan(
     "-map",
     audioLabel,
     ...encoderArgs(encoder),
-    "-c:a",
-    "aac",
-    "-b:a",
-    "192k",
-    "-movflags",
-    "+faststart",
+    ...(encoder === "libvpx-vp9"
+      ? ["-c:a", "libopus", "-b:a", "128k"]
+      : ["-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart"]),
     outPath,
   ];
   return { args, duration: total, files };

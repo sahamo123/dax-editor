@@ -260,6 +260,23 @@ describe("controller", () => {
     expect(store.getState().toasts.map((t) => t.text)).toEqual(["Exported out.mp4."]);
   });
 
+  it("announces a review without displaying its internal cache filename", () => {
+    const { store, socket } = setup();
+    const job = {
+      id: "review",
+      kind: "export" as const,
+      label: "Render complete edit preview",
+      progress: 0.5,
+      status: "running" as const,
+    };
+    socket().onEvent({ type: "job", job });
+    socket().onEvent({
+      type: "job",
+      job: { ...job, status: "done", progress: 1, result: "/private/cache/uuid.webm" },
+    });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Effects preview ready."]);
+  });
+
   it("toasts the command reply of an export that never became a job, and a failed export job", async () => {
     const { store, controller, socket } = setup({
       run: vi.fn(async () => ({ ok: true, summary: "Exported to /tmp/out.mp4." })),
