@@ -345,7 +345,7 @@ try {
   assert.ok(existsSync(appState));
   result = {
     status: "PASS",
-    sourceRun: 40505507400,
+    sourceRun: 40528351026,
     nativeWebView: true,
     bundledAIInstalled: true,
     manualAIUnloaded: true,
@@ -362,7 +362,7 @@ try {
     binarySha256,
   };
 } catch (error) {
-  result = { status: "FAIL", phase, error: error.message, sourceRun: 40505507400 };
+  result = { status: "FAIL", phase, error: error.message, sourceRun: 40528351026 };
   console.error(`Native acceptance failed during ${phase}: ${error.message}`);
   if (connection) {
     try {
