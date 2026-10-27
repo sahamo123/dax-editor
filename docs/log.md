@@ -1,5 +1,9 @@
 # Project log
 
+## 2026-10-27
+
+* **Design**: explicit rendered review copies use the existing export renderer for complete zoom/image/music/ducking/caption behavior, with private bounded host-managed output, shared tasks and no project/history edit. The typed capability refuses injected paths and unsupported standalone hosts; Planning excludes it. See the rendered-effects-preview spec. Native and live-provider acceptance remain separate.
+
 ## 2026-10-23
 
 * **Delivery result**: current Windows candidate 39925892009 succeeds (source 4e019ae). Transport-only run 39927794724 produces 26 hashed pieces from that exact installer; all 15 root tests and lint/dead-code/OKF pass. Local connector transfer still times out at 64 MiB; the standard browser download also times out. The small receipt is hash-verified locally, but no current local installer or native installation is claimed. Current artifact/installer hashes and reproducible source/history backups are recorded in STATUS and the local delivery receipt.

@@ -67,6 +67,8 @@ import { findFillerRanges, formatTranscript, type Transcriber } from "./transcri
 
 /** What a command needs to run. */
 export interface CommandContext {
+  /** Optional live-host review rendering. Returns a tracked job and private preview identifier without editing project/history. */
+  renderPreview?: () => Promise<CommandResult>;
   /** Optional live-host cancellation capability. Must restrict the task UUID to the active project; returns whether cancellation was signalled. */
   cancelTask?: (taskId: string) => boolean;
   /** Editor sessions preserve omitted fit and fps on format changes; omitted/false retains standalone CLI preset defaults. */
@@ -1113,6 +1115,17 @@ export const COMMANDS: readonly CommandDef[] = [
           : "Task is already finished or unavailable in this project.",
         data: { cancelled },
       };
+    },
+  }),
+  define({
+    name: "render_preview",
+    description:
+      "Render a review copy of the complete current edit, including zooms, images, music, ducking and captions. Requires a running editor; starts a cancellable task without changing project history.",
+    schema: z.object({}).strict(),
+    irreversible: true,
+    async run(ctx) {
+      if (!ctx.renderPreview) throw new CommandError("Render preview requires a live editor host.");
+      return ctx.renderPreview();
     },
   }),
   define({

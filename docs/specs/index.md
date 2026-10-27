@@ -11,3 +11,4 @@
 * [Manual effects controls](manual-effects.md) - Manual zoom, music, sound effect and image controls over the existing validated editing registry.
 * [Named API connections](named-connections.md) - Explicit immutable snapshots of provider configuration and isolated private credentials.
 * [Product v1 specification](product-v1.md) - How the desktop editor fits together and what each package must deliver: agent, local model runtime, server, desktop UI and Tauri shell.
+* [Rendered effects preview](rendered-effects-preview.md) - Review the complete edit through the existing renderer without exporting a user-managed file or changing the project.
