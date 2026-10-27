@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native workflow extension result**: real native file selection/import and interactive H.264 playback now pass, followed by manual title/undo/redo. The extended flow reaches review rendering but remains at 100% until its UI deadline. Add bounded backend job/format and renderer-process diagnostics to separate rendering from UI task delivery. The prior baseline review/export/restart pass remains scoped to its tested workflow.
+
 * **Native harness completion**: wait for the test harness process itself, rather than PowerShell's whole descendant-tree wait. Common dialogs may activate shared Windows shell services; the JavaScript harness separately verifies application/engine shutdown and must not wait for unrelated system-service lifetimes.
 
 * **Native common-dialog driver**: actual picker opening is confirmed, but this runner's UIA provider blocks while enumerating its children. Use bounded Win32 control discovery within the exact owned standard common dialog, set only its filename edit and activate its standard confirmation button. Backend import and export-path assertions still determine success; finding a dialog alone never counts as a passed file selection.

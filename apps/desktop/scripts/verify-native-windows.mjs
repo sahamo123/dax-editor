@@ -364,6 +364,28 @@ try {
 } catch (error) {
   result = { status: "FAIL", phase, error: error.message, sourceRun: 40505507400 };
   console.error(`Native acceptance failed during ${phase}: ${error.message}`);
+  if (connection) {
+    try {
+      const state = await request("/api/state");
+      result.jobs = state.jobs.map(({ kind, status, progress, error }) => ({
+        kind,
+        status,
+        progress,
+        error,
+      }));
+      result.format = {
+        width: state.project.timeline.width,
+        height: state.project.timeline.height,
+        fps: state.project.timeline.fps,
+        clips: state.project.timeline.tracks[0]?.clips,
+      };
+      console.error(
+        `Native render state: ${JSON.stringify({ jobs: result.jobs, format: result.format })}`,
+      );
+    } catch {
+      console.error("Native job diagnostics unavailable");
+    }
+  }
   // CI-only OS diagnostics omit command lines, environment and application data (which contain secrets).
   try {
     const diagnostics = execFileSync(
@@ -371,7 +393,7 @@ try {
       [
         "-NoProfile",
         "-Command",
-        "$ErrorActionPreference='Stop'; Get-Process | Where-Object {$_.ProcessName -match 'dax|msedgewebview2'} | Select-Object Id,ProcessName,SessionId,Responding,MainWindowHandle | ConvertTo-Json; Get-WinEvent -FilterHashtable @{LogName='Application';Id=1000,1001;StartTime=(Get-Date).AddMinutes(-8)} -ErrorAction SilentlyContinue | Where-Object {$_.Message -match 'dax-editor|WebView2'} | Select-Object Id,Message | ConvertTo-Json",
+        "$ErrorActionPreference='Stop'; Get-Process | Where-Object {$_.ProcessName -match 'dax|msedgewebview2|ffmpeg|ffprobe'} | Select-Object Id,ProcessName,SessionId,Responding,MainWindowHandle,CPU,WorkingSet64 | ConvertTo-Json; Get-WinEvent -FilterHashtable @{LogName='Application';Id=1000,1001;StartTime=(Get-Date).AddMinutes(-8)} -ErrorAction SilentlyContinue | Where-Object {$_.Message -match 'dax-editor|WebView2'} | Select-Object Id,Message | ConvertTo-Json",
       ],
       { encoding: "utf8", windowsHide: true, timeout: 15_000 },
     );
