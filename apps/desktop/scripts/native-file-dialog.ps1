@@ -41,7 +41,7 @@ public static class NativeFileDialogWindow {
     }, IntPtr.Zero);
     return found;
   }
-  public static bool Select(IntPtr dialog, string path) {
+  public static bool Select(IntPtr dialog, string path, bool save) {
     if (Class(dialog)!="#32770") throw new InvalidOperationException("Expected an owned Windows common dialog");
     IntPtr edit=IntPtr.Zero; Seen="";
     EnumChildWindows(dialog, delegate(IntPtr window, IntPtr data) {
@@ -49,6 +49,8 @@ public static class NativeFileDialogWindow {
       if (Seen.Length<2000) Seen+=kind+":"+id+"; ";
       if (kind!="Edit") return true;
       bool filename=id==1152;
+      // Modern Save dialogs use a filename Edit 1001 directly inside a ComboBox.
+      if (save && id==1001 && Class(GetParent(window))=="ComboBox") filename=true;
       for (IntPtr parent=GetParent(window); parent!=IntPtr.Zero && parent!=dialog; parent=GetParent(parent))
         if (GetDlgCtrlID(parent)==1148) { filename=true; break; }
       if (!filename) return true;
@@ -68,7 +70,7 @@ public static class NativeFileDialogWindow {
 $deadline = (Get-Date).AddSeconds(10)
 while ((Get-Date) -lt $deadline) {
   $dialog = [NativeFileDialogWindow]::Find($DialogProcessId, $Title)
-  if ($dialog -ne [IntPtr]::Zero -and [NativeFileDialogWindow]::Select($dialog,$Path)) {
+  if ($dialog -ne [IntPtr]::Zero -and [NativeFileDialogWindow]::Select($dialog,$Path,($Action -eq 'Save'))) {
     Write-Output "Native $Action file selection submitted."
     exit 0
   }

@@ -11,6 +11,8 @@ generated:
 
 # Native Windows candidate acceptance
 
+Result integrity: a completed workflow job is insufficient. Require a known zero child exit code and `result.json` status PASS independently; reject empty/malformed completion markers. Run 40530091909 falsely reported job success despite a Save-driver failure. Its native import/playback/review checks passed, but export/restart/reinstall acceptance did not finish. The repaired wrapper retains the process handle before waiting. Local isolated validation covers four result/marker combinations and real zero/nonzero child exits without invoking the native app. The Save driver accepts modern filename Edit 1001 only inside the exact owned Save dialog's ComboBox; address/search controls remain excluded.
+
 The owner's laptop blocks unsigned executables. A successful build is insufficient, so exercise the exact current installer on an isolated Windows runner with an appropriate execution policy. The workflow reads a fixed successful candidate artifact; it does not sign, publish or change security policy. It uses existing locked Playwright dependencies and immutable-pinned official artifact actions, with contents/actions read only.
 
 The CLI test is gated to GitHub Actions. It silently installs into RUNNER_TEMP, launches the actual installed Tauri executable, and attaches to its WebView2 using the [official Playwright method](https://playwright.dev/docs/webview2). CDP is restricted to loopback and enabled only in that test child's environment, never in the production app or registry. Child environments exclude CI credentials. Generated footage stays in an isolated home-directory test folder, within the app's normal allowed roots.

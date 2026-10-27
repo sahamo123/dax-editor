@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+* **Native test truthfulness**: 40530091909 verifies corrected native review playback, then fails in the Save-dialog driver (modern filename Edit 1001). Its job conclusion is a false pass because Windows PowerShell lost the child exit code and cast an empty marker to zero. Retain the process handle, reject unknown markers and independently require result.json PASS. Extend only the owned Save filename selector. The application candidate is unchanged; a full rerun is still required.
+
 * **Corrected state verification**: full `pnpm check` passes with 1,799 package and 17 root tests; all 39 browser workflows pass. The rebuilt live development editor completes review playback and returns to idle, preserving its saved project. Evidence: `artifacts/job-state-full-check.log`, `job-state-browser.log`, `job-state-live-review.png`. The corrected installer still needs its separate native acceptance.
 
 * **Corrected candidate acceptance**: pin build 40528351026 in the existing isolated native harness and add its dedicated review branch. PR #62 records the reason before this workflow edit. The native file-dialog driver already verifies import/playback; the new run must additionally finish review and native Save/export with the corrected job state. Permissions, pinned actions and owner policy remain unchanged.
