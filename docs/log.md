@@ -2,11 +2,15 @@
 
 ## 2026-11-01
 
+* **Update**: Restored the preview-slice historical log and error entries that were accidentally replaced when preparing compact-layout [PR #148](https://github.com/sahamo123/dax-editor/pull/148). This is a documentation-only correction; source and browser evidence remain tied to the tested code commit.
+
 * **Update**: S01.04's preview/sizing child [#137](https://github.com/sahamo123/dax-editor/issues/137) passed self-review and was published as [PR #147](https://github.com/sahamo123/dax-editor/pull/147); the compact workspace follows separately under #144. Confirmed save-as recovery defect #146 remains open.
 
 * **Update**: S01.03 passed self-review ([issue #142](https://github.com/sahamo123/dax-editor/issues/142), [PR #143](https://github.com/sahamo123/dax-editor/pull/143)). S01.04 ([issue #144](https://github.com/sahamo123/dax-editor/issues/144)) is testing responsive preview, compact navigation and a resizable inspector dock; full acceptance and native validation remain open.
 
 * **Update**: S01.04's corrected browser suite passed after two compact-start regressions were fixed. A later full check failed one unchanged CLI-detection timeout case; five isolated reruns passed, without proving the original cause. Source review separately identified [issue #145](https://github.com/sahamo123/dax-editor/issues/145). The full source check is being repeated; failed evidence remains recorded.
+
+* **Update**: S01.04 [#144](https://github.com/sahamo123/dax-editor/issues/144) is split into a preview/sizing child [#137](https://github.com/sahamo123/dax-editor/issues/137) and dependent compact-layout work. The child is under verification; confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) remains separate.
 
 * **Update**: S01.02's product and workspace contract passed self-review ([issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141)). S01.03 ([issue #142](https://github.com/sahamo123/dax-editor/issues/142)) implements skippable setup and preserves contextual inspector focus; full browser acceptance and native validation remain open.
 

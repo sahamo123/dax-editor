@@ -28,6 +28,12 @@ E005: Git-ignored underscore folders remain visible to the documentation walker.
 
 E006: A core real-media test's `detect_silence` operation failed with `spawn UNKNOWN` when the development setup selected the packaged FFmpeg executable. The failure reproduced both under the restricted environment and on the normal host. The same two-file suite passed using explicitly selected system FFmpeg/ffprobe; that does not resolve or verify the packaged binary. Keep packaged/native acceptance open and investigate the applicable policy-authorized execution path at its required gate. No machine-security changes were made. See [S00.02 receipt](s00-02-receipt.md) and issue #123.
 
+## S01.04 verification findings — November 1
+
+The larger responsive candidate's first browser run failed two compact workflows because the tools panel started open; a correction passed both original cases and the subsequent full browser suite. Two full source attempts then failed distinct unchanged CLI-detection and temporary save-as tests. Each exact test passed five isolated reruns, and a later full source check passed, but the original causes remain unconfirmed. The preview-only child was then tested independently; its [receipt](s01-04-preview-child-receipt.md) records those checks. Failed raw logs remain private.
+
+An isolated synthetic save-as test deliberately blocked the destination history file and confirmed that the request can return HTTP 400 after writing the new project file and changing the active path. This is a distinct confirmed recovery defect, not proof of the intermittent test failure's cause. [Issue #146](https://github.com/sahamo123/dax-editor/issues/146) tracks both observations and prioritizes safe recovery. Its private result SHA-256 is `5455f42dc3b537a5bbc588337e601425aae29413f821e015a9d26aee067003f3`. A separate CLI help-probe classification finding is tracked by [issue #145](https://github.com/sahamo123/dax-editor/issues/145).
+
 ## S01.04 development-tool invocation — November 1
 
 E007: The first restricted browser-test invocation picked a different pnpm shim and failed before tests with `EPERM` while creating a project-store symlink. The documented `scripts/Enter-Dev.ps1` setup and authorized normal-host run selected the pinned local toolchain; the focused suite then ran. This resolves the invocation error only, not E006 or native/packaged execution. The intentionally failing layout regressions and the subsequent narrow top-bar failure are recorded in the [S01.04 receipt](s01-04-responsive-receipt.md).

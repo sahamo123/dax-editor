@@ -113,6 +113,10 @@ S01.01 passed self-review and is recorded in issue #135 and PR #138 at `48bb5b00
 
 S01.02 passed self-review, recorded in issue #140 and PR #141 at `f3f019e353493a6050959170c72e33a73dc1b2ae`; rechecked before starting issue #142 on `codex/s01-03-setup-inspector`. Added skippable/reopenable empty-project setup and a project-controls entry while preserving contextual selection focus and the shared command path. Focused browser tests and controller tests pass; the full source check passed with explicit system FFmpeg, and the complete browser suite is running. Earlier red tests and an Escape timing failure were corrected and rerun. Native acceptance remains open.
 
+## 2026-11-01 - S01.04 preview child
+
+S01.03 passed self-review at issue #142 and PR #143, tested head `6ecf3b533df2029eda17699dbfc7c32d7598a689`. Responsive work under #144 was split for review; preview/sizing child #137 passed a full source check, focused browser regression and generated-media frame measurement in an isolated worktree. Review and publication remain pending; the compact child follows. A distinct save-as history-write recovery defect was confirmed on disposable data and is tracked as #146; it is not proven to have caused the earlier intermittent save-test failure.
+
 ## 2026-11-01 - S01.04 responsive workspace
 
 S01.03 passed self-review at issue #142 and PR #143, tested head `6ecf3b533df2029eda17699dbfc7c32d7598a689`. Rechecked the issue, PR and ancestry before issue #144 on `codex/s01-04-responsive-workspace`. Baseline browser regressions reproduced negative stored dimensions and the compact overlay covering the timeline. A responsive implementation and targeted checks are in progress; full acceptance and publication remain pending. Native and packaged acceptance remain separate.
