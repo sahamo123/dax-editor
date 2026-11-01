@@ -16,6 +16,7 @@ okf_version: "0.2"
 * [Engineering standards](engineering/index.md) - Rules and workflows for contributing code and docs
 * [Model evaluation](evals/index.md) - How we measure whether a model can edit video
 * [handoff](handoff/index.md) - Documents in handoff/
+* [implementation](implementation/index.md) - Documents in implementation/
 * [Maintainer guides](maintainers/index.md) - Procedures for people who run the repository
 * [Research](research/index.md) - Outside facts, competitors and experiments
 * [Specifications](specs/index.md) - What a feature must do, written before it is built

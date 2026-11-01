@@ -11,6 +11,12 @@ generated:
 
 # Project status
 
+## Handbook publication in progress — November 1, 2026
+
+[Issue #72](https://github.com/sahamo123/dax-editor/issues/72) tracks the partial documentation stack. Do not execute incomplete handbook snapshots. Application state is unchanged; all future implementation steps remain NOT_STARTED.
+
+Current batch: 1 of 24. Completed publication scope: 2 concept pages. Next: the next dependent documentation batch.
+
 ## Creator workflow planning — November 1, 2026
 
 [Creator-platform review and implementation plan](specs/creator-platform-plan.md) is a documentation-only proposal based on source `2032f0d`; tracking [#70](https://github.com/sahamo123/dax-editor/issues/70), branch `codex/creator-platform-plan`. It covers current gaps, content profiles, layered composition, curated Blender characters, reference-style analysis, bounded specialist workflows, optional personal hosting, effort/dependencies and a proposed project/module outline. No new application capabilities, runtime validation or release readiness are claimed. Begin with M0 baseline reconciliation and M1/M2 workspace/profile work when implementation is requested; the current setup/native boundaries below remain in force.
