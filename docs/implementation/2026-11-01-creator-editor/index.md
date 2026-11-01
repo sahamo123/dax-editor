@@ -29,6 +29,11 @@
 * [S02.08: Close the first-improvement development candidate](s02-08-first-improvement-candidate.md) - Plan and evidence gates: Close the first-improvement development candidate.
 * [S03.01: Decide the bounded composition and time-map contract](s03-01-composition-contract.md) - Plan and evidence gates: Decide the bounded composition and time-map contract.
 * [S03.02: Add versioned layers and preserve saved history](s03-02-layer-schema-persistence.md) - Plan and evidence gates: Add versioned layers and preserve saved history.
+* [S03.03: Implement pure layer operations and anchoring](s03-03-layer-commands-anchoring.md) - Plan and evidence gates: Implement pure layer operations and anchoring.
+* [S03.04: Render video and still layers through the shared engine](s03-04-layer-renderer.md) - Plan and evidence gates: Render video and still layers through the shared engine.
+* [S03.05: Add bounded keyframes and transitions](s03-05-keyframes-transitions.md) - Plan and evidence gates: Add bounded keyframes and transitions.
+* [S03.06: Compose alpha assets and supplied foreground mattes](s03-06-alpha-supplied-mattes.md) - Plan and evidence gates: Compose alpha assets and supplied foreground mattes.
+* [S03.07: Expose layer lanes and contextual controls](s03-07-layer-workspace.md) - Plan and evidence gates: Expose layer lanes and contextual controls.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
