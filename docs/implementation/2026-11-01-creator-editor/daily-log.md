@@ -11,7 +11,7 @@ generated:
 
 # Daily work journal
 
-Append a new dated session entry after meaningful work and before changing laptops/agents. Preserve old entries; corrections are new entries that cite the superseded one. GitHub Issues retain canonical step status, progress (`progress.md`; later publication batch) is the current mirror, and handoff (`handoff.md`; later publication batch) says the exact next action. Plan-file authoring and application implementation are always labelled separately.
+Append a new dated session entry after meaningful work and before changing laptops/agents. Preserve old entries; corrections are new entries that cite the superseded one. GitHub Issues retain canonical step status, progress (`progress.md`; later publication batch) is the current mirror, and [handoff](handoff.md) says the exact next action. Plan-file authoring and application implementation are always labelled separately.
 
 ## 2026-11-01 — planning session
 

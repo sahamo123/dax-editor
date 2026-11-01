@@ -11,14 +11,14 @@ generated:
 
 # Project context
 
-This dated handbook belongs to Dax Editor, the existing Apache-2.0 desktop/CLI/MCP video editor. It does not start a new product. GitHub and committed repository documents are the shared context across laptops and agents. Baseline review source: `f05a57b99a2d184900ddd809a7480b30052ae5c1`; follow the current handoff (`handoff.md`; later publication batch) for the reviewed successor rather than checking out an old SHA blindly.
+This dated handbook belongs to Dax Editor, the existing Apache-2.0 desktop/CLI/MCP video editor. It does not start a new product. GitHub and committed repository documents are the shared context across laptops and agents. Baseline review source: `f05a57b99a2d184900ddd809a7480b30052ae5c1`; follow the current [handoff](handoff.md) for the reviewed successor rather than checking out an old SHA blindly.
 
 ## Read in this order
 
 1. Root AGENTS and current repository STATUS/handoff.
-2. This context, the dated handoff (`handoff.md`; later publication batch) and progress (`progress.md`; later publication batch).
+2. This context, the dated [handoff](handoff.md) and progress (`progress.md`; later publication batch).
 3. [Master plan](master-plan.md), [execution contract](execution-contract.md), chosen stage and step.
-4. Relevant decisions (`decisions.md`; later publication batch), gotchas (`gotchas.md`; later publication batch), errors (`errors-and-recovery.md`; later publication batch), evidence (`evidence-log.md`; later publication batch) and the step's GitHub receipt.
+4. Relevant [decisions](decisions.md), [gotchas](gotchas.md), [errors](errors-and-recovery.md), [evidence](evidence-log.md) and the step's GitHub receipt.
 
 Every step file is a planned instruction; it is not an activity log. This folder's operational records coordinate actual work. Do not recreate the plan from chat recollection or overwrite prior receipts after a restart.
 
@@ -44,7 +44,7 @@ Outside scope: unrestricted generated Blender code, arbitrary text-to-3D, voice/
 
 The repository contains implemented editing, providers, speech, live MCP, bounded motion templates and historical acceptance evidence. The current user request only commissions a detailed plan. No new application execution or release certification occurs while writing it. Existing owner-machine policy blocks, real hosted/client checks and broader performance/native acceptance must be re-evaluated at their named steps.
 
-Historical run results retain dates, source identities and target environments. A new plan, copied project, installed model, configured key or clean source check does not establish end-to-end operation. Use the evidence log (`evidence-log.md`; later publication batch) to distinguish these classes.
+Historical run results retain dates, source identities and target environments. A new plan, copied project, installed model, configured key or clean source check does not establish end-to-end operation. Use the [evidence log](evidence-log.md) to distinguish these classes.
 
 ## Folder ownership and portability
 

@@ -4,8 +4,13 @@
 
 * [Dated project context and scope](context.md) - Stable project facts, scope choices, evidence boundaries and reading order for the multi-day creator-editor work.
 * [Daily work and handoff journal](daily-log.md) - Append-only session journal for completed work, pending actions, source revisions and next-step handoffs across multiple days.
+* [Decision register and open scope choices](decisions.md) - Records planning choices, unresolved implementation decisions and their required ADR or owner-review evidence.
+* [Error ledger and recovery actions](errors-and-recovery.md) - Known historical risks, new incident recording fields and safe recovery rules without fabricated runtime failures or hidden retries.
+* [Evidence and verification log](evidence-log.md) - Public index of planning and future implementation verification, linked to private raw logs with precise source and environment scope.
 * [Execution contract - verify before advancing](execution-contract.md) - Required predecessor checks, evidence states, safe recovery and completion rules for executing the staged implementation plan.
 * [Future execution goal - launch only after review](execution-goal.md) - Copyable agent-neutral goal prompt, route selection and stopping rules for executing the handbook after owner review.
+* [Gotchas and prevention checklist](gotchas.md) - Source-grounded pitfalls, symptoms, prevention and verification links for multi-day implementation work.
+* [Current dated handoff and exact next action](handoff.md) - Current planning versus implementation state, resumable next action, blockers and files to read before continuing.
 * [Master implementation index - stages and step gates](master-plan.md) - Canonical entry point for ten stages, seventy-six executable step specifications, selected routes and evidence-based advancement.
 * [Implementation receipt and predecessor double-check](receipt-template.md) - Evidence fields and two-pass review checklist required to verify one implementation step and unlock its successor.
 * [S00.01: Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) - Plan and evidence gates: Verify the continuation and preserve the workspace.
