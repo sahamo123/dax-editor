@@ -26,11 +26,11 @@ Read the [master](master-plan.md) and [execution contract](execution-contract.md
 |---|---|---:|
 | S03.01 | [Decide the bounded composition and time-map contract](s03-01-composition-contract.md) | 1–1.5 |
 | S03.02 | [Add versioned layers and preserve saved history](s03-02-layer-schema-persistence.md) | 1–1.5 |
-| S03.03 | Implement pure layer operations and anchoring (`s03-03-layer-commands-anchoring.md`; later publication batch) | 1–2 |
-| S03.04 | Render video and still layers through the shared engine (`s03-04-layer-renderer.md`; later publication batch) | 1–2 |
-| S03.05 | Add bounded keyframes and transitions (`s03-05-keyframes-transitions.md`; later publication batch) | 1–2 |
-| S03.06 | Compose alpha assets and supplied foreground mattes (`s03-06-alpha-supplied-mattes.md`; later publication batch) | 1–1.5 |
-| S03.07 | Expose layer lanes and contextual controls (`s03-07-layer-workspace.md`; later publication batch) | 1–1.5 |
+| S03.03 | [Implement pure layer operations and anchoring](s03-03-layer-commands-anchoring.md) | 1–2 |
+| S03.04 | [Render video and still layers through the shared engine](s03-04-layer-renderer.md) | 1–2 |
+| S03.05 | [Add bounded keyframes and transitions](s03-05-keyframes-transitions.md) | 1–2 |
+| S03.06 | [Compose alpha assets and supplied foreground mattes](s03-06-alpha-supplied-mattes.md) | 1–1.5 |
+| S03.07 | [Expose layer lanes and contextual controls](s03-07-layer-workspace.md) | 1–1.5 |
 | S03.08 | Declare and verify interactive and rendered coverage (`s03-08-preview-review-coverage.md`; later publication batch) | 1.5–2 |
 | S03.09 | Close layered composition with measured output (`s03-09-composition-acceptance.md`; later publication batch) | 1.5–2 |
 
