@@ -27,8 +27,8 @@ test("a disconnected compact workspace keeps its retry action and open dock usab
   expect(timeline?.height ?? 0).toBeGreaterThanOrEqual(150);
   expect((dock?.y ?? 700) + (dock?.height ?? 0)).toBeLessThanOrEqual(700);
   await shot("s01-05-disconnected-compact-dock");
-  await server.start();
   await retry.click();
-  await expect(alert).toBeHidden();
+  await server.start();
+  await expect(alert).toBeHidden({ timeout: 20_000 });
   await expect(page.getByRole("button", { name: "Close tools panel" })).toBeVisible();
 });

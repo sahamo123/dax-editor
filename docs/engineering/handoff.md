@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.05 failure visibility — November 1, 2026
+
+Continue [child #153](https://github.com/sahamo123/dax-editor/issues/153) in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed [PR #155](https://github.com/sahamo123/dax-editor/pull/155), head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. The [failure receipt](../implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records prior synthetic evidence; this child's fresh checks and review remain pending. Earlier headings are historical.
+
 ## Active S01.05 state-ordering child — November 1, 2026
 
 Continue [#154](https://github.com/sahamo123/dax-editor/issues/154) on local `codex/s01-05-state-ordering`, based on [PR #152](https://github.com/sahamo123/dax-editor/pull/152), head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. Verify publication before resuming elsewhere. The [receipt](../implementation/2026-11-01-creator-editor/s01-05-state-ordering-receipt.md) records the reproduced warning-loss defect. Dependent failure-visibility work #153 is retained separately; earlier headings below are historical.

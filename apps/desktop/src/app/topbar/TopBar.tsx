@@ -31,6 +31,12 @@ export function TopBar({
   const unfinished = (tasks ?? []).filter(
     (task) => task.status === "running" || task.status === "queued",
   );
+  const recentFinished = (tasks ?? [])
+    .filter((task) => task.status !== "running" && task.status !== "queued")
+    .slice(-5);
+  const attention = recentFinished.filter(
+    (task) => task.status === "failed" || task.status === "interrupted",
+  ).length;
 
   const exporting = runningExport(jobs);
   const percent = exporting ? Math.round(exporting.progress * 100) : 0;
@@ -89,8 +95,12 @@ export function TopBar({
         Setup
       </button>
       <details className="project-menu work-menu">
-        <summary className="btn" aria-label="Work status">
-          Work · {unfinished.length ? `${unfinished.length} active/queued` : "idle"}
+        <summary className="btn" aria-label="Work status" aria-describedby="work-status-detail">
+          Work ·{" "}
+          <span id="work-status-detail" aria-live="polite">
+            {unfinished.length ? `${unfinished.length} active/queued` : "idle"}
+            {attention ? ` · ${attention} ${attention === 1 ? "issue" : "issues"}` : ""}
+          </span>
         </summary>
         <div className="project-menu__panel">
           <TaskQueue />

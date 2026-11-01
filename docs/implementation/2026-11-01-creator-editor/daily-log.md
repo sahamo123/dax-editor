@@ -150,3 +150,11 @@ The synthetic narrow composer audit measured 48.8 CSS px of message width and ov
 Composer child #136 passed full source/browser checks and self-review in PR #152 at `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. A delayed state refresh was then observed hiding a newer autosave warning. The bounded ordering fix was split into [#154](https://github.com/sahamo123/dax-editor/issues/154) on an isolated worktree, ahead of dependent failure-visibility work #153. See the [state-ordering receipt](s01-05-state-ordering-receipt.md); full verification is pending.
 
 The first state-ordering candidate passed full source and focused browser checks. Separate review identified a provider-only refresh that could suppress a newer project refresh; a focused regression reproduced it and the correction passed the focused suite. The corrected code needs fresh full and browser checks before the child is verified.
+
+## 2026-11-01 - failure visibility split
+
+The already-developed failure-visibility work was copied into a separate worktree based on pending state-ordering head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`; the original working changes remain preserved. [Child #153](https://github.com/sahamo123/dax-editor/issues/153) has synthetic evidence in the [receipt](s01-05-failure-receipt.md). Parent verification and this child's fresh checks remain pending.
+
+The corrected state-ordering parent passed full source and focused browser checks and self-review in PR #155 at `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Failure-visibility PR #156 is published as a draft on that head; its fresh full checks and review remain pending.
+
+The initial failure-visibility candidate passed full source and browser checks. Review found the task list misreported multiple running tasks as one; a focused regression and correction now pass. Repeat full checks on the corrected code; earlier passes do not verify it.

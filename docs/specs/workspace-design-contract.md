@@ -39,7 +39,9 @@ Goals: skippable project setup; direct entry for existing projects; contextual i
 
 ## Responsive and focus contract
 
-S01.05's [narrow composer child](../implementation/2026-11-01-creator-editor/s01-05-composer-receipt.md) is in progress: the message field and active-run actions occupy separate rows, and Queue is labelled distinctly from Steer and Stop. This is a candidate, not the complete task/recovery acceptance.
+S01.05's [narrow composer child](../implementation/2026-11-01-creator-editor/s01-05-composer-receipt.md) passed self-review: the message field and active-run actions occupy separate rows, and Queue is labelled distinctly from Steer and Stop. It does not complete the task/recovery acceptance.
+
+The [failure and autosave visibility child](../implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) is in progress. It also addresses a reproduced delayed-state response that hid an autosave warning; full verification remains pending.
 
 At wide sizes retain resizable chat, preview/timeline and contextual panel. At narrow sizes use a labelled Edit/Assistant switch; an inspector may dock at the bottom and be resized/closed without permanently covering preview and timeline. Keep a visible task summary in both views. Preserve stored dimensions while clamping to the available viewport: chat minimum 260 CSS px when shown, preview column at least 320 CSS px when feasible, timeline at least 150 CSS px, and preview at least 160 CSS px high. If the physical window cannot accommodate all minima, collapse/switch panels and keep primary actions reachable rather than hiding content or creating page-wide horizontal overflow. These are implementation targets, not proof of existing behavior.
 
