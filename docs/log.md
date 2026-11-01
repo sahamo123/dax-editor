@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Incident**: A delayed state refresh hid a newer autosave warning in a synthetic browser test. [Issue #154](https://github.com/sahamo123/dax-editor/issues/154) isolates the ordering fix ahead of dependent failure visibility [#153](https://github.com/sahamo123/dax-editor/issues/153); verification remains in progress.
+
 * **Update**: Save-as recovery [PR #150](https://github.com/sahamo123/dax-editor/pull/150) passed full source checks and self-review at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; Windows rename failures remain separate in [#149](https://github.com/sahamo123/dax-editor/issues/149). S01.05 starts under [#151](https://github.com/sahamo123/dax-editor/issues/151).
 
 * **Update**: S01.04 passed self-review ([issue #144](https://github.com/sahamo123/dax-editor/issues/144), [PR #148](https://github.com/sahamo123/dax-editor/pull/148), published head `77a6c17ccee8854968c0b92567ea847fd9d017a3`). The confirmed [save-as recovery defect #146](https://github.com/sahamo123/dax-editor/issues/146) is being addressed under a separate [contract](specs/save-as-recovery.md); native acceptance remains open.

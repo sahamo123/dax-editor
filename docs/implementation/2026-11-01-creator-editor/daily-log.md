@@ -144,3 +144,7 @@ After correcting publication order to protect against a competing project, focus
 Save-as PR #150 was published and separately self-reviewed at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; the review was not independent. Rechecked S01.04 issue #144, PR #148, both private check/browser log hashes and ancestry, then opened S01.05 issue #151 and local branch `codex/s01-05-task-recovery`. Desktop source and existing task controls are being audited; no S01.05 behavior change or acceptance is claimed yet.
 
 The synthetic narrow composer audit measured 48.8 CSS px of message width and overlapping Queue text. A separate action row passed the new browser regression and seven existing chat workflows. A compact disconnected-engine/dock/reconnect regression also passed. Full checks and review are pending; see the [child receipt](s01-05-composer-receipt.md). Raw captures remain private.
+
+## 2026-11-01 - state ordering split
+
+Composer child #136 passed full source/browser checks and self-review in PR #152 at `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. A delayed state refresh was then observed hiding a newer autosave warning. The bounded ordering fix was split into [#154](https://github.com/sahamo123/dax-editor/issues/154) on an isolated worktree, ahead of dependent failure-visibility work #153. See the [state-ordering receipt](s01-05-state-ordering-receipt.md); full verification is pending.

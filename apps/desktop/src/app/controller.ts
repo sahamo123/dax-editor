@@ -11,6 +11,7 @@ import type {
   ProviderKind,
   Settings,
   SpeechStatus,
+  StateResponse,
 } from "@dax/protocol";
 import type { StoreApi } from "zustand/vanilla";
 import type { DaxClient, LiveSocket, LocalModelAction, SocketStatus } from "../api";
@@ -124,13 +125,23 @@ export function createController(deps: ControllerDeps): Controller {
   const openSocket = deps.openSocket ?? openLiveSocket;
   let live: LiveSocket | null = null;
   let manualChain: Promise<unknown> = Promise.resolve();
+  let stateEpoch = 0;
+  let refreshSequence = 0;
 
   const toast = (tone: "info" | "success" | "error", text: string) =>
     store.getState().pushToast(tone, text);
 
+  function applySnapshot(state: StateResponse): void {
+    stateEpoch++;
+    store.getState().applyState(state);
+  }
+
   async function refreshState(): Promise<void> {
+    const epoch = stateEpoch;
+    const sequence = ++refreshSequence;
     const r = await client.getState();
-    if (r.ok) store.getState().applyState(r.value);
+    // A push, project switch, or newer refresh can supersede a delayed HTTP response.
+    if (r.ok && epoch === stateEpoch && sequence === refreshSequence) applySnapshot(r.value);
   }
 
   function onStatus(status: SocketStatus, info: { failures: number; retryAt?: number }) {
@@ -205,6 +216,7 @@ export function createController(deps: ControllerDeps): Controller {
 
   return {
     start() {
+      stateEpoch++;
       live?.close();
       store.getState().setConnection({ status: "connecting" });
       live = openSocket({
@@ -214,7 +226,7 @@ export function createController(deps: ControllerDeps): Controller {
         onEvent(event) {
           const s = store.getState();
           if (event.type === "state") {
-            s.applyState(event.state);
+            applySnapshot(event.state);
           } else if (event.type === "job") {
             const prev = s.jobs[event.job.id];
             s.applyJob(event.job);
@@ -240,6 +252,7 @@ export function createController(deps: ControllerDeps): Controller {
       });
     },
     stop() {
+      stateEpoch++;
       live?.close();
       live = null;
     },
@@ -412,7 +425,7 @@ export function createController(deps: ControllerDeps): Controller {
       const r = await client.getProviders();
       const current = store.getState().state;
       if (!r.ok) toast("error", r.error);
-      else if (current) store.getState().applyState({ ...current, providers: r.value });
+      else if (current) applySnapshot({ ...current, providers: r.value });
     },
 
     async project(action, value) {
@@ -428,7 +441,7 @@ export function createController(deps: ControllerDeps): Controller {
         toast("error", r.error);
         return false;
       }
-      store.getState().applyState(r.value);
+      applySnapshot(r.value);
       if (action === "new" || action === "open" || action === "copy") {
         store.getState().patchUi({ setupVisible: action === "new" });
       }

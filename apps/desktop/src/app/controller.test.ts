@@ -61,6 +61,67 @@ it("uses the engine's actual undo boundary for a queued task instead of the earl
 });
 
 describe("controller", () => {
+  it("does not apply an in-flight state refresh after a newer project state arrives", async () => {
+    let release: ((value: { ok: true; value: ReturnType<typeof makeState> }) => void) | undefined;
+    const response = new Promise<{ ok: true; value: ReturnType<typeof makeState> }>((resolve) => {
+      release = resolve;
+    });
+    const { store, socket } = setup({ getState: vi.fn(() => response) });
+    socket().onStatus("open", { failures: 0 });
+    const current = makeState({
+      projectId: "project-b",
+      revision: 0,
+      saveError: "Disk unavailable",
+    });
+    socket().onEvent({ type: "state", state: current });
+    release?.({ ok: true, value: makeState({ projectId: "project-a", revision: 10 }) });
+    await response;
+    await Promise.resolve();
+    expect(store.getState().state).toMatchObject({
+      projectId: "project-b",
+      revision: 0,
+      saveError: "Disk unavailable",
+    });
+  });
+
+  it("does not restore an old save error after a same-revision successful save", async () => {
+    let release: ((value: { ok: true; value: ReturnType<typeof makeState> }) => void) | undefined;
+    const response = new Promise<{ ok: true; value: ReturnType<typeof makeState> }>((resolve) => {
+      release = resolve;
+    });
+    const { store, socket } = setup({ getState: vi.fn(() => response) });
+    socket().onStatus("open", { failures: 0 });
+    socket().onEvent({ type: "state", state: makeState({ projectId: "project-a", revision: 2 }) });
+    release?.({
+      ok: true,
+      value: makeState({ projectId: "project-a", revision: 2, saveError: "Old save error" }),
+    });
+    await response;
+    await Promise.resolve();
+    expect(store.getState().state?.saveError).toBeUndefined();
+  });
+
+  it("prefers the later of two overlapping state refreshes", async () => {
+    type Result = { ok: true; value: ReturnType<typeof makeState> };
+    let firstReply: ((value: Result) => void) | undefined;
+    let secondReply: ((value: Result) => void) | undefined;
+    const first = new Promise<Result>((resolve) => {
+      firstReply = resolve;
+    });
+    const second = new Promise<Result>((resolve) => {
+      secondReply = resolve;
+    });
+    const getState = vi.fn().mockReturnValueOnce(first).mockReturnValueOnce(second);
+    const { controller, store } = setup({ getState });
+    const earlier = controller.refreshState();
+    const later = controller.refreshState();
+    secondReply?.({ ok: true, value: makeState({ projectId: "project-b", revision: 0 }) });
+    await later;
+    firstReply?.({ ok: true, value: makeState({ projectId: "project-a", revision: 10 }) });
+    await earlier;
+    expect(store.getState().state?.projectId).toBe("project-b");
+  });
+
   it("opens an initially loaded saved empty project directly", () => {
     const store = createAppStore();
     store.getState().applyState(makeState({ projectPath: "saved.dax.json" }));

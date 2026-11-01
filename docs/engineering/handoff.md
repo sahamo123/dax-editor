@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.05 state-ordering child — November 1, 2026
+
+Continue [#154](https://github.com/sahamo123/dax-editor/issues/154) on local `codex/s01-05-state-ordering`, based on [PR #152](https://github.com/sahamo123/dax-editor/pull/152), head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. Verify publication before resuming elsewhere. The [receipt](../implementation/2026-11-01-creator-editor/s01-05-state-ordering-receipt.md) records the reproduced warning-loss defect. Dependent failure-visibility work #153 is retained separately; earlier headings below are historical.
+
 ## Active S01.05 — November 1, 2026
 
 Continue [issue #151](https://github.com/sahamo123/dax-editor/issues/151) on local `codex/s01-05-task-recovery`, after checking publication. The baseline [PR #150](https://github.com/sahamo123/dax-editor/pull/150) is at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; the dated [handoff](../implementation/2026-11-01-creator-editor/handoff.md) is current. The following headings are historical checkpoints.
