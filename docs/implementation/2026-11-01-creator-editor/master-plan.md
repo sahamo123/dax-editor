@@ -109,11 +109,11 @@ Stage overview: [S04](stage-04-long-form.md). Read it before its first step.
 
 - [S04.01: Specify long-form workflows and expand fixtures](s04-01-long-form-contract-fixtures.md) - 1-1.5 engineer-days.
 - [S04.02: Add chapters, markers and transcript navigation](s04-02-chapters-markers-navigation.md) - 1-1.5 engineer-days.
-- S04.03: Bound long-project views and derived-media work (`s04-03-long-timeline-bounds.md`; later publication batch) - 1-2 engineer-days.
-- S04.04: Build slide scenes and educational layouts (`s04-04-slides-educational-layouts.md`; later publication batch) - 1-1.5 engineer-days.
-- S04.05: Add manual camera alignment and switching (`s04-05-manual-camera-sync.md`; later publication batch) - 1-2 engineer-days.
-- S04.06: Add speaker labels and reviewed highlight proposals (`s04-06-speakers-reviewed-highlights.md`; later publication batch) - 1-1.5 engineer-days.
-- S04.07: Measure long-session synchronization and resources (`s04-07-long-session-acceptance.md`; later publication batch) - 1-2 engineer-days.
+- [S04.03: Bound long-project views and derived-media work](s04-03-long-timeline-bounds.md) - 1-2 engineer-days.
+- [S04.04: Build slide scenes and educational layouts](s04-04-slides-educational-layouts.md) - 1-1.5 engineer-days.
+- [S04.05: Add manual camera alignment and switching](s04-05-manual-camera-sync.md) - 1-2 engineer-days.
+- [S04.06: Add speaker labels and reviewed highlight proposals](s04-06-speakers-reviewed-highlights.md) - 1-1.5 engineer-days.
+- [S04.07: Measure long-session synchronization and resources](s04-07-long-session-acceptance.md) - 1-2 engineer-days.
 - S04.08: Close podcast and educational workflow acceptance (`s04-08-long-form-close.md`; later publication batch) - 1-2 engineer-days.
 
 ## S05: Reference-style analysis and editable recipes
