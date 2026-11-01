@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:e2e": "pnpm build:engine && playwright test",
     "test:performance": "pnpm build:engine && playwright test --config playwright.performance.config.ts",
+    "test:offline-baseline": "pnpm build:engine && playwright test --config playwright.offline-baseline.config.ts",
     "mock-server": "node e2e/mock-server.mjs",
     "docs:check": "typedoc",
     "build:engine": "pnpm --filter \"@dax/engine...\" build",

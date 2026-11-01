@@ -24,6 +24,7 @@
 * [S00.04: Establish measurable timing and resource budgets](s00-04-performance-budgets.md) - Plan and evidence gates: Establish measurable timing and resource budgets.
 * [S00.04 performance budgets and baseline receipt](s00-04-performance.md) - Reproducible short browser measurements, proposed targets and resource-monitoring procedures with native and long-session limitations.
 * [S00.05: Repeat the scoped source and offline editing baseline](s00-05-baseline-acceptance.md) - Plan and evidence gates: Repeat the scoped source and offline editing baseline.
+* [S00.05 fresh offline editing baseline receipt](s00-05-offline-baseline.md) - Fresh browser and isolated manual editing evidence, export decoding, errors and native acceptance boundaries.
 * [S00.06: Close the reconciled baseline and route its blockers](s00-06-baseline-close.md) - Plan and evidence gates: Close the reconciled baseline and route its blockers.
 * [S01.01: Audit the current rendered editing workflow](s01-01-workflow-audit.md) - Plan and evidence gates: Audit the current rendered editing workflow.
 * [S01.02: Record the product and design contract](s01-02-product-design-contract.md) - Plan and evidence gates: Record the product and design contract.

@@ -11,9 +11,13 @@ generated:
 
 # Project status
 
-## First-improvement S00.04 — November 1, 2026
+## First-improvement S00.05 — November 1, 2026
 
-[Issue #127](https://github.com/sahamo123/dax-editor/issues/127) measures and documents baseline budgets on `codex/s00-04-performance-baseline`. The [performance receipt](implementation/2026-11-01-creator-editor/s00-04-performance.md) records short isolated Edge samples, including a test-seeded 720p cache; normal proxies are 480p. Native, painted-frame, whole-process, model and two-hour measurements remain open. Packaged FFmpeg remains unresolved. S00.01–S00.03 are verified with self-reviews; independent stage review remains due.
+[Issue #129](https://github.com/sahamo123/dax-editor/issues/129) is running a fresh offline editing baseline on `codex/s00-05-offline-baseline` after [issue #127](https://github.com/sahamo123/dax-editor/issues/127) and [PR #128](https://github.com/sahamo123/dax-editor/pull/128) were rechecked. S00.01–S00.04 have separate self-reviews; independent stage review remains due. Browser/system-FFmpeg results and native/packaged acceptance are separate.
+
+## First-improvement S00.04 checkpoint — November 1, 2026
+
+[Issue #127](https://github.com/sahamo123/dax-editor/issues/127) measured and documented baseline budgets on `codex/s00-04-performance-baseline`, then passed self-review. The [performance receipt](implementation/2026-11-01-creator-editor/s00-04-performance.md) records short isolated Edge samples, including a test-seeded 720p cache; normal proxies are 480p. Native, painted-frame, whole-process, model and two-hour measurements remain open. Packaged FFmpeg remains unresolved.
 
 ## First-improvement S00.03 checkpoint — November 1, 2026
 
