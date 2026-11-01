@@ -11,7 +11,7 @@ generated:
 
 # Daily work journal
 
-Append a new dated session entry after meaningful work and before changing laptops/agents. Preserve old entries; corrections are new entries that cite the superseded one. GitHub Issues retain canonical step status, progress (`progress.md`; later publication batch) is the current mirror, and [handoff](handoff.md) says the exact next action. Plan-file authoring and application implementation are always labelled separately.
+Append a new dated session entry after meaningful work and before changing laptops/agents. Preserve old entries; corrections are new entries that cite the superseded one. GitHub Issues retain canonical step status, [progress](progress.md) is the current mirror, and [handoff](handoff.md) says the exact next action. Plan-file authoring and application implementation are always labelled separately.
 
 ## 2026-11-01 — planning session
 
@@ -49,6 +49,6 @@ Do not report “done” without naming the step and its verification scope. If 
 
 - Completed 10 stage pages and 76 separate step instructions; 100 Markdown files total in this dated pack.
 - Independent reviewers read every opposite stage set and shared controls. Repaired route STOP, candidate acquisition order, provisional scope declaration, conditional hosting dependencies and next links; re-review PASS.
-- Deterministic checks and documentation/lint checks PASS; see review receipt (`review-report.md`; later publication batch). `_local/` is ignored.
+- Deterministic checks and documentation/lint checks PASS; see [review receipt](review-report.md). `_local/` is ignored.
 - No application features implemented or runtime tests repeated; 0/76 implementation steps complete. Owner review and explicit execution launch are next.
 - Publication stack and exact remote continuation are recorded in [issue #72](https://github.com/sahamo123/dax-editor/issues/72); do not assume default main contains them.

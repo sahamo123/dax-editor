@@ -17,9 +17,9 @@ This is the public evidence index for the dated handbook. Raw logs, screenshots 
 
 | Run | Scope | Result | Source / evidence |
 |---|---|---|---|
-| PLAN-AUTHOR | Stage/step source inspection and drafting | PASS: 76 step pages and 10 stage pages self-checked | Stage pages and review report (`review-report.md`; later publication batch); NOT_STARTED application state |
-| PLAN-CROSS | Independent cross-review of every assigned stage/step and controls | PASS: all stage/step pages and shared controls; repairs rechecked | Review report (`review-report.md`; later publication batch) |
-| PLAN-STRUCTURE | IDs, sections, source links, counts, effort and route closure | PASS: 100 Markdown files, 1,173 links, route/effort/dependency gates; docs/OKF/lint | Sanitized final receipt (`review-report.md`; later publication batch); raw audit receipt ignored |
+| PLAN-AUTHOR | Stage/step source inspection and drafting | PASS: 76 step pages and 10 stage pages self-checked | Stage pages and [review report](review-report.md); NOT_STARTED application state |
+| PLAN-CROSS | Independent cross-review of every assigned stage/step and controls | PASS: all stage/step pages and shared controls; repairs rechecked | [Review report](review-report.md) |
+| PLAN-STRUCTURE | IDs, sections, source links, counts, effort and route closure | PASS: 100 Markdown files, 1,173 links, route/effort/dependency gates; docs/OKF/lint | [Sanitized final receipt](review-report.md); raw audit receipt ignored |
 | PLAN-PUBLISH | GitHub publication and final laptop/tree comparison | Publication receipt and PR stack tracked separately; verify the checked-out head | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 
 Historical application checks remain in repository STATUS with their original date/source/environment. They are not new runs in this table. The current planning task does not load an LLM, edit media, run native acceptance or deploy a host.

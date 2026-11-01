@@ -12,7 +12,9 @@
 * [Gotchas and prevention checklist](gotchas.md) - Source-grounded pitfalls, symptoms, prevention and verification links for multi-day implementation work.
 * [Current dated handoff and exact next action](handoff.md) - Current planning versus implementation state, resumable next action, blockers and files to read before continuing.
 * [Master implementation index - stages and step gates](master-plan.md) - Canonical entry point for ten stages, seventy-six executable step specifications, selected routes and evidence-based advancement.
+* [Implementation progress snapshot](progress.md) - Dated mirror of implementation step status with issue and evidence references, initially zero completed steps.
 * [Implementation receipt and predecessor double-check](receipt-template.md) - Evidence fields and two-pass review checklist required to verify one implementation step and unlock its successor.
+* [Planning review report - completeness and execution boundaries](review-report.md) - Inventory, independent review findings and deterministic verification for the staged implementation handbook, distinct from application acceptance.
 * [S00.01: Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) - Plan and evidence gates: Verify the continuation and preserve the workspace.
 * [S00.02: Reconcile source and capability claims](s00-02-source-capability-reconciliation.md) - Plan and evidence gates: Reconcile source and capability claims.
 * [S00.03: Build the authorized acceptance fixture inventory](s00-03-authorized-fixtures.md) - Plan and evidence gates: Build the authorized acceptance fixture inventory.
