@@ -20,6 +20,10 @@ generated:
 | E003 | Source-observed persistence gap; November 1 | Recent task writes do not provide the durable transaction acknowledgement needed by the proposed workflow journal | Pending proposed feature work; design crash/dedupe semantics before dispatch automation | S07.01-S07.03 |
 | E004 | Source-observed migration risk; November 1 | Current project/history readers need coordinated migration and equality handling | Pending proposed migration work; preserve originals and prove interrupted-write recovery | S02.01-S02.02 |
 
+## Planning incident resolved — November 1
+
+E005: Git-ignored underscore folders remain visible to the documentation walker. Source inspection and an independent review confirmed that future Markdown logs could enter generated navigation. VERIFIED_RESOLVED for this planning pack: current private evidence guidance now uses hidden `.local/`, both Git and the existing indexer exclude it, and a deliberately invalid private Markdown probe leaves docs validation/indexes unchanged. No exposure of private content was observed. The legacy ignore rule and old journal entries are preserved.
+
 ## Incident record to append during execution
 
 Use a stable new ID and record: date/time; selected route and step; source/candidate SHA; environment; sanitized exact error; trigger/reproduction; expected versus observed result; severity; impacted prerequisites; task/job/operation ID where safe; evidence-log entry; recovery attempted; outcome; owner/next action. Distinguish OPEN, INVESTIGATING, FIXED_PENDING_VERIFICATION and VERIFIED_RESOLVED.
@@ -34,4 +38,4 @@ Do not overwrite the original error or call it resolved because a different scen
 - Required failed/blocked acceptance prevents the next dependent step. Optional capability exclusion must already be declared, not invented after failure.
 - A missing credential, licensed asset, authorized native target or host permission is an external dependency, not a reason to bypass controls.
 
-Logs/screenshots belong under ignored `_local/<date>/<step>/<run>/` when private. Put sanitized metadata and hashes in [evidence log](evidence-log.md). A fresh laptop may not have those raw artifacts; mark that absence and safely reproduce or obtain them before relying on their claims.
+Logs/screenshots belong under ignored `.local/<date>/<step>/<run>/` when private. Put sanitized metadata and hashes in [evidence log](evidence-log.md). A fresh laptop may not have those raw artifacts; mark that absence and safely reproduce or obtain them before relying on their claims.

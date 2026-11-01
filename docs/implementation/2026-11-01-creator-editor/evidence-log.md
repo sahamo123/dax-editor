@@ -11,7 +11,7 @@ generated:
 
 # Evidence and verification log
 
-This is the public evidence index for the dated handbook. Raw logs, screenshots and private diagnostics stay in ignored `_local/` or their existing private artifact location. A public row contains enough sanitized metadata to assess the claim without exposing credentials or source media. No implementation result is implied by a planning check.
+This is the public evidence index for the dated handbook. Raw logs, screenshots and private diagnostics stay in ignored `.local/` or their existing private artifact location. A public row contains enough sanitized metadata to assess the claim without exposing credentials or source media. No implementation result is implied by a planning check.
 
 ## Current planning evidence
 
@@ -44,6 +44,6 @@ Completed artifacts must match the recorded revision and input digest. Check nat
 
 ## Private layout and transfer
 
-Suggested layout: `_local/2026-11-01/S02.05/run-001/` containing sanitized-test-result copies, raw logs and screenshots as appropriate. The folder's `.gitignore` excludes `_local/`; verify ignore behavior before writing secrets. Do not store keys deliberately in logs even when ignored. Original media stays in private project storage.
+Suggested layout: `.local/2026-11-01/S02.05/run-001/` containing sanitized-test-result copies, raw logs and screenshots as appropriate. The folder's `.gitignore` excludes `.local/`, and the existing documentation indexer skips its dot-prefixed name. Both boundaries were verified with a private Markdown probe. The old `_local/` path remains ignored for legacy evidence; do not use it for new Markdown logs. Do not store keys deliberately in logs even when ignored. Original media stays in private project storage.
 
 GitHub remains the source of truth for issue status, safe receipts and code. Raw private evidence requires a separate authorized transfer or reproduction on another laptop. Record unavailable artifacts honestly. Do not automatically upload private logs to make a receipt appear portable.

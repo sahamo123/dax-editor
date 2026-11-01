@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: final planning privacy review switches raw evidence to hidden `.local/` inside the dated handbook, excluded by both Git and the existing documentation walker/indexer. Retain the old underscore-folder ignore guard and append a historical correction. A private Markdown probe confirms both boundaries; no application/tooling changes or private-content exposure.
+
 * **Update**: planning-publication batch 24 adds final entrypoints and publication reconciliation. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
 
 * **Update**: planning-publication batch 23 adds progress, review-report. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.

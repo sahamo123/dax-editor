@@ -21,7 +21,7 @@ There are **100 Markdown files** here: **10 stage overviews +76 individual sub-s
 2. Declare the provisional capability/provider/client/machine matrix at launch/S00.01; S09 freezes and revalidates it. Choose a route and explicitly start the [future execution goal](execution-goal.md) only after review. Merely opening the goal file does not start implementation.
 3. Read the current stage page and first eligible step. Recheck the predecessor's actual receipt and current source before proceeding; no failed/blocked required check may be bypassed.
 4. Track actual work in scoped GitHub issues/PRs using the [receipt template](receipt-template.md). Page status records the publication baseline; it is not a live progress database.
-5. After a checkpoint, refresh [handoff](handoff.md) and [progress](progress.md) from issue receipts; append [daily log](daily-log.md) and [evidence](evidence-log.md), record [errors/recovery](errors-and-recovery.md), [decisions](decisions.md) and [gotchas](gotchas.md). Keep raw logs in ignored `_local/`; do not commit media, keys or personal data.
+5. After a checkpoint, refresh [handoff](handoff.md) and [progress](progress.md) from issue receipts; append [daily log](daily-log.md) and [evidence](evidence-log.md), record [errors/recovery](errors-and-recovery.md), [decisions](decisions.md) and [gotchas](gotchas.md). Keep raw logs in ignored `.local/`; do not commit media, keys or personal data.
 6. At a stage boundary, verify every child receipt and stage acceptance before entering the next selected stage. At a route endpoint, report its exact evidence scope and stop.
 
 ## Route selection and effort

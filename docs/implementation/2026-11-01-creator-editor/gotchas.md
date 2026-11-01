@@ -36,7 +36,7 @@ These are actionable cautions from source inspection and dated repository eviden
 | System FFmpeg/browser success is called bundled/native proof | Identify runtime and actual native target; keep diagnostic evidence scoped | S01.07, S09.04-S09.06 |
 | A private API is exposed by changing bind/CORS | Keep engine private; gateway auth, scoped media and worker boundaries need explicit tests | S08.01-S08.08 |
 | Hosted stage becomes mandatory for desktop through an unconditional dependency | Validate both routes; S09 follows S07.07 or S08.08 as selected | S09.01 |
-| Logs accidentally commit credentials/private footage | Use ignored `_local/`, sanitized public receipts and evidence digests; inspect staged files | Every step |
+| Logs accidentally commit credentials/private footage | Use ignored `.local/`, sanitized public receipts and evidence digests; inspect staged files | Every step |
 
 ## When a pitfall occurs
 
