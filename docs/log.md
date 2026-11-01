@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: planning-publication batch 19 adds S08.07, S08.08, S09, S09.01. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
+
 * **Update**: planning-publication batch 18 adds S08.03, S08.04, S08.05, S08.06. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
 
 * **Update**: planning-publication batch 17 adds S07.07, S08, S08.01, S08.02. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
