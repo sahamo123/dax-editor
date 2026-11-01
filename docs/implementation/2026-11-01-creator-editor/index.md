@@ -61,6 +61,10 @@
 * [S06.08: Accept curated character rendering across targets](s06-08-character-close.md) - Execute S06.08 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S07.01: Define bounded workflow and journal semantics](s07-01-workflow-contract.md) - Execute S07.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S07.02: Persist journal and idempotent mutation receipts](s07-02-workflow-journal.md) - Execute S07.02 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S07.03: Execute dependencies and recover interrupted work](s07-03-workflow-coordinator.md) - Execute S07.03 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S07.04: Admit all expensive work under one resource budget](s07-04-resource-admission.md) - Execute S07.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S07.05: Wire restricted specialist roles to existing capabilities](s07-05-specialist-adapters.md) - Execute S07.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S07.06: Expose workflow trace and live-client controls](s07-06-workflow-trace.md) - Execute S07.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
