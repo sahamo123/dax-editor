@@ -1,6 +1,25 @@
 // Visible local task history and queue controls shared across connected editor tabs.
+import type { TaskInfo } from "@dax/protocol";
 import type { ReactElement } from "react";
 import { useApp, useController } from "../context";
+
+/** Describe each task by its actual operation; Planning is a read-only chat mode. */
+function taskLabel(task: TaskInfo): string {
+  switch (task.kind) {
+    case "chat":
+      return task.mode === "plan" ? "Plan" : "Edit";
+    case "import":
+      return "Import";
+    case "export":
+      return "Export";
+    case "transcribe":
+      return "Transcription";
+    case "blender":
+      return "Blender";
+    case "command":
+      return "Command";
+  }
+}
 
 /** Show current/queued work and recent results, with cancellation for unfinished tasks. */
 export function TaskQueue(): ReactElement {
@@ -19,7 +38,14 @@ export function TaskQueue(): ReactElement {
       .reverse(),
   ];
   return (
-    <details className="task-queue" open={queued > 0 || Boolean(active)}>
+    <details
+      className="task-queue"
+      open={
+        queued > 0 ||
+        Boolean(active) ||
+        visible.some((task) => task.status === "failed" || task.status === "interrupted")
+      }
+    >
       <summary>
         Tasks · {active ? "1 running" : "idle"} · {queued} queued
       </summary>
@@ -30,13 +56,10 @@ export function TaskQueue(): ReactElement {
               {task.id.slice(0, 8)}
               {task.queuePosition ? ` · Queue #${task.queuePosition}` : ""} ·{" "}
             </small>
-            <strong>
-              {task.kind === "import" ? "Import" : task.mode === "plan" ? "Plan" : "Edit"}
-            </strong>{" "}
-            · <span>{task.status}</span>
+            <strong>{taskLabel(task)}</strong> · <span>{task.status}</span>
             <p>{task.title}</p>
             <small>
-              {task.origin ?? "ai"}
+              {task.origin ?? "Origin not recorded"}
               {task.provider ? ` · ${task.provider}` : ""}
               {task.phase ? ` · ${task.phase}` : ""}
             </small>

@@ -166,8 +166,8 @@ export function Shell(): ReactElement {
   const drawerMax = Math.max(240, Math.min(560, usableWidth - chat - MIN_CENTER - 2 * SPLITTER_PX));
   const drawer = clamp(drawerW, 240, drawerMax);
   const compactDock = compact && showDrawer;
-  // The narrow top bar can wrap to a second row; reserve its height before sizing the dock.
-  const chromeHeight = viewport.width <= 760 ? 104 : 56;
+  // The compact top bar can wrap to a second row; reserve its height before sizing the dock.
+  const chromeHeight = viewport.width <= 1100 ? 104 : 56;
   const maxDock = Math.max(150, viewport.height - chromeHeight - 160 - 150 - 2 * SPLITTER_PX);
   const dock = clamp(dockH, 150, maxDock);
   const maxTimeline = Math.max(

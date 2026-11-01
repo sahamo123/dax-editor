@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: S01.05 failure/autosave visibility [#153](https://github.com/sahamo123/dax-editor/issues/153)** on local `codex/s01-05-failure-visibility`, prepared above pending state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Verify the parent and publication, then run this child's full checks and review. The [failure receipt](s01-05-failure-receipt.md) records synthetic results; the following cursor is a historical checkpoint.
+
 **First-improvement is active: S00.01–S00.06 and S01.01–S01.04 VERIFIED.** S01.04 [issue #144](https://github.com/sahamo123/dax-editor/issues/144), [PR #148](https://github.com/sahamo123/dax-editor/pull/148), published head `77a6c17ccee8854968c0b92567ea847fd9d017a3` was self-reviewed. Its [receipt](s01-04-responsive-receipt.md) separates the tested code commit from the documentation-only follow-up. Stacked PRs remain unmerged.
 
 | Item | Current state |

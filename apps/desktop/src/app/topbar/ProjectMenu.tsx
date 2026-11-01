@@ -55,7 +55,14 @@ export function ProjectMenu(): ReactElement {
           if (event.currentTarget.open) void controller.recentProjects().then(setRecent);
         }}
       >
-        <summary className="btn">Project</summary>
+        <summary className="btn">
+          <span>Project</span>
+          {state?.saveError ? (
+            <span className="project-menu__save-error" role="status">
+              Save failed
+            </span>
+          ) : null}
+        </summary>
         <div className="project-menu__panel stack">
           <button
             className="btn"
@@ -89,11 +96,22 @@ export function ProjectMenu(): ReactElement {
           >
             Save project as…
           </button>
-          <p className={state?.saveError ? "note note--error" : "muted"} role="status">
-            {state?.saveError
-              ? `Autosave failed: ${state.saveError}`
-              : "Changes autosave locally. Project copies reference your media files."}
-          </p>
+          {state?.saveError ? (
+            <div className="note note--error" role="status">
+              <p>
+                Autosave failed. Your latest changes may not be on disk. Fix the problem, then use
+                Save project or Save project as…
+              </p>
+              <details>
+                <summary>Technical details</summary>
+                <p>{state.saveError}</p>
+              </details>
+            </div>
+          ) : (
+            <p className="muted" role="status">
+              Changes autosave locally. Project copies reference your media files.
+            </p>
+          )}
           <strong>Recent projects</strong>
           {recent.length ? (
             recent.slice(0, 8).map((path) => (

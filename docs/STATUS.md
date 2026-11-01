@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.05 failure visibility — November 1, 2026
+
+[Child #153](https://github.com/sahamo123/dax-editor/issues/153) prepares task failure and autosave visibility on local `codex/s01-05-failure-visibility`, based on pending state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), candidate head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. The [failure receipt](implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records synthetic checks; the parent and this child require verification. Check branch publication before resuming elsewhere.
+
 ## S01.05 state ordering — November 1, 2026
 
 [Issue #154](https://github.com/sahamo123/dax-editor/issues/154) isolates a reproduced delayed-refresh defect from failure-visibility work [#153](https://github.com/sahamo123/dax-editor/issues/153). Local worktree branch `codex/s01-05-state-ordering` follows self-reviewed composer [PR #152](https://github.com/sahamo123/dax-editor/pull/152), tested head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. See the [receipt](implementation/2026-11-01-creator-editor/s01-05-state-ordering-receipt.md) for pending verification and check publication before resuming elsewhere.
