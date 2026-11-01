@@ -85,7 +85,7 @@ export interface EngineConfig {
 interface ChatRun {
   runId: string;
   abort: AbortController;
-  finish: () => void;
+  finish: (interrupted?: boolean) => void;
   manualEdits?: boolean;
 }
 
@@ -958,13 +958,19 @@ export class Engine {
         ...(startStateId !== undefined ? { startStateId } : {}),
       });
     };
-    const finish = () => {
+    const finish = (interrupted = false) => {
       if (finished) return;
       if (!terminal) emit({ type: "done", turns: 0 });
       finished = true;
       this.tasks.put({
         ...task,
-        status: failure ? "failed" : abort.signal.aborted ? "cancelled" : "completed",
+        status: failure
+          ? "failed"
+          : interrupted
+            ? "interrupted"
+            : abort.signal.aborted
+              ? "cancelled"
+              : "completed",
         startStateId,
         endStateId: this.projects.session.history().find((state) => state.current)?.id,
         ...(failure ? { error: this.cfg.log.redact(failure) } : {}),
@@ -972,7 +978,13 @@ export class Engine {
       for (const steering of joined)
         this.tasks.put({
           ...steering,
-          status: abort.signal.aborted ? "cancelled" : failure ? "failed" : "completed",
+          status: failure
+            ? "failed"
+            : interrupted
+              ? "interrupted"
+              : abort.signal.aborted
+                ? "cancelled"
+                : "completed",
           ...(failure ? { error: failure } : {}),
         });
       for (const steering of joined) this.queuedSettings.delete(steering.id);
@@ -991,6 +1003,7 @@ export class Engine {
       try {
         // Edits accepted before this run started finish first; new ones are refused while the run is busy.
         await this.commandChain;
+        if (finished || abort.signal.aborted) return;
         if (task.projectId !== this.projects.session.projectId)
           throw new Error(
             "This request belongs to a different project. Submit it again in the open project.",
@@ -1008,6 +1021,7 @@ export class Engine {
             if (!imported.ok) throw new Error(imported.error);
           }
         }
+        if (finished || abort.signal.aborted) return;
         const runner = await this.resolveRunner(
           task.mode,
           this.queuedSettings.get(task.id),
@@ -1365,7 +1379,18 @@ export class Engine {
   async shutdown(): Promise<void> {
     this.closing = true;
     clearTimeout(this.idleTimer);
-    this.chat?.abort.abort();
+    const chat = this.chat;
+    if (chat) {
+      // Seal before the final flush: a provider may ignore abort and finish after shutdown.
+      const interrupted = !chat.abort.signal.aborted;
+      chat.abort.abort();
+      chat.finish(interrupted);
+    }
+    for (const task of this.chatQueue.splice(0)) {
+      this.tasks.put({ ...task, status: "interrupted" });
+      this.queuedSettings.delete(task.id);
+      this.queuedKeys.delete(task.id);
+    }
     this.localTask?.abort();
     this.exportAbort?.abort();
     for (const work of this.work.values()) work.abort.abort();

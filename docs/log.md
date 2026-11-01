@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Incident**: Recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) found a synthetic task-directory cleanup failure. Shutdown investigation [#158](https://github.com/sahamo123/dax-editor/issues/158) reproduced late task completion; its fix remains under verification. S01.05 remains open.
+
 * **Update**: Review of failure-visibility [PR #156](https://github.com/sahamo123/dax-editor/pull/156) found an inaccurate count for multiple running tasks. A regression and correction are under verification; prior full checks apply to the previous candidate.
 
 * **Update**: State-ordering [#154 / PR #155](https://github.com/sahamo123/dax-editor/pull/155) passed full source and focused browser checks with self-review at `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Dependent failure visibility [PR #156](https://github.com/sahamo123/dax-editor/pull/156) requires its own verification.

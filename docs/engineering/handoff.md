@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.05 shutdown recovery — November 1, 2026
+
+Continue [#158](https://github.com/sahamo123/dax-editor/issues/158) on `codex/s01-05-chat-shutdown`, based on self-reviewed [PR #156](https://github.com/sahamo123/dax-editor/pull/156), head `082314a691f1ee1720beaf85c8c1280858727842`; check publication before resuming on another laptop. The [receipt](../implementation/2026-11-01-creator-editor/s01-05-shutdown-receipt.md) records the failed browser run and deterministic shutdown regression. Separate [#157](https://github.com/sahamo123/dax-editor/issues/157) recovery tests remain in an isolated worktree and need revalidation on the fixed baseline. Earlier headings are historical.
+
 ## Active S01.05 failure visibility — November 1, 2026
 
 Continue [child #153](https://github.com/sahamo123/dax-editor/issues/153) in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed [PR #155](https://github.com/sahamo123/dax-editor/pull/155), head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. The [failure receipt](../implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records prior synthetic evidence; this child's fresh checks and review remain pending. Earlier headings are historical.
