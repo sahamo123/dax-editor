@@ -11,15 +11,15 @@ generated:
 
 # Current handoff
 
-**First-improvement is active: S00.01–S00.04 VERIFIED; S00.05 IN_PROGRESS.** Follow [issue #129](https://github.com/sahamo123/dax-editor/issues/129). Predecessor [issue #127](https://github.com/sahamo123/dax-editor/issues/127), [PR #128](https://github.com/sahamo123/dax-editor/pull/128) and its tested source were rechecked before entry. Independent stage review remains due.
+**First-improvement is active: S00.01–S00.05 VERIFIED; S00.06 IN_PROGRESS.** Follow [issue #133](https://github.com/sahamo123/dax-editor/issues/133). Predecessor [issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132) and its tested source were rechecked before entry. Independent stage review is in progress.
 
 | Item | Current state |
 |---|---|
-| Current work | S00.05 fresh source, browser and offline editing baseline |
+| Current work | S00.06 independent review and baseline-stage closure |
 | Implementation route | first-improvement, S00–S02 |
-| Active implementation step | S00.05 IN_PROGRESS |
-| Completed implementation steps | 4 of 76; each self-reviewed, independent stage review pending |
-| Next eligible implementation step | S00.06 after S00.05 evidence, review and current-tree recheck |
+| Active implementation step | S00.06 IN_PROGRESS |
+| Completed implementation steps | 5 of 76; each self-reviewed, independent stage review in progress |
+| Next eligible implementation step | S01.01 after S00.06 independent review, receipt and current-tree recheck |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 | Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use work branch `codex/s00-05-offline-baseline`, based on `codex/s00-04-performance-baseline`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
+Use work branch `codex/s00-06-baseline-stage-review`, based on `codex/s00-05-offline-baseline`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
 
 ## Next execution action
 
-Run the required full/browser checks and isolated offline editing, review, restart and fully decoded export; record S00.05 evidence, limitations and review in issue #129 and its PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing required check blocks S00.06.
+Independently inspect all S00 receipts and their artifacts, reconcile release issues and external gates, resolve material findings, and publish S00.06's receipt and PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing required check blocks S01.01.
 
 ## Known gates to anticipate
 

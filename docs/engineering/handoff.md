@@ -11,9 +11,13 @@ generated:
 
 # Handoff: resuming dax-editor
 
-## Active S00.05 — November 1, 2026
+## Active S00.06 — November 1, 2026
 
-Continue `codex/s00-05-offline-baseline` under [issue #129](https://github.com/sahamo123/dax-editor/issues/129). Recheck its live issue and the [current handoff](../implementation/2026-11-01-creator-editor/handoff.md), preserve private projects, and complete the fresh source/browser/isolated offline editing and decoded-export acceptance before S00.06. The packaged-renderer and native-policy boundaries remain separate.
+Continue `codex/s00-06-baseline-stage-review` under [issue #133](https://github.com/sahamo123/dax-editor/issues/133). Independently review S00.01–S00.05 receipts, commits and artifacts; reconcile release gates and findings before preparing the stage-closure PR. The [current handoff](../implementation/2026-11-01-creator-editor/handoff.md) tracks next actions. Do not present browser/system-FFmpeg evidence as native or packaged acceptance.
+
+## S00.05 checkpoint — November 1, 2026
+
+[Issue #129](https://github.com/sahamo123/dax-editor/issues/129) completed fresh source/browser/isolated offline editing and decoded-export acceptance on `codex/s00-05-offline-baseline`; current work is in the newer section above. The packaged-renderer and native-policy boundaries remain separate.
 
 ## S00.04 checkpoint — November 1, 2026
 
