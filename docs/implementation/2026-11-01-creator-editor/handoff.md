@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: parent reconciliation [#151](https://github.com/sahamo123/dax-editor/issues/151).** All children are self-reviewed; tested application/test head [PR #160](https://github.com/sahamo123/dax-editor/pull/160) is `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. On `codex/s01-05-stage-reconciliation`, review the [parent receipt](s01-05-task-recovery-receipt.md), verify publication, then update #151; earlier headings are historical.
+
 **Current work: combined recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157).** Branch `codex/s01-05-recovery-acceptance-v2` starts from self-reviewed [PR #159](https://github.com/sahamo123/dax-editor/pull/159) head `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Verify publication before switching laptops. Run the full browser suite and complete the [acceptance receipt](s01-05-recovery-acceptance-receipt.md); earlier headings are historical.
 
 **Current work: shutdown recovery [#158](https://github.com/sahamo123/dax-editor/issues/158).** Branch `codex/s01-05-chat-shutdown` starts from self-reviewed PR #156 head `082314a691f1ee1720beaf85c8c1280858727842`. Check publication before switching laptops. The [receipt](s01-05-shutdown-receipt.md) records the reproduced defect, candidate and pending tests. S01.05 recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) is in a separate worktree and must be revalidated on the fix. Earlier paragraphs are historical.

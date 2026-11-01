@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.05 parent reconciliation:** review [#151](https://github.com/sahamo123/dax-editor/issues/151) and the [receipt](../implementation/2026-11-01-creator-editor/s01-05-task-recovery-receipt.md) on `codex/s01-05-stage-reconciliation`, based on tested [PR #160](https://github.com/sahamo123/dax-editor/pull/160) `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. Check publication before changing laptops.
+
 **Current S01.05 acceptance child:** [#157](https://github.com/sahamo123/dax-editor/issues/157), `codex/s01-05-recovery-acceptance-v2`, is based on self-reviewed [PR #159](https://github.com/sahamo123/dax-editor/pull/159) at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Confirm publication and rerun the full browser suite as recorded in the [receipt](../implementation/2026-11-01-creator-editor/s01-05-recovery-acceptance-receipt.md).
 
 **Current S01.05 shutdown child:** [#158](https://github.com/sahamo123/dax-editor/issues/158), local `codex/s01-05-chat-shutdown`, starts from self-reviewed [PR #156](https://github.com/sahamo123/dax-editor/pull/156) at `082314a691f1ee1720beaf85c8c1280858727842`. Verify publication before switching laptops; see the [shutdown receipt](../implementation/2026-11-01-creator-editor/s01-05-shutdown-receipt.md) and retain separate pending recovery tests #157.

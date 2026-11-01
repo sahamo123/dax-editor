@@ -42,6 +42,7 @@
 * [S01.05 recovery acceptance child receipt](s01-05-recovery-acceptance-receipt.md) - Synthetic export, missing media and hidden assistant recovery acceptance evidence.
 * [S01.05 chat shutdown recovery child receipt](s01-05-shutdown-receipt.md) - Reproduction and validation of task persistence when a chat runner outlives shutdown.
 * [S01.05 state refresh ordering child receipt](s01-05-state-ordering-receipt.md) - Reproduction and verification of stale desktop state handling.
+* [S01.05 task and recovery completion receipt](s01-05-task-recovery-receipt.md) - Reconciled implementation, synthetic verification, private evidence identities and remaining boundaries for S01.05.
 * [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - Plan and evidence gates: Preserve task and recovery controls in the new layout.
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.
 * [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - Plan and evidence gates: Verify browser and native workspace acceptance.
