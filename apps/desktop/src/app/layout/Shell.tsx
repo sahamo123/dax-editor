@@ -30,14 +30,17 @@ import "../styles/workspace.css";
 const SPLITTER_PX = 6;
 const MIN_CENTER = 320;
 
-function useViewportWidth(): number {
-  const [w, setW] = useState(() => window.innerWidth);
+function useViewport(): { width: number; height: number } {
+  const [size, setSize] = useState(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }));
   useEffect(() => {
-    const on = () => setW(window.innerWidth);
+    const on = () => setSize({ width: window.innerWidth, height: window.innerHeight });
     window.addEventListener("resize", on);
     return () => window.removeEventListener("resize", on);
   }, []);
-  return w;
+  return size;
 }
 
 /** Switches the drawer to the Inspector when the user selects something on the timeline. */
@@ -128,8 +131,8 @@ export function Shell(): ReactElement {
   const importOpen = useApp((s) => s.ui.importOpen);
   const exportOpen = useApp((s) => s.ui.exportOpen);
   const dropHover = useApp((s) => s.ui.dropHover);
-  const viewport = useViewportWidth();
-  const compact = viewport < 1180;
+  const viewport = useViewport();
+  const compact = viewport.width < 1180;
   const patchUi = useApp((s) => s.patchUi);
   useEffect(() => {
     if (compact) patchUi({ drawerOpen: false });
@@ -143,12 +146,22 @@ export function Shell(): ReactElement {
   // The drawer hosts editor panels that need server state, so it waits for the first state.
   const showDrawer = drawerOpen && hasState;
   const inlineDrawer = showDrawer && !compact;
-  const drawerSpace = inlineDrawer ? drawerW + SPLITTER_PX : 0;
-  const chatMax = Math.max(260, Math.min(600, viewport - drawerSpace - MIN_CENTER - SPLITTER_PX));
-  const drawerMax = Math.max(240, Math.min(560, viewport - chatW - MIN_CENTER - 2 * SPLITTER_PX));
-  const chat = Math.min(chatW, chatMax);
-  const drawer = Math.min(drawerW, drawerMax);
-  const maxTimeline = Math.max(160, window.innerHeight - 48 - 180 - SPLITTER_PX);
+  const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
+  const usableWidth = viewport.width - 16;
+  const initialDrawerMax = Math.max(
+    240,
+    Math.min(560, usableWidth - 260 - MIN_CENTER - 2 * SPLITTER_PX),
+  );
+  const initialDrawer = clamp(drawerW, 240, initialDrawerMax);
+  const drawerSpace = inlineDrawer ? initialDrawer + SPLITTER_PX : 0;
+  const chatMax = Math.max(
+    260,
+    Math.min(600, usableWidth - drawerSpace - MIN_CENTER - SPLITTER_PX),
+  );
+  const chat = clamp(chatW, 260, chatMax);
+  const drawerMax = Math.max(240, Math.min(560, usableWidth - chat - MIN_CENTER - 2 * SPLITTER_PX));
+  const drawer = clamp(drawerW, 240, drawerMax);
+  const maxTimeline = Math.max(160, viewport.height - 48 - 180 - SPLITTER_PX);
 
   const columns = inlineDrawer
     ? `${chat}px ${SPLITTER_PX}px minmax(0, 1fr) ${SPLITTER_PX}px ${drawer}px`
@@ -171,7 +184,7 @@ export function Shell(): ReactElement {
           />
           {hasState ? (
             <Workspace
-              timelineHeight={Math.min(timelineH, maxTimeline)}
+              timelineHeight={clamp(timelineH, 150, maxTimeline)}
               onTimelineHeight={setTimelineH}
               maxTimeline={maxTimeline}
             />

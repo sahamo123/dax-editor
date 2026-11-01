@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.04 preview slice — November 1, 2026
+
+The responsive workspace [#144](https://github.com/sahamo123/dax-editor/issues/144) is split for review. Verify and publish preview/sizing child [#137](https://github.com/sahamo123/dax-editor/issues/137) from `codex/s01-04-preview-sizing`, then continue its dependent compact layout. See the [child receipt](../implementation/2026-11-01-creator-editor/s01-04-preview-child-receipt.md). The independently confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) requires separate remediation; native acceptance remains open.
+
 ## Active S01.03 — November 1, 2026
 
 Continue `codex/s01-03-setup-inspector`, [issue #142](https://github.com/sahamo123/dax-editor/issues/142). Rechecked S01.02's verified [issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141) and head `f3f019e353493a6050959170c72e33a73dc1b2ae`. Finish the setup/inspector implementation, acceptance and scoped PR before S01.04. Native/packaged acceptance remains separate.

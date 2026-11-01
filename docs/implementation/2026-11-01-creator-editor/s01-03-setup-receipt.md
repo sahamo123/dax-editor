@@ -11,11 +11,11 @@ generated:
 
 # S01.03 setup and contextual inspector
 
-**State: IN_PROGRESS.** [Issue #142](https://github.com/sahamo123/dax-editor/issues/142). Before entry, rechecked [issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141), tested head `f3f019e353493a6050959170c72e33a73dc1b2ae`, tree `8875ec18156a129b38447894051c57626fc8223e` and current ancestry. The approved [workspace contract](../../specs/workspace-design-contract.md) is proposed design, not prior UI acceptance.
+**State: VERIFIED (self-reviewed).** [Issue #142](https://github.com/sahamo123/dax-editor/issues/142), [PR #143](https://github.com/sahamo123/dax-editor/pull/143), tested commit `6ecf3b533df2029eda17699dbfc7c32d7598a689`, tree `d76163a2df2fe41e0b9187a86cfadd60876d3112`. Before entry, rechecked [issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141), tested head `f3f019e353493a6050959170c72e33a73dc1b2ae`, tree `8875ec18156a129b38447894051c57626fc8223e` and current ancestry. The approved [workspace contract](../../specs/workspace-design-contract.md) is proposed design, not prior UI acceptance.
 
 ## Implementation
 
-The empty-project surface offers Start editing and a Project options entry that opens the existing project tools, with a top-bar Project setup entry to reopen setup or show those tools for a populated project. New projects show setup; explicitly opened/copied projects enter the editor, and an initially loaded saved project bypasses setup. Skipping or Escape changes only viewer UI state and returns focus to the setup control; clip selection continues to open Inspector without moving focus. The existing controller and typed registry still own mutations; no project schema, history or provider semantics changed. Narrow-window reachability still requires the broader browser run and visual review.
+The empty-project surface offers Start editing and a Project options entry that opens the existing project tools, with a top-bar Project setup entry to reopen setup or show those tools for a populated project. New projects show setup; explicitly opened/copied projects enter the editor, and an initially loaded saved project bypasses setup. Skipping or Escape changes only viewer UI state and returns focus to the setup control; clip selection continues to open Inspector without moving focus. The existing controller and typed registry still own mutations; no project schema, history or provider semantics changed. Narrow-window setup was inspected in the full browser run; broader responsive layout remains S01.04.
 
 ## Evidence so far
 
@@ -28,4 +28,4 @@ The empty-project surface offers Start editing and a Project options entry that 
 
 ## Remaining and recovery
 
-Complete documentation/indexes, second review and a scoped PR with exact tree and test evidence. Do not mark VERIFIED until all S01.03 criteria pass. The compact drawer and wasted preview width remain planned S01.04 work, not claimed fixed here. Preserve `.dax-data`, ignored artifacts and original user projects. Native Windows/DPI and packaged runtime remain separate later gates.
+The coordinator separately reviewed the published diff and evidence; this was self-review, not independent review. The issue and draft PR remain open for integration. The compact drawer and wasted preview width are S01.04 work, not claimed fixed here. Preserve `.dax-data`, ignored artifacts and original user projects. Native Windows/DPI and packaged runtime remain separate later gates.
