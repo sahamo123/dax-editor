@@ -1,7 +1,7 @@
 // Component tests for the app shell pieces that do not need the editor module: chat, settings, history,
 // media bin, banner, empty state, top bar. Each renders against a real store and a fake controller.
 
-import { screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { ChatPanel } from "./chat/ChatPanel";
@@ -453,8 +453,27 @@ describe("TopBar", () => {
       s.applyJob({ id: "e", kind: "export", label: "Export", progress: 0.42, status: "running" }),
     );
     const btn = screen.getByRole("button", { name: "Exporting, 42 percent" });
-    expect(btn).toBeDisabled();
+    expect(btn).toHaveAttribute("aria-disabled", "true");
     expect(btn).toHaveTextContent("Exporting 42%");
+  });
+
+  it("keeps focus on the busy export control and refuses another activation", async () => {
+    const { store } = renderApp(<TopBar />);
+    const button = screen.getByRole("button", { name: "Export" });
+    button.focus();
+    act(() =>
+      store.getState().applyJob({
+        id: "e",
+        kind: "export",
+        label: "Export",
+        progress: 0.42,
+        status: "running",
+      }),
+    );
+    expect(button).toHaveFocus();
+    expect(button).toHaveAttribute("aria-disabled", "true");
+    await userEvent.keyboard("{Enter}");
+    expect(store.getState().ui.exportOpen).toBe(false);
   });
 
   it("disables everything that needs the engine while offline", () => {

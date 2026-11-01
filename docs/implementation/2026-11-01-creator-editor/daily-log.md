@@ -170,3 +170,5 @@ S01.05 parent #151 and reconciliation PR #161 passed a separate self-review at `
 The partial generated-media browser keyboard walkthrough exposed repeated review progress updates in a live region (#163) and focus loss when export starts (#164). A focused regression reproduced #163; its correction is under test. Browser chooser assistance was required and native-window access timed out, so full manual and screen-reader evidence remains pending. The keyboard-triggered generated export contained six seconds of video and audio.
 
 Review of #163's first draft found that a transient-progress browser assertion could race very fast rendering. It was removed; the deterministic component regression remains, and the unchanged browser review tests passed again. The generated keyboard export was fully decoded.
+
+Review progress PR #166 passed self-review at `1a57506035551b4d6cf3ddae414acd54f044274b`. Export-focus #164's regression first failed against the old control; the candidate passed 34 component and seven focused browser tests. Full checks, contrast and actual assistive-technology evidence remain pending.

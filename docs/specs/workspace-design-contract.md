@@ -41,6 +41,8 @@ Goals: skippable project setup; direct entry for existing projects; contextual i
 
 During rendered review, progress percentages remain readable through the labelled progress bar and visible text without changing a live status region on every update. Meaningful start, completion and error announcements remain distinct; actual screen-reader behavior requires separate observation. [#163](https://github.com/sahamo123/dax-editor/issues/163) tracks the scoped correction.
 
+During export, the top-bar progress control remains keyboard-focusable and is programmatically unavailable; activation must be ignored until the running job finishes. Offline and empty-project states remain genuinely disabled. Closing the export dialog without a valid submission returns focus to its trigger. [#164](https://github.com/sahamo123/dax-editor/issues/164) tracks the scoped correction.
+
 S01.05's [narrow composer child](../implementation/2026-11-01-creator-editor/s01-05-composer-receipt.md) passed self-review: the message field and active-run actions occupy separate rows, and Queue is labelled distinctly from Steer and Stop. It does not complete the task/recovery acceptance.
 
 The [failure and autosave visibility child](../implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) is in progress. It also addresses a reproduced delayed-state response that hid an autosave warning; full verification remains pending.

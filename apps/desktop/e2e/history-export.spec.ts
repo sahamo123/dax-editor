@@ -1,5 +1,6 @@
 // History panel (restore, checkpoints, who made each state), undo/redo keys, export progress, layout controls.
 
+import { dirname, join } from "node:path";
 import { chatInput, expect, test } from "./fixtures";
 
 test("history lists every state with its author, restores on click, and keeps checkpoints", async ({
@@ -102,6 +103,9 @@ test("export shows progress on the button and announces the finished file", asyn
   const busy = page.getByRole("banner").getByRole("button", { name: /Exporting/ });
   await expect(busy).toBeVisible();
   await expect(busy).toBeDisabled();
+  await expect(busy).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeHidden();
   await shot("07-exporting");
   await expect(page.getByText("Exported Untitled.mp4.")).toBeVisible({ timeout: 30_000 });
   await expect(
@@ -123,6 +127,34 @@ test("a bad export path is refused in the dialog before anything is sent", async
   const dialog = page.getByRole("dialog", { name: "Export video" });
   await dialog.getByLabel("Save as").fill("/tmp/not-an-mp4.txt");
   await expect(dialog.getByRole("button", { name: "Export" })).toBeDisabled();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("banner").getByRole("button", { name: "Export" })).toBeFocused();
+});
+
+test("compact export keeps keyboard focus while work runs", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+}) => {
+  const server = await startServer();
+  await server.importPaths([sampleVideo]);
+  await page.setViewportSize({ width: 1000, height: 700 });
+  await openApp(server);
+  const trigger = page.getByRole("banner").getByRole("button", { name: "Export", exact: true });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: "Export video" });
+  await dialog.getByLabel("Save as").fill(join(dirname(sampleVideo), "compact-focus.mp4"));
+  await dialog.getByRole("button", { name: "Export", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  const busy = page.getByRole("banner").getByRole("button", { name: /Exporting/ });
+  await expect(busy).toBeVisible();
+  await expect(busy).toBeFocused();
+  await expect(busy).toBeDisabled();
+  await page.keyboard.press("Enter");
+  await expect(dialog).toBeHidden();
+  await expect(page.getByText("Exported compact-focus.mp4.")).toBeVisible({ timeout: 30_000 });
 });
 
 test("panels resize with the keyboard and the side drawer tabs use arrow keys", async ({
