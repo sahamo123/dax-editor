@@ -66,5 +66,5 @@ Inspect actual decoded media for rendering claims. Keep source/mock, browser, na
 Use the [receipt template](receipt-template.md) to record Portable bundle/relink manifest, cross-root results and resolver security regressions.
 Include exact base/result SHAs, issue/PR, artifact hashes and private locations, tested hardware/runtime, assertions, skips, blockers, and the predecessor receipt(s) revalidated.
 Complete the scribe step (log, affected concepts, STATUS, indexes and `pnpm docs:okf`) in the implementation PR. Record any scope change in the issue/spec rather than silently weakening a gate.
-Advance to S08.03 (`s08-03-owner-gateway.md`; later publication batch) only after every required outcome above passes. Link this receipt from its GitHub implementation issue and current STATUS/handoff; the [master plan](master-plan.md) remains static navigation. A blocked outcome does not count as completed implementation.
+Advance to [S08.03](s08-03-owner-gateway.md) only after every required outcome above passes. Link this receipt from its GitHub implementation issue and current STATUS/handoff; the [master plan](master-plan.md) remains static navigation. A blocked outcome does not count as completed implementation.
 

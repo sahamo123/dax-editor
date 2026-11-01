@@ -68,6 +68,10 @@
 * [S07.07: Accept workflow recovery and actual clients](s07-07-workflow-close.md) - Execute S07.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S08.01: Define the optional personal-host trust boundary](s08-01-host-threat-model.md) - Execute S08.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S08.02: Resolve portable assets and collect projects](s08-02-portable-assets.md) - Execute S08.02 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.03: Implement single-owner authenticated gateway sessions](s08-03-owner-gateway.md) - Execute S08.03 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.04: Scope remote media and isolate native workers](s08-04-host-media-boundaries.md) - Execute S08.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.05: Package a pinned private single-owner deployment](s08-05-private-deployment.md) - Execute S08.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.06: Recover browser sessions and task controls remotely](s08-06-host-reconnect.md) - Execute S08.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.

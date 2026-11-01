@@ -15,7 +15,7 @@ generated:
 
 [Issue #72](https://github.com/sahamo123/dax-editor/issues/72) tracks the partial documentation stack. Do not execute incomplete handbook snapshots. Application state is unchanged; all future implementation steps remain NOT_STARTED.
 
-Current batch: 17 of 24. Completed publication scope: 75 concept pages. Next: the next dependent documentation batch.
+Current batch: 18 of 24. Completed publication scope: 79 concept pages. Next: the next dependent documentation batch.
 
 ## Creator workflow planning — November 1, 2026
 

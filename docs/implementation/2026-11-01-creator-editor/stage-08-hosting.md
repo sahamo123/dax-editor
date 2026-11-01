@@ -31,10 +31,10 @@ Planning approval is not implementation authorization or evidence. Read current 
 |---|---|---:|
 | [S08.01](s08-01-host-threat-model.md) | Define the optional personal-host trust boundary | 1-2 |
 | [S08.02](s08-02-portable-assets.md) | Resolve portable assets and collect projects | 1-2 |
-| S08.03 (`s08-03-owner-gateway.md`; later publication batch) | Implement single-owner authenticated gateway sessions | 1-2 |
-| S08.04 (`s08-04-host-media-boundaries.md`; later publication batch) | Scope remote media and isolate native workers | 1-2 |
-| S08.05 (`s08-05-private-deployment.md`; later publication batch) | Package a pinned private single-owner deployment | 1-1.5 |
-| S08.06 (`s08-06-host-reconnect.md`; later publication batch) | Recover browser sessions and task controls remotely | 1-1.5 |
+| [S08.03](s08-03-owner-gateway.md) | Implement single-owner authenticated gateway sessions | 1-2 |
+| [S08.04](s08-04-host-media-boundaries.md) | Scope remote media and isolate native workers | 1-2 |
+| [S08.05](s08-05-private-deployment.md) | Package a pinned private single-owner deployment | 1-1.5 |
+| [S08.06](s08-06-host-reconnect.md) | Recover browser sessions and task controls remotely | 1-1.5 |
 | S08.07 (`s08-07-host-recovery.md`; later publication batch) | Verify quotas backup restore and workspace recovery | 1-1.5 |
 | S08.08 (`s08-08-host-close.md`; later publication batch) | Accept personal hosting and desktop parity | 1-1.5 |
 
