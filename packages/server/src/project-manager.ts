@@ -2,8 +2,8 @@
 // Project files live under <data>/projects unless the user saves elsewhere; they never contain API keys (core's Project has no place for them).
 
 import { randomBytes, randomUUID } from "node:crypto";
-import { mkdir, readFile, stat } from "node:fs/promises";
-import { basename, join } from "node:path";
+import { link, lstat, mkdir, open, readFile, stat, unlink } from "node:fs/promises";
+import { basename, dirname, join } from "node:path";
 import { emptyProject, isPathInside, type Project, ProjectSchema, Session } from "@dax/core";
 import type { ProjectNewRequest } from "@dax/protocol";
 import type { Logger } from "./logger.js";
@@ -15,6 +15,8 @@ import { writeFileAtomic } from "./stores.js";
 const MAX_PROJECT_BYTES = 50 * 1024 * 1024;
 /** Required file ending for project files, so the picker and the server agree on what is a project. */
 const PROJECT_EXTENSION = ".dax.json";
+/** A fresh destination protects unrelated projects and undo histories from replacement. */
+const SAVE_AS_COLLISION = "The project or its history already exists. Choose a new filename.";
 
 /**
  * A core {@link Session} that saves atomically to a path the server controls and calls `onChange`
@@ -46,17 +48,68 @@ export class EngineSession extends Session {
     await writeFileAtomic(this.savePath, JSON.stringify(this.project, null, 2));
   }
 
+  /** Publish a staged file only if the destination does not exist. */
+  protected async publishSaveFile(staged: string, destination: string): Promise<void> {
+    await link(staged, destination);
+  }
+
   /**
-   * "Save as": write the project to `path` and only then make it the autosave location. If the write fails
-   * (read-only folder, name taken by a directory) the session keeps saving to where it was before.
+   * Save to a fresh location without replacing an existing project or history. The active location changes
+   * only after both files are published; an interrupted publication can leave a project copy behind.
    */
   async saveAs(path: string): Promise<void> {
-    await writeFileAtomic(path, JSON.stringify(this.project, null, 2));
-    this.savePath = path;
-    this.userSaved = true;
-    // The history follows the project to its new home.
-    await this.saveHistory();
-    this.markSaved();
+    const historyPath = `${path}.history.json`;
+    const suffix = randomBytes(16).toString("hex");
+    const projectStage = `${path}.${suffix}.stage`;
+    const historyStage = `${historyPath}.${suffix}.stage`;
+    let projectStaged = false;
+    let historyStaged = false;
+    let projectPublished = false;
+    await mkdir(dirname(path), { recursive: true });
+    try {
+      for (const destination of [path, historyPath]) {
+        try {
+          await lstat(destination);
+          throw new Error(SAVE_AS_COLLISION);
+        } catch (err) {
+          if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+        }
+      }
+      const stagedProject = await open(projectStage, "wx");
+      projectStaged = true;
+      try {
+        await stagedProject.writeFile(JSON.stringify(this.project, null, 2));
+      } finally {
+        await stagedProject.close();
+      }
+      await this.saveHistory(historyStage);
+      historyStaged = true;
+      // Hard-link publication is exclusive: even a concurrent creator cannot be overwritten.
+      await this.publishSaveFile(projectStage, path);
+      projectPublished = true;
+      await this.publishSaveFile(historyStage, historyPath);
+      this.savePath = path;
+      this.userSaved = true;
+      this.markSaved();
+    } catch (err) {
+      if (projectPublished) {
+        throw new Error(
+          "Save As did not switch projects. A project copy was created at the chosen destination, but its history could not be published. Choose a new filename and inspect the copy and any existing history file.",
+          { cause: err },
+        );
+      }
+      if ((err as NodeJS.ErrnoException).code === "EEXIST") {
+        throw new Error(SAVE_AS_COLLISION, { cause: err });
+      }
+      if (err instanceof Error && err.message === SAVE_AS_COLLISION) throw err;
+      throw new Error(
+        "Save As could not safely create the project. The current project remains active; check the destination and try a different local folder.",
+        { cause: err },
+      );
+    } finally {
+      if (projectStaged) await unlink(projectStage).catch(() => undefined);
+      if (historyStaged) await unlink(historyStage).catch(() => undefined);
+    }
   }
 
   protected override onAutosaveFailed(err: unknown): void {
@@ -225,9 +278,23 @@ export class ProjectManager {
   async save(path?: string): Promise<void> {
     if (path !== undefined) {
       const abs = await this.checkProjectPath(path);
-      // Commit the new location only after the file is really there, so a failed save-as changes nothing.
-      await this.session.saveAs(abs);
-      await this.cfg.appState.setLastProject(abs);
+      if (abs === this.session.savePath) {
+        await this.session.save();
+        this.session.userSaved = true;
+      } else await this.session.saveAs(abs);
+      try {
+        await this.cfg.appState.setLastProject(abs);
+      } catch (err) {
+        const code = (err as NodeJS.ErrnoException).code;
+        this.cfg.log.warn(
+          `recent-project metadata update failed${code && /^[A-Z0-9_]+$/.test(code) ? ` (${code})` : ""}`,
+        );
+        this.cfg.onChange();
+        throw new Error(
+          "The project was saved and is active, but the recent-project list could not be updated. Open the saved file manually after restart.",
+          { cause: err },
+        );
+      }
     } else {
       await this.session.save();
     }

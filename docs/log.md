@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: S01.04 passed self-review ([issue #144](https://github.com/sahamo123/dax-editor/issues/144), [PR #148](https://github.com/sahamo123/dax-editor/pull/148), published head `77a6c17ccee8854968c0b92567ea847fd9d017a3`). The confirmed [save-as recovery defect #146](https://github.com/sahamo123/dax-editor/issues/146) is being addressed under a separate [contract](specs/save-as-recovery.md); native acceptance remains open.
+
 * **Update**: Restored the preview-slice historical log and error entries that were accidentally replaced when preparing compact-layout [PR #148](https://github.com/sahamo123/dax-editor/pull/148). This is a documentation-only correction; source and browser evidence remain tied to the tested code commit.
 
 * **Update**: S01.04's preview/sizing child [#137](https://github.com/sahamo123/dax-editor/issues/137) passed self-review and was published as [PR #147](https://github.com/sahamo123/dax-editor/pull/147); the compact workspace follows separately under #144. Confirmed save-as recovery defect #146 remains open.

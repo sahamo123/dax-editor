@@ -378,6 +378,109 @@ describe("projects", () => {
     });
   });
 
+  it("keeps the current project and undo history when the save-as history destination is blocked", async () => {
+    await withServer({}, async (h) => {
+      await h.post("/api/project/new", { name: "Keep editing" });
+      expect((await h.command("set_format", { preset: "square-1080" })).ok).toBe(true);
+      const target = join(h.workDir, "history-blocked.dax.json");
+      await mkdir(`${target}.history.json`);
+
+      const response = await h.post("/api/project/save", { path: target });
+      expect(response.status).toBe(400);
+      expect(existsSync(target)).toBe(false);
+      const state = await stateOf(h);
+      expect(state.projectPath).toBeUndefined();
+      expect(state.project.timeline.width).toBe(1080);
+      expect(state.canUndo).toBe(true);
+      expect((await h.command("undo")).ok).toBe(true);
+    });
+  });
+
+  it("does not overwrite an existing project or its history during save-as", async () => {
+    await withServer({}, async (h) => {
+      await h.post("/api/project/new", { name: "New work" });
+      const target = join(h.workDir, "existing.dax.json");
+      await writeFile(target, "existing project contents");
+      await writeFile(`${target}.history.json`, "existing history contents");
+
+      const response = await h.post("/api/project/save", { path: target });
+      expect(response.status).toBe(400);
+      expect(response.json().error).toContain("already exists");
+      expect(await readFile(target, "utf8")).toBe("existing project contents");
+      expect(await readFile(`${target}.history.json`, "utf8")).toBe("existing history contents");
+      expect((await stateOf(h)).projectPath).toBeUndefined();
+    });
+  });
+
+  it("reports a completed save when updating recent projects fails and can reopen its history", async () => {
+    await withServer({}, async (h) => {
+      await h.post("/api/project/new", { name: "Saved but not recent" });
+      expect((await h.command("set_format", { preset: "square-1080" })).ok).toBe(true);
+      const target = join(h.workDir, "recoverable.dax.json");
+      const appState = join(h.dataDir, "state.json");
+      const oldState = await readFile(appState, "utf8");
+      await rm(appState);
+      await mkdir(appState);
+      const ws = await h.ws();
+
+      const response = await h.post("/api/project/save", { path: target });
+      expect(response.status).toBe(400);
+      expect(response.json().error).toContain("project was saved and is active");
+      const state = await stateOf(h);
+      expect(state.projectPath).toBe(target);
+      expect(state.canUndo).toBe(true);
+      expect(existsSync(target)).toBe(true);
+      expect(existsSync(`${target}.history.json`)).toBe(true);
+      await ws.waitForAny((event) => isState(event) && event.state.projectPath === target);
+      ws.close();
+
+      await rm(appState, { recursive: true });
+      await writeFile(appState, oldState);
+      const reopened = await h.post("/api/project/open", { path: target });
+      expect(reopened.status).toBe(200);
+      expect(reopened.json<StateResponse>().canUndo).toBe(true);
+      expect((await h.command("undo")).ok).toBe(true);
+    });
+  });
+
+  it("allows an explicit save at the already active project path", async () => {
+    await withServer({}, async (h) => {
+      const target = join(h.workDir, "same.dax.json");
+      const firstSave = await h.post("/api/project/save", { path: target });
+      expect(firstSave.status, firstSave.text()).toBe(200);
+      expect((await h.command("set_format", { preset: "square-1080" })).ok).toBe(true);
+      const secondSave = await h.post("/api/project/save", { path: target });
+      expect(secondSave.status, secondSave.text()).toBe(200);
+      expect((await stateOf(h)).projectPath).toBe(target);
+      expect(JSON.parse(await readFile(target, "utf8")).timeline.width).toBe(1080);
+    });
+  });
+
+  it("restores a saved-as project and its undo history after restart", async () => {
+    const first = await startHarness();
+    try {
+      expect((await first.command("set_format", { preset: "square-1080" })).ok).toBe(true);
+      const target = join(first.workDir, "restart.dax.json");
+      expect((await first.post("/api/project/save", { path: target })).status).toBe(200);
+      await first.server.close();
+      const second = await startHarness({
+        dataDir: first.dataDir,
+        allowRoots: [first.workDir, first.dataDir],
+      });
+      try {
+        const state = await stateOf(second);
+        expect(state.projectPath).toBe(target);
+        expect(state.project.timeline.width).toBe(1080);
+        expect(state.canUndo).toBe(true);
+        expect((await second.command("undo")).ok).toBe(true);
+      } finally {
+        await second.cleanup();
+      }
+    } finally {
+      await first.cleanup();
+    }
+  });
+
   it("validates new-project fields", async () => {
     await withServer({}, async (h) => {
       expect((await h.post("/api/project/new", { name: "", width: 5 })).status).toBe(400);

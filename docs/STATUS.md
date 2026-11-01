@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Save-as recovery — November 1, 2026
+
+S01.04 is VERIFIED with self-review at [issue #144](https://github.com/sahamo123/dax-editor/issues/144), [PR #148](https://github.com/sahamo123/dax-editor/pull/148), published head `77a6c17ccee8854968c0b92567ea847fd9d017a3`; see the [receipt](implementation/2026-11-01-creator-editor/s01-04-responsive-receipt.md) for the tested code commit and evidence. Work is in progress on the distinct [save-as recovery defect #146](https://github.com/sahamo123/dax-editor/issues/146), initially on local branch `codex/save-as-recovery`. Check its publication before continuing elsewhere. This is not a release or native acceptance claim.
+
 ## First-improvement S01.04 — November 1, 2026
 
 The preview/sizing child is VERIFIED with self-review at [issue #137](https://github.com/sahamo123/dax-editor/issues/137), [PR #147](https://github.com/sahamo123/dax-editor/pull/147), tested head `798c87ca5872dbb1aaff95a996b4a7b8f52cf0f6`. Its dependent compact workspace is VERIFYING on `codex/s01-04-responsive-workspace`, [issue #144](https://github.com/sahamo123/dax-editor/issues/144): the dependent tree passed full source and browser checks, and review/publication remain pending. Native/packaged and DPI acceptance remain open.

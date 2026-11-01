@@ -15,4 +15,5 @@
 * [Native Windows candidate acceptance](native-windows-acceptance.md) - Validate the installed candidate on an isolated Windows runner without changing the owner's application-control policy.
 * [Product v1 specification](product-v1.md) - How the desktop editor fits together and what each package must deliver: agent, local model runtime, server, desktop UI and Tauri shell.
 * [Rendered effects preview](rendered-effects-preview.md) - Review the complete edit through the existing renderer without exporting a user-managed file or changing the project.
+* [Save-as failure and recovery contract](save-as-recovery.md) - Safe outcomes for project, history and recent-project writes during save-as.
 * [Desktop workspace product and design contract](workspace-design-contract.md) - Proposed setup, contextual inspection, responsive layout, task, focus and verification rules for the first-improvement editor.

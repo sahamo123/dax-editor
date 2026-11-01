@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active save-as recovery — November 1, 2026
+
+Continue [issue #146](https://github.com/sahamo123/dax-editor/issues/146) on local `codex/save-as-recovery` after checking publication. Its verified predecessor is [PR #148](https://github.com/sahamo123/dax-editor/pull/148), head `77a6c17ccee8854968c0b92567ea847fd9d017a3`. Follow the [dated handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [save-as contract](../specs/save-as-recovery.md); previous active headings below are historical. S01.05 follows recovery and its predecessor recheck.
+
 ## Active S01.04 — November 1, 2026
 
 Continue `codex/s01-04-responsive-workspace`, [issue #144](https://github.com/sahamo123/dax-editor/issues/144). Rechecked preview child [issue #137](https://github.com/sahamo123/dax-editor/issues/137), [PR #147](https://github.com/sahamo123/dax-editor/pull/147), tested head `798c87ca5872dbb1aaff95a996b4a7b8f52cf0f6` and tree `db3c2c754d71f33c91e47de23aa30e527f39f781`. Retest and publish the dependent compact slice before S01.05; then prioritize confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146). Native/packaged acceptance remains separate.
