@@ -35,6 +35,7 @@
 * [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) - Plan and evidence gates: Separate project setup from contextual inspection.
 * [S01.03 setup and contextual inspector receipt](s01-03-setup-receipt.md) - Evidence and outstanding checks for the skippable setup and contextual-inspector workspace slice.
 * [S01.04 preview and panel sizing child receipt](s01-04-preview-child-receipt.md) - Evidence for the first reviewable responsive workspace slice.
+* [S01.04 responsive workspace receipt](s01-04-responsive-receipt.md) - Implementation and evidence for the resizable desktop workspace.
 * [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) - Plan and evidence gates: Keep the preview usable across workspace sizes.
 * [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - Plan and evidence gates: Preserve task and recovery controls in the new layout.
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.

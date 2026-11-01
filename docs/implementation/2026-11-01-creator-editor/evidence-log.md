@@ -29,7 +29,8 @@ Historical application checks remain in repository STATUS with their original da
 | Run | Scope | Result | Source / evidence |
 |---|---|---|---|
 | S01.03 | Setup and contextual inspection | VERIFIED with self-review | [Receipt](s01-03-setup-receipt.md), [issue #142](https://github.com/sahamo123/dax-editor/issues/142), [PR #143](https://github.com/sahamo123/dax-editor/pull/143) |
-| S01.04 preview child | Preview and saved panel sizes | VERIFYING: isolated source/browser/frame checks passed; review/publication pending | [Child receipt](s01-04-preview-child-receipt.md), [issue #137](https://github.com/sahamo123/dax-editor/issues/137) |
+| S01.04 preview child | Preview and saved panel sizes | VERIFIED with self-review | [Child receipt](s01-04-preview-child-receipt.md), [issue #137](https://github.com/sahamo123/dax-editor/issues/137), [PR #147](https://github.com/sahamo123/dax-editor/pull/147) |
+| S01.04 compact child | Responsive workspace and loaded-frame measurements | VERIFYING: dependent tree passed full source/browser checks; review/publication pending | [Receipt](s01-04-responsive-receipt.md), [issue #144](https://github.com/sahamo123/dax-editor/issues/144), [errors E008–E011](errors-and-recovery.md) |
 
 ## Add a verification run
 

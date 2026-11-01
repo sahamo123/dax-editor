@@ -10,7 +10,15 @@ import { useImport } from "../use-import";
 import { ProjectMenu } from "./ProjectMenu";
 
 /** The application's top bar. */
-export function TopBar(): ReactElement {
+export function TopBar({
+  compact = false,
+  compactView = "edit",
+  onCompactView,
+}: {
+  compact?: boolean;
+  compactView?: "edit" | "assistant";
+  onCompactView?(view: "edit" | "assistant"): void;
+} = {}): ReactElement {
   const controller = useController();
   const state = useApp((s) => s.state);
   const jobs = useApp((s) => s.jobs);
@@ -26,7 +34,8 @@ export function TopBar(): ReactElement {
 
   const exporting = runningExport(jobs);
   const percent = exporting ? Math.round(exporting.progress * 100) : 0;
-  const historyActive = drawerOpen && drawerTab === "history";
+  const drawerVisible = drawerOpen && (!compact || compactView === "edit");
+  const historyActive = drawerVisible && drawerTab === "history";
 
   return (
     <header className="topbar">
@@ -38,6 +47,28 @@ export function TopBar(): ReactElement {
       </h1>
 
       <div className="topbar__spacer" />
+      {compact ? (
+        <fieldset className="workspace-switch" aria-label="Workspace view">
+          <button
+            type="button"
+            className="btn"
+            aria-label="Edit view"
+            aria-pressed={compactView === "edit"}
+            onClick={() => onCompactView?.("edit")}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="btn"
+            aria-label="Assistant view"
+            aria-pressed={compactView === "assistant"}
+            onClick={() => onCompactView?.("assistant")}
+          >
+            Assistant
+          </button>
+        </fieldset>
+      ) : null}
       <ProjectMenu />
       <button
         id="project-setup-trigger"
@@ -46,6 +77,7 @@ export function TopBar(): ReactElement {
         aria-label="Project setup"
         disabled={!state}
         onClick={() => {
+          if (compact) onCompactView?.("edit");
           if (isProjectEmpty(state)) {
             patchUi({ setupVisible: true });
             requestAnimationFrame(() => document.getElementById("setup-skip")?.focus());
@@ -97,7 +129,10 @@ export function TopBar(): ReactElement {
           aria-label="History"
           aria-pressed={historyActive}
           title="Version history"
-          onClick={() => patchUi({ drawerOpen: true, drawerTab: "history" })}
+          onClick={() => {
+            if (compact) onCompactView?.("edit");
+            patchUi({ drawerOpen: true, drawerTab: "history" });
+          }}
         >
           <Icon name="history" />
         </button>
@@ -134,12 +169,16 @@ export function TopBar(): ReactElement {
         <Icon name="settings" />
       </button>
       <button
+        id="side-panel-trigger"
         type="button"
-        className={`icon-btn${drawerOpen ? " is-active" : ""}`}
-        aria-label={drawerOpen ? "Hide side panel" : "Show side panel"}
-        aria-pressed={drawerOpen}
-        title={drawerOpen ? "Hide side panel" : "Show side panel"}
-        onClick={() => patchUi({ drawerOpen: !drawerOpen })}
+        className={`icon-btn${drawerVisible ? " is-active" : ""}`}
+        aria-label={drawerVisible ? "Hide side panel" : "Show side panel"}
+        aria-pressed={drawerVisible}
+        title={drawerVisible ? "Hide side panel" : "Show side panel"}
+        onClick={() => {
+          if (compact) onCompactView?.("edit");
+          patchUi({ drawerOpen: !drawerVisible });
+        }}
       >
         <Icon name="panelRight" />
       </button>

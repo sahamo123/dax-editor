@@ -13,7 +13,9 @@ generated:
 
 This is the proposed contract for S01.03–S01.07, not a claim that those changes exist. The [audit](../implementation/2026-11-01-creator-editor/s01-01-audit-receipt.md), [product brief](../../PRODUCT.md) and [design context](../../DESIGN.md) establish scope. Tracking: [issue #140](https://github.com/sahamo123/dax-editor/issues/140).
 
-S01.03 has a candidate implementation under [issue #142](https://github.com/sahamo123/dax-editor/issues/142): an empty-project setup surface can be skipped or reopened, with project options separate from selected-item inspection. Its [receipt](../implementation/2026-11-01-creator-editor/s01-03-setup-receipt.md) records tests and remaining review. The later responsive layout and native acceptance below remain proposed.
+S01.03 was verified with self-review under [issue #142](https://github.com/sahamo123/dax-editor/issues/142): an empty-project setup surface can be skipped or reopened, with project options separate from selected-item inspection. Its [receipt](../implementation/2026-11-01-creator-editor/s01-03-setup-receipt.md) records tests and limitations. The later native acceptance below remains proposed.
+
+S01.04's [preview child](../implementation/2026-11-01-creator-editor/s01-04-preview-child-receipt.md) passed self-review in [PR #147](https://github.com/sahamo123/dax-editor/pull/147). The dependent [compact candidate](../implementation/2026-11-01-creator-editor/s01-04-responsive-receipt.md) is under test in [issue #144](https://github.com/sahamo123/dax-editor/issues/144). Browser layout observations do not establish the later native acceptance.
 
 ## Problem and goals
 
@@ -36,8 +38,6 @@ Goals: skippable project setup; direct entry for existing projects; contextual i
 | Export and project dialogs | Top-level actions remain reachable; open/close returns to prior context. | Show path/format, overwrite choice and job progress; report error and recovery without falsely reporting success. Preserve project on failure. | Focus enters dialog, remains within modal controls, Escape/cancel closes without export and restores trigger; test native chooser separately. |
 
 ## Responsive and focus contract
-
-The preview and panel-sizing part is being implemented as a separate [child slice](../implementation/2026-11-01-creator-editor/s01-04-preview-child-receipt.md); it is not full responsive or native acceptance.
 
 At wide sizes retain resizable chat, preview/timeline and contextual panel. At narrow sizes use a labelled Edit/Assistant switch; an inspector may dock at the bottom and be resized/closed without permanently covering preview and timeline. Keep a visible task summary in both views. Preserve stored dimensions while clamping to the available viewport: chat minimum 260 CSS px when shown, preview column at least 320 CSS px when feasible, timeline at least 150 CSS px, and preview at least 160 CSS px high. If the physical window cannot accommodate all minima, collapse/switch panels and keep primary actions reachable rather than hiding content or creating page-wide horizontal overflow. These are implementation targets, not proof of existing behavior.
 
