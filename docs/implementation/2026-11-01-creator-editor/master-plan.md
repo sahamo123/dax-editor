@@ -44,7 +44,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | [S01](stage-01-workspace.md) | Control-panel workflow and design contract | 7 | 4-7 |
 | [S02](stage-02-profiles.md) | Content profiles and compatibility foundation | 8 | 4-6 |
 | [S03](stage-03-composition.md) | Bounded layered composition | 9 | 10-16 |
-| S04 (`stage-04-long-form.md`; later publication batch) | Long-form podcast and educational workflows | 8 | 8-14 |
+| [S04](stage-04-long-form.md) | Long-form podcast and educational workflows | 8 | 8-14 |
 | S05 (`stage-05-reference-style.md`; later publication batch) | Reference-style analysis and editable recipes | 7 | 7-12 |
 | S06 (`stage-06-characters.md`; later publication batch) | Curated Blender characters and scene packs | 8 | 10-18 |
 | S07 (`stage-07-workflows.md`; later publication batch) | Bounded specialist workflows and recovery | 7 | 5-8 |
@@ -100,15 +100,15 @@ Stage overview: [S03](stage-03-composition.md). Read it before its first step.
 - [S03.05: Add bounded keyframes and transitions](s03-05-keyframes-transitions.md) - 1-2 engineer-days.
 - [S03.06: Compose alpha assets and supplied foreground mattes](s03-06-alpha-supplied-mattes.md) - 1-1.5 engineer-days.
 - [S03.07: Expose layer lanes and contextual controls](s03-07-layer-workspace.md) - 1-1.5 engineer-days.
-- S03.08: Declare and verify interactive and rendered coverage (`s03-08-preview-review-coverage.md`; later publication batch) - 1.5-2 engineer-days.
-- S03.09: Close layered composition with measured output (`s03-09-composition-acceptance.md`; later publication batch) - 1.5-2 engineer-days.
+- [S03.08: Declare and verify interactive and rendered coverage](s03-08-preview-review-coverage.md) - 1.5-2 engineer-days.
+- [S03.09: Close layered composition with measured output](s03-09-composition-acceptance.md) - 1.5-2 engineer-days.
 
 ## S04: Long-form podcast and educational workflows
 
-Stage overview: S04 (`stage-04-long-form.md`; later publication batch). Read it before its first step.
+Stage overview: [S04](stage-04-long-form.md). Read it before its first step.
 
-- S04.01: Specify long-form workflows and expand fixtures (`s04-01-long-form-contract-fixtures.md`; later publication batch) - 1-1.5 engineer-days.
-- S04.02: Add chapters, markers and transcript navigation (`s04-02-chapters-markers-navigation.md`; later publication batch) - 1-1.5 engineer-days.
+- [S04.01: Specify long-form workflows and expand fixtures](s04-01-long-form-contract-fixtures.md) - 1-1.5 engineer-days.
+- [S04.02: Add chapters, markers and transcript navigation](s04-02-chapters-markers-navigation.md) - 1-1.5 engineer-days.
 - S04.03: Bound long-project views and derived-media work (`s04-03-long-timeline-bounds.md`; later publication batch) - 1-2 engineer-days.
 - S04.04: Build slide scenes and educational layouts (`s04-04-slides-educational-layouts.md`; later publication batch) - 1-1.5 engineer-days.
 - S04.05: Add manual camera alignment and switching (`s04-05-manual-camera-sync.md`; later publication batch) - 1-2 engineer-days.

@@ -34,7 +34,12 @@
 * [S03.05: Add bounded keyframes and transitions](s03-05-keyframes-transitions.md) - Plan and evidence gates: Add bounded keyframes and transitions.
 * [S03.06: Compose alpha assets and supplied foreground mattes](s03-06-alpha-supplied-mattes.md) - Plan and evidence gates: Compose alpha assets and supplied foreground mattes.
 * [S03.07: Expose layer lanes and contextual controls](s03-07-layer-workspace.md) - Plan and evidence gates: Expose layer lanes and contextual controls.
+* [S03.08: Declare and verify interactive and rendered coverage](s03-08-preview-review-coverage.md) - Plan and evidence gates: Declare and verify interactive and rendered coverage.
+* [S03.09: Close layered composition with measured output](s03-09-composition-acceptance.md) - Plan and evidence gates: Close layered composition with measured output.
+* [S04.01: Specify long-form workflows and expand fixtures](s04-01-long-form-contract-fixtures.md) - Plan and evidence gates: Specify long-form workflows and expand fixtures.
+* [S04.02: Add chapters, markers and transcript navigation](s04-02-chapters-markers-navigation.md) - Plan and evidence gates: Add chapters, markers and transcript navigation.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
 * [S03: Bounded layered composition](stage-03-composition.md) - Versioned video/still layers, bounded transforms/transitions, supplied-matte alpha composition, manual controls and measured review/export coverage.
+* [S04: Long-form podcast and educational workflows](stage-04-long-form.md) - Chapters/markers, bounded long-project views, slide scenes, manual camera alignment, speaker labels and reviewed highlights validated on long sessions.
