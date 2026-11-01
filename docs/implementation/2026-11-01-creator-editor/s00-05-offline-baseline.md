@@ -11,7 +11,7 @@ generated:
 
 # S00.05 fresh offline baseline
 
-**State: IN_PROGRESS.** [Issue #129](https://github.com/sahamo123/dax-editor/issues/129). Before entry, [issue #127](https://github.com/sahamo123/dax-editor/issues/127), [PR #128](https://github.com/sahamo123/dax-editor/pull/128), tested head `90e5cc604f64ac189d879dcd1db15541f3fe9668` and clean source ancestry were rechecked. Previous step reviews were self-reviews; independent stage review remains required.
+**State: VERIFIED**, with a separate self-review; independent stage review remains required. [Issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132), tested head `fca7677085dc291d6cdf8e38eea9ed4c19c71211`. Before entry, [issue #127](https://github.com/sahamo123/dax-editor/issues/127), [PR #128](https://github.com/sahamo123/dax-editor/pull/128), tested head `90e5cc604f64ac189d879dcd1db15541f3fe9668` and clean source ancestry were rechecked.
 
 ## Browser suite
 
@@ -33,4 +33,4 @@ The opt-in test can be repeated with `DAX_OFFLINE_BASELINE=1`, `DAX_OFFLINE_RESU
 
 ## Remaining checks and native boundary
 
-The fresh normal-host `pnpm check` passed with system FFmpeg/ffprobe: 1,801 package tests and 17 script tests passed; 68 package tests were skipped. One earlier attempt was stopped before completion to strengthen the export decoder; it was not counted as a pass. Run final docs/whitespace checks, then review and publish the step receipt and tested PR before S00.06. Packaged FFmpeg returned `spawn UNKNOWN` on this laptop; no system-FFmpeg or Edge run resolves that. Prior native installer evidence remains tied to its original source and host in [STATUS](../../STATUS.md); no current owner-laptop native or clean-install acceptance is claimed.
+The fresh normal-host `pnpm check` passed with system FFmpeg/ffprobe: 1,801 package tests and 17 script tests passed; 67 package tests were skipped. One earlier attempt was stopped before completion to strengthen the export decoder; it was not counted as a pass. Final documentation, whitespace and self-review checks were recorded in issue #129. Packaged FFmpeg returned `spawn UNKNOWN` on this laptop; no system-FFmpeg or Edge run resolves that. Prior native installer evidence remains tied to its original source and host in [STATUS](../../STATUS.md); no current owner-laptop native or clean-install acceptance is claimed.

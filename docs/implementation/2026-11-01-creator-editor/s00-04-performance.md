@@ -44,4 +44,4 @@ The opt-in `apps/desktop/e2e/performance-baseline.spec.ts` starts a fresh tempor
 
 ## Open gates
 
-The 720p run is an artificially seeded browser player test, not a normal 720p proxy workflow. Native Windows startup, display scaling, painted-frame latency, whole-process resource peaks, local-model performance and the two-hour run have not been measured. Keep those claims open. The normal-host `pnpm check` passed with explicit system FFmpeg/ffprobe: 1,801 package tests and 17 script tests passed, with 68 package tests skipped. Final documentation checks and self-review were recorded in issue #127.
+The 720p run is an artificially seeded browser player test, not a normal 720p proxy workflow. Native Windows startup, display scaling, painted-frame latency, whole-process resource peaks, local-model performance and the two-hour run have not been measured. Keep those claims open. The normal-host `pnpm check` passed with explicit system FFmpeg/ffprobe: 1,801 package tests and 17 script tests passed, with 67 package tests skipped. Final documentation checks and self-review were recorded in issue #127.

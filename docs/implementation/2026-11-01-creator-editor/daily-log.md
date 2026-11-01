@@ -80,3 +80,11 @@ Rechecked issue #125, PR #126 and tested head before starting issue #127. Measur
 ## 2026-11-01 - S00.05 offline acceptance
 
 Rechecked issue #127, PR #128 and tested head before starting issue #129 on `codex/s00-05-offline-baseline`. The complete browser suite is running in a unique private artifact directory with Edge and system FFmpeg; no user's project is used. Next: finish browser tests, full check and a fresh isolated edit/undo/redo/save/reopen/review/export with complete decoding. Native and packaged acceptance remain separate.
+
+## 2026-11-01 - S00.06 stage review
+
+S00.05 passed a fresh full check, 39 browser tests and a strict decoded offline walkthrough; issue #129 and PR #132 record self-review and limitations. Rechecked its tested head before issue #133 on `codex/s00-06-baseline-stage-review`. Independent review of all five receipts is in progress. Existing release issues #9/#17 remain open; UI issues #130/#131 and packaged/native acceptance remain separate. Next: resolve review findings, map external gates and publish stage-closure evidence before S01.01.
+
+## 2026-11-01 - independent baseline review correction
+
+The independent reviewer checked five issue/PR/commit chains, private artifact hashes, seeded-cache timing samples and a fresh strict export decode. The reviewer found 67 skipped package tests rather than the 68 previously reported; 1,801 package passes and 17 script passes are unchanged. Corrected S00.02–S00.05 summaries and their GitHub issue/PR descriptions, with an appended correction to issue #9. The reviewer’s pnpm attempt stopped before tests on sandbox symlink EPERM; the independent decode and a subsequent coordinator-focused regression passed. Correction recheck and stage PR remain pending.

@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: S00.05 passed fresh system-FFmpeg source and browser checks plus an isolated manual edit, grouped undo/redo, project-copy reopen, revision-bound review and strictly decoded export ([issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132)). UI findings #130/#131 remain open. S00.06 independent baseline review is tracked in [issue #133](https://github.com/sahamo123/dax-editor/issues/133); native and packaged acceptance remain separate.
+
 * **Update**: S00.04 passed its short seeded-cache browser measurements and self-review ([issue #127](https://github.com/sahamo123/dax-editor/issues/127), [PR #128](https://github.com/sahamo123/dax-editor/pull/128)). S00.05 ([issue #129](https://github.com/sahamo123/dax-editor/issues/129)) begins fresh isolated offline editing and full/browser verification; native and packaged results remain separate.
 
 * **Update**: S00.03 passed fixture generation and review ([issue #125](https://github.com/sahamo123/dax-editor/issues/125), [PR #126](https://github.com/sahamo123/dax-editor/pull/126)). S00.04 ([issue #127](https://github.com/sahamo123/dax-editor/issues/127)) records proposed budgets and short isolated Edge samples, including a test-seeded 720p cache; normal proxies are 480p. Packaged/native and sustained acceptance remain open.

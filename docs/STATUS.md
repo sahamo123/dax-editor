@@ -11,9 +11,13 @@ generated:
 
 # Project status
 
-## First-improvement S00.05 — November 1, 2026
+## First-improvement S00.06 — November 1, 2026
 
-[Issue #129](https://github.com/sahamo123/dax-editor/issues/129) is running a fresh offline editing baseline on `codex/s00-05-offline-baseline` after [issue #127](https://github.com/sahamo123/dax-editor/issues/127) and [PR #128](https://github.com/sahamo123/dax-editor/pull/128) were rechecked. S00.01–S00.04 have separate self-reviews; independent stage review remains due. Browser/system-FFmpeg results and native/packaged acceptance are separate.
+[Issue #133](https://github.com/sahamo123/dax-editor/issues/133) independently reviews the baseline stage on `codex/s00-06-baseline-stage-review`. S00.01–S00.05 have self-reviewed receipts; the S00.05 [offline baseline](implementation/2026-11-01-creator-editor/s00-05-offline-baseline.md) passed the full source check, browser suite and isolated decoded-export walkthrough with system FFmpeg. Native/packaged acceptance remains open; UI issues [#130](https://github.com/sahamo123/dax-editor/issues/130) and [#131](https://github.com/sahamo123/dax-editor/issues/131) remain open.
+
+## First-improvement S00.05 checkpoint — November 1, 2026
+
+[Issue #129](https://github.com/sahamo123/dax-editor/issues/129) completed a fresh offline editing baseline on `codex/s00-05-offline-baseline`, after [issue #127](https://github.com/sahamo123/dax-editor/issues/127) and [PR #128](https://github.com/sahamo123/dax-editor/pull/128) were rechecked. Current work is in the newer section above. Browser/system-FFmpeg results and native/packaged acceptance are separate.
 
 ## First-improvement S00.04 checkpoint — November 1, 2026
 
