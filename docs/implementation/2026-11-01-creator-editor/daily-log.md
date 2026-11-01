@@ -76,3 +76,7 @@ S00.02 verified with self-review in issue #123 and PR #124; rechecked tested hea
 ## 2026-11-01 - S00.04 performance baseline
 
 Rechecked issue #125, PR #126 and tested head before starting issue #127. Measured Edge with an isolated engine: 15 acknowledgement and scrub iterations including three warm-ups. A manually seeded 720p cache sample is recorded separately from the normal 480p proxy workflow; seeked is not painted-frame timing. Packaged FFmpeg and native, whole-process and sustained measurements remain open. The opt-in benchmark is reproducible; full system-FFmpeg check is running before review and PR.
+
+## 2026-11-01 - S00.05 offline acceptance
+
+Rechecked issue #127, PR #128 and tested head before starting issue #129 on `codex/s00-05-offline-baseline`. The complete browser suite is running in a unique private artifact directory with Edge and system FFmpeg; no user's project is used. Next: finish browser tests, full check and a fresh isolated edit/undo/redo/save/reopen/review/export with complete decoding. Native and packaged acceptance remain separate.

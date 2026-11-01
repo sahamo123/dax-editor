@@ -11,9 +11,13 @@ generated:
 
 # Handoff: resuming dax-editor
 
-## Active S00.04 — November 1, 2026
+## Active S00.05 — November 1, 2026
 
-Continue `codex/s00-04-performance-baseline` under [issue #127](https://github.com/sahamo123/dax-editor/issues/127). The [performance receipt](../implementation/2026-11-01-creator-editor/s00-04-performance.md) records isolated browser samples and the test-only seeded 720p cache; normal proxies are 480p. Complete the required source checks and review, and record the PR before S00.05. Native, painted-frame, model and long-session performance are not certified.
+Continue `codex/s00-05-offline-baseline` under [issue #129](https://github.com/sahamo123/dax-editor/issues/129). Recheck its live issue and the [current handoff](../implementation/2026-11-01-creator-editor/handoff.md), preserve private projects, and complete the fresh source/browser/isolated offline editing and decoded-export acceptance before S00.06. The packaged-renderer and native-policy boundaries remain separate.
+
+## S00.04 checkpoint — November 1, 2026
+
+[Issue #127](https://github.com/sahamo123/dax-editor/issues/127) was verified with self-review on `codex/s00-04-performance-baseline`; current work is in the newer section above. The [performance receipt](../implementation/2026-11-01-creator-editor/s00-04-performance.md) records isolated browser samples and the test-only seeded 720p cache; normal proxies are 480p. Native, painted-frame, model and long-session performance are not certified.
 
 ## S00.03 checkpoint — November 1, 2026
 

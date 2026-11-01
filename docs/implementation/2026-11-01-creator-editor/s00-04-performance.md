@@ -11,7 +11,7 @@ generated:
 
 # S00.04 performance budgets and baseline
 
-**State: IN_PROGRESS.** [Issue #127](https://github.com/sahamo123/dax-editor/issues/127). Before entry, [issue #125](https://github.com/sahamo123/dax-editor/issues/125), [PR #126](https://github.com/sahamo123/dax-editor/pull/126) and tested head `103e2fb4ee39a80e2fc0bfd85a7ddd0ede2769b5` were rechecked against the clean working tree. Earlier step reviews were self-reviews; independent stage review remains required.
+**State: VERIFIED**, with a separate self-review; independent stage review remains required. [Issue #127](https://github.com/sahamo123/dax-editor/issues/127), [PR #128](https://github.com/sahamo123/dax-editor/pull/128), tested head `90e5cc604f64ac189d879dcd1db15541f3fe9668`. Before entry, [issue #125](https://github.com/sahamo123/dax-editor/issues/125), [PR #126](https://github.com/sahamo123/dax-editor/pull/126) and tested head `103e2fb4ee39a80e2fc0bfd85a7ddd0ede2769b5` were rechecked against the clean working tree.
 
 ## Machine and scope
 
@@ -44,4 +44,4 @@ The opt-in `apps/desktop/e2e/performance-baseline.spec.ts` starts a fresh tempor
 
 ## Open gates
 
-The 720p run is an artificially seeded browser player test, not a normal 720p proxy workflow. Native Windows startup, display scaling, painted-frame latency, whole-process resource peaks, local-model performance and the two-hour run have not been measured. Keep those claims open. The normal-host `pnpm check` passed with explicit system FFmpeg/ffprobe: 1,801 package tests and 17 script tests passed, with 68 package tests skipped. Final documentation checks, review, tested commit and PR remain to be recorded in issue #127 before S00.04 is VERIFIED.
+The 720p run is an artificially seeded browser player test, not a normal 720p proxy workflow. Native Windows startup, display scaling, painted-frame latency, whole-process resource peaks, local-model performance and the two-hour run have not been measured. Keep those claims open. The normal-host `pnpm check` passed with explicit system FFmpeg/ffprobe: 1,801 package tests and 17 script tests passed, with 68 package tests skipped. Final documentation checks and self-review were recorded in issue #127.
