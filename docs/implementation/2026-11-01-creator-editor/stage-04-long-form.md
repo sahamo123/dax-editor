@@ -31,7 +31,7 @@ Read the [master](master-plan.md) and [execution contract](execution-contract.md
 | S04.05 | [Add manual camera alignment and switching](s04-05-manual-camera-sync.md) | 1–2 |
 | S04.06 | [Add speaker labels and reviewed highlight proposals](s04-06-speakers-reviewed-highlights.md) | 1–1.5 |
 | S04.07 | [Measure long-session synchronization and resources](s04-07-long-session-acceptance.md) | 1–2 |
-| S04.08 | Close podcast and educational workflow acceptance (`s04-08-long-form-close.md`; later publication batch) | 1–2 |
+| S04.08 | [Close podcast and educational workflow acceptance](s04-08-long-form-close.md) | 1–2 |
 
 ## Deliverables and resources
 
@@ -45,5 +45,5 @@ Short synthetic fixtures cannot substitute for required long human recordings. A
 
 Each required step must have a complete [receipt](receipt-template.md), current commit/artifact evidence and passing regression checks. Failed/missing evidence blocks advancement; record the recovery action and do not bypass it.
 
-After independent stage review, continue to the next stage's first step (`s05-01-reference-feasibility.md`; later publication batch). Complete log/STATUS/concept/index updates in the implementation PR; preserve this plan's original estimates and record actual effort separately.
+After independent stage review, continue to [the next stage's first step](s05-01-reference-feasibility.md). Complete log/STATUS/concept/index updates in the implementation PR; preserve this plan's original estimates and record actual effort separately.
 
