@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.05 — November 1, 2026
+
+Continue [issue #151](https://github.com/sahamo123/dax-editor/issues/151) on local `codex/s01-05-task-recovery`, after checking publication. The baseline [PR #150](https://github.com/sahamo123/dax-editor/pull/150) is at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; the dated [handoff](../implementation/2026-11-01-creator-editor/handoff.md) is current. The following headings are historical checkpoints.
+
 ## Active save-as recovery — November 1, 2026
 
 Continue [issue #146](https://github.com/sahamo123/dax-editor/issues/146) on local `codex/save-as-recovery` after checking publication. Its verified predecessor is [PR #148](https://github.com/sahamo123/dax-editor/pull/148), head `77a6c17ccee8854968c0b92567ea847fd9d017a3`. Follow the [dated handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [save-as contract](../specs/save-as-recovery.md); previous active headings below are historical. S01.05 follows recovery and its predecessor recheck.

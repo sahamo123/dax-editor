@@ -11,14 +11,14 @@ generated:
 
 # Implementation progress
 
-**10 of 76 steps verified; the first-improvement goal is active.** S00.01–S00.05 and S01.01–S01.04 were self-reviewed; S00.06 passed independent review. S01.04 is verified at [issue #144](https://github.com/sahamo123/dax-editor/issues/144) and [PR #148](https://github.com/sahamo123/dax-editor/pull/148). Confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) is being addressed separately before S01.05.
+**10 of 76 steps verified; the first-improvement goal is active.** S00.01–S00.05 and S01.01–S01.04 were self-reviewed; S00.06 passed independent review. S01.04 is verified at [issue #144](https://github.com/sahamo123/dax-editor/issues/144) and [PR #148](https://github.com/sahamo123/dax-editor/pull/148). The distinct save-as recovery work [#146](https://github.com/sahamo123/dax-editor/issues/146) passed self-review in [PR #150](https://github.com/sahamo123/dax-editor/pull/150); separate Windows rename investigation [#149](https://github.com/sahamo123/dax-editor/issues/149) remains open.
 
 GitHub step issues and tested PR receipts are authoritative. Refresh this mirror after every execution checkpoint and record the synchronization date, exact implementation SHA and issue links. If it conflicts with an issue, inspect the evidence and reconcile both; do not choose the more optimistic state. Current planning delivery: [issue #72](https://github.com/sahamo123/dax-editor/issues/72), [review report](review-report.md).
 
 ## Current cursor
 
 - Selected execution route: first-improvement (21 steps), explicitly launched November 1, 2026.
-- Active recovery work: issue #146 on local branch `codex/save-as-recovery`, from verified S01.04 published head `77a6c17ccee8854968c0b92567ea847fd9d017a3`. Check branch publication before relying on it on another laptop.
+- Active step: S01.05, [issue #151](https://github.com/sahamo123/dax-editor/issues/151), local branch `codex/s01-05-task-recovery`, based on self-reviewed recovery [PR #150](https://github.com/sahamo123/dax-editor/pull/150), head `5b29ed64956f770febaf2ec6c119215ffd9caca9`. Check branch publication before relying on it on another laptop.
 - Required scope, clients/providers and machines: provisional choices are recorded in issue #121 and the S00.01 receipt; freeze/revalidate at S09.01 for broader routes.
 - Implementation issue/PR pairs: #121/#122, #123/#124, #125/#126, #127/#128, #129/#132, #133/#134, #135/#138, #140/#141, #142/#143, preview child #137/#147 and compact child #144/#148. Later steps are unassigned.
 - Resume context: [handoff](handoff.md), [daily log](daily-log.md), [errors and recovery](errors-and-recovery.md), [evidence log](evidence-log.md).
@@ -39,7 +39,7 @@ State vocabulary and advancement rules: [execution contract](execution-contract.
 | [S01.02: Record the product and design contract](s01-02-product-design-contract.md) | VERIFIED | [Issue #140](https://github.com/sahamo123/dax-editor/issues/140); [PR #141](https://github.com/sahamo123/dax-editor/pull/141) |
 | [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) | VERIFIED | [Issue #142](https://github.com/sahamo123/dax-editor/issues/142); [PR #143](https://github.com/sahamo123/dax-editor/pull/143); [receipt](s01-03-setup-receipt.md) |
 | [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) | VERIFIED | [Issue #144](https://github.com/sahamo123/dax-editor/issues/144); [PR #148](https://github.com/sahamo123/dax-editor/pull/148); [verified preview child](s01-04-preview-child-receipt.md); [compact receipt](s01-04-responsive-receipt.md) |
-| [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) | NOT_STARTED | Unassigned |
+| [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) | IN_PROGRESS | [Issue #151](https://github.com/sahamo123/dax-editor/issues/151); narrow composer finding [#136](https://github.com/sahamo123/dax-editor/issues/136) |
 | [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) | NOT_STARTED | Unassigned |
 | [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) | NOT_STARTED | Unassigned |
 | [S02.01: Specify profiles and project compatibility](s02-01-profile-compatibility-contract.md) | NOT_STARTED | Unassigned |

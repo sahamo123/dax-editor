@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## First-improvement S01.05 — November 1, 2026
+
+[Issue #151](https://github.com/sahamo123/dax-editor/issues/151) begins task and recovery visibility on local `codex/s01-05-task-recovery`, based on [save-as PR #150](https://github.com/sahamo123/dax-editor/pull/150), tested head `5b29ed64956f770febaf2ec6c119215ffd9caca9`. S01.04's [receipt](implementation/2026-11-01-creator-editor/s01-04-responsive-receipt.md), published issue/PR, log hashes and current-tree ancestry were rechecked; it was self-reviewed, not independently reviewed. Check branch publication before resuming elsewhere. Native/DPI acceptance and the separate Windows rename investigation [#149](https://github.com/sahamo123/dax-editor/issues/149) remain open.
+
 ## Save-as recovery — November 1, 2026
 
 S01.04 is VERIFIED with self-review at [issue #144](https://github.com/sahamo123/dax-editor/issues/144), [PR #148](https://github.com/sahamo123/dax-editor/pull/148), published head `77a6c17ccee8854968c0b92567ea847fd9d017a3`; see the [receipt](implementation/2026-11-01-creator-editor/s01-04-responsive-receipt.md) for the tested code commit and evidence. Work is in progress on the distinct [save-as recovery defect #146](https://github.com/sahamo123/dax-editor/issues/146), initially on local branch `codex/save-as-recovery`. Check its publication before continuing elsewhere. This is not a release or native acceptance claim.

@@ -37,6 +37,7 @@
 * [S01.04 preview and panel sizing child receipt](s01-04-preview-child-receipt.md) - Evidence for the first reviewable responsive workspace slice.
 * [S01.04 responsive workspace receipt](s01-04-responsive-receipt.md) - Implementation and evidence for the resizable desktop workspace.
 * [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) - Plan and evidence gates: Keep the preview usable across workspace sizes.
+* [S01.05 narrow composer and recovery child receipt](s01-05-composer-receipt.md) - Browser evidence and verification status for the first task-visibility slice.
 * [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - Plan and evidence gates: Preserve task and recovery controls in the new layout.
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.
 * [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - Plan and evidence gates: Verify browser and native workspace acceptance.
