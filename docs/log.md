@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: State-ordering [#154 / PR #155](https://github.com/sahamo123/dax-editor/pull/155) passed full source and focused browser checks with self-review at `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Dependent failure visibility [PR #156](https://github.com/sahamo123/dax-editor/pull/156) requires its own verification.
+
 * **Update**: Prepared failure/autosave visibility [#153](https://github.com/sahamo123/dax-editor/issues/153) as a dependent worktree on pending state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155). Both parent and child require verification.
 
 * **Update**: Review of the first state-ordering candidate found a provider-refresh edge case; a regression and correction are under verification in [#154](https://github.com/sahamo123/dax-editor/issues/154). Earlier full checks apply to the prior candidate only.

@@ -13,7 +13,7 @@ generated:
 
 ## Active S01.05 failure visibility — November 1, 2026
 
-Continue [child #153](https://github.com/sahamo123/dax-editor/issues/153) on local `codex/s01-05-failure-visibility`, based on pending [PR #155](https://github.com/sahamo123/dax-editor/pull/155), head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Check branch publication and parent verification before advancing. The [failure receipt](../implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records synthetic evidence; earlier headings are historical.
+Continue [child #153](https://github.com/sahamo123/dax-editor/issues/153) in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed [PR #155](https://github.com/sahamo123/dax-editor/pull/155), head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. The [failure receipt](../implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records prior synthetic evidence; this child's fresh checks and review remain pending. Earlier headings are historical.
 
 ## Active S01.05 state-ordering child — November 1, 2026
 

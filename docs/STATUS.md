@@ -13,7 +13,7 @@ generated:
 
 ## S01.05 failure visibility — November 1, 2026
 
-[Child #153](https://github.com/sahamo123/dax-editor/issues/153) prepares task failure and autosave visibility on local `codex/s01-05-failure-visibility`, based on pending state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), candidate head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. The [failure receipt](implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records synthetic checks; the parent and this child require verification. Check branch publication before resuming elsewhere.
+[Child #153](https://github.com/sahamo123/dax-editor/issues/153) implements task failure and autosave visibility in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), tested head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. The [failure receipt](implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records earlier synthetic checks; this child's full verification remains pending.
 
 ## S01.05 state ordering — November 1, 2026
 

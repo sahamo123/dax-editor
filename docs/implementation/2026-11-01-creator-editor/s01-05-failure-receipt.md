@@ -11,7 +11,7 @@ generated:
 
 # S01.05 task failure and autosave recovery child
 
-**State: IN_PROGRESS.** [Child #153](https://github.com/sahamo123/dax-editor/issues/153), parent [#151](https://github.com/sahamo123/dax-editor/issues/151), is prepared on pending state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`, which follows the verified, self-reviewed [composer child #136 / PR #152](https://github.com/sahamo123/dax-editor/pull/152). Verify the ordering parent before accepting this child.
+**State: IN_PROGRESS.** [Child #153](https://github.com/sahamo123/dax-editor/issues/153), parent [#151](https://github.com/sahamo123/dax-editor/issues/151), follows self-reviewed state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), tested head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`, which follows the verified, self-reviewed [composer child #136 / PR #152](https://github.com/sahamo123/dax-editor/pull/152).
 
 The candidate exposes recent failed/interrupted task counts in Work, labels task types accurately, and says when an old task has no recorded origin. Failed/interrupted details open for inspection. An autosave failure is visible on Project; its menu explains that recent changes may not be on disk, offers existing manual save actions and places the technical error behind a disclosure. The compact toolbar wraps as needed; a generated mixed active/queued/failed state fits at 600, 800 and 1000 CSS px.
 

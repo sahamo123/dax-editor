@@ -11,7 +11,7 @@ generated:
 
 # Continue on another laptop or agent
 
-**Current S01.05 failure child:** [#153](https://github.com/sahamo123/dax-editor/issues/153) is prepared on local `codex/s01-05-failure-visibility`, based on pending [PR #155](https://github.com/sahamo123/dax-editor/pull/155) head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Verify parent status and branch publication before continuing on another laptop.
+**Current S01.05 failure child:** [#153](https://github.com/sahamo123/dax-editor/issues/153) is in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed [PR #155](https://github.com/sahamo123/dax-editor/pull/155) head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Fresh child checks and review remain pending.
 
 **Current S01.05 state-ordering child:** [#154](https://github.com/sahamo123/dax-editor/issues/154) starts from [PR #152](https://github.com/sahamo123/dax-editor/pull/152), head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. Work is on local `codex/s01-05-state-ordering`; verify publication before switching laptops. Dependent failure visibility is #153.
 

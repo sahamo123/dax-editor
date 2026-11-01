@@ -154,3 +154,5 @@ The first state-ordering candidate passed full source and focused browser checks
 ## 2026-11-01 - failure visibility split
 
 The already-developed failure-visibility work was copied into a separate worktree based on pending state-ordering head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`; the original working changes remain preserved. [Child #153](https://github.com/sahamo123/dax-editor/issues/153) has synthetic evidence in the [receipt](s01-05-failure-receipt.md). Parent verification and this child's fresh checks remain pending.
+
+The corrected state-ordering parent passed full source and focused browser checks and self-review in PR #155 at `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Failure-visibility PR #156 is published as a draft on that head; its fresh full checks and review remain pending.
