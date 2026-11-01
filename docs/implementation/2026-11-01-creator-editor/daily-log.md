@@ -108,3 +108,7 @@ The owner approved the five identified synthetic screenshots. Rechecked their SH
 ## 2026-11-01 - S01.02 workspace contract
 
 S01.01 passed self-review and is recorded in issue #135 and PR #138 at `48bb5b00fce1399cd193123e49bc16b43266c99b`; screenshot hashes and ancestry were rechecked. Started issue #140 on `codex/s01-02-workspace-contract`. PRODUCT.md and DESIGN.md were absent. Draft the product/design context and focused workspace contract, validate documentation and separately review before publishing. No UI behavior or native readiness is claimed.
+
+## 2026-11-01 - S01.03 setup and inspector
+
+S01.02 passed self-review, recorded in issue #140 and PR #141 at `f3f019e353493a6050959170c72e33a73dc1b2ae`; rechecked before starting issue #142 on `codex/s01-03-setup-inspector`. Added skippable/reopenable empty-project setup and a project-controls entry while preserving contextual selection focus and the shared command path. Focused browser tests and controller tests pass; the full source check passed with explicit system FFmpeg, and the complete browser suite is running. Earlier red tests and an Escape timing failure were corrected and rerun. Native acceptance remains open.

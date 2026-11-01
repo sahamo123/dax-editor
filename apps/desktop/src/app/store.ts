@@ -60,6 +60,8 @@ interface UiState {
   exportOpen: boolean;
   drawerOpen: boolean;
   drawerTab: DrawerTab;
+  /** Whether the optional empty-project setup surface is shown. */
+  setupVisible: boolean;
   /** A file is being dragged over the window. */
   dropHover: boolean;
 }
@@ -171,6 +173,7 @@ export function createAppStore(): StoreApi<AppStore> {
       exportOpen: false,
       drawerOpen: true,
       drawerTab: readDrawerTab(),
+      setupVisible: true,
       dropHover: false,
     },
 
@@ -181,7 +184,11 @@ export function createAppStore(): StoreApi<AppStore> {
       set((s) => {
         const jobs = { ...s.jobs };
         for (const job of state.jobs) mergeJob(jobs, job);
-        return { state: { ...state, jobs: Object.values(jobs) }, jobs };
+        return {
+          state: { ...state, jobs: Object.values(jobs) },
+          jobs,
+          ui: !s.state && state.projectPath ? { ...s.ui, setupVisible: false } : s.ui,
+        };
       }),
 
     applyJob: (job) =>

@@ -4,7 +4,7 @@
 import type { ReactElement } from "react";
 import { TaskQueue } from "../chat/TaskQueue";
 import { useApp, useController } from "../context";
-import { runningExport } from "../selectors";
+import { isProjectEmpty, runningExport } from "../selectors";
 import { Icon } from "../ui/icons";
 import { useImport } from "../use-import";
 import { ProjectMenu } from "./ProjectMenu";
@@ -39,6 +39,23 @@ export function TopBar(): ReactElement {
 
       <div className="topbar__spacer" />
       <ProjectMenu />
+      <button
+        id="project-setup-trigger"
+        type="button"
+        className="btn"
+        aria-label="Project setup"
+        disabled={!state}
+        onClick={() => {
+          if (isProjectEmpty(state)) {
+            patchUi({ setupVisible: true });
+            requestAnimationFrame(() => document.getElementById("setup-skip")?.focus());
+          } else {
+            patchUi({ drawerOpen: true, drawerTab: "tools" });
+          }
+        }}
+      >
+        Setup
+      </button>
       <details className="project-menu work-menu">
         <summary className="btn" aria-label="Work status">
           Work · {unfinished.length ? `${unfinished.length} active/queued` : "idle"}

@@ -61,6 +61,38 @@ it("uses the engine's actual undo boundary for a queued task instead of the earl
 });
 
 describe("controller", () => {
+  it("opens an initially loaded saved empty project directly", () => {
+    const store = createAppStore();
+    store.getState().applyState(makeState({ projectPath: "saved.dax.json" }));
+    expect(store.getState().ui.setupVisible).toBe(false);
+  });
+
+  it("shows setup for a new project but not an opened project, and preserves it on failure", async () => {
+    const projectNew = vi.fn(async () => ({ ok: true, value: makeState({ projectId: "new" }) }));
+    const projectOpen = vi.fn(async () => ({
+      ok: true,
+      value: makeState({ projectId: "opened" }),
+    }));
+    const projectCopy = vi.fn(async () => ({ ok: false, error: "Invalid project" }));
+    const { controller, store } = setup({ projectNew, projectOpen, projectCopy });
+    store.getState().patchUi({ setupVisible: false });
+    expect(await controller.project("new", "New project")).toBe(true);
+    expect(store.getState().ui.setupVisible).toBe(true);
+    expect(await controller.project("open", "project.dax.json")).toBe(true);
+    expect(store.getState().ui.setupVisible).toBe(false);
+    expect(await controller.project("copy", {})).toBe(false);
+    expect(store.getState().ui.setupVisible).toBe(false);
+    expect(store.getState().state?.projectId).toBe("opened");
+  });
+
+  it("opens a browser project copy directly even when it is empty", async () => {
+    const projectCopy = vi.fn(async () => ({ ok: true, value: makeState({ projectId: "copy" }) }));
+    const { controller, store } = setup({ projectCopy });
+    expect(store.getState().ui.setupVisible).toBe(true);
+    expect(await controller.project("copy", {})).toBe(true);
+    expect(store.getState().ui.setupVisible).toBe(false);
+  });
+
   it("orders rapid manual edits using refreshed revisions and rejects queued edits after a project switch", async () => {
     let revision = 0;
     let release: (() => void) | undefined;

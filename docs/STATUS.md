@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## First-improvement S01.03 — November 1, 2026
+
+S01.02's product/design contract passed self-review: [issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141). Setup and contextual-inspector work is IN_PROGRESS on `codex/s01-03-setup-inspector`, [issue #142](https://github.com/sahamo123/dax-editor/issues/142). Targeted tests pass; full acceptance and publication remain pending. Native/packaged and DPI acceptance remain open.
+
 ## First-improvement S01.02 — November 1, 2026
 
 S01.01 passed its scoped self-reviewed browser audit: [issue #135](https://github.com/sahamo123/dax-editor/issues/135), [PR #138](https://github.com/sahamo123/dax-editor/pull/138). The owner approved five synthetic screenshots. S01.02 is IN_PROGRESS on `codex/s01-02-workspace-contract`, [issue #140](https://github.com/sahamo123/dax-editor/issues/140); its proposed [workspace contract](specs/workspace-design-contract.md) does not claim implementation. Native/packaged and DPI acceptance remain open.
