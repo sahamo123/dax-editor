@@ -11,9 +11,13 @@ generated:
 
 # Project status
 
-## First-improvement S00.02 — November 1, 2026
+## First-improvement S00.03 — November 1, 2026
 
-[Issue #123](https://github.com/sahamo123/dax-editor/issues/123) is reconciling source capability and history claims on `codex/s00-02-capability-reconciliation`. S00.01 is VERIFIED in [issue #121](https://github.com/sahamo123/dax-editor/issues/121), with self-review and [PR #122](https://github.com/sahamo123/dax-editor/pull/122); independent stage review remains pending. The S00.02 predecessor issue, PR head and local ancestry were rechecked. A normal-host test using packaged FFmpeg failed with `spawn UNKNOWN`; explicit system-FFmpeg tests are separate evidence and cannot establish packaged-runtime readiness.
+[Issue #125](https://github.com/sahamo123/dax-editor/issues/125) is preparing offline acceptance fixtures on `codex/s00-03-acceptance-fixtures`, after S00.02's [verified issue #123](https://github.com/sahamo123/dax-editor/issues/123) and [PR #124](https://github.com/sahamo123/dax-editor/pull/124) were rechecked. The [fixture inventory](implementation/2026-11-01-creator-editor/s00-03-fixtures.md) distinguishes regenerated synthetic clips from authorized private footage and records unresolved real-media and packaged-runtime gates.
+
+## First-improvement S00.02 checkpoint — November 1, 2026
+
+[Issue #123](https://github.com/sahamo123/dax-editor/issues/123) reconciled source capability and history claims on `codex/s00-02-capability-reconciliation` and was verified with self-review; see the current section above. S00.01 is VERIFIED in [issue #121](https://github.com/sahamo123/dax-editor/issues/121) and [PR #122](https://github.com/sahamo123/dax-editor/pull/122); independent stage review remains pending. A normal-host test using packaged FFmpeg failed with `spawn UNKNOWN`; explicit system-FFmpeg tests are separate evidence and cannot establish packaged-runtime readiness.
 
 ## First-improvement baseline checkpoint — November 1, 2026
 
