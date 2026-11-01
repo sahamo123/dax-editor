@@ -1,8 +1,10 @@
 # dax-editor
 
+[Detailed dated plan](docs/implementation/2026-11-01-creator-editor/master-plan.md): 10 stages, 76 step files and resumable progress/handoff/logs. Planning only; implementation awaits owner launch.
+
 A free, open-source video editor you drive with plain language. Drop in a video, say what you want, and watch it get edited. Chat on the left, your video on the right.
 
-> **Development testing is available; release acceptance remains open.** The desktop editor, CLI, live-project MCP, local AI/speech and optional API providers are implemented. See [current status](docs/STATUS.md) for verified versus pending workflows. **Latest continuation: `codex/impeccable-design-setup`, based on `codex/laptop-agent-handoff`; default `main` is older.** [New laptop / any-agent handoff](docs/engineering/laptop-continuation.md) includes setup, exact baseline, private-file transfer and next issues. [Impeccable design setup](docs/engineering/impeccable-design.md) adds optional pinned UI/UX guidance.
+> **Development testing is available; release acceptance remains open.** The desktop editor, CLI, live-project MCP, local AI/speech and optional API providers are implemented. See [current status](docs/STATUS.md) for verified versus pending workflows. **Latest continuation: `codex/staged-implementation-handbook`, based on `codex/creator-platform-plan`; default `main` is older.** [New laptop / any-agent handoff](docs/engineering/laptop-continuation.md) includes setup, exact baseline, private-file transfer and next issues. [Impeccable design setup](docs/engineering/impeccable-design.md) adds optional pinned UI/UX guidance.
 
 ## Goals
 

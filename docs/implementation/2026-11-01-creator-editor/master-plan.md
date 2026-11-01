@@ -11,8 +11,6 @@ generated:
 
 # Master implementation index
 
-**PUBLICATION IN PROGRESS:** this branch is a partial documentation stack. Counts below describe the final planned pack; do not launch implementation from this intermediate snapshot. Follow issue #72 for the completed continuation.
-
 **Planning package for owner review; all application implementation is NOT_STARTED.** This handbook expands the [architecture review](../../specs/creator-platform-plan.md), source baseline `f05a57b99a2d184900ddd809a7480b30052ae5c1`, without implementing its features. Tracking: [planning issue #72](https://github.com/sahamo123/dax-editor/issues/72). Start from the latest published handbook continuation identified in [handoff](../../engineering/handoff.md); do not assume default main includes it.
 
 ## Inventory and how to use it

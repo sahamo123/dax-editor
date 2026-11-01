@@ -6,16 +6,16 @@ tags: [status, roadmap, handoff]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-11-01T08:53:28Z
+  at: 2026-11-01T10:00:00Z
 ---
 
 # Project status
 
-## Handbook publication in progress — November 1, 2026
+## Detailed planning delivery — November 1, 2026
 
-[Issue #72](https://github.com/sahamo123/dax-editor/issues/72) tracks the partial documentation stack. Do not execute incomplete handbook snapshots. Application state is unchanged; all future implementation steps remain NOT_STARTED.
+The [dated handbook](implementation/2026-11-01-creator-editor/master-plan.md) decomposes the creator proposal into 10 stages and 76 individually specified steps, with predecessor checks, acceptance/recovery instructions and one shared execution contract. [Progress](implementation/2026-11-01-creator-editor/progress.md) starts at **0/76 implementation steps**. [Review report](implementation/2026-11-01-creator-editor/review-report.md) records planning verification only; application acceptance below retains its historical scope. Tracking [#72](https://github.com/sahamo123/dax-editor/issues/72); latest continuation `codex/staged-implementation-handbook`.
 
-Current batch: 23 of 24. Completed publication scope: 99 concept pages. Next: the next dependent documentation batch.
+The folder coordinates context, current handoff, issue-backed progress, decisions, gotchas, errors/recovery, evidence and daily logs. First-improvement is 21 steps /10–17 engineering person-days; desktop creator is 68 /56–95; full hosted is 76 /64–109 before contingency and artist time. No implementation goal has been started. Review and launch a selected route explicitly; no required failed/blocked gate may be skipped.
 
 ## Creator workflow planning — November 1, 2026
 

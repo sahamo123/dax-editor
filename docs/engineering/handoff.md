@@ -6,10 +6,14 @@ tags: [handoff, process, agents, dependencies]
 status: stable
 generated:
   by: process:implementer
-  at: 2026-11-01T08:53:28Z
+  at: 2026-11-01T10:00:00Z
 ---
 
 # Handoff: resuming dax-editor
+
+## Dated implementation handbook — November 1, 2026
+
+Latest full continuation: `codex/staged-implementation-handbook`, based on the creator-plan branch at `f05a57b99a2d184900ddd809a7480b30052ae5c1`. Start with the [dated master index](../implementation/2026-11-01-creator-editor/master-plan.md), [current plan handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [progress snapshot](../implementation/2026-11-01-creator-editor/progress.md). Tracking: [planning #72](https://github.com/sahamo123/dax-editor/issues/72). The folder contains 100 Markdown files: 10 stages, 76 steps, 13 controls/operating records and one generated index. All implementation steps are NOT_STARTED; the [future execution goal](../implementation/2026-11-01-creator-editor/execution-goal.md) remains inactive until owner launch. No application behavior or readiness changes. Earlier continuation entries below are historical; the latest branch includes their source and setup.
 
 ## Creator-workflow planning continuation — November 1, 2026
 

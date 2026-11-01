@@ -6,10 +6,12 @@ tags: [handoff, agents, windows, setup]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-11-01T08:40:21Z
+  at: 2026-11-01T10:00:00Z
 ---
 
 # Continue on another laptop or agent
+
+**Latest November 1 continuation:** use `codex/staged-implementation-handbook`. It includes the full application, design setup and [dated implementation handbook](../implementation/2026-11-01-creator-editor/master-plan.md). Read its [handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [progress](../implementation/2026-11-01-creator-editor/progress.md) for multi-day execution. This is a planning-only addition: owner review and an explicit implementation launch are still required. Older branch examples below describe their dated baseline; substitute this latest branch when cloning. Do not assume main has the unmerged PR stack.
 
 **November 1 supplement:** the latest full continuation is `codex/impeccable-design-setup`, based on `codex/laptop-agent-handoff` at `2adea8a7d1a3e5a8a37f1713724fb6e24a46387c`. Use that latest branch for UI/UX work; it includes the complete application and [pinned Impeccable setup](impeccable-design.md). The branch/clone example below records the October 31 baseline; substitute `codex/impeccable-design-setup` when cloning the latest continuation. Private-file boundaries and application acceptance gates are unchanged.
 

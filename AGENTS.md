@@ -15,7 +15,7 @@ Hard constraints, in priority order:
 
 ## Resuming the build
 
-If you are continuing work started by another agent, read `docs/engineering/handoff.md` first, then its current [cross-laptop continuation](docs/engineering/laptop-continuation.md) and `docs/STATUS.md`. Latest continuation: `codex/impeccable-design-setup`, based on `codex/laptop-agent-handoff`; default `main` is older. Historical checkpoints do not override the current guide. No chat memory is required.
+If you are continuing work started by another agent, read `docs/engineering/handoff.md` first, then its current [cross-laptop continuation](docs/engineering/laptop-continuation.md) and `docs/STATUS.md`. Latest continuation: `codex/staged-implementation-handbook`, based on `codex/creator-platform-plan`; default `main` is older. Historical checkpoints do not override the current guide. No chat memory is required.
 
 ## Repository map
 
