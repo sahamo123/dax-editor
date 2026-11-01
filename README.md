@@ -1,6 +1,6 @@
 # dax-editor
 
-A free, open-source video editor you drive with plain language. Drop in a video (or record one), say what you want, and watch it get edited. Chat on the left, your video on the right.
+A free, open-source video editor you drive with plain language. Drop in a video, say what you want, and watch it get edited. Chat on the left, your video on the right.
 
 > **Development testing is available; release acceptance remains open.** The desktop editor, CLI, live-project MCP, local AI/speech and optional API providers are implemented. See [current status](docs/STATUS.md) for verified versus pending workflows. **Continue on `codex/laptop-agent-handoff`, not the older default `main`.** [New laptop / any-agent handoff](docs/engineering/laptop-continuation.md) includes setup, exact baseline, private-file transfer and next issues.
 
@@ -10,7 +10,7 @@ A free, open-source video editor you drive with plain language. Drop in a video 
 - **Prompt-driven editing.** Cuts, silence and filler-word removal, transcripts, captions, and animation suggestions based on the format you want (tutorial, explainer, short-form).
 - **Works with any LLM.** Use it from Claude or any MCP client, from the built-in chat with your own API key, with a local model through Ollama, or with a small embedded model.
 - **Desktop app for macOS, Windows and Linux** (Tauri), with a **CLI and MCP server from the start**.
-- **Extensible.** Connectors for cloud storage (Google Drive and more) and optional plugins such as Blender animation come later, built on interfaces that already exist in the engine.
+- **Extensible.** Optional controlled Blender templates run separately. Cloud-storage connectors and broader plugins remain future work, built on the engine's interfaces.
 - **Built to be continued by anyone.** The repo is the source of truth and is readable by any person or AI agent. See [Working on this project](#working-on-this-project).
 
 ## What works today

@@ -6,7 +6,7 @@ tags: [agents, process, harness, context-engineering]
 status: stable
 generated:
   by: process:implementer
-  at: 2026-10-31T12:00:00-07:00
+  at: 2026-10-31T18:54:04-07:00
 ---
 
 # Working with AI agents (the harness)
@@ -22,7 +22,7 @@ The "harness" is everything around a model that makes it effective and safe: ins
 | Work queue | GitHub Issues (use the *Work item* template) |
 | Guardrails | `AGENTS.md` safety rules, branch protection, CODEOWNERS, hooks |
 
-## Onboarding a new agent (about five minutes)
+## Onboarding a new agent
 
 1. Follow [the current continuation guide](laptop-continuation.md): clone the published handoff branch, install pinned tools, then run `pnpm check`. A default-branch clone or another laptop's ignored caches are not the current setup.
 2. Give the agent this prompt:

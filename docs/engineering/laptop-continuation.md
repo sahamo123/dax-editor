@@ -6,7 +6,7 @@ tags: [handoff, agents, windows, setup]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-31T12:00:00-07:00
+  at: 2026-10-31T18:54:04-07:00
 ---
 
 # Continue on another laptop or agent
@@ -110,7 +110,9 @@ Local creative work is separate from application development: `artifacts/worksho
 
 ## Evidence and next tasks
 
-Last application verification was **October 27**, not a new October 31 test: 1,799 package +17 root tests, 39 browser workflows; real offline AI edits/export/restart/cleanup (17–96 s requests), longer synthetic speech, real MCP SDK/live-proxy edits and Linux Blender templates passed. Native installed workflow passed [40532196608](https://github.com/sahamo123/dax-editor/actions/runs/40532196608) using candidate [40528351026](https://github.com/sahamo123/dax-editor/actions/runs/40528351026). Read STATUS for source/artifact hashes and scope. CI artifacts may expire; rebuild pinned source if absent. No current installer transfer or execution on the new laptop is established. Local raw evidence is not promised on GitHub. Rerun checks before changing code.
+**October 31 source checkpoint:** full `pnpm check` passes in the normal Windows host: 1,799 package +17 root tests, with 67 explicit platform/opt-in package skips. Docs indexes/OKF, 37 local handoff links and whitespace checks pass. Local log: `artifacts/laptop-handoff-check-authorized.log` (ignored). The initial restricted run hit a symlink-fixture EPERM and was stopped; the normal-host rerun passes that fixture without changing assertions or machine policy. [Handoff PR #67](https://github.com/sahamo123/dax-editor/pull/67) publishes the continuation.
+
+Last runtime/browser/native acceptance remains **October 27**: 39 browser workflows; real offline AI edits/export/restart/cleanup (17–96 s requests), longer synthetic speech, real MCP SDK/live-proxy edits and Linux Blender templates passed. Native installed workflow passed [40532196608](https://github.com/sahamo123/dax-editor/actions/runs/40532196608) using candidate [40528351026](https://github.com/sahamo123/dax-editor/actions/runs/40528351026). Read STATUS for source/artifact hashes and scope. CI artifacts may expire; rebuild pinned source if absent. No current installer transfer or execution on the new laptop is established. Local raw evidence is not promised on GitHub. Rerun checks before changing code.
 
 Continue the release tasks in this order; do not rebuild already implemented features from historical TODOs:
 
