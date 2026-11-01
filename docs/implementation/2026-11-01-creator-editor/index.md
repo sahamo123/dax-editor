@@ -2,6 +2,8 @@
 
 ## Documents
 
+* [Dated project context and scope](context.md) - Stable project facts, scope choices, evidence boundaries and reading order for the multi-day creator-editor work.
+* [Daily work and handoff journal](daily-log.md) - Append-only session journal for completed work, pending actions, source revisions and next-step handoffs across multiple days.
 * [Execution contract - verify before advancing](execution-contract.md) - Required predecessor checks, evidence states, safe recovery and completion rules for executing the staged implementation plan.
 * [Future execution goal - launch only after review](execution-goal.md) - Copyable agent-neutral goal prompt, route selection and stopping rules for executing the handbook after owner review.
 * [Master implementation index - stages and step gates](master-plan.md) - Canonical entry point for ten stages, seventy-six executable step specifications, selected routes and evidence-based advancement.
@@ -79,6 +81,9 @@
 * [S09.03: Verify offline AI and selected providers and clients](s09-03-release-ai-clients.md) - Execute S09.03 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S09.04: Validate the exact packaged native candidate](s09-04-release-native-install.md) - Execute S09.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S09.05: Verify cross-version upgrades and data preservation](s09-05-release-upgrade.md) - Execute S09.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.06: Verify native accessibility and whole-app endurance](s09-06-release-performance.md) - Execute S09.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.07: Prepare verified package provenance and transfer](s09-07-release-provenance.md) - Execute S09.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.08: Adjudicate readiness and hand off exact release scope](s09-08-release-adjudication.md) - Execute S09.08 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.

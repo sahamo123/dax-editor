@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: planning-publication batch 21 adds S09.06, S09.07, S09.08, context, daily-log. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
+
 * **Update**: planning-publication batch 20 adds S09.02, S09.03, S09.04, S09.05. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
 
 * **Update**: planning-publication batch 19 adds S08.07, S08.08, S09, S09.01. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
