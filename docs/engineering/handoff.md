@@ -11,9 +11,13 @@ generated:
 
 # Handoff: resuming dax-editor
 
-## Active S00.02 — November 1, 2026
+## Active S00.03 — November 1, 2026
 
-Continue `codex/s00-02-capability-reconciliation` under [issue #123](https://github.com/sahamo123/dax-editor/issues/123). S00.01 was verified with self-review at PR #122's tested head; independent stage review remains due. Reconcile source claims, complete and review required checks, then open the scoped PR before S00.03. The packaged FFmpeg process returned `spawn UNKNOWN` on the normal host; do not present a system-FFmpeg run as packaged validation.
+Continue `codex/s00-03-acceptance-fixtures` under [issue #125](https://github.com/sahamo123/dax-editor/issues/125). The [fixture receipt](../implementation/2026-11-01-creator-editor/s00-03-fixtures.md) describes generated cases, provenance limits and pending verification. S00.02 was verified in issue #123 at PR #124's tested head, using self-review; independent stage review remains due. Do not treat synthetic tones or system-FFmpeg checks as human speech or packaged-native acceptance.
+
+## S00.02 checkpoint — November 1, 2026
+
+[Issue #123](https://github.com/sahamo123/dax-editor/issues/123) was verified with self-review on `codex/s00-02-capability-reconciliation`; current work is in the newer section above. S00.01 was verified with self-review at PR #122's tested head; independent stage review remains due. The packaged FFmpeg process returned `spawn UNKNOWN` on the normal host; do not present a system-FFmpeg run as packaged validation.
 
 ## Execution start checkpoint — November 1, 2026
 

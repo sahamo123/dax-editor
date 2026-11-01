@@ -68,3 +68,7 @@ The user launched first-improvement. S00.01 is VERIFYING in issue #121 on branch
 ## 2026-11-01 - S00.02 reconciliation
 
 Rechecked S00.01 issue #121, PR #122 and tested head before entering issue #123 on `codex/s00-02-capability-reconciliation`. Corrected missing-transcript and deferred-caption descriptions; targeted tests went red then green. Both full core test files passed 242 tests with system FFmpeg. Packaged FFmpeg failed with spawn UNKNOWN on restricted and normal hosts; it remains a separate unresolved acceptance gate. First full check failed formatting; corrected and retrying. Next: capture full check, review and PR before S00.03.
+
+## 2026-11-01 - S00.03 fixture generation
+
+S00.02 verified with self-review in issue #123 and PR #124; rechecked tested head before issue #125. Generated seven synthetic videos plus malformed and absent cases in unique ignored folders. Same-build repeated generation hashes match, all videos decode, and the variable-rate case has distinct frame intervals. Real podcast/educational usability remains unverified. Full check with explicit system FFmpeg is running; packaged FFmpeg remains unresolved. Next: record check result, review and publish the scoped PR before S00.04.
