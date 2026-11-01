@@ -25,11 +25,11 @@ Read the [master](master-plan.md) and [execution contract](execution-contract.md
 | Step | Execution document | Person-days |
 |---|---|---:|
 | S02.01 | [Specify profiles and project compatibility](s02-01-profile-compatibility-contract.md) | 0.5–0.75 |
-| S02.02 | Implement safe project and history migration (`s02-02-project-history-migration.md`; later publication batch) | 0.5–0.75 |
-| S02.03 | Define the four deterministic content profiles (`s02-03-content-profiles.md`; later publication batch) | 0.5–0.75 |
-| S02.04 | Make template capability reporting truthful (`s02-04-capability-metadata.md`; later publication batch) | 0.5–0.75 |
-| S02.05 | Preview and commit a profile as one edit (`s02-05-atomic-profile-application.md`; later publication batch) | 0.5–0.75 |
-| S02.06 | Integrate the profile chooser and template gallery (`s02-06-profile-gallery-ui.md`; later publication batch) | 0.5–0.75 |
+| S02.02 | [Implement safe project and history migration](s02-02-project-history-migration.md) | 0.5–0.75 |
+| S02.03 | [Define the four deterministic content profiles](s02-03-content-profiles.md) | 0.5–0.75 |
+| S02.04 | [Make template capability reporting truthful](s02-04-capability-metadata.md) | 0.5–0.75 |
+| S02.05 | [Preview and commit a profile as one edit](s02-05-atomic-profile-application.md) | 0.5–0.75 |
+| S02.06 | [Integrate the profile chooser and template gallery](s02-06-profile-gallery-ui.md) | 0.5–0.75 |
 | S02.07 | Verify profile contracts across all entry points (`s02-07-profile-contract-acceptance.md`; later publication batch) | 0.5–0.75 |
 | S02.08 | Close the first-improvement development candidate (`s02-08-first-improvement-candidate.md`; later publication batch) | 0.5–0.75 |
 

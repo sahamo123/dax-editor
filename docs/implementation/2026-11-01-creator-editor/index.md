@@ -20,6 +20,11 @@
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.
 * [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - Plan and evidence gates: Verify browser and native workspace acceptance.
 * [S02.01: Specify profiles and project compatibility](s02-01-profile-compatibility-contract.md) - Plan and evidence gates: Specify profiles and project compatibility.
+* [S02.02: Implement safe project and history migration](s02-02-project-history-migration.md) - Plan and evidence gates: Implement safe project and history migration.
+* [S02.03: Define the four deterministic content profiles](s02-03-content-profiles.md) - Plan and evidence gates: Define the four deterministic content profiles.
+* [S02.04: Make template capability reporting truthful](s02-04-capability-metadata.md) - Plan and evidence gates: Make template capability reporting truthful.
+* [S02.05: Preview and commit a profile as one edit](s02-05-atomic-profile-application.md) - Plan and evidence gates: Preview and commit a profile as one edit.
+* [S02.06: Integrate the profile chooser and template gallery](s02-06-profile-gallery-ui.md) - Plan and evidence gates: Integrate the profile chooser and template gallery.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
