@@ -43,7 +43,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | [S00](stage-00-baseline.md) | Baseline reconciliation and acceptance | 6 | 2-4 |
 | [S01](stage-01-workspace.md) | Control-panel workflow and design contract | 7 | 4-7 |
 | [S02](stage-02-profiles.md) | Content profiles and compatibility foundation | 8 | 4-6 |
-| S03 (`stage-03-composition.md`; later publication batch) | Bounded layered composition | 9 | 10-16 |
+| [S03](stage-03-composition.md) | Bounded layered composition | 9 | 10-16 |
 | S04 (`stage-04-long-form.md`; later publication batch) | Long-form podcast and educational workflows | 8 | 8-14 |
 | S05 (`stage-05-reference-style.md`; later publication batch) | Reference-style analysis and editable recipes | 7 | 7-12 |
 | S06 (`stage-06-characters.md`; later publication batch) | Curated Blender characters and scene packs | 8 | 10-18 |
@@ -86,15 +86,15 @@ Stage overview: [S02](stage-02-profiles.md). Read it before its first step.
 - [S02.04: Make template capability reporting truthful](s02-04-capability-metadata.md) - 0.5-0.75 engineer-days.
 - [S02.05: Preview and commit a profile as one edit](s02-05-atomic-profile-application.md) - 0.5-0.75 engineer-days.
 - [S02.06: Integrate the profile chooser and template gallery](s02-06-profile-gallery-ui.md) - 0.5-0.75 engineer-days.
-- S02.07: Verify profile contracts across all entry points (`s02-07-profile-contract-acceptance.md`; later publication batch) - 0.5-0.75 engineer-days.
-- S02.08: Close the first-improvement development candidate (`s02-08-first-improvement-candidate.md`; later publication batch) - 0.5-0.75 engineer-days.
+- [S02.07: Verify profile contracts across all entry points](s02-07-profile-contract-acceptance.md) - 0.5-0.75 engineer-days.
+- [S02.08: Close the first-improvement development candidate](s02-08-first-improvement-candidate.md) - 0.5-0.75 engineer-days.
 
 ## S03: Bounded layered composition
 
-Stage overview: S03 (`stage-03-composition.md`; later publication batch). Read it before its first step.
+Stage overview: [S03](stage-03-composition.md). Read it before its first step.
 
-- S03.01: Decide the bounded composition and time-map contract (`s03-01-composition-contract.md`; later publication batch) - 1-1.5 engineer-days.
-- S03.02: Add versioned layers and preserve saved history (`s03-02-layer-schema-persistence.md`; later publication batch) - 1-1.5 engineer-days.
+- [S03.01: Decide the bounded composition and time-map contract](s03-01-composition-contract.md) - 1-1.5 engineer-days.
+- [S03.02: Add versioned layers and preserve saved history](s03-02-layer-schema-persistence.md) - 1-1.5 engineer-days.
 - S03.03: Implement pure layer operations and anchoring (`s03-03-layer-commands-anchoring.md`; later publication batch) - 1-2 engineer-days.
 - S03.04: Render video and still layers through the shared engine (`s03-04-layer-renderer.md`; later publication batch) - 1-2 engineer-days.
 - S03.05: Add bounded keyframes and transitions (`s03-05-keyframes-transitions.md`; later publication batch) - 1-2 engineer-days.

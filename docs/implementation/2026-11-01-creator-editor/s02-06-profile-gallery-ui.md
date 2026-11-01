@@ -59,5 +59,5 @@ Preserve original projects/history and captured failure logs. Stop only owned jo
 Complete the [receipt](receipt-template.md) with: Profile/gallery browser/component results, failure-state captures and command/undo/save-reopen observations.
 
 Include implementation commit, issue/PR, recorded predecessor evidence recheck, commands/exit codes, artifact hashes, remaining risks and rollback/recovery instructions. Mark complete only when every required check passes.
-Then perform a fresh evidence recheck of this receipt before the next step (`s02-07-profile-contract-acceptance.md`; later publication batch). Planning-file creation itself does not satisfy this gate.
+Then perform a fresh evidence recheck of this receipt before [the next step](s02-07-profile-contract-acceptance.md). Planning-file creation itself does not satisfy this gate.
 
