@@ -32,10 +32,10 @@ Planning approval is not implementation authorization or evidence. Read current 
 | [S05.01](s05-01-reference-feasibility.md) | Bound the reference-style feasibility decision | 2-2 |
 | [S05.02](s05-02-reference-contracts.md) | Define evidence and recipe contracts | 0.5-1 |
 | [S05.03](s05-03-reference-sampling.md) | Acquire and cache bounded local samples | 1-2 |
-| S05.04 (`s05-04-reference-measurements.md`; later publication batch) | Extract deterministic style evidence | 1-2 |
-| S05.05 (`s05-05-reference-preview.md`; later publication batch) | Compile recipes and render comparison previews | 0.5-1 |
-| S05.06 (`s05-06-reference-workflow.md`; later publication batch) | Add editable reference review and apply controls | 1-2 |
-| S05.07 (`s05-07-reference-close.md`; later publication batch) | Close reference-style quality and compatibility | 1-2 |
+| [S05.04](s05-04-reference-measurements.md) | Extract deterministic style evidence | 1-2 |
+| [S05.05](s05-05-reference-preview.md) | Compile recipes and render comparison previews | 0.5-1 |
+| [S05.06](s05-06-reference-workflow.md) | Add editable reference review and apply controls | 1-2 |
+| [S05.07](s05-07-reference-close.md) | Close reference-style quality and compatibility | 1-2 |
 
 ## Resources and boundaries
 

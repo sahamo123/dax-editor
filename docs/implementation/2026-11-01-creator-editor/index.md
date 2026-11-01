@@ -47,6 +47,10 @@
 * [S05.01: Bound the reference-style feasibility decision](s05-01-reference-feasibility.md) - Execute S05.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S05.02: Define evidence and recipe contracts](s05-02-reference-contracts.md) - Execute S05.02 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S05.03: Acquire and cache bounded local samples](s05-03-reference-sampling.md) - Execute S05.03 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S05.04: Extract deterministic style evidence](s05-04-reference-measurements.md) - Execute S05.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S05.05: Compile recipes and render comparison previews](s05-05-reference-preview.md) - Execute S05.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S05.06: Add editable reference review and apply controls](s05-06-reference-workflow.md) - Execute S05.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S05.07: Close reference-style quality and compatibility](s05-07-reference-close.md) - Execute S05.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.

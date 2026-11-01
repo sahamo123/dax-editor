@@ -123,10 +123,10 @@ Stage overview: [S05](stage-05-reference-style.md). Read it before its first ste
 - [S05.01: Bound the reference-style feasibility decision](s05-01-reference-feasibility.md) - 2-2 engineer-days.
 - [S05.02: Define evidence and recipe contracts](s05-02-reference-contracts.md) - 0.5-1 engineer-days.
 - [S05.03: Acquire and cache bounded local samples](s05-03-reference-sampling.md) - 1-2 engineer-days.
-- S05.04: Extract deterministic style evidence (`s05-04-reference-measurements.md`; later publication batch) - 1-2 engineer-days.
-- S05.05: Compile recipes and render comparison previews (`s05-05-reference-preview.md`; later publication batch) - 0.5-1 engineer-days.
-- S05.06: Add editable reference review and apply controls (`s05-06-reference-workflow.md`; later publication batch) - 1-2 engineer-days.
-- S05.07: Close reference-style quality and compatibility (`s05-07-reference-close.md`; later publication batch) - 1-2 engineer-days.
+- [S05.04: Extract deterministic style evidence](s05-04-reference-measurements.md) - 1-2 engineer-days.
+- [S05.05: Compile recipes and render comparison previews](s05-05-reference-preview.md) - 0.5-1 engineer-days.
+- [S05.06: Add editable reference review and apply controls](s05-06-reference-workflow.md) - 1-2 engineer-days.
+- [S05.07: Close reference-style quality and compatibility](s05-07-reference-close.md) - 1-2 engineer-days.
 
 ## S06: Curated Blender characters and scene packs
 
