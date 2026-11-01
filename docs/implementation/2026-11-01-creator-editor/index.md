@@ -72,6 +72,9 @@
 * [S08.04: Scope remote media and isolate native workers](s08-04-host-media-boundaries.md) - Execute S08.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S08.05: Package a pinned private single-owner deployment](s08-05-private-deployment.md) - Execute S08.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S08.06: Recover browser sessions and task controls remotely](s08-06-host-reconnect.md) - Execute S08.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.07: Verify quotas backup restore and workspace recovery](s08-07-host-recovery.md) - Execute S08.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.08: Accept personal hosting and desktop parity](s08-08-host-close.md) - Execute S08.08 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.01: Freeze selected release scope and evidence requirements](s09-01-release-scope.md) - Execute S09.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
@@ -81,3 +84,4 @@
 * [S06: Curated Blender characters and scene packs](stage-06-characters.md) - Ordered S06 execution steps with explicit dependencies, resource needs and acceptance gates.
 * [S07: Bounded specialist workflows and recovery](stage-07-workflows.md) - Ordered S07 execution steps with explicit dependencies, resource needs and acceptance gates.
 * [S08: Optional private personal hosting](stage-08-hosting.md) - Ordered S08 execution steps with explicit dependencies, resource needs and acceptance gates.
+* [S09: Compatibility performance and distribution gates](stage-09-release.md) - Ordered S09 execution steps with explicit dependencies, resource needs and acceptance gates.

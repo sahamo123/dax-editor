@@ -35,8 +35,8 @@ Planning approval is not implementation authorization or evidence. Read current 
 | [S08.04](s08-04-host-media-boundaries.md) | Scope remote media and isolate native workers | 1-2 |
 | [S08.05](s08-05-private-deployment.md) | Package a pinned private single-owner deployment | 1-1.5 |
 | [S08.06](s08-06-host-reconnect.md) | Recover browser sessions and task controls remotely | 1-1.5 |
-| S08.07 (`s08-07-host-recovery.md`; later publication batch) | Verify quotas backup restore and workspace recovery | 1-1.5 |
-| S08.08 (`s08-08-host-close.md`; later publication batch) | Accept personal hosting and desktop parity | 1-1.5 |
+| [S08.07](s08-07-host-recovery.md) | Verify quotas backup restore and workspace recovery | 1-1.5 |
+| [S08.08](s08-08-host-close.md) | Accept personal hosting and desktop parity | 1-1.5 |
 
 ## Resources and boundaries
 

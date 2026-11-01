@@ -49,7 +49,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | [S06](stage-06-characters.md) | Curated Blender characters and scene packs | 8 | 10-18 |
 | [S07](stage-07-workflows.md) | Bounded specialist workflows and recovery | 7 | 5-8 |
 | [S08](stage-08-hosting.md) | Optional private personal hosting | 8 | 8-14 |
-| S09 (`stage-09-release.md`; later publication batch) | Compatibility performance and distribution gates | 8 | 6-10 |
+| [S09](stage-09-release.md) | Compatibility performance and distribution gates | 8 | 6-10 |
 
 Strict default execution is the ordered selected route. Explicit data prerequisites are in each page's frontmatter; the route predecessor also applies. Independent research may inform later plans, but it must not implement dependent features before gates pass. S09 entry is S07.07 for desktop and S08.08 when hosting was selected. Do not add S08 to desktop prerequisites by accident.
 
@@ -163,14 +163,14 @@ Stage overview: [S08](stage-08-hosting.md). Read it before its first step.
 - [S08.04: Scope remote media and isolate native workers](s08-04-host-media-boundaries.md) - 1-2 engineer-days.
 - [S08.05: Package a pinned private single-owner deployment](s08-05-private-deployment.md) - 1-1.5 engineer-days.
 - [S08.06: Recover browser sessions and task controls remotely](s08-06-host-reconnect.md) - 1-1.5 engineer-days.
-- S08.07: Verify quotas backup restore and workspace recovery (`s08-07-host-recovery.md`; later publication batch) - 1-1.5 engineer-days.
-- S08.08: Accept personal hosting and desktop parity (`s08-08-host-close.md`; later publication batch) - 1-1.5 engineer-days.
+- [S08.07: Verify quotas backup restore and workspace recovery](s08-07-host-recovery.md) - 1-1.5 engineer-days.
+- [S08.08: Accept personal hosting and desktop parity](s08-08-host-close.md) - 1-1.5 engineer-days.
 
 ## S09: Compatibility performance and distribution gates
 
-Stage overview: S09 (`stage-09-release.md`; later publication batch). Read it before its first step.
+Stage overview: [S09](stage-09-release.md). Read it before its first step.
 
-- S09.01: Freeze selected release scope and evidence requirements (`s09-01-release-scope.md`; later publication batch) - 0.5-1 engineer-days.
+- [S09.01: Freeze selected release scope and evidence requirements](s09-01-release-scope.md) - 0.5-1 engineer-days.
 - S09.02: Validate source compatibility and decoded media (`s09-02-release-source-media.md`; later publication batch) - 1-1.5 engineer-days.
 - S09.03: Verify offline AI and selected providers and clients (`s09-03-release-ai-clients.md`; later publication batch) - 0.5-1 engineer-days.
 - S09.04: Validate the exact packaged native candidate (`s09-04-release-native-install.md`; later publication batch) - 1-1.5 engineer-days.
