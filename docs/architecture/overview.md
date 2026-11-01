@@ -6,10 +6,12 @@ tags: [architecture, engine, design, commands]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T21:00:00Z
+  at: 2026-11-01T08:53:28Z
 ---
 
 # Architecture overview
+
+**Reading note (November 1, 2026):** this overview preserves the original architecture and invariants; its diagram's implementation labels are historical. Current source includes the native shell, local AI, speech and live-project MCP described in [STATUS](../STATUS.md). The [creator workflow plan](../specs/creator-platform-plan.md) reviews that source and proposes future layers, specialist workflows and hosting; those extensions are not implemented by the plan.
 
 One engine and one command registry, several front doors. Whatever a person can do with the buttons, an AI agent can do through the same commands, and so can the command line. They all share the same validation and the same undo history, so none of them can drift apart.
 

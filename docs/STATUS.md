@@ -6,10 +6,16 @@ tags: [status, roadmap, handoff]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-11-01T08:40:21Z
+  at: 2026-11-01T08:53:28Z
 ---
 
 # Project status
+
+## Creator workflow planning — November 1, 2026
+
+[Creator-platform review and implementation plan](specs/creator-platform-plan.md) is a documentation-only proposal based on source `2032f0d`; tracking [#70](https://github.com/sahamo123/dax-editor/issues/70), branch `codex/creator-platform-plan`. It covers current gaps, content profiles, layered composition, curated Blender characters, reference-style analysis, bounded specialist workflows, optional personal hosting, effort/dependencies and a proposed project/module outline. No new application capabilities, runtime validation or release readiness are claimed. Begin with M0 baseline reconciliation and M1/M2 workspace/profile work when implementation is requested; the current setup/native boundaries below remain in force.
+
+Planning checks pass: docs indexes/OKF, lint and 35 local links. Full application/browser/native checks were not rerun for this documentation-only delivery.
 
 ## Design skill setup — November 1, 2026
 

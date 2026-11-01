@@ -2,6 +2,10 @@
 
 ## 2026-11-01
 
+* **Update**: [creator workflow review and implementation plan](specs/creator-platform-plan.md) records source-backed gaps, historical evidence limits, a proposed composition/asset/task architecture, control-panel journey, bounded Blender/reference-style/hosting scope, estimated milestones and module/project-file ownership. Issue #70; documentation only, no application/dependency/runtime changes. Preserve current release gates and make future capabilities explicitly proposed.
+
+* **Verification**: creator-plan documentation indexes/OKF, lint (567 files), 35 local source/document links and whitespace checks pass. Full application/browser/native suites were not rerun for this planning-only change; previous test evidence retains its original date and scope. No formal automated design critique or live UI acceptance was performed.
+
 * **Update**: install pinned Impeccable 4.8.0 developer skills for Codex and the Antigravity workspace, retain licences/NOTICE and verify installed bytes against the SHA-256-pinned source archive. [Design setup and editor brief](engineering/impeccable-design.md) records manual-context use and fresh-laptop installation. Keep generated copies ignored and exclude the auto-downloaded engine, hooks/live injection and application dependency changes. Issue #68; no UI or project changes.
 
 * **Verification**: [PR #69](https://github.com/sahamo123/dax-editor/pull/69) records fresh-folder installation from the documented commands, reproducing both installed skill tree hashes. Required full check passes 1,799 package +17 root tests with 67 explicit skips; docs/OKF/lint, setup links and whitespace pass. Initially lint saw generated upstream scripts before their exact install path was ignored; no application lint rules/assertions changed. Private receipts/logs remain under artifacts/.

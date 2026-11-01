@@ -6,10 +6,12 @@ tags: [roadmap, planning]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T21:00:00Z
+  at: 2026-11-01T08:53:28Z
 ---
 
 # Roadmap
+
+**November 1 planning continuation:** read [STATUS](STATUS.md) for current evidence and the [creator workflow review and plan](specs/creator-platform-plan.md) for the proposed next milestones, dependencies, estimates and project/module outline. The original decisions/checklists below retain their historical scope; do not use their old model or feature-absence labels as current implementation status. No new feature or architectural proposal is implemented by that planning document.
 
 Decisions so far:
 
