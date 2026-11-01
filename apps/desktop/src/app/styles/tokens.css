@@ -26,8 +26,8 @@
   /* Accent (blue) and semantic colours. */
   --accent: #6b97ff; /* links, focus ring, active underline */
   --accent-text: #9bbbff;
-  --accent-bg: #3a6cf0; /* primary buttons (white text, 4.8:1) */
-  --accent-bg-hover: #4b7bf7;
+  --accent-bg: #3a6cf0; /* primary buttons (white text, 4.58:1) */
+  --accent-bg-hover: #305cd6; /* white text, 5.79:1 */
   --accent-soft: rgba(107, 151, 255, 0.16);
   --ok: #47d69a;
   --ok-soft: rgba(71, 214, 154, 0.14);

@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.06 primary contrast — November 1, 2026
+
+Continue [#165](https://github.com/sahamo123/dax-editor/issues/165) on `codex/s01-06-primary-contrast`, based on self-reviewed [PR #167](https://github.com/sahamo123/dax-editor/pull/167) `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. A rendered test reproduced 3.84:1 hover contrast and the adjusted color passed at 5.79:1; full checks and review remain pending. Confirm publication before switching laptops. Actual assistive-technology and native/DPI evidence remain separate. Earlier headings are historical.
+
 ## Active S01.06 export-focus child — November 1, 2026
 
 Continue [#164](https://github.com/sahamo123/dax-editor/issues/164) on `codex/s01-06-export-focus`, based on self-reviewed [PR #166](https://github.com/sahamo123/dax-editor/pull/166) `1a57506035551b4d6cf3ddae414acd54f044274b`. Focused component/browser checks passed; run full verification and review the published diff. Hover contrast #165 and actual assistive-technology acceptance remain open. Check publication before another laptop resumes.

@@ -2,6 +2,10 @@
 
 ## 2026-11-01
 
+* **Incident**: A rendered S01.06 diagnostic found component transitions still active under reduced motion ([#168](https://github.com/sahamo123/dax-editor/issues/168)); fix and verification remain pending.
+
+* **Update**: Export focus [#164 / PR #167](https://github.com/sahamo123/dax-editor/pull/167) passed full checks, compact/wide browser tests and self-review at `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. Primary contrast #165 is under verification; S01.06 remains in progress.
+
 * **Update**: Review progress [#163 / PR #166](https://github.com/sahamo123/dax-editor/pull/166) passed focused/full checks and self-review at `1a57506035551b4d6cf3ddae414acd54f044274b`. Export-focus child #164 is under verification; S01.06 remains in progress.
 
 * **Incident**: S01.06's partial keyboard walkthrough found progress repeatedly updating a live region ([#163](https://github.com/sahamo123/dax-editor/issues/163)) and export focus loss ([#164](https://github.com/sahamo123/dax-editor/issues/164)); scoped fixes and actual assistive-technology observations remain pending.

@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 primary-button contrast — November 1, 2026
+
+Export-focus [#164 / PR #167](https://github.com/sahamo123/dax-editor/pull/167) is verified with self-review at `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. Primary-hover contrast [#165](https://github.com/sahamo123/dax-editor/issues/165) is under test on local `codex/s01-06-primary-contrast`: a rendered regression measured the original hover at 3.84:1; the adjusted color measured 5.79:1. Full checks and review remain pending. Confirm publication before switching laptops; actual assistive-technology and native/DPI evidence remain open.
+
 ## S01.06 export focus — November 1, 2026
 
 Review progress [#163 / PR #166](https://github.com/sahamo123/dax-editor/pull/166) is verified with self-review at `1a57506035551b4d6cf3ddae414acd54f044274b`. Export-focus [#164](https://github.com/sahamo123/dax-editor/issues/164) is under test on `codex/s01-06-export-focus`; 34 component tests and seven focused browser tests passed. Full checks and separate review are pending. Hover contrast #165 and real assistive-technology observations remain open. Verify publication before another laptop resumes.

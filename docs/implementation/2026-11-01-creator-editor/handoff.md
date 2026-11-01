@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: primary contrast [#165](https://github.com/sahamo123/dax-editor/issues/165).** Start from self-reviewed [PR #167](https://github.com/sahamo123/dax-editor/pull/167) `ee1c4726c7e4fb03986fe986440521f428dc5b4c` on `codex/s01-06-primary-contrast`; rendered before/after measurements are recorded, full checks and review are pending. Confirm branch publication. Actual assistive-technology and native/DPI acceptance remain open. Earlier headings are historical.
+
 **Current work: export focus [#164](https://github.com/sahamo123/dax-editor/issues/164).** Start from self-reviewed [PR #166](https://github.com/sahamo123/dax-editor/pull/166) `1a57506035551b4d6cf3ddae414acd54f044274b` on `codex/s01-06-export-focus`; focused tests passed, full checks and review are pending. Check branch publication. Hover contrast #165 and actual assistive-technology evidence remain open. Earlier headings are historical.
 
 **Current work: S01.06 [#162](https://github.com/sahamo123/dax-editor/issues/162).** The S01.05 parent [receipt](s01-05-task-recovery-receipt.md) is verified with self-review. Its [PR #161](https://github.com/sahamo123/dax-editor/pull/161) head `594f1866bdc760a76a3bd37659ce1d7c25fe7449`, tested ancestor #160 and both private log hashes were rechecked. Continue `codex/s01-06-review-announcements` after confirming publication; begin the actual keyboard and assistive-technology audit. Earlier headings are historical.
