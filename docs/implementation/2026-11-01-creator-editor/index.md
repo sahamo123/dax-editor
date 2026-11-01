@@ -75,6 +75,10 @@
 * [S08.07: Verify quotas backup restore and workspace recovery](s08-07-host-recovery.md) - Execute S08.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S08.08: Accept personal hosting and desktop parity](s08-08-host-close.md) - Execute S08.08 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S09.01: Freeze selected release scope and evidence requirements](s09-01-release-scope.md) - Execute S09.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.02: Validate source compatibility and decoded media](s09-02-release-source-media.md) - Execute S09.02 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.03: Verify offline AI and selected providers and clients](s09-03-release-ai-clients.md) - Execute S09.03 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.04: Validate the exact packaged native candidate](s09-04-release-native-install.md) - Execute S09.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S09.05: Verify cross-version upgrades and data preservation](s09-05-release-upgrade.md) - Execute S09.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.

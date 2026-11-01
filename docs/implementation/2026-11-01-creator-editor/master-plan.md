@@ -171,10 +171,10 @@ Stage overview: [S08](stage-08-hosting.md). Read it before its first step.
 Stage overview: [S09](stage-09-release.md). Read it before its first step.
 
 - [S09.01: Freeze selected release scope and evidence requirements](s09-01-release-scope.md) - 0.5-1 engineer-days.
-- S09.02: Validate source compatibility and decoded media (`s09-02-release-source-media.md`; later publication batch) - 1-1.5 engineer-days.
-- S09.03: Verify offline AI and selected providers and clients (`s09-03-release-ai-clients.md`; later publication batch) - 0.5-1 engineer-days.
-- S09.04: Validate the exact packaged native candidate (`s09-04-release-native-install.md`; later publication batch) - 1-1.5 engineer-days.
-- S09.05: Verify cross-version upgrades and data preservation (`s09-05-release-upgrade.md`; later publication batch) - 1-1.5 engineer-days.
+- [S09.02: Validate source compatibility and decoded media](s09-02-release-source-media.md) - 1-1.5 engineer-days.
+- [S09.03: Verify offline AI and selected providers and clients](s09-03-release-ai-clients.md) - 0.5-1 engineer-days.
+- [S09.04: Validate the exact packaged native candidate](s09-04-release-native-install.md) - 1-1.5 engineer-days.
+- [S09.05: Verify cross-version upgrades and data preservation](s09-05-release-upgrade.md) - 1-1.5 engineer-days.
 - S09.06: Verify native accessibility and whole-app endurance (`s09-06-release-performance.md`; later publication batch) - 1-1.5 engineer-days.
 - S09.07: Prepare verified package provenance and transfer (`s09-07-release-provenance.md`; later publication batch) - 0.5-1 engineer-days.
 - S09.08: Adjudicate readiness and hand off exact release scope (`s09-08-release-adjudication.md`; later publication batch) - 0.5-1 engineer-days.

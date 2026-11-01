@@ -32,10 +32,10 @@ Planning approval is not implementation authorization or evidence. Read current 
 | Step | Deliverable | Person-days |
 |---|---|---:|
 | [S09.01](s09-01-release-scope.md) | Freeze selected release scope and evidence requirements | 0.5-1 |
-| S09.02 (`s09-02-release-source-media.md`; later publication batch) | Validate source compatibility and decoded media | 1-1.5 |
-| S09.03 (`s09-03-release-ai-clients.md`; later publication batch) | Verify offline AI and selected providers and clients | 0.5-1 |
-| S09.04 (`s09-04-release-native-install.md`; later publication batch) | Validate the exact packaged native candidate | 1-1.5 |
-| S09.05 (`s09-05-release-upgrade.md`; later publication batch) | Verify cross-version upgrades and data preservation | 1-1.5 |
+| [S09.02](s09-02-release-source-media.md) | Validate source compatibility and decoded media | 1-1.5 |
+| [S09.03](s09-03-release-ai-clients.md) | Verify offline AI and selected providers and clients | 0.5-1 |
+| [S09.04](s09-04-release-native-install.md) | Validate the exact packaged native candidate | 1-1.5 |
+| [S09.05](s09-05-release-upgrade.md) | Verify cross-version upgrades and data preservation | 1-1.5 |
 | S09.06 (`s09-06-release-performance.md`; later publication batch) | Verify native accessibility and whole-app endurance | 1-1.5 |
 | S09.07 (`s09-07-release-provenance.md`; later publication batch) | Prepare verified package provenance and transfer | 0.5-1 |
 | S09.08 (`s09-08-release-adjudication.md`; later publication batch) | Adjudicate readiness and hand off exact release scope | 0.5-1 |
