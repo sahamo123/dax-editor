@@ -36,9 +36,9 @@ Planning approval is not implementation authorization or evidence. Read current 
 | [S09.03](s09-03-release-ai-clients.md) | Verify offline AI and selected providers and clients | 0.5-1 |
 | [S09.04](s09-04-release-native-install.md) | Validate the exact packaged native candidate | 1-1.5 |
 | [S09.05](s09-05-release-upgrade.md) | Verify cross-version upgrades and data preservation | 1-1.5 |
-| S09.06 (`s09-06-release-performance.md`; later publication batch) | Verify native accessibility and whole-app endurance | 1-1.5 |
-| S09.07 (`s09-07-release-provenance.md`; later publication batch) | Prepare verified package provenance and transfer | 0.5-1 |
-| S09.08 (`s09-08-release-adjudication.md`; later publication batch) | Adjudicate readiness and hand off exact release scope | 0.5-1 |
+| [S09.06](s09-06-release-performance.md) | Verify native accessibility and whole-app endurance | 1-1.5 |
+| [S09.07](s09-07-release-provenance.md) | Prepare verified package provenance and transfer | 0.5-1 |
+| [S09.08](s09-08-release-adjudication.md) | Adjudicate readiness and hand off exact release scope | 0.5-1 |
 
 ## Resources and boundaries
 

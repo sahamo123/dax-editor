@@ -19,11 +19,11 @@ generated:
 
 There are **100 Markdown files** here: **10 stage overviews +76 individual sub-stage/step specifications +5 navigation/control/review guides +8 operating records +1 generated index**. A sub-stage is one implementation step in this hierarchy; it has its own stable ID and file. The five guides are this master, execution contract, future goal, receipt template and review report. The eight operating records keep multi-day context, progress, handoff, decisions, pitfalls, errors, evidence and daily checkpoints together in this dated folder. [Generated index](index.md) is a catalogue maintained by docs:index; this master is the execution order. No extra runtime dependency, application code or model is installed by the plan.
 
-1. Read context (`context.md`; later publication batch), current handoff (`handoff.md`; later publication batch) and progress (`progress.md`; later publication batch), then review the audit report (`review-report.md`; later publication batch), then [execution contract](execution-contract.md).
+1. Read [context](context.md), current handoff (`handoff.md`; later publication batch) and progress (`progress.md`; later publication batch), then review the audit report (`review-report.md`; later publication batch), then [execution contract](execution-contract.md).
 2. Declare the provisional capability/provider/client/machine matrix at launch/S00.01; S09 freezes and revalidates it. Choose a route and explicitly start the [future execution goal](execution-goal.md) only after review. Merely opening the goal file does not start implementation.
 3. Read the current stage page and first eligible step. Recheck the predecessor's actual receipt and current source before proceeding; no failed/blocked required check may be bypassed.
 4. Track actual work in scoped GitHub issues/PRs using the [receipt template](receipt-template.md). Page status records the publication baseline; it is not a live progress database.
-5. After a checkpoint, refresh handoff (`handoff.md`; later publication batch) and progress (`progress.md`; later publication batch) from issue receipts; append daily log (`daily-log.md`; later publication batch) and evidence (`evidence-log.md`; later publication batch), record errors/recovery (`errors-and-recovery.md`; later publication batch), decisions (`decisions.md`; later publication batch) and gotchas (`gotchas.md`; later publication batch). Keep raw logs in ignored `_local/`; do not commit media, keys or personal data.
+5. After a checkpoint, refresh handoff (`handoff.md`; later publication batch) and progress (`progress.md`; later publication batch) from issue receipts; append [daily log](daily-log.md) and evidence (`evidence-log.md`; later publication batch), record errors/recovery (`errors-and-recovery.md`; later publication batch), decisions (`decisions.md`; later publication batch) and gotchas (`gotchas.md`; later publication batch). Keep raw logs in ignored `_local/`; do not commit media, keys or personal data.
 6. At a stage boundary, verify every child receipt and stage acceptance before entering the next selected stage. At a route endpoint, report its exact evidence scope and stop.
 
 ## Route selection and effort
@@ -175,9 +175,9 @@ Stage overview: [S09](stage-09-release.md). Read it before its first step.
 - [S09.03: Verify offline AI and selected providers and clients](s09-03-release-ai-clients.md) - 0.5-1 engineer-days.
 - [S09.04: Validate the exact packaged native candidate](s09-04-release-native-install.md) - 1-1.5 engineer-days.
 - [S09.05: Verify cross-version upgrades and data preservation](s09-05-release-upgrade.md) - 1-1.5 engineer-days.
-- S09.06: Verify native accessibility and whole-app endurance (`s09-06-release-performance.md`; later publication batch) - 1-1.5 engineer-days.
-- S09.07: Prepare verified package provenance and transfer (`s09-07-release-provenance.md`; later publication batch) - 0.5-1 engineer-days.
-- S09.08: Adjudicate readiness and hand off exact release scope (`s09-08-release-adjudication.md`; later publication batch) - 0.5-1 engineer-days.
+- [S09.06: Verify native accessibility and whole-app endurance](s09-06-release-performance.md) - 1-1.5 engineer-days.
+- [S09.07: Prepare verified package provenance and transfer](s09-07-release-provenance.md) - 0.5-1 engineer-days.
+- [S09.08: Adjudicate readiness and hand off exact release scope](s09-08-release-adjudication.md) - 0.5-1 engineer-days.
 
 ## Boundaries and completion
 
