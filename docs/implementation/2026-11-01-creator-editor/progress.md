@@ -11,16 +11,16 @@ generated:
 
 # Implementation progress
 
-**5 of 76 steps verified; the first-improvement goal is active.** S00.01–S00.05 were separately self-reviewed; independent stage review is IN_PROGRESS under [issue #133](https://github.com/sahamo123/dax-editor/issues/133). Remaining steps are NOT_STARTED.
+**6 of 76 steps verified; the first-improvement goal is active.** S00.01–S00.05 were separately self-reviewed; S00.06 passed independent review. S01.01 is IN_PROGRESS under [issue #135](https://github.com/sahamo123/dax-editor/issues/135).
 
 GitHub step issues and tested PR receipts are authoritative. Refresh this mirror after every execution checkpoint and record the synchronization date, exact implementation SHA and issue links. If it conflicts with an issue, inspect the evidence and reconcile both; do not choose the more optimistic state. Current planning delivery: [issue #72](https://github.com/sahamo123/dax-editor/issues/72), [review report](review-report.md).
 
 ## Current cursor
 
 - Selected execution route: first-improvement (21 steps), explicitly launched November 1, 2026.
-- Active step: S00.06 IN_PROGRESS. Predecessor issue/PR and current-tree ancestry rechecked at commit `fca7677085dc291d6cdf8e38eea9ed4c19c71211`.
+- Active step: S01.01 IN_PROGRESS. Predecessor issue #133 and PR #134, published commit `1d520153a1f81d2429f815d2db5e655e1a0d538d` and current-tree ancestry rechecked.
 - Required scope, clients/providers and machines: provisional choices are recorded in issue #121 and the S00.01 receipt; freeze/revalidate at S09.01 for broader routes.
-- Implementation issues: #121/#122, #123/#124, #125/#126, #127/#128, #129/#132; #133 active. Later steps are unassigned.
+- Implementation issue/PR pairs: #121/#122, #123/#124, #125/#126, #127/#128, #129/#132, #133/#134; #135 active. Later steps are unassigned.
 - Resume context: [handoff](handoff.md), [daily log](daily-log.md), [errors and recovery](errors-and-recovery.md), [evidence log](evidence-log.md).
 
 ## Step ledger
@@ -34,8 +34,8 @@ State vocabulary and advancement rules: [execution contract](execution-contract.
 | [S00.03: Build the authorized acceptance fixture inventory](s00-03-authorized-fixtures.md) | VERIFIED | [Issue #125](https://github.com/sahamo123/dax-editor/issues/125); [PR #126](https://github.com/sahamo123/dax-editor/pull/126) |
 | [S00.04: Establish measurable timing and resource budgets](s00-04-performance-budgets.md) | VERIFIED | [Issue #127](https://github.com/sahamo123/dax-editor/issues/127); [PR #128](https://github.com/sahamo123/dax-editor/pull/128) |
 | [S00.05: Repeat the scoped source and offline editing baseline](s00-05-baseline-acceptance.md) | VERIFIED | [Issue #129](https://github.com/sahamo123/dax-editor/issues/129); [PR #132](https://github.com/sahamo123/dax-editor/pull/132) |
-| [S00.06: Close the reconciled baseline and route its blockers](s00-06-baseline-close.md) | IN_PROGRESS | [Issue #133](https://github.com/sahamo123/dax-editor/issues/133) |
-| [S01.01: Audit the current rendered editing workflow](s01-01-workflow-audit.md) | NOT_STARTED | Unassigned |
+| [S00.06: Close the reconciled baseline and route its blockers](s00-06-baseline-close.md) | VERIFIED | [Issue #133](https://github.com/sahamo123/dax-editor/issues/133); [PR #134](https://github.com/sahamo123/dax-editor/pull/134) |
+| [S01.01: Audit the current rendered editing workflow](s01-01-workflow-audit.md) | IN_PROGRESS | [Issue #135](https://github.com/sahamo123/dax-editor/issues/135) |
 | [S01.02: Record the product and design contract](s01-02-product-design-contract.md) | NOT_STARTED | Unassigned |
 | [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) | NOT_STARTED | Unassigned |
 | [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) | NOT_STARTED | Unassigned |

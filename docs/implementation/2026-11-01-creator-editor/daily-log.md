@@ -88,3 +88,7 @@ S00.05 passed a fresh full check, 39 browser tests and a strict decoded offline 
 ## 2026-11-01 - independent baseline review correction
 
 The independent reviewer checked five issue/PR/commit chains, private artifact hashes, seeded-cache timing samples and a fresh strict export decode. The reviewer found 67 skipped package tests rather than the 68 previously reported; 1,801 package passes and 17 script passes are unchanged. Corrected S00.02–S00.05 summaries and their GitHub issue/PR descriptions, with an appended correction to issue #9. The reviewer’s pnpm attempt stopped before tests on sandbox symlink EPERM; the independent decode and a subsequent coordinator-focused regression passed. Correction recheck and stage PR remain pending.
+
+## 2026-11-01 - S01.01 workspace audit
+
+S00.06 correction recheck passed; issue #133 and PR #134 record the verified stage at `1d520153a1f81d2429f815d2db5e655e1a0d538d`. Issue #135 tracks the next audit on `codex/s01-01-workspace-audit`. Fresh synthetic browser walkthroughs covered three sizes and task controls; findings #136/#137 join #130/#131. Automatic approval review rejected screenshot uploads because their sensitive-data content was not independently verified; captures remain ignored locally. The first harness configuration failed before tests, and a sandboxed retry produced no successful result; corrected normal-host sessions passed. Next: preserve the text receipt, resolve portable screenshot evidence, second review and scoped PR before S01.02. Native acceptance remains separate.

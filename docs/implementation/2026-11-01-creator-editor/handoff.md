@@ -11,15 +11,15 @@ generated:
 
 # Current handoff
 
-**First-improvement is active: S00.01–S00.05 VERIFIED; S00.06 IN_PROGRESS.** Follow [issue #133](https://github.com/sahamo123/dax-editor/issues/133). Predecessor [issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132) and its tested source were rechecked before entry. Independent stage review is in progress.
+**First-improvement is active: S00.01–S00.06 VERIFIED; S01.01 IN_PROGRESS.** Follow [issue #135](https://github.com/sahamo123/dax-editor/issues/135). S00.06 independent review and published [PR #134](https://github.com/sahamo123/dax-editor/pull/134) were rechecked at `1d520153a1f81d2429f815d2db5e655e1a0d538d`; the stacked PR remains unmerged.
 
 | Item | Current state |
 |---|---|
-| Current work | S00.06 independent review and baseline-stage closure |
+| Current work | S01.01 rendered workspace audit |
 | Implementation route | first-improvement, S00–S02 |
-| Active implementation step | S00.06 IN_PROGRESS |
-| Completed implementation steps | 5 of 76; each self-reviewed, independent stage review in progress |
-| Next eligible implementation step | S01.01 after S00.06 independent review, receipt and current-tree recheck |
+| Active implementation step | S01.01 IN_PROGRESS |
+| Completed implementation steps | 6 of 76; S00.06 independently reviewed |
+| Next eligible implementation step | S01.02 after S01.01 verification and evidence recheck |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 | Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use work branch `codex/s00-06-baseline-stage-review`, based on `codex/s00-05-offline-baseline`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
+Use work branch `codex/s01-01-workspace-audit`, based on `codex/s00-06-baseline-stage-review`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
 
 ## Next execution action
 
-Independently inspect all S00 receipts and their artifacts, reconcile release issues and external gates, resolve material findings, and publish S00.06's receipt and PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing required check blocks S01.01.
+Finish the fresh isolated browser audit, inspect and hash the screenshots, exercise workspace resizing, selection and task controls, then publish a ranked findings receipt and scoped PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing required check blocks S01.02. The synthetic audit captures are private under ignored `artifacts/s01-01-workspace-audit-20261101/`. Automatic approval review rejected their upload because sensitive-data content was not independently verified; do not retry through an indirect upload. Preserve the local captures and resolve the portable screenshot evidence before marking the step verified.
 
 ## Known gates to anticipate
 

@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: S00.06 passed independent baseline review ([issue #133](https://github.com/sahamo123/dax-editor/issues/133), [PR #134](https://github.com/sahamo123/dax-editor/pull/134)). S01.01 ([issue #135](https://github.com/sahamo123/dax-editor/issues/135)) records fresh synthetic browser workspace captures and routes findings #130, #131, #136 and #137; its second review and publication remain pending. Native/packaged acceptance remains open.
+
 * **Update**: S00.05 passed fresh system-FFmpeg source and browser checks plus an isolated manual edit, grouped undo/redo, project-copy reopen, revision-bound review and strictly decoded export ([issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132)). UI findings #130/#131 remain open. S00.06 independent baseline review is tracked in [issue #133](https://github.com/sahamo123/dax-editor/issues/133); native and packaged acceptance remain separate.
 
 * **Update**: S00.04 passed its short seeded-cache browser measurements and self-review ([issue #127](https://github.com/sahamo123/dax-editor/issues/127), [PR #128](https://github.com/sahamo123/dax-editor/pull/128)). S00.05 ([issue #129](https://github.com/sahamo123/dax-editor/issues/129)) begins fresh isolated offline editing and full/browser verification; native and packaged results remain separate.
