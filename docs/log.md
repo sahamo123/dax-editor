@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: S01.01 passed the scoped, self-reviewed audit with owner-approved synthetic evidence ([issue #135](https://github.com/sahamo123/dax-editor/issues/135), [PR #138](https://github.com/sahamo123/dax-editor/pull/138)). S01.02 ([issue #140](https://github.com/sahamo123/dax-editor/issues/140)) records proposed product/design and workspace behavior; native acceptance remains open.
+
 * **Update**: The owner approved five identified synthetic S01.01 screenshots after the initial automatic upload rejection. Their hashes were rechecked and the direct blob uploads succeeded; publication and audit verification remain pending.
 
 * **Update**: A read-only native test preflight found that the historical installer run ID is fixed both in the workflow and in its result field; viewport resizing does not establish Windows display scaling. [Issue #139](https://github.com/sahamo123/dax-editor/issues/139) tracks source-matched provenance and actual scaling after S01.06. No CI changes or native run occurred.

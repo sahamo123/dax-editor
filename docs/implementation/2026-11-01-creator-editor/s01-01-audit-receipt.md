@@ -11,7 +11,7 @@ generated:
 
 # S01.01 rendered workspace audit
 
-**State: VERIFYING, publication recheck pending.** [Issue #135](https://github.com/sahamo123/dax-editor/issues/135). Entry rechecked [issue #133](https://github.com/sahamo123/dax-editor/issues/133), [PR #134](https://github.com/sahamo123/dax-editor/pull/134), stage receipt, tested commit `1d520153a1f81d2429f815d2db5e655e1a0d538d` and tree `219fd8dbce965c48986b9b445fd4db4d3d2957ea`; that commit is the current branch ancestor. Independent S00 review and its correction are recorded in the predecessor receipt. No application source changed after the tested baseline.
+**State: VERIFIED with self-review.** [Issue #135](https://github.com/sahamo123/dax-editor/issues/135), [PR #138](https://github.com/sahamo123/dax-editor/pull/138), tested head `48bb5b00fce1399cd193123e49bc16b43266c99b`, tree `32e2278a0f2c519fd01a476daf799ede64e83c83`. Entry rechecked [issue #133](https://github.com/sahamo123/dax-editor/issues/133), [PR #134](https://github.com/sahamo123/dax-editor/pull/134), stage receipt, tested commit `1d520153a1f81d2429f815d2db5e655e1a0d538d` and tree `219fd8dbce965c48986b9b445fd4db4d3d2957ea`. Independent S00 review and its correction are recorded in the predecessor receipt. No application source changed after the tested baseline.
 
 ## Method and boundaries
 
@@ -43,4 +43,4 @@ In the control session, keyboard resizing changed the chat width and persisted a
 
 Approved synthetic screenshot SHA-256 values: empty `602c2d889c50f2b1ac676f1b3ce10c3187c576c49a21c0dd263db28f4c1e69ae`; redacted error `f7952d6eb073682cc288d22ccf26106ef9d2de9752cebfe767155d829ad21e32`; maximum-chat frame `d0f956e387dc080ee58ce6f4d50ec36c3bf390e7790481e86304385f1e81d755`; task `915e64fcfd64c6d457ff35b240ab66f66c9b8114f72b159af1f196578f8c4e80`; compact `94fc3208f1c645c1d2d9dc3f75d42d71abd90e61114ca81a149591289815534f`.
 
-`pnpm docs:index`, `pnpm docs:okf`, `pnpm lint` and `git diff --check` passed after the audit. The full source and browser checks are reused from S00.05 because this slice changes documentation and screenshots only. A separate coordinator self-review checked the prior published tree, local screenshots and metrics; the final publication must be rechecked before marking VERIFIED. S01.07 still requires native DPI checks on a policy-authorized Windows target.
+`pnpm docs:index`, `pnpm docs:okf`, `pnpm lint` and `git diff --check` passed after the audit. The full source and browser checks are reused from S00.05 because this slice changes documentation and screenshots only. A separate coordinator self-review checked the published tree, screenshot hashes and metrics; it was not independent. S01.07 still requires native DPI checks on a policy-authorized Windows target.

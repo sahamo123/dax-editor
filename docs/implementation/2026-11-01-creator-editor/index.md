@@ -30,6 +30,7 @@
 * [S01.01 rendered workspace audit receipt](s01-01-audit-receipt.md) - Browser-observed editing workflow, prioritized usability findings and design direction for the first-improvement route.
 * [Reproduce the S01.01 synthetic workspace audit](s01-01-reproduce-audit.md) - Portable procedure and test harness for recapturing the browser audit without uploading private screenshots.
 * [S01.01: Audit the current rendered editing workflow](s01-01-workflow-audit.md) - Plan and evidence gates: Audit the current rendered editing workflow.
+* [S01.02 product and workspace contract receipt](s01-02-contract-receipt.md) - Entry checks, design decisions, verification and handoff for the proposed first-improvement workspace contract.
 * [S01.02: Record the product and design contract](s01-02-product-design-contract.md) - Plan and evidence gates: Record the product and design contract.
 * [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) - Plan and evidence gates: Separate project setup from contextual inspection.
 * [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) - Plan and evidence gates: Keep the preview usable across workspace sizes.
