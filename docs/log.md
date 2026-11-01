@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: Recovery acceptance [#157 / PR #160](https://github.com/sahamo123/dax-editor/pull/160) passed the complete browser suite and self-review at `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. S01.05 parent evidence reconciliation remains pending.
+
 * **Update**: Shutdown recovery [#158 / PR #159](https://github.com/sahamo123/dax-editor/pull/159) passed source checks, three focused browser repeats and self-review at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Combined recovery acceptance #157 remains pending.
 
 * **Incident**: Recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) found a synthetic task-directory cleanup failure. Shutdown investigation [#158](https://github.com/sahamo123/dax-editor/issues/158) reproduced late task completion; its fix remains under verification. S01.05 remains open.

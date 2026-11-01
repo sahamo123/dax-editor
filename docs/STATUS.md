@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.05 parent evidence reconciliation — November 1, 2026
+
+All five scoped children now have self-reviewed draft PRs, most recently [recovery acceptance #157 / PR #160](https://github.com/sahamo123/dax-editor/pull/160), tested head `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. The [parent receipt](implementation/2026-11-01-creator-editor/s01-05-task-recovery-receipt.md) reconciles the checklist and is awaiting its separate review; the step is not yet verified. Check branch publication before resuming elsewhere.
+
 ## S01.05 combined recovery acceptance — November 1, 2026
 
 Shutdown [#158 / PR #159](https://github.com/sahamo123/dax-editor/pull/159) is self-reviewed at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) continues on `codex/s01-05-recovery-acceptance-v2` from that commit; see the [receipt](implementation/2026-11-01-creator-editor/s01-05-recovery-acceptance-receipt.md). The full browser suite must pass before S01.05 can be reconciled. Check branch publication before resuming elsewhere.

@@ -162,3 +162,5 @@ The initial failure-visibility candidate passed full source and browser checks. 
 Failure visibility passed source/browser checks and self-review in PR #156 at `082314a691f1ee1720beaf85c8c1280858727842`. Recovery acceptance #157 then found a synthetic cleanup failure; #158 independently reproduced chat shutdown ordering and is under verification. See the [shutdown receipt](s01-05-shutdown-receipt.md).
 
 Shutdown fix PR #159 passed source checks, three focused browser repeats and self-review at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. The separate recovery-acceptance tests are now based on that commit and require the full browser suite.
+
+Recovery acceptance PR #160 passed the complete browser suite (62 passed, two skipped) and self-review at `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. Parent #151 remains in verification while its [receipt](s01-05-task-recovery-receipt.md) awaits a separate self-review.
