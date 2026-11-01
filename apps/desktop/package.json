@@ -11,6 +11,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:e2e": "pnpm build:engine && playwright test",
+    "test:performance": "pnpm build:engine && playwright test --config playwright.performance.config.ts",
     "mock-server": "node e2e/mock-server.mjs",
     "docs:check": "typedoc",
     "build:engine": "pnpm --filter \"@dax/engine...\" build",

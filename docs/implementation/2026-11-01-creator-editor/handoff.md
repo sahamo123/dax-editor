@@ -11,15 +11,15 @@ generated:
 
 # Current handoff
 
-**First-improvement is active: S00.01 and S00.02 VERIFIED; S00.03 IN_PROGRESS.** Follow [issue #125](https://github.com/sahamo123/dax-editor/issues/125). Predecessor [issue #123](https://github.com/sahamo123/dax-editor/issues/123), [PR #124](https://github.com/sahamo123/dax-editor/pull/124) and its tested source were rechecked before entry. Independent stage review remains due.
+**First-improvement is active: S00.01–S00.03 VERIFIED; S00.04 IN_PROGRESS.** Follow [issue #127](https://github.com/sahamo123/dax-editor/issues/127). Predecessor [issue #125](https://github.com/sahamo123/dax-editor/issues/125), [PR #126](https://github.com/sahamo123/dax-editor/pull/126) and its tested source were rechecked before entry. Independent stage review remains due.
 
 | Item | Current state |
 |---|---|
-| Current work | S00.03 fixture inventory, reproducibility and provenance |
+| Current work | S00.04 performance budgets and short baseline measurements |
 | Implementation route | first-improvement, S00–S02 |
-| Active implementation step | S00.03 IN_PROGRESS |
-| Completed implementation steps | 2 of 76; both self-reviewed, independent stage review pending |
-| Next eligible implementation step | S00.04 after S00.03 evidence, review and current-tree recheck |
+| Active implementation step | S00.04 IN_PROGRESS |
+| Completed implementation steps | 3 of 76; each self-reviewed, independent stage review pending |
+| Next eligible implementation step | S00.05 after S00.04 evidence, review and current-tree recheck |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 | Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use work branch `codex/s00-03-acceptance-fixtures`, based on `codex/s00-02-capability-reconciliation`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
+Use work branch `codex/s00-04-performance-baseline`, based on `codex/s00-03-acceptance-fixtures`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
 
 ## Next execution action
 
-Inventory existing authorized fixtures, generate and verify the documented synthetic cases and preserve provenance; record S00.03's evidence and review in issue #125 and its PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing check blocks S00.04.
+Specify and collect the required short performance samples and resource budgets; record S00.04 evidence, limitations and review in issue #127 and its PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing check blocks S00.05.
 
 ## Known gates to anticipate
 

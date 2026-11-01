@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: S00.03 passed fixture generation and review ([issue #125](https://github.com/sahamo123/dax-editor/issues/125), [PR #126](https://github.com/sahamo123/dax-editor/pull/126)). S00.04 ([issue #127](https://github.com/sahamo123/dax-editor/issues/127)) records proposed budgets and short isolated Edge samples, including a test-seeded 720p cache; normal proxies are 480p. Packaged/native and sustained acceptance remain open.
+
 * **Update**: S00.02 passed its scoped source reconciliation with self-review and system-FFmpeg checks ([issue #123](https://github.com/sahamo123/dax-editor/issues/123), [PR #124](https://github.com/sahamo123/dax-editor/pull/124)). S00.03 ([issue #125](https://github.com/sahamo123/dax-editor/issues/125)) inventories [synthetic and private-media fixtures](implementation/2026-11-01-creator-editor/s00-03-fixtures.md); generated media is ignored and packaged-runtime acceptance remains separate.
 
 * **Update**: S00.01 is verified with self-review ([issue #121](https://github.com/sahamo123/dax-editor/issues/121), [PR #122](https://github.com/sahamo123/dax-editor/pull/122)); S00.02 began after a fresh issue/PR/tree recheck. Correct misleading transcript availability and deferred-template caption wording without changing caption behavior. A packaged-FFmpeg `spawn UNKNOWN` during core tests is tracked separately from system-FFmpeg evidence.
