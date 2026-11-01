@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: planning-publication batch 01 adds master-plan, execution-contract. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
+
 * **Update**: [creator workflow review and implementation plan](specs/creator-platform-plan.md) records source-backed gaps, historical evidence limits, a proposed composition/asset/task architecture, control-panel journey, bounded Blender/reference-style/hosting scope, estimated milestones and module/project-file ownership. Issue #70; documentation only, no application/dependency/runtime changes. Preserve current release gates and make future capabilities explicitly proposed.
 
 * **Verification**: creator-plan documentation indexes/OKF, lint (567 files), 35 local source/document links and whitespace checks pass. Full application/browser/native suites were not rerun for this planning-only change; previous test evidence retains its original date and scope. No formal automated design critique or live UI acceptance was performed.
