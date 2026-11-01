@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: planning-publication batch 03 adds S00.02, S00.03, S00.04, S00.05, S00.06. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
+
 * **Update**: planning-publication batch 02 adds receipt-template, execution-goal, S00, S00.01. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
 
 * **Update**: planning-publication batch 01 adds master-plan, execution-contract. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.

@@ -25,11 +25,11 @@ Read the [master](master-plan.md) and [execution contract](execution-contract.md
 | Step | Execution document | Person-days |
 |---|---|---:|
 | S00.01 | [Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) | 0.25–0.5 |
-| S00.02 | Reconcile source and capability claims (`s00-02-source-capability-reconciliation.md`; later publication batch) | 0.25–0.5 |
-| S00.03 | Build the authorized acceptance fixture inventory (`s00-03-authorized-fixtures.md`; later publication batch) | 0.25–0.5 |
-| S00.04 | Establish measurable timing and resource budgets (`s00-04-performance-budgets.md`; later publication batch) | 0.5–1 |
-| S00.05 | Repeat the scoped source and offline editing baseline (`s00-05-baseline-acceptance.md`; later publication batch) | 0.5–1 |
-| S00.06 | Close the reconciled baseline and route its blockers (`s00-06-baseline-close.md`; later publication batch) | 0.25–0.5 |
+| S00.02 | [Reconcile source and capability claims](s00-02-source-capability-reconciliation.md) | 0.25–0.5 |
+| S00.03 | [Build the authorized acceptance fixture inventory](s00-03-authorized-fixtures.md) | 0.25–0.5 |
+| S00.04 | [Establish measurable timing and resource budgets](s00-04-performance-budgets.md) | 0.5–1 |
+| S00.05 | [Repeat the scoped source and offline editing baseline](s00-05-baseline-acceptance.md) | 0.5–1 |
+| S00.06 | [Close the reconciled baseline and route its blockers](s00-06-baseline-close.md) | 0.25–0.5 |
 
 ## Deliverables and resources
 
