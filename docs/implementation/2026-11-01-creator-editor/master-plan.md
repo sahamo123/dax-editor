@@ -41,7 +41,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | Stage | Deliverable | Step files | Person-days |
 |---|---|---:|---:|
 | [S00](stage-00-baseline.md) | Baseline reconciliation and acceptance | 6 | 2-4 |
-| S01 (`stage-01-workspace.md`; later publication batch) | Control-panel workflow and design contract | 7 | 4-7 |
+| [S01](stage-01-workspace.md) | Control-panel workflow and design contract | 7 | 4-7 |
 | S02 (`stage-02-profiles.md`; later publication batch) | Content profiles and compatibility foundation | 8 | 4-6 |
 | S03 (`stage-03-composition.md`; later publication batch) | Bounded layered composition | 9 | 10-16 |
 | S04 (`stage-04-long-form.md`; later publication batch) | Long-form podcast and educational workflows | 8 | 8-14 |
@@ -66,12 +66,12 @@ Stage overview: [S00](stage-00-baseline.md). Read it before its first step.
 
 ## S01: Control-panel workflow and design contract
 
-Stage overview: S01 (`stage-01-workspace.md`; later publication batch). Read it before its first step.
+Stage overview: [S01](stage-01-workspace.md). Read it before its first step.
 
-- S01.01: Audit the current rendered editing workflow (`s01-01-workflow-audit.md`; later publication batch) - 0.5-1 engineer-days.
-- S01.02: Record the product and design contract (`s01-02-product-design-contract.md`; later publication batch) - 0.5-0.75 engineer-days.
-- S01.03: Separate project setup from contextual inspection (`s01-03-setup-inspector.md`; later publication batch) - 0.75-1.25 engineer-days.
-- S01.04: Keep the preview usable across workspace sizes (`s01-04-responsive-workspace.md`; later publication batch) - 0.75-1.25 engineer-days.
+- [S01.01: Audit the current rendered editing workflow](s01-01-workflow-audit.md) - 0.5-1 engineer-days.
+- [S01.02: Record the product and design contract](s01-02-product-design-contract.md) - 0.5-0.75 engineer-days.
+- [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) - 0.75-1.25 engineer-days.
+- [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) - 0.75-1.25 engineer-days.
 - S01.05: Preserve task and recovery controls in the new layout (`s01-05-task-recovery-visibility.md`; later publication batch) - 0.5-1 engineer-days.
 - S01.06: Complete keyboard and accessibility behavior (`s01-06-accessibility.md`; later publication batch) - 0.5-1 engineer-days.
 - S01.07: Verify browser and native workspace acceptance (`s01-07-workspace-acceptance.md`; later publication batch) - 0.5-0.75 engineer-days.

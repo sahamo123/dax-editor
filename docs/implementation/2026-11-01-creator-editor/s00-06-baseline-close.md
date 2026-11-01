@@ -59,5 +59,5 @@ Preserve original projects/history and captured failure logs. Stop only owned jo
 Complete the [receipt](receipt-template.md) with: Stage S00 closure review, consolidated evidence map, unresolved external gate register and next-step authorization scope.
 
 Include implementation commit, issue/PR, recorded predecessor evidence recheck, commands/exit codes, artifact hashes, remaining risks and rollback/recovery instructions. Mark complete only when every required check passes.
-Then perform a fresh evidence recheck of this receipt before the next step (`s01-01-workflow-audit.md`; later publication batch). Planning-file creation itself does not satisfy this gate.
+Then perform a fresh evidence recheck of this receipt before [the next step](s01-01-workflow-audit.md). Planning-file creation itself does not satisfy this gate.
 

@@ -12,4 +12,9 @@
 * [S00.04: Establish measurable timing and resource budgets](s00-04-performance-budgets.md) - Plan and evidence gates: Establish measurable timing and resource budgets.
 * [S00.05: Repeat the scoped source and offline editing baseline](s00-05-baseline-acceptance.md) - Plan and evidence gates: Repeat the scoped source and offline editing baseline.
 * [S00.06: Close the reconciled baseline and route its blockers](s00-06-baseline-close.md) - Plan and evidence gates: Close the reconciled baseline and route its blockers.
+* [S01.01: Audit the current rendered editing workflow](s01-01-workflow-audit.md) - Plan and evidence gates: Audit the current rendered editing workflow.
+* [S01.02: Record the product and design contract](s01-02-product-design-contract.md) - Plan and evidence gates: Record the product and design contract.
+* [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) - Plan and evidence gates: Separate project setup from contextual inspection.
+* [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) - Plan and evidence gates: Keep the preview usable across workspace sizes.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
+* [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
