@@ -6,10 +6,14 @@ tags: [handoff, process, agents, dependencies]
 status: stable
 generated:
   by: process:implementer
-  at: 2026-10-20T00:00:00Z
+  at: 2026-10-31T18:54:04-07:00
 ---
 
 # Handoff: resuming dax-editor
+
+## Current entry point — October 31, 2026
+
+**Read [Continue on another laptop or agent](laptop-continuation.md) before executing commands below.** It is the authoritative branch/setup/transfer/next-work guide for this handoff, including Antigravity. Use `codex/laptop-agent-handoff`; default `main` is older. Issue [#66](https://github.com/sahamo123/dax-editor/issues/66) tracks this delivery. Earlier sections preserve historical evidence; their live-process, branch, cache and incomplete-feature statements are not current instructions. Last application acceptance was October 27; no engine is promised running on another machine. Private ad projects/exports are inventoried in the new guide, not committed.
 
 ## October 27 continuation
 
@@ -55,11 +59,11 @@ The unsigned Windows installer includes offline AI. Full `pnpm check`, 32 browse
 
 ## 1. Start (any agent, any machine)
 
-1. `git checkout codex/windows-offline-desktop` for the current Windows work; the historical baseline is `claude/exciting-lamport-1k91fh`. Preserve local changes before switching.
+1. Follow the current [cross-laptop continuation](laptop-continuation.md); the branch/setup steps in this historical section are superseded. Preserve local changes before switching.
 2. Read `AGENTS.md`, then this file, then `docs/STATUS.md` (current state and "Needs a human").
 3. Install the toolchain in section 3.1, then `corepack enable && pnpm bootstrap`.
 4. `pnpm check`. It must pass before you change anything. If it fails, fix that first. Known flaky tests are in section 6.
-5. Work in small steps: test first, `pnpm check` green, one Conventional Commit, push to this branch. Use the trailer `Co-Authored-By: <your agent name> <noreply@...>`, but never a model name in commits, PRs or repo files.
+5. Work in small steps: test first, `pnpm check` green, one Conventional Commit, push the issue branch. Use tool-neutral authorship; do not invent an agent identity or vendor author trailer.
 
 ## 2. Where we stopped
 

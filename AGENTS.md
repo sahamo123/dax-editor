@@ -15,7 +15,7 @@ Hard constraints, in priority order:
 
 ## Resuming the build
 
-If you are continuing work started by another agent, read `docs/engineering/handoff.md` first. It says where the build stopped, what is unfinished (and where its patch is), and the order of the remaining work. Then `docs/STATUS.md`.
+If you are continuing work started by another agent, read `docs/engineering/handoff.md` first, then its current [cross-laptop continuation](docs/engineering/laptop-continuation.md) and `docs/STATUS.md`. Use `codex/laptop-agent-handoff`; default `main` is older. Historical checkpoints do not override the current guide. No chat memory is required.
 
 ## Repository map
 
@@ -30,7 +30,7 @@ If you are continuing work started by another agent, read `docs/engineering/hand
 | `.github/` | CI, issue/PR templates, CODEOWNERS. |
 | `scripts/`, `.githooks/` | Bootstrap script and git hooks. |
 
-Planned, not yet present: `packages/agent`, `apps/desktop`.
+Also present: `packages/agent` (provider/tool loop), `packages/server` and `packages/engine` (live session/launcher), `packages/protocol`, `packages/local-llm`, `packages/stt`, and `apps/desktop` (React/Tauri editor).
 
 ## Commands
 

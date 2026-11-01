@@ -6,7 +6,7 @@ tags: [process, agents, context-engineering, okf]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-18T18:40:00Z
+  at: 2026-10-31T18:54:04-07:00
 ---
 
 # Knowledge protocol
@@ -18,7 +18,7 @@ The goal is simple: **if every chat history vanished tomorrow, the repo alone wo
 ## Reading order for a new agent or person
 
 1. [`/AGENTS.md`](../../AGENTS.md): rules, commands, definition of done. Short on purpose.
-2. [`docs/STATUS.md`](../STATUS.md): what works, what is in progress, what is next, what is blocked.
+2. [Current handoff](handoff.md) and [cross-laptop continuation](laptop-continuation.md), then [`docs/STATUS.md`](../STATUS.md): branch/setup, what works, what is next and what is blocked.
 3. [`docs/log.md`](../log.md): newest entries first. Read the last few to see how we got here.
 4. [`docs/index.md`](../index.md): the map. Open only the concepts relevant to the task.
 5. The GitHub issue you were given, and any spec or ADR it links.

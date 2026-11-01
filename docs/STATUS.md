@@ -6,10 +6,18 @@ tags: [status, roadmap, handoff]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-19T12:00:00Z
+  at: 2026-10-31T18:54:04-07:00
 ---
 
 # Project status
+
+## Cross-laptop handoff — October 31, 2026
+
+Continue from `codex/laptop-agent-handoff`, based on the published October 27 application tree. Read [the current continuation guide](engineering/laptop-continuation.md) for the exact baseline, fresh Windows commands, live MCP configuration, private data boundaries and prioritized issue links. Root README/AGENTS and setup entry points now agree. Default `main` remains older; stacked implementation PRs are not merged by this handoff. Tracking: [#66](https://github.com/sahamo123/dax-editor/issues/66).
+
+This is a documentation handoff, not a new native-release certification. October 27 evidence below retains its original scope; runtime-running statements describe that checkpoint. Rerun checks on the new laptop. Local creative evidence additionally contains three decoded 30-second vertical ad variations under ignored `artifacts/workshop-ad-variations/`; no private media or credentials are published. Their October 28 event date has passed. Projects/media need a separate private transfer and relinking; models/dependencies are reproducible downloads.
+
+Fresh October 31 `pnpm check` PASS: 1,799 package +17 root tests; 67 explicit platform/opt-in package skips. The normal Windows host passes the symlink fixture denied by the initial stopped sandbox run; no assertions or security settings changed. Docs indexes/OKF and 37 handoff links also pass. Private log: `artifacts/laptop-handoff-check-authorized.log`. [PR #67](https://github.com/sahamo123/dax-editor/pull/67) carries this handoff; new-laptop/browser/native acceptance is not inferred from the source checks.
 
 ## Complete-effects review continuation — October 27, 2026
 

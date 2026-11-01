@@ -1,5 +1,11 @@
 # Dax Editor laptop delivery tracker
 
+## Cross-laptop continuation — October 31, 2026
+
+Issue [#66](https://github.com/sahamo123/dax-editor/issues/66) tracks the repository-only handoff on `codex/laptop-agent-handoff`. Read [the current guide](docs/engineering/laptop-continuation.md) for fresh setup, exact baseline, private transfer and ranked next issues. Older tables preserve historical evidence; use the October 27 acceptance matrix and current guide instead of restarting completed features. Application behavior and security policy are unchanged.
+
+[PR #67](https://github.com/sahamo123/dax-editor/pull/67): fresh full check PASS (1,799 package +17 root tests, 67 explicit platform/opt-in skips), docs indexes/OKF and 37 local handoff links PASS. Private log: `artifacts/laptop-handoff-check-authorized.log`. Setup on the other laptop remains to be performed there.
+
 ## Current acceptance — October 27, 2026
 
 Additional real-footage MCP gate PASS: actual stdio proxy/SDK client imports a real clip into the visible live editor, makes one grouped trim/title/volume edit, verifies undo/redo and Planning refusal, and exports/fully decodes audio/video plus WebM review. Private result and reopenable test/previous projects: artifacts/real-video-mcp/. Actual Claude/Codex assistant inference remains pending.

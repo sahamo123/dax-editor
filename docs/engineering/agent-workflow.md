@@ -6,7 +6,7 @@ tags: [agents, process, harness, context-engineering]
 status: stable
 generated:
   by: process:implementer
-  at: 2026-10-18T19:00:00Z
+  at: 2026-10-31T18:54:04-07:00
 ---
 
 # Working with AI agents (the harness)
@@ -22,12 +22,12 @@ The "harness" is everything around a model that makes it effective and safe: ins
 | Work queue | GitHub Issues (use the *Work item* template) |
 | Guardrails | `AGENTS.md` safety rules, branch protection, CODEOWNERS, hooks |
 
-## Onboarding a new agent (about five minutes)
+## Onboarding a new agent
 
-1. Clone the repo and run `pnpm bootstrap`, then `pnpm check`. It should pass.
+1. Follow [the current continuation guide](laptop-continuation.md): clone the published handoff branch, install pinned tools, then run `pnpm check`. A default-branch clone or another laptop's ignored caches are not the current setup.
 2. Give the agent this prompt:
 
-> You are continuing work on dax-editor. Read `AGENTS.md`, then `docs/STATUS.md`, then the newest entries in `docs/log.md`. Then work on GitHub issue #N. Follow the loop in `docs/engineering/agent-workflow.md`. When finished, run `pnpm check`, open a PR, and do the scribe step from `docs/engineering/knowledge-protocol.md`.
+> You are continuing work on dax-editor. Read `AGENTS.md`, `docs/engineering/handoff.md`, `docs/engineering/laptop-continuation.md`, `docs/STATUS.md`, then the newest entries in `docs/log.md`. Then work on GitHub issue #N. Follow the loop in `docs/engineering/agent-workflow.md`. When finished, run `pnpm check`, open a PR, and do the scribe step from `docs/engineering/knowledge-protocol.md`.
 
 3. If the agent has its own instruction file name (`CLAUDE.md`, `GEMINI.md`, `.cursorrules`, ...), make it a one-line pointer to `AGENTS.md`. Never duplicate rules.
 

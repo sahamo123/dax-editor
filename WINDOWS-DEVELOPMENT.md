@@ -1,5 +1,11 @@
 # Develop Dax Editor on this laptop
 
+## Current setup entry — October 31, 2026
+
+For another laptop or any agent, use [the current continuation guide](docs/engineering/laptop-continuation.md). It documents `codex/laptop-agent-handoff`, global-toolchain commands and what a clone omits. This file's cached-toolchain commands apply only to the original prepared folder. Older readiness/test counts below are superseded by [STATUS](docs/STATUS.md): installed-native CI acceptance passed October 27; owner/new-laptop execution remains a separate gate. No Windows security settings were changed.
+
+## Historical local setup notes
+
 The browser preview now supports choosing/dropping video files and chat video attachments. Selected bytes are copied into local `.dax-data/uploads/` (1 GiB per file). Use the chat Mode selector for Planning (read-only) or Edit. Send queues requests while work runs; Steer task continues the active conversation with new guidance at the next model step, without cancelling current work. Attachment/mode changes continue after the active run. Stop remains explicit cancellation. Expand Tasks for statuses, queue positions and cancellation. Task metadata is saved locally; engine restart marks unfinished work interrupted. Planning attachments stay off the timeline until a new Edit request imports them. Non-video attachments are not supported yet. The native installer has not been rebuilt for these latest preview features.
 
 Current delivery status: **development preview works; native release NOT READY**. Current application source passes `pnpm check`, all 37 browser workflows, 25 Rust tests and the stronger real offline editing/export/restart suite. Packaging scripts pass 13 tests. Local AI remains slow: measured requests took 49–129 seconds on this laptop. Windows Application Control blocks native execution and both local installer build-tool paths; registry state reports Smart App Control enforcement. PR #37 provides an unsigned artifact-only candidate build, which still needs actual installation and upgrade testing. The October 20 installer is historical and predates these features. See [Microsoft's Smart App Control overview](https://learn.microsoft.com/en-us/windows/apps/develop/smart-app-control/overview). No Windows security settings were changed.
