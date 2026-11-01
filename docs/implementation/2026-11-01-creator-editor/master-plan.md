@@ -46,7 +46,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | [S03](stage-03-composition.md) | Bounded layered composition | 9 | 10-16 |
 | [S04](stage-04-long-form.md) | Long-form podcast and educational workflows | 8 | 8-14 |
 | [S05](stage-05-reference-style.md) | Reference-style analysis and editable recipes | 7 | 7-12 |
-| S06 (`stage-06-characters.md`; later publication batch) | Curated Blender characters and scene packs | 8 | 10-18 |
+| [S06](stage-06-characters.md) | Curated Blender characters and scene packs | 8 | 10-18 |
 | S07 (`stage-07-workflows.md`; later publication batch) | Bounded specialist workflows and recovery | 7 | 5-8 |
 | S08 (`stage-08-hosting.md`; later publication batch) | Optional private personal hosting | 8 | 8-14 |
 | S09 (`stage-09-release.md`; later publication batch) | Compatibility performance and distribution gates | 8 | 6-10 |
@@ -130,11 +130,11 @@ Stage overview: [S05](stage-05-reference-style.md). Read it before its first ste
 
 ## S06: Curated Blender characters and scene packs
 
-Stage overview: S06 (`stage-06-characters.md`; later publication batch). Read it before its first step.
+Stage overview: [S06](stage-06-characters.md). Read it before its first step.
 
-- S06.01: Qualify three curated character and scene packs (`s06-01-character-intake.md`; later publication batch) - 1-2 engineer-days.
-- S06.02: Version bounded character recipes and provenance (`s06-02-character-contracts.md`; later publication batch) - 1-2 engineer-days.
-- S06.03: Harden owned Blender process execution (`s06-03-character-process-limits.md`; later publication batch) - 2-3 engineer-days.
+- [S06.01: Qualify three curated character and scene packs](s06-01-character-intake.md) - 1-2 engineer-days.
+- [S06.02: Version bounded character recipes and provenance](s06-02-character-contracts.md) - 1-2 engineer-days.
+- [S06.03: Harden owned Blender process execution](s06-03-character-process-limits.md) - 2-3 engineer-days.
 - S06.04: Render curated opaque draft and full scenes (`s06-04-character-draft-scenes.md`; later publication batch) - 1-2 engineer-days.
 - S06.05: Preserve alpha through character composition (`s06-05-character-alpha.md`; later publication batch) - 1-2 engineer-days.
 - S06.06: Commit and regenerate character assets atomically (`s06-06-character-regeneration.md`; later publication batch) - 1-2 engineer-days.
