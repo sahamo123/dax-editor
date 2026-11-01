@@ -6,10 +6,12 @@ tags: [handoff, agents, windows, setup]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-31T18:54:04-07:00
+  at: 2026-11-01T08:40:21Z
 ---
 
 # Continue on another laptop or agent
+
+**November 1 supplement:** the latest full continuation is `codex/impeccable-design-setup`, based on `codex/laptop-agent-handoff` at `2adea8a7d1a3e5a8a37f1713724fb6e24a46387c`. Use that latest branch for UI/UX work; it includes the complete application and [pinned Impeccable setup](impeccable-design.md). The branch/clone example below records the October 31 baseline; substitute `codex/impeccable-design-setup` when cloning the latest continuation. Private-file boundaries and application acceptance gates are unchanged.
 
 ## Start here — October 31, 2026
 
@@ -127,5 +129,7 @@ The shared command/session/task/history engine is authoritative for manual, chat
 The accepted product contract is [functional desktop release](../specs/functional-desktop-release.md); architecture and licensing decisions are under [ADRs](../adr/index.md). Opt-in checks after resources are prepared: `pnpm test:offline`, `pnpm test:speech:acceptance`, `pnpm --filter @dax/desktop shell:test` and `pnpm eval --adapter oracle`. Offline/native checks execute packaged binaries and need an authorized machine; a browser pass cannot substitute for them. Run only the suite relevant to the next issue, and keep credentials out of test fixtures.
 
 ## Paste into any agent, including Antigravity
+
+Optional UI/UX guidance added after this baseline: [Impeccable setup and project brief](impeccable-design.md), branch `codex/impeccable-design-setup`, issue #68. Reinstall the pinned skill on a new laptop; ignored copies are not included in a clone. Follow the manual-context restriction in root AGENTS.md.
 
 > Continue dax-editor from branch codex/laptop-agent-handoff (or its reviewed successor). Read AGENTS.md, docs/engineering/laptop-continuation.md, docs/STATUS.md and the latest docs/log.md before editing. Inspect Git status and relevant package instructions. Report the actual commit, implemented features, open acceptance gates and first issue to tackle; do not infer readiness from old checkpoints or chat history. Follow the fresh-machine setup, run pnpm check and relevant browser/native checks, then work on one GitHub issue per branch/PR. Preserve private project/media data, use the live MCP proxy for the running editor, and never expose credentials or weaken security policy. Update STATUS/log/concepts/indexes and leave a pushed, reviewable handoff. Do not merge your own PR.

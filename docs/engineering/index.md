@@ -7,6 +7,7 @@
 * [Frameworks and standards we adopted](frameworks.md) - Which existing standards, templates and tools the repo reuses instead of inventing its own, and where each one shows up.
 * [Git and pull request workflow](git-workflow.md) - Trunk-based branching, Conventional Commits, small squash-merged pull requests, and what CI and review require.
 * [Handoff: how another agent resumes dax-editor](handoff.md) - Where the build stopped, what is merged, every dependency and system tool the build needs and where each is pinned, the unfinished patch and its state, and the order of the remaining work. Read this first when resuming from the repository alone.
+* [Impeccable design setup and editor brief](impeccable-design.md) - Pinned development-only design skills, licence and integrity evidence, manual-context use, cross-laptop installation and Dax Editor UI constraints.
 * [Knowledge protocol (how the repo remembers)](knowledge-protocol.md) - How work is recorded in docs/ as an Open Knowledge Format bundle so any agent or person can resume where the last one stopped.
 * [Continue on another laptop or agent](laptop-continuation.md) - The current continuation branch, fresh Windows setup, private-file transfer boundary, evidence and next tasks for any agent without chat history.
 * [Refactoring guide](refactoring.md) - When and how to refactor safely: separate commits, tests green throughout, small steps, and the tools that find candidates.

@@ -6,10 +6,14 @@ tags: [handoff, process, agents, dependencies]
 status: stable
 generated:
   by: process:implementer
-  at: 2026-10-31T18:54:04-07:00
+  at: 2026-11-01T08:40:21Z
 ---
 
 # Handoff: resuming dax-editor
+
+## Design-tool continuation — November 1, 2026
+
+`codex/impeccable-design-setup` adds the pinned Impeccable skill setup on top of `codex/laptop-agent-handoff`. Read [design setup and editor brief](impeccable-design.md) for manual-context usage and reinstall instructions; skill copies are ignored local developer files. No UI redesign or engine/hook installation is implied. Issue [#68](https://github.com/sahamo123/dax-editor/issues/68) tracks the setup. The October 31 guide below remains the application baseline and fresh-laptop procedure.
 
 ## Current entry point — October 31, 2026
 
