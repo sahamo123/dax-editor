@@ -52,3 +52,11 @@ Do not report “done” without naming the step and its verification scope. If 
 - Deterministic checks and documentation/lint checks PASS; see [review receipt](review-report.md). `_local/` is ignored.
 - No application features implemented or runtime tests repeated; 0/76 implementation steps complete. Owner review and explicit execution launch are next.
 - Publication stack and exact remote continuation are recorded in [issue #72](https://github.com/sahamo123/dax-editor/issues/72); do not assume default main contains them.
+
+## 2026-11-01 — private evidence path correction
+
+The earlier entries name `_local/`. New evidence now belongs in hidden `.local/`: Git ignore alone does not exclude Markdown from the OKF indexer. Independent source review confirmed the risk; the existing dot-folder exclusion and Git ignore both pass a private Markdown probe. Old journal entries and the legacy ignore guard are preserved; no private content exposure was observed. This documentation-only correction does not start application work.
+
+## 2026-11-01 — final staged-file verification
+
+The earlier working-tree whitespace check did not cover newly untracked plan pages. Final staged verification caught redundant blank lines at EOF in 86 stage/step pages. Removed only those trailing blanks, recomputed the content digest and reran the full-baseline diff/structure/docs checks. No instruction, dependency or acceptance criterion changed; all application work remains NOT_STARTED.

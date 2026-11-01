@@ -6,10 +6,12 @@ tags: [architecture, roadmap, desktop, ux, rendering, agents]
 status: draft
 generated:
   by: process:implementer
-  at: 2026-11-01T08:53:28Z
+  at: 2026-11-01T09:20:35Z
 ---
 
 # Creator workflows: review and implementation plan
+
+**Detailed execution handbook:** [master index](../implementation/2026-11-01-creator-editor/master-plan.md) expands these milestones into separate stage/step files with predecessor evidence gates and a future launch prompt. It remains planning-only until the owner starts implementation; the handbook's current continuation supersedes this document's historical branch pointer for execution setup.
 
 Planning delivery: [issue #70](https://github.com/sahamo123/dax-editor/issues/70). Inspected baseline: `codex/impeccable-design-setup`, commit `2032f0d191aa46cb90dc29b76d002ce7dcb31451`. This extends Dax Editor; the supplied brief's empty repository fields are resolved by this checkout. It is a proposal, not implemented functionality or a release-readiness claim. No application execution, model calls, media edits or new dependency installation formed part of this review.
 
@@ -129,7 +131,7 @@ Call the feature **Reference style**, not “exact clone.” Reproduce generic e
 
 Build a character configurator around a small set of owned/permissively licensed rigged characters: appearance parameters, materials, camera, lighting, poses, a few gestures and reusable scene presets. Persist parameters for regeneration. Users can still edit their own models in Blender outside Dax. Arbitrary text-to-3D, sculpting, automatic rigging, realistic likeness and lip-sync are later research, not consequences of having Blender installed.
 
-Reuse the separate-process adapter; do not embed Blender into the UI. Accept template ids and validated asset references only. Retain factory startup, disabled auto-execution and owned scripts. Add Blender-stage timeout, output/disk bounds, explicit Python failure reporting, killed-child cleanup and version compatibility tests. Disabling scene auto-execution is not a Python sandbox: application scripts still need review, and hosted workers need OS/container restrictions. Relevant official command/security references: [Blender arguments](https://docs.blender.org/manual/en/4.5/advanced/command_line/arguments.html), [scripting security](https://docs.blender.org/manual/en/4.5/advanced/scripting/security.html). Full pages were unavailable to the research fetch; command flags were checked in the current adapter and official indexed documentation.
+Reuse the separate-process adapter; do not embed Blender into the UI. Accept template ids and validated asset references only. Retain factory startup, disabled auto-execution and owned scripts. The adapter already has a 30-minute render timer: strengthen timeout/error classification, output/disk bounds, explicit Python failure reporting, killed-child cleanup and version compatibility tests. Disabling scene auto-execution is not a Python sandbox: application scripts still need review, and hosted workers need OS/container restrictions. Relevant official command/security references: [Blender arguments](https://docs.blender.org/manual/en/4.5/advanced/command_line/arguments.html), [scripting security](https://docs.blender.org/manual/en/4.5/advanced/scripting/security.html). Full pages were unavailable to the research fetch; command flags were checked in the current adapter and official indexed documentation.
 
 Start with a flattened character scene as an ordinary video; after M3, add transparent renders through a verified alpha-preserving intermediate. Current MP4 output is not that intermediate. Define premultiplied/straight-alpha conversion and test edges over light/dark footage. Pin/hash rigs, textures and animation packs, retain asset licences separately from Blender's licence, and record renderer/template versions in generated metadata. Benchmark a low-resolution draft before full-resolution rendering. Blender stays optional and is released after each job.
 

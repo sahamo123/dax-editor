@@ -22,7 +22,7 @@ generated:
 | Next eligible implementation step | S00.01 after explicit launch authorization and its entry gate |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
-| Current raw artifact location | Ignored `_local/`; older acceptance artifacts remain where STATUS records them |
+| Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
 
 ## Completed in this planning session
 

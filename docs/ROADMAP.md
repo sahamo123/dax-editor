@@ -6,10 +6,12 @@ tags: [roadmap, planning]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-11-01T08:53:28Z
+  at: 2026-11-01T10:00:00Z
 ---
 
 # Roadmap
+
+**Detailed dated execution plan:** [master index](implementation/2026-11-01-creator-editor/master-plan.md) is the current step-by-step proposal, with [progress](implementation/2026-11-01-creator-editor/progress.md), [handoff](implementation/2026-11-01-creator-editor/handoff.md), route boundaries and review evidence. All 76 implementation steps are NOT_STARTED; the earlier milestone outline below is historical context.
 
 **November 1 planning continuation:** read [STATUS](STATUS.md) for current evidence and the [creator workflow review and plan](specs/creator-platform-plan.md) for the proposed next milestones, dependencies, estimates and project/module outline. The original decisions/checklists below retain their historical scope; do not use their old model or feature-absence labels as current implementation status. No new feature or architectural proposal is implemented by that planning document.
 

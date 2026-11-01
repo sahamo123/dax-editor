@@ -2,6 +2,10 @@
 
 ## 2026-11-01
 
+* **Update**: final planning privacy review switches raw evidence to hidden `.local/` inside the dated handbook, excluded by both Git and the existing documentation walker/indexer. Retain the old underscore-folder ignore guard and append a historical correction. A private Markdown probe confirms both boundaries; no application/tooling changes or private-content exposure.
+
+* **Update**: planning-publication batch 24 adds final entrypoints and publication reconciliation. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
+
 * **Update**: planning-publication batch 23 adds progress, review-report. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
 
 * **Update**: planning-publication batch 22 adds decisions, errors-and-recovery, evidence-log, gotchas, handoff. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
@@ -47,6 +51,10 @@
 * **Update**: planning-publication batch 02 adds receipt-template, execution-goal, S00, S00.01. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
 
 * **Update**: planning-publication batch 01 adds master-plan, execution-contract. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
+
+* **Update**: [dated implementation handbook](implementation/2026-11-01-creator-editor/master-plan.md) provides 100 Markdown files: 10 stage overviews, 76 step specifications, 13 control/operating records and a generated index. Source-grounded actions, explicit predecessor and route gates, recovery/receipts and coordinated multi-day context support any agent. Issue #72; documentation only, 0/76 application steps completed.
+
+* **Verification**: independent cross-review covers every stage/step, with ordering and scope findings repaired and rechecked. The final [review report](implementation/2026-11-01-creator-editor/review-report.md) records deterministic inventory/dependency/link/effort and documentation checks. Application/browser/native checks were not rerun for this plan; no new release readiness is claimed.
 
 * **Update**: [creator workflow review and implementation plan](specs/creator-platform-plan.md) records source-backed gaps, historical evidence limits, a proposed composition/asset/task architecture, control-panel journey, bounded Blender/reference-style/hosting scope, estimated milestones and module/project-file ownership. Issue #70; documentation only, no application/dependency/runtime changes. Preserve current release gates and make future capabilities explicitly proposed.
 

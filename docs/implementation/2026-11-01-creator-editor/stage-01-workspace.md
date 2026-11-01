@@ -45,4 +45,3 @@ Browser screenshots do not satisfy native DPI acceptance. Missing required nativ
 Each required step must have a complete [receipt](receipt-template.md), current commit/artifact evidence and passing regression checks. Failed/missing evidence blocks advancement; record the recovery action and do not bypass it.
 
 After independent stage review, continue to [the next stage's first step](s02-01-profile-compatibility-contract.md). Complete log/STATUS/concept/index updates in the implementation PR; preserve this plan's original estimates and record actual effort separately.
-

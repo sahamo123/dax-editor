@@ -1,2 +1,4 @@
-# Private evidence stays local; publish only sanitized receipts.
+# Private evidence stays local and outside documentation indexing.
+.local/
+# Preserve ignore protection for artifacts created before the hidden-folder correction.
 _local/

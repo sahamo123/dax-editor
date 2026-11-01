@@ -60,4 +60,3 @@ Complete the [receipt](receipt-template.md) with: Dated audit, viewport captures
 
 Include implementation commit, issue/PR, recorded predecessor evidence recheck, commands/exit codes, artifact hashes, remaining risks and rollback/recovery instructions. Mark complete only when every required check passes.
 Then perform a fresh evidence recheck of this receipt before [the next step](s01-02-product-design-contract.md). Planning-file creation itself does not satisfy this gate.
-

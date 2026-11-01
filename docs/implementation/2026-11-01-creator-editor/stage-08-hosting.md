@@ -48,4 +48,3 @@ Remote computation requires media transfer and a separate trust boundary. Option
 One-owner private host passes scoped auth/media/range/worker isolation, reconnect, quotas, restart, restore and desktop export parity; no public/multi-user claim.
 Use the [receipt template](receipt-template.md) and link stage/step receipts from their GitHub implementation issues and current STATUS/handoff. Keep the [master plan](master-plan.md) as static navigation; record SHAs, command exits, artifact hashes, hardware, scope, skips and blockers.
 Complete log/concept/STATUS/index updates in the implementation PR. A source/mock/browser success cannot close a required native, provider, external-client or host gate; failed/blocked evidence stops advancement.
-
