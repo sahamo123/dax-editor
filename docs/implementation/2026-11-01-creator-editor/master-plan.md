@@ -58,11 +58,11 @@ Strict default execution is the ordered selected route. Explicit data prerequisi
 Stage overview: [S00](stage-00-baseline.md). Read it before its first step.
 
 - [S00.01: Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) - 0.25-0.5 engineer-days.
-- S00.02: Reconcile source and capability claims (`s00-02-source-capability-reconciliation.md`; later publication batch) - 0.25-0.5 engineer-days.
-- S00.03: Build the authorized acceptance fixture inventory (`s00-03-authorized-fixtures.md`; later publication batch) - 0.25-0.5 engineer-days.
-- S00.04: Establish measurable timing and resource budgets (`s00-04-performance-budgets.md`; later publication batch) - 0.5-1 engineer-days.
-- S00.05: Repeat the scoped source and offline editing baseline (`s00-05-baseline-acceptance.md`; later publication batch) - 0.5-1 engineer-days.
-- S00.06: Close the reconciled baseline and route its blockers (`s00-06-baseline-close.md`; later publication batch) - 0.25-0.5 engineer-days.
+- [S00.02: Reconcile source and capability claims](s00-02-source-capability-reconciliation.md) - 0.25-0.5 engineer-days.
+- [S00.03: Build the authorized acceptance fixture inventory](s00-03-authorized-fixtures.md) - 0.25-0.5 engineer-days.
+- [S00.04: Establish measurable timing and resource budgets](s00-04-performance-budgets.md) - 0.5-1 engineer-days.
+- [S00.05: Repeat the scoped source and offline editing baseline](s00-05-baseline-acceptance.md) - 0.5-1 engineer-days.
+- [S00.06: Close the reconciled baseline and route its blockers](s00-06-baseline-close.md) - 0.25-0.5 engineer-days.
 
 ## S01: Control-panel workflow and design contract
 
