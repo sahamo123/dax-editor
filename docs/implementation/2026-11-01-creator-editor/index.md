@@ -38,6 +38,11 @@
 * [S03.09: Close layered composition with measured output](s03-09-composition-acceptance.md) - Plan and evidence gates: Close layered composition with measured output.
 * [S04.01: Specify long-form workflows and expand fixtures](s04-01-long-form-contract-fixtures.md) - Plan and evidence gates: Specify long-form workflows and expand fixtures.
 * [S04.02: Add chapters, markers and transcript navigation](s04-02-chapters-markers-navigation.md) - Plan and evidence gates: Add chapters, markers and transcript navigation.
+* [S04.03: Bound long-project views and derived-media work](s04-03-long-timeline-bounds.md) - Plan and evidence gates: Bound long-project views and derived-media work.
+* [S04.04: Build slide scenes and educational layouts](s04-04-slides-educational-layouts.md) - Plan and evidence gates: Build slide scenes and educational layouts.
+* [S04.05: Add manual camera alignment and switching](s04-05-manual-camera-sync.md) - Plan and evidence gates: Add manual camera alignment and switching.
+* [S04.06: Add speaker labels and reviewed highlight proposals](s04-06-speakers-reviewed-highlights.md) - Plan and evidence gates: Add speaker labels and reviewed highlight proposals.
+* [S04.07: Measure long-session synchronization and resources](s04-07-long-session-acceptance.md) - Plan and evidence gates: Measure long-session synchronization and resources.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
