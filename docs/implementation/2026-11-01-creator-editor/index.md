@@ -43,8 +43,13 @@
 * [S04.05: Add manual camera alignment and switching](s04-05-manual-camera-sync.md) - Plan and evidence gates: Add manual camera alignment and switching.
 * [S04.06: Add speaker labels and reviewed highlight proposals](s04-06-speakers-reviewed-highlights.md) - Plan and evidence gates: Add speaker labels and reviewed highlight proposals.
 * [S04.07: Measure long-session synchronization and resources](s04-07-long-session-acceptance.md) - Plan and evidence gates: Measure long-session synchronization and resources.
+* [S04.08: Close podcast and educational workflow acceptance](s04-08-long-form-close.md) - Plan and evidence gates: Close podcast and educational workflow acceptance.
+* [S05.01: Bound the reference-style feasibility decision](s05-01-reference-feasibility.md) - Execute S05.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S05.02: Define evidence and recipe contracts](s05-02-reference-contracts.md) - Execute S05.02 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S05.03: Acquire and cache bounded local samples](s05-03-reference-sampling.md) - Execute S05.03 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
 * [S03: Bounded layered composition](stage-03-composition.md) - Versioned video/still layers, bounded transforms/transitions, supplied-matte alpha composition, manual controls and measured review/export coverage.
 * [S04: Long-form podcast and educational workflows](stage-04-long-form.md) - Chapters/markers, bounded long-project views, slide scenes, manual camera alignment, speaker labels and reviewed highlights validated on long sessions.
+* [S05: Reference-style analysis and editable recipes](stage-05-reference-style.md) - Ordered S05 execution steps with explicit dependencies, resource needs and acceptance gates.

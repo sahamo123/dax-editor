@@ -45,7 +45,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | [S02](stage-02-profiles.md) | Content profiles and compatibility foundation | 8 | 4-6 |
 | [S03](stage-03-composition.md) | Bounded layered composition | 9 | 10-16 |
 | [S04](stage-04-long-form.md) | Long-form podcast and educational workflows | 8 | 8-14 |
-| S05 (`stage-05-reference-style.md`; later publication batch) | Reference-style analysis and editable recipes | 7 | 7-12 |
+| [S05](stage-05-reference-style.md) | Reference-style analysis and editable recipes | 7 | 7-12 |
 | S06 (`stage-06-characters.md`; later publication batch) | Curated Blender characters and scene packs | 8 | 10-18 |
 | S07 (`stage-07-workflows.md`; later publication batch) | Bounded specialist workflows and recovery | 7 | 5-8 |
 | S08 (`stage-08-hosting.md`; later publication batch) | Optional private personal hosting | 8 | 8-14 |
@@ -114,15 +114,15 @@ Stage overview: [S04](stage-04-long-form.md). Read it before its first step.
 - [S04.05: Add manual camera alignment and switching](s04-05-manual-camera-sync.md) - 1-2 engineer-days.
 - [S04.06: Add speaker labels and reviewed highlight proposals](s04-06-speakers-reviewed-highlights.md) - 1-1.5 engineer-days.
 - [S04.07: Measure long-session synchronization and resources](s04-07-long-session-acceptance.md) - 1-2 engineer-days.
-- S04.08: Close podcast and educational workflow acceptance (`s04-08-long-form-close.md`; later publication batch) - 1-2 engineer-days.
+- [S04.08: Close podcast and educational workflow acceptance](s04-08-long-form-close.md) - 1-2 engineer-days.
 
 ## S05: Reference-style analysis and editable recipes
 
-Stage overview: S05 (`stage-05-reference-style.md`; later publication batch). Read it before its first step.
+Stage overview: [S05](stage-05-reference-style.md). Read it before its first step.
 
-- S05.01: Bound the reference-style feasibility decision (`s05-01-reference-feasibility.md`; later publication batch) - 2-2 engineer-days.
-- S05.02: Define evidence and recipe contracts (`s05-02-reference-contracts.md`; later publication batch) - 0.5-1 engineer-days.
-- S05.03: Acquire and cache bounded local samples (`s05-03-reference-sampling.md`; later publication batch) - 1-2 engineer-days.
+- [S05.01: Bound the reference-style feasibility decision](s05-01-reference-feasibility.md) - 2-2 engineer-days.
+- [S05.02: Define evidence and recipe contracts](s05-02-reference-contracts.md) - 0.5-1 engineer-days.
+- [S05.03: Acquire and cache bounded local samples](s05-03-reference-sampling.md) - 1-2 engineer-days.
 - S05.04: Extract deterministic style evidence (`s05-04-reference-measurements.md`; later publication batch) - 1-2 engineer-days.
 - S05.05: Compile recipes and render comparison previews (`s05-05-reference-preview.md`; later publication batch) - 0.5-1 engineer-days.
 - S05.06: Add editable reference review and apply controls (`s05-06-reference-workflow.md`; later publication batch) - 1-2 engineer-days.
