@@ -48,7 +48,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | [S05](stage-05-reference-style.md) | Reference-style analysis and editable recipes | 7 | 7-12 |
 | [S06](stage-06-characters.md) | Curated Blender characters and scene packs | 8 | 10-18 |
 | [S07](stage-07-workflows.md) | Bounded specialist workflows and recovery | 7 | 5-8 |
-| S08 (`stage-08-hosting.md`; later publication batch) | Optional private personal hosting | 8 | 8-14 |
+| [S08](stage-08-hosting.md) | Optional private personal hosting | 8 | 8-14 |
 | S09 (`stage-09-release.md`; later publication batch) | Compatibility performance and distribution gates | 8 | 6-10 |
 
 Strict default execution is the ordered selected route. Explicit data prerequisites are in each page's frontmatter; the route predecessor also applies. Independent research may inform later plans, but it must not implement dependent features before gates pass. S09 entry is S07.07 for desktop and S08.08 when hosting was selected. Do not add S08 to desktop prerequisites by accident.
@@ -151,14 +151,14 @@ Stage overview: [S07](stage-07-workflows.md). Read it before its first step.
 - [S07.04: Admit all expensive work under one resource budget](s07-04-resource-admission.md) - 1-1.5 engineer-days.
 - [S07.05: Wire restricted specialist roles to existing capabilities](s07-05-specialist-adapters.md) - 0.5-1 engineer-days.
 - [S07.06: Expose workflow trace and live-client controls](s07-06-workflow-trace.md) - 0.5-0.75 engineer-days.
-- S07.07: Accept workflow recovery and actual clients (`s07-07-workflow-close.md`; later publication batch) - 0.5-0.75 engineer-days.
+- [S07.07: Accept workflow recovery and actual clients](s07-07-workflow-close.md) - 0.5-0.75 engineer-days.
 
 ## S08: Optional private personal hosting
 
-Stage overview: S08 (`stage-08-hosting.md`; later publication batch). Read it before its first step.
+Stage overview: [S08](stage-08-hosting.md). Read it before its first step.
 
-- S08.01: Define the optional personal-host trust boundary (`s08-01-host-threat-model.md`; later publication batch) - 1-2 engineer-days.
-- S08.02: Resolve portable assets and collect projects (`s08-02-portable-assets.md`; later publication batch) - 1-2 engineer-days.
+- [S08.01: Define the optional personal-host trust boundary](s08-01-host-threat-model.md) - 1-2 engineer-days.
+- [S08.02: Resolve portable assets and collect projects](s08-02-portable-assets.md) - 1-2 engineer-days.
 - S08.03: Implement single-owner authenticated gateway sessions (`s08-03-owner-gateway.md`; later publication batch) - 1-2 engineer-days.
 - S08.04: Scope remote media and isolate native workers (`s08-04-host-media-boundaries.md`; later publication batch) - 1-2 engineer-days.
 - S08.05: Package a pinned private single-owner deployment (`s08-05-private-deployment.md`; later publication batch) - 1-1.5 engineer-days.

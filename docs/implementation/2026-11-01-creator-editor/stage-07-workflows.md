@@ -35,7 +35,7 @@ Planning approval is not implementation authorization or evidence. Read current 
 | [S07.04](s07-04-resource-admission.md) | Admit all expensive work under one resource budget | 1-1.5 |
 | [S07.05](s07-05-specialist-adapters.md) | Wire restricted specialist roles to existing capabilities | 0.5-1 |
 | [S07.06](s07-06-workflow-trace.md) | Expose workflow trace and live-client controls | 0.5-0.75 |
-| S07.07 (`s07-07-workflow-close.md`; later publication batch) | Accept workflow recovery and actual clients | 0.5-0.75 |
+| [S07.07](s07-07-workflow-close.md) | Accept workflow recovery and actual clients | 0.5-0.75 |
 
 ## Resources and boundaries
 

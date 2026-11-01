@@ -65,6 +65,9 @@
 * [S07.04: Admit all expensive work under one resource budget](s07-04-resource-admission.md) - Execute S07.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S07.05: Wire restricted specialist roles to existing capabilities](s07-05-specialist-adapters.md) - Execute S07.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S07.06: Expose workflow trace and live-client controls](s07-06-workflow-trace.md) - Execute S07.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S07.07: Accept workflow recovery and actual clients](s07-07-workflow-close.md) - Execute S07.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.01: Define the optional personal-host trust boundary](s08-01-host-threat-model.md) - Execute S08.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S08.02: Resolve portable assets and collect projects](s08-02-portable-assets.md) - Execute S08.02 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
@@ -73,3 +76,4 @@
 * [S05: Reference-style analysis and editable recipes](stage-05-reference-style.md) - Ordered S05 execution steps with explicit dependencies, resource needs and acceptance gates.
 * [S06: Curated Blender characters and scene packs](stage-06-characters.md) - Ordered S06 execution steps with explicit dependencies, resource needs and acceptance gates.
 * [S07: Bounded specialist workflows and recovery](stage-07-workflows.md) - Ordered S07 execution steps with explicit dependencies, resource needs and acceptance gates.
+* [S08: Optional private personal hosting](stage-08-hosting.md) - Ordered S08 execution steps with explicit dependencies, resource needs and acceptance gates.
