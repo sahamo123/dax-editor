@@ -63,14 +63,14 @@ export const TEMPLATE_NOTES_DISCLAIMER =
   "These are general notes, not legal advice. Rules differ by country, state and platform; check with a qualified professional before you publish.";
 
 /**
- * Engine capabilities that do not exist yet, with a plain-language description. A template step that needs one
- * is recorded under `deferred` with `requires: [...]` and reported as skipped, never faked. When the engine
- * gains a feature, remove it here, teach {@link applyTemplate} to run it (a template `effects` entry), and
- * update the templates. Already built, and therefore no longer listed: music beds and ducking, zoom moves and
- * image overlays (see `effects` in {@link TemplateSchema}).
+ * Template steps the deterministic applier cannot perform yet, with plain-language descriptions. Some
+ * underlying engine commands may already exist; a step remains deferred until {@link applyTemplate} can
+ * perform it. Deferred steps are reported as skipped, never faked. Music beds and ducking, zoom moves and
+ * image overlays are already applied through `effects` in {@link TemplateSchema}.
  */
 export const ENGINE_FEATURES = {
-  captions: "Word-timed captions (needs a speech-to-text adapter and a caption track)",
+  captions:
+    "Automatic captions in templates (manual captions are available when a transcript exists)",
   "sound-effects":
     "Sound effects placed automatically on cuts or emphasis points (the audio layer can place one you choose: add_audio with role sfx)",
   broll: "A second video layer for B-roll inserts",

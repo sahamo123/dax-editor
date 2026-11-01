@@ -11,9 +11,13 @@ generated:
 
 # Project status
 
-## First-improvement execution — November 1, 2026
+## First-improvement S00.02 — November 1, 2026
 
-The user launched the first-improvement route. S00.01 is VERIFYING under [issue #121](https://github.com/sahamo123/dax-editor/issues/121); [baseline receipt](implementation/2026-11-01-creator-editor/s00-01-receipt.md) records source ancestry, provisional scope, tool versions and a verified private project/history byte backup. Zero of 76 steps are verified and no new application behavior is claimed. The working branch is `codex/s00-01-baseline-receipt`; S00.02 is gated on review and verification of S00.01.
+[Issue #123](https://github.com/sahamo123/dax-editor/issues/123) is reconciling source capability and history claims on `codex/s00-02-capability-reconciliation`. S00.01 is VERIFIED in [issue #121](https://github.com/sahamo123/dax-editor/issues/121), with self-review and [PR #122](https://github.com/sahamo123/dax-editor/pull/122); independent stage review remains pending. The S00.02 predecessor issue, PR head and local ancestry were rechecked. A normal-host test using packaged FFmpeg failed with `spawn UNKNOWN`; explicit system-FFmpeg tests are separate evidence and cannot establish packaged-runtime readiness.
+
+## First-improvement baseline checkpoint — November 1, 2026
+
+The user launched the first-improvement route. At this checkpoint S00.01 was verifying under [issue #121](https://github.com/sahamo123/dax-editor/issues/121); its [baseline receipt](implementation/2026-11-01-creator-editor/s00-01-receipt.md) records source ancestry, provisional scope, tool versions and a verified private project/history byte backup. The current state is in the newer section above.
 
 ## Detailed planning delivery — November 1, 2026
 

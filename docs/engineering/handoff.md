@@ -11,9 +11,13 @@ generated:
 
 # Handoff: resuming dax-editor
 
-## Execution started — November 1, 2026
+## Active S00.02 — November 1, 2026
 
-The selected route is first-improvement. Continue S00.01 on `codex/s00-01-baseline-receipt` using [issue #121](https://github.com/sahamo123/dax-editor/issues/121), the [current handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [baseline receipt](../implementation/2026-11-01-creator-editor/s00-01-receipt.md). The step is VERIFYING, not completed; finish its review and PR before the next step. The published handbook branch below is its base.
+Continue `codex/s00-02-capability-reconciliation` under [issue #123](https://github.com/sahamo123/dax-editor/issues/123). S00.01 was verified with self-review at PR #122's tested head; independent stage review remains due. Reconcile source claims, complete and review required checks, then open the scoped PR before S00.03. The packaged FFmpeg process returned `spawn UNKNOWN` on the normal host; do not present a system-FFmpeg run as packaged validation.
+
+## Execution start checkpoint — November 1, 2026
+
+The selected route is first-improvement. S00.01 was started on `codex/s00-01-baseline-receipt` using [issue #121](https://github.com/sahamo123/dax-editor/issues/121) and its [baseline receipt](../implementation/2026-11-01-creator-editor/s00-01-receipt.md). Its later verification and current branch are in the active section above and [current handoff](../implementation/2026-11-01-creator-editor/handoff.md).
 
 ## Dated implementation handbook — November 1, 2026
 

@@ -11,7 +11,7 @@ generated:
 
 # S00.01 execution baseline receipt
 
-**State: VERIFYING.** Tracking [issue #121](https://github.com/sahamo123/dax-editor/issues/121). The user explicitly launched the implementation goal on November 1, 2026. The selected route is `first-improvement`, S00–S02, ending at S02.08 as a development candidate. This is baseline evidence, not evidence that any editor feature has been implemented or accepted.
+**State: VERIFIED**, with a separate self-review; independent stage review remains required. Tracking [issue #121](https://github.com/sahamo123/dax-editor/issues/121), [PR #122](https://github.com/sahamo123/dax-editor/pull/122), tested head `41f75aae2f1e5f9a863e39d8d1d6bfeaca401475`. The user explicitly launched the implementation goal on November 1, 2026. The selected route is `first-improvement`, S00–S02, ending at S02.08 as a development candidate. This is baseline evidence, not evidence that any editor feature has been implemented or accepted.
 
 ## Scope and source
 
@@ -32,4 +32,4 @@ generated:
 
 Entry authorization and source ancestry were verified from the current request and Git; the project/history read and private backup checks passed. Historical browser, native, model and MCP evidence remains dated in [STATUS](../../STATUS.md), not rerun here. S00.05 owns the fresh full baseline.
 
-Before S00.02, the issue and PR must contain the reviewed final receipt, source SHA and second-review result. Recheck the receipt and the current source tree; do not infer completion from this file alone. If the original pair is needed, consult the private origin record and restore only to an explicitly chosen location after verifying all associated media. Do not overwrite a live project.
+Before S00.02, the issue and PR contained the reviewed receipt, source SHA and second-review result. The S00.02 agent rechecked the issue, PR and current source ancestry. If the original pair is needed, consult the private origin record and restore only to an explicitly chosen location after verifying all associated media. Do not overwrite a live project.

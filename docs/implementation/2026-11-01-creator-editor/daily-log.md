@@ -64,3 +64,7 @@ The earlier working-tree whitespace check did not cover newly untracked plan pag
 ## 2026-11-01 - first-improvement launch
 
 The user launched first-improvement. S00.01 is VERIFYING in issue #121 on branch `codex/s00-01-baseline-receipt`. Starting SHA f57af682441e8442700199078e028d860e22418d is descended from the planning base. One saved project/history pair was privately copied, hash checked and parsed; no application feature change or native acceptance is claimed. Next: validate docs and complete the second review and PR, then recheck the receipt before S00.02.
+
+## 2026-11-01 - S00.02 reconciliation
+
+Rechecked S00.01 issue #121, PR #122 and tested head before entering issue #123 on `codex/s00-02-capability-reconciliation`. Corrected missing-transcript and deferred-caption descriptions; targeted tests went red then green. Both full core test files passed 242 tests with system FFmpeg. Packaged FFmpeg failed with spawn UNKNOWN on restricted and normal hosts; it remains a separate unresolved acceptance gate. First full check failed formatting; corrected and retrying. Next: capture full check, review and PR before S00.03.

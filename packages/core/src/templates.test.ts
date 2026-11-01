@@ -681,6 +681,14 @@ describe("template effects", () => {
     hasAudio: false,
   };
 
+  it("distinguishes manual caption support from deferred template application", () => {
+    expect(ENGINE_FEATURES.captions).toMatch(/template/i);
+    expect(ENGINE_FEATURES.captions).toMatch(/manual/i);
+    expect(ENGINE_FEATURES.captions).not.toMatch(
+      /needs a speech-to-text adapter and a caption track/i,
+    );
+  });
+
   it("no template still lists a feature the engine has now (music, ducking, zoom, image overlays)", () => {
     for (const t of templates) {
       for (const d of t.deferred) {

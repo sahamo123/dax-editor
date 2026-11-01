@@ -11,15 +11,15 @@ generated:
 
 # Current handoff
 
-**Implementation launched: first-improvement route. S00.01 is VERIFYING.** The planning delivery is complete; application feature work has not yet begun. Follow [issue #121](https://github.com/sahamo123/dax-editor/issues/121) and its [baseline receipt](s00-01-receipt.md).
+**First-improvement is active: S00.01 VERIFIED; S00.02 IN_PROGRESS.** Follow [issue #123](https://github.com/sahamo123/dax-editor/issues/123). Predecessor [issue #121](https://github.com/sahamo123/dax-editor/issues/121), [PR #122](https://github.com/sahamo123/dax-editor/pull/122) and its [receipt](s00-01-receipt.md) were rechecked before entry.
 
 | Item | Current state |
 |---|---|
-| Current work | S00.01 baseline and preservation evidence; final review and PR pending |
+| Current work | S00.02 source/capability reconciliation and regression checks |
 | Implementation route | first-improvement, S00–S02 |
-| Active implementation step | S00.01 VERIFYING |
-| Completed implementation steps | 0 of 76 |
-| Next eligible implementation step | S00.02 only after S00.01 is verified and its receipt/current tree are rechecked |
+| Active implementation step | S00.02 IN_PROGRESS |
+| Completed implementation steps | 1 of 76; S00.01 self-reviewed, independent stage review pending |
+| Next eligible implementation step | S00.03 after S00.02 evidence, review and current-tree recheck |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 | Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use work branch `codex/s00-01-baseline-receipt` based on `codex/staged-implementation-handbook`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged. The user has launched first-improvement; see issue #121 for the live execution record.
+Use work branch `codex/s00-02-capability-reconciliation`, based on `codex/s00-01-baseline-receipt`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
 
 ## Next execution action
 
-Finish the second review and PR for S00.01, update issue #121 with the tested head and evidence, then recheck that receipt and current source before S00.02. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). Do not skip S00 because planning inspected code.
+Complete S00.02's source reconciliation, run the required checks and record its receipt and review in issue #123 and its PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing check blocks S00.03.
 
 ## Known gates to anticipate
 
