@@ -159,10 +159,10 @@ Stage overview: [S08](stage-08-hosting.md). Read it before its first step.
 
 - [S08.01: Define the optional personal-host trust boundary](s08-01-host-threat-model.md) - 1-2 engineer-days.
 - [S08.02: Resolve portable assets and collect projects](s08-02-portable-assets.md) - 1-2 engineer-days.
-- S08.03: Implement single-owner authenticated gateway sessions (`s08-03-owner-gateway.md`; later publication batch) - 1-2 engineer-days.
-- S08.04: Scope remote media and isolate native workers (`s08-04-host-media-boundaries.md`; later publication batch) - 1-2 engineer-days.
-- S08.05: Package a pinned private single-owner deployment (`s08-05-private-deployment.md`; later publication batch) - 1-1.5 engineer-days.
-- S08.06: Recover browser sessions and task controls remotely (`s08-06-host-reconnect.md`; later publication batch) - 1-1.5 engineer-days.
+- [S08.03: Implement single-owner authenticated gateway sessions](s08-03-owner-gateway.md) - 1-2 engineer-days.
+- [S08.04: Scope remote media and isolate native workers](s08-04-host-media-boundaries.md) - 1-2 engineer-days.
+- [S08.05: Package a pinned private single-owner deployment](s08-05-private-deployment.md) - 1-1.5 engineer-days.
+- [S08.06: Recover browser sessions and task controls remotely](s08-06-host-reconnect.md) - 1-1.5 engineer-days.
 - S08.07: Verify quotas backup restore and workspace recovery (`s08-07-host-recovery.md`; later publication batch) - 1-1.5 engineer-days.
 - S08.08: Accept personal hosting and desktop parity (`s08-08-host-close.md`; later publication batch) - 1-1.5 engineer-days.
 
