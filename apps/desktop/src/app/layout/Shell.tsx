@@ -62,10 +62,11 @@ function Workspace({
   maxTimeline: number;
 }): ReactElement {
   const empty = useApp((s) => isProjectEmpty(s.state));
+  const setupVisible = useApp((s) => s.ui.setupVisible);
   useEditorShortcuts();
   useInspectOnSelect();
 
-  if (empty) return <EmptyState />;
+  if (empty && setupVisible) return <EmptyState />;
   return (
     <div
       className="workspace"

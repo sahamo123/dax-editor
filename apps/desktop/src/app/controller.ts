@@ -429,6 +429,9 @@ export function createController(deps: ControllerDeps): Controller {
         return false;
       }
       store.getState().applyState(r.value);
+      if (action === "new" || action === "open" || action === "copy") {
+        store.getState().patchUi({ setupVisible: action === "new" });
+      }
       toast("success", action === "save" ? "Project saved." : "Project opened.");
       return true;
     },

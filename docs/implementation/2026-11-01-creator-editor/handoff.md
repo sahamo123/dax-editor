@@ -11,15 +11,15 @@ generated:
 
 # Current handoff
 
-**First-improvement is active: S00.01–S00.06 and S01.01 VERIFIED; S01.02 IN_PROGRESS.** Follow [issue #140](https://github.com/sahamo123/dax-editor/issues/140). S01.01's approved evidence, [issue #135](https://github.com/sahamo123/dax-editor/issues/135), [PR #138](https://github.com/sahamo123/dax-editor/pull/138) and tested commit `48bb5b00fce1399cd193123e49bc16b43266c99b` were rechecked; stacked PRs remain unmerged.
+**First-improvement is active: S00.01–S00.06 and S01.01–S01.02 VERIFIED; S01.03 IN_PROGRESS.** Follow [issue #142](https://github.com/sahamo123/dax-editor/issues/142). S01.02's [issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141) and tested commit `f3f019e353493a6050959170c72e33a73dc1b2ae` were rechecked; stacked PRs remain unmerged.
 
 | Item | Current state |
 |---|---|
-| Current work | S01.02 product and workspace design contract |
+| Current work | S01.03 setup and contextual inspector implementation |
 | Implementation route | first-improvement, S00–S02 |
-| Active implementation step | S01.02 IN_PROGRESS |
-| Completed implementation steps | 7 of 76; S00.06 independently reviewed, S01.01 self-reviewed |
-| Next eligible implementation step | S01.03 after S01.02 verification and evidence recheck |
+| Active implementation step | S01.03 IN_PROGRESS |
+| Completed implementation steps | 8 of 76; S00.06 independently reviewed, S01.01–S01.02 self-reviewed |
+| Next eligible implementation step | S01.04 after S01.03 verification and evidence recheck |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 | Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use work branch `codex/s01-02-workspace-contract`, based on `codex/s01-01-workspace-audit`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
+Use work branch `codex/s01-03-setup-inspector`, based on `codex/s01-02-workspace-contract`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
 
 ## Next execution action
 
-Complete the product/design and [workspace contract](../../specs/workspace-design-contract.md), map the audit findings to verification, review the documentation and publish its scoped PR before S01.03. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). The owner approved five identified synthetic audit screenshots; all other captures remain private under ignored `artifacts/s01-01-workspace-audit-20261101/`.
+Finish S01.03's setup/inspector regressions, full browser suite and visual review, record exact evidence and publish a scoped PR before S01.04. Read [context](context.md), [progress](progress.md), the [workspace contract](../../specs/workspace-design-contract.md) and [execution contract](execution-contract.md). The owner approved five specific S01.01 screenshots; all other captures remain private under ignored `artifacts/`.
 
 ## Known gates to anticipate
 
