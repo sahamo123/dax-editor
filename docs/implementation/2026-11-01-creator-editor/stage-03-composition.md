@@ -31,8 +31,8 @@ Read the [master](master-plan.md) and [execution contract](execution-contract.md
 | S03.05 | [Add bounded keyframes and transitions](s03-05-keyframes-transitions.md) | 1–2 |
 | S03.06 | [Compose alpha assets and supplied foreground mattes](s03-06-alpha-supplied-mattes.md) | 1–1.5 |
 | S03.07 | [Expose layer lanes and contextual controls](s03-07-layer-workspace.md) | 1–1.5 |
-| S03.08 | Declare and verify interactive and rendered coverage (`s03-08-preview-review-coverage.md`; later publication batch) | 1.5–2 |
-| S03.09 | Close layered composition with measured output (`s03-09-composition-acceptance.md`; later publication batch) | 1.5–2 |
+| S03.08 | [Declare and verify interactive and rendered coverage](s03-08-preview-review-coverage.md) | 1.5–2 |
+| S03.09 | [Close layered composition with measured output](s03-09-composition-acceptance.md) | 1.5–2 |
 
 ## Deliverables and resources
 
@@ -46,5 +46,5 @@ The authoritative render must pass frame/audio measurements and full decode. Int
 
 Each required step must have a complete [receipt](receipt-template.md), current commit/artifact evidence and passing regression checks. Failed/missing evidence blocks advancement; record the recovery action and do not bypass it.
 
-After independent stage review, continue to the next stage's first step (`s04-01-long-form-contract-fixtures.md`; later publication batch). Complete log/STATUS/concept/index updates in the implementation PR; preserve this plan's original estimates and record actual effort separately.
+After independent stage review, continue to [the next stage's first step](s04-01-long-form-contract-fixtures.md). Complete log/STATUS/concept/index updates in the implementation PR; preserve this plan's original estimates and record actual effort separately.
 
