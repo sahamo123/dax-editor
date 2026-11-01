@@ -47,7 +47,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 | [S04](stage-04-long-form.md) | Long-form podcast and educational workflows | 8 | 8-14 |
 | [S05](stage-05-reference-style.md) | Reference-style analysis and editable recipes | 7 | 7-12 |
 | [S06](stage-06-characters.md) | Curated Blender characters and scene packs | 8 | 10-18 |
-| S07 (`stage-07-workflows.md`; later publication batch) | Bounded specialist workflows and recovery | 7 | 5-8 |
+| [S07](stage-07-workflows.md) | Bounded specialist workflows and recovery | 7 | 5-8 |
 | S08 (`stage-08-hosting.md`; later publication batch) | Optional private personal hosting | 8 | 8-14 |
 | S09 (`stage-09-release.md`; later publication batch) | Compatibility performance and distribution gates | 8 | 6-10 |
 
@@ -139,14 +139,14 @@ Stage overview: [S06](stage-06-characters.md). Read it before its first step.
 - [S06.05: Preserve alpha through character composition](s06-05-character-alpha.md) - 1-2 engineer-days.
 - [S06.06: Commit and regenerate character assets atomically](s06-06-character-regeneration.md) - 1-2 engineer-days.
 - [S06.07: Expose bounded character configuration and review](s06-07-character-configurator.md) - 1-2 engineer-days.
-- S06.08: Accept curated character rendering across targets (`s06-08-character-close.md`; later publication batch) - 2-3 engineer-days.
+- [S06.08: Accept curated character rendering across targets](s06-08-character-close.md) - 2-3 engineer-days.
 
 ## S07: Bounded specialist workflows and recovery
 
-Stage overview: S07 (`stage-07-workflows.md`; later publication batch). Read it before its first step.
+Stage overview: [S07](stage-07-workflows.md). Read it before its first step.
 
-- S07.01: Define bounded workflow and journal semantics (`s07-01-workflow-contract.md`; later publication batch) - 0.5-1 engineer-days.
-- S07.02: Persist journal and idempotent mutation receipts (`s07-02-workflow-journal.md`; later publication batch) - 1-1.5 engineer-days.
+- [S07.01: Define bounded workflow and journal semantics](s07-01-workflow-contract.md) - 0.5-1 engineer-days.
+- [S07.02: Persist journal and idempotent mutation receipts](s07-02-workflow-journal.md) - 1-1.5 engineer-days.
 - S07.03: Execute dependencies and recover interrupted work (`s07-03-workflow-coordinator.md`; later publication batch) - 1-1.5 engineer-days.
 - S07.04: Admit all expensive work under one resource budget (`s07-04-resource-admission.md`; later publication batch) - 1-1.5 engineer-days.
 - S07.05: Wire restricted specialist roles to existing capabilities (`s07-05-specialist-adapters.md`; later publication batch) - 0.5-1 engineer-days.

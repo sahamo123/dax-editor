@@ -36,7 +36,7 @@ Planning approval is not implementation authorization or evidence. Read current 
 | [S06.05](s06-05-character-alpha.md) | Preserve alpha through character composition | 1-2 |
 | [S06.06](s06-06-character-regeneration.md) | Commit and regenerate character assets atomically | 1-2 |
 | [S06.07](s06-07-character-configurator.md) | Expose bounded character configuration and review | 1-2 |
-| S06.08 (`s06-08-character-close.md`; later publication batch) | Accept curated character rendering across targets | 2-3 |
+| [S06.08](s06-08-character-close.md) | Accept curated character rendering across targets | 2-3 |
 
 ## Resources and boundaries
 
