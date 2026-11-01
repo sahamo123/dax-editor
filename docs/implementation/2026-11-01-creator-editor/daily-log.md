@@ -72,3 +72,7 @@ Rechecked S00.01 issue #121, PR #122 and tested head before entering issue #123 
 ## 2026-11-01 - S00.03 fixture generation
 
 S00.02 verified with self-review in issue #123 and PR #124; rechecked tested head before issue #125. Generated seven synthetic videos plus malformed and absent cases in unique ignored folders. Same-build repeated generation hashes match, all videos decode, and the variable-rate case has distinct frame intervals. Real podcast/educational usability remains unverified. Full check with explicit system FFmpeg is running; packaged FFmpeg remains unresolved. Next: record check result, review and publish the scoped PR before S00.04.
+
+## 2026-11-01 - S00.04 performance baseline
+
+Rechecked issue #125, PR #126 and tested head before starting issue #127. Measured Edge with an isolated engine: 15 acknowledgement and scrub iterations including three warm-ups. A manually seeded 720p cache sample is recorded separately from the normal 480p proxy workflow; seeked is not painted-frame timing. Packaged FFmpeg and native, whole-process and sustained measurements remain open. The opt-in benchmark is reproducible; full system-FFmpeg check is running before review and PR.

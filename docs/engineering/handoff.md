@@ -11,9 +11,13 @@ generated:
 
 # Handoff: resuming dax-editor
 
-## Active S00.03 — November 1, 2026
+## Active S00.04 — November 1, 2026
 
-Continue `codex/s00-03-acceptance-fixtures` under [issue #125](https://github.com/sahamo123/dax-editor/issues/125). The [fixture receipt](../implementation/2026-11-01-creator-editor/s00-03-fixtures.md) describes generated cases, provenance limits and pending verification. S00.02 was verified in issue #123 at PR #124's tested head, using self-review; independent stage review remains due. Do not treat synthetic tones or system-FFmpeg checks as human speech or packaged-native acceptance.
+Continue `codex/s00-04-performance-baseline` under [issue #127](https://github.com/sahamo123/dax-editor/issues/127). The [performance receipt](../implementation/2026-11-01-creator-editor/s00-04-performance.md) records isolated browser samples and the test-only seeded 720p cache; normal proxies are 480p. Complete the required source checks and review, and record the PR before S00.05. Native, painted-frame, model and long-session performance are not certified.
+
+## S00.03 checkpoint — November 1, 2026
+
+[Issue #125](https://github.com/sahamo123/dax-editor/issues/125) was verified with self-review on `codex/s00-03-acceptance-fixtures`; current work is in the newer section above. The [fixture receipt](../implementation/2026-11-01-creator-editor/s00-03-fixtures.md) describes generated cases and provenance limits. Independent stage review remains due. Do not treat synthetic tones or system-FFmpeg checks as human speech or packaged-native acceptance.
 
 ## S00.02 checkpoint — November 1, 2026
 

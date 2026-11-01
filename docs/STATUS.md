@@ -11,9 +11,13 @@ generated:
 
 # Project status
 
-## First-improvement S00.03 — November 1, 2026
+## First-improvement S00.04 — November 1, 2026
 
-[Issue #125](https://github.com/sahamo123/dax-editor/issues/125) is preparing offline acceptance fixtures on `codex/s00-03-acceptance-fixtures`, after S00.02's [verified issue #123](https://github.com/sahamo123/dax-editor/issues/123) and [PR #124](https://github.com/sahamo123/dax-editor/pull/124) were rechecked. The [fixture inventory](implementation/2026-11-01-creator-editor/s00-03-fixtures.md) distinguishes regenerated synthetic clips from authorized private footage and records unresolved real-media and packaged-runtime gates.
+[Issue #127](https://github.com/sahamo123/dax-editor/issues/127) measures and documents baseline budgets on `codex/s00-04-performance-baseline`. The [performance receipt](implementation/2026-11-01-creator-editor/s00-04-performance.md) records short isolated Edge samples, including a test-seeded 720p cache; normal proxies are 480p. Native, painted-frame, whole-process, model and two-hour measurements remain open. Packaged FFmpeg remains unresolved. S00.01–S00.03 are verified with self-reviews; independent stage review remains due.
+
+## First-improvement S00.03 checkpoint — November 1, 2026
+
+[Issue #125](https://github.com/sahamo123/dax-editor/issues/125) prepared offline acceptance fixtures on `codex/s00-03-acceptance-fixtures` and was verified with self-review; current work is in the newer section above. The [fixture inventory](implementation/2026-11-01-creator-editor/s00-03-fixtures.md) distinguishes regenerated synthetic clips from authorized private footage and records unresolved real-media and packaged-runtime gates.
 
 ## First-improvement S00.02 checkpoint — November 1, 2026
 

@@ -11,7 +11,7 @@ generated:
 
 # S00.03 fixture inventory and receipt
 
-**State: IN_PROGRESS.** [Issue #125](https://github.com/sahamo123/dax-editor/issues/125). Before entry, predecessor [issue #123](https://github.com/sahamo123/dax-editor/issues/123), [PR #124](https://github.com/sahamo123/dax-editor/pull/124) and head `58089a15147971b0bce590cfcd6c313d4e225517` were rechecked against the clean current tree. The prior stage-step reviews were self-reviews; independent stage review remains due.
+**State: VERIFIED**, with a separate self-review; independent stage review remains due. [Issue #125](https://github.com/sahamo123/dax-editor/issues/125), [PR #126](https://github.com/sahamo123/dax-editor/pull/126), tested head `103e2fb4ee39a80e2fc0bfd85a7ddd0ede2769b5`. Before entry, predecessor [issue #123](https://github.com/sahamo123/dax-editor/issues/123), [PR #124](https://github.com/sahamo123/dax-editor/pull/124) and head `58089a15147971b0bce590cfcd6c313d4e225517` were rechecked against the clean current tree.
 
 ## Synthetic cases
 
@@ -40,4 +40,4 @@ The 30/60/120-minute corpus is reserved for S04.01. Preserve previous ignored fi
 
 ## Verification still required
 
-The first full `pnpm check` stopped at dead-code validation because the generator was not registered as a project command. Adding `fixtures:acceptance` fixed the issue; the standalone dead-code check and fixture command then passed. The normal-host full retry with explicit system FFmpeg/ffprobe passed: 1,801 package tests and 17 script tests passed, with 68 package tests skipped. Final source/doc checks and a second review remain necessary; record the tested commit, PR and results in issue #125 before marking S00.03 VERIFIED. Required real-media usability cases with unavailable authorized inputs must remain blocked at their applicable acceptance gate. The packaged FFmpeg `spawn UNKNOWN` issue remains distinct from these system-tool fixture checks.
+The first full `pnpm check` stopped at dead-code validation because the generator was not registered as a project command. Adding `fixtures:acceptance` fixed the issue; the standalone dead-code check and fixture command then passed. The normal-host full retry with explicit system FFmpeg/ffprobe passed: 1,801 package tests and 17 script tests passed, with 68 package tests skipped. Final checks and self-review were recorded in issue #125. Required real-media usability cases with unavailable authorized inputs must remain blocked at their applicable acceptance gate. The packaged FFmpeg `spawn UNKNOWN` issue remains distinct from these system-tool fixture checks.
