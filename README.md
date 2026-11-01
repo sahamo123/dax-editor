@@ -2,7 +2,7 @@
 
 A free, open-source video editor you drive with plain language. Drop in a video (or record one), say what you want, and watch it get edited. Chat on the left, your video on the right.
 
-> **Status: early.** The video engine (`@dax/core`) and a model-evaluation harness work and are tested. The CLI, MCP server and desktop app are not built yet. Current state: [docs/STATUS.md](docs/STATUS.md). Plan: [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Development testing is available; release acceptance remains open.** The desktop editor, CLI, live-project MCP, local AI/speech and optional API providers are implemented. See [current status](docs/STATUS.md) for verified versus pending workflows. **Continue on `codex/laptop-agent-handoff`, not the older default `main`.** [New laptop / any-agent handoff](docs/engineering/laptop-continuation.md) includes setup, exact baseline, private-file transfer and next issues.
 
 ## Goals
 
@@ -20,15 +20,17 @@ A free, open-source video editor you drive with plain language. Drop in a video 
 - A JSON timeline model with non-destructive, undoable edit operations (split, trim, delete range, keep ranges, move, volume).
 - FFmpeg probing, silence detection and scene detection.
 - Mapping from source-file time to timeline time, so "remove these silences / filler words" stays correct after earlier edits.
-- An FFmpeg renderer that picks a license-friendly H.264 encoder (hardware encoders first; libx264 only if present).
-- Transcript types and filler-word detection (the whisper.cpp adapter is not written yet).
+- An FFmpeg renderer with LGPL-safe encoder selection, atomic/cancellable export and complete-effects WebM review. Shipped builds do not rely on libx264/libx265.
+- Offline whisper.cpp transcription, correction, caption styling and reviewed filler/silence cuts.
 - A `Connector` interface with a local-disk implementation.
+
+`apps/desktop` provides import, preview, timeline/inspector edits, project lifecycle, undo/history, chat attachments, Planning/Edit modes, non-cancelling steering and tracked jobs. Providers include optional local llama.cpp, OpenRouter, OpenAI and custom compatible APIs. External MCP clients share the live project; optional Blender uses controlled templates as a separate process. See STATUS for acceptance limits rather than assuming every client/platform is verified.
 
 `@dax/evals` measures how well a model can edit video (see [docs/evals/overview.md](docs/evals/overview.md)).
 
 ## Develop
 
-Needs Node 22+, [pnpm](https://pnpm.io) (`corepack enable`) and FFmpeg on your `PATH` (or set `DAX_FFMPEG` / `DAX_FFPROBE`).
+Needs Node 22 (`.node-version`), pnpm 10.28.0 (`package.json`) and FFmpeg/ffprobe on your `PATH` (or set `DAX_FFMPEG` / `DAX_FFPROBE`). On a new Windows laptop use the [fresh setup and launch commands](docs/engineering/laptop-continuation.md#fresh-windows-x64-setup); `Enter-Dev.ps1` and root launchers require ignored caches absent from a clone.
 
 ```sh
 pnpm bootstrap   # checks tools, installs dependencies, enables git hooks
@@ -39,7 +41,7 @@ pnpm eval --adapter oracle   # run the model-evaluation harness
 ## Working on this project
 
 - **People:** read [CONTRIBUTING.md](CONTRIBUTING.md). Work items are GitHub Issues.
-- **AI agents:** read [AGENTS.md](AGENTS.md) first, then [docs/STATUS.md](docs/STATUS.md). Switching agents takes minutes: [docs/engineering/agent-workflow.md](docs/engineering/agent-workflow.md).
+- **AI agents:** read [AGENTS.md](AGENTS.md), [handoff](docs/engineering/handoff.md), [cross-laptop continuation](docs/engineering/laptop-continuation.md), then [docs/STATUS.md](docs/STATUS.md). Workflow: [docs/engineering/agent-workflow.md](docs/engineering/agent-workflow.md).
 - **Memory:** `docs/` is an [Open Knowledge Format](https://github.com/GoogleCloudPlatform/open-knowledge-format) knowledge base with a project [log](docs/log.md), architecture decisions ([docs/adr](docs/adr/index.md)) and an [index](docs/index.md). How it is kept current: [docs/engineering/knowledge-protocol.md](docs/engineering/knowledge-protocol.md).
 - Also: [Code of Conduct](CODE_OF_CONDUCT.md), [Security policy](SECURITY.md), [Governance](GOVERNANCE.md).
 

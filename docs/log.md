@@ -1,5 +1,9 @@
 # Project log
 
+## 2026-10-31
+
+* **Update**: [Cross-laptop/agent continuation](engineering/laptop-continuation.md) records the published baseline, fresh Windows setup without local caches, MCP read-only/edit configuration, private-media/model transfer boundaries, current evidence and ranked remaining release gates. Reconcile stale README/AGENTS and historical setup entry points; add a thin GEMINI.md pointer for agents that use it. Issue #66; application behavior and security policy unchanged.
+
 ## 2026-10-27
 
 * **Real-footage MCP acceptance PASS**: import a user-authorized real clip through the stdio editor proxy and an actual MCP SDK client, apply a grouped trim/title/volume edit, verify timeline undo/redo and separate Planning refusal, then export a fully decoded 20-second 1280 x 720 audio/video MP4 and complete-effects WebM review. Six MCP-origin tasks appear in the live editor. Original remote footage and a reopenable previous-project backup are preserved. Private evidence stays under ignored artifacts/real-video-mcp/; no footage, identifying metadata or screenshots are published. External-assistant inference remains separate.
