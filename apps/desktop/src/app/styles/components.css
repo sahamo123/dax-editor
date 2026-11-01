@@ -733,7 +733,8 @@ textarea.input {
 }
 .composer__box {
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
   padding: 6px 6px 6px 12px;
   border-radius: 14px;
@@ -748,7 +749,6 @@ textarea.input {
   opacity: 0.7;
 }
 .composer__input {
-  flex: 1;
   min-width: 0;
   max-height: 140px;
   resize: none;
@@ -760,6 +760,13 @@ textarea.input {
 }
 .composer__input::placeholder {
   color: var(--text-faint);
+}
+.composer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
 }
 .send-btn {
   flex: none;
@@ -778,6 +785,14 @@ textarea.input {
 .send-btn:disabled {
   background: var(--bg-4);
   color: var(--text-faint);
+}
+.send-btn--queue {
+  display: inline-flex;
+  width: auto;
+  min-width: 32px;
+  padding: 0 10px;
+  gap: 6px;
+  border-radius: var(--radius);
 }
 .send-btn--stop {
   background: var(--bg-4);

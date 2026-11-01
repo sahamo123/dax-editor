@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: Save-as recovery [PR #150](https://github.com/sahamo123/dax-editor/pull/150) passed full source checks and self-review at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; Windows rename failures remain separate in [#149](https://github.com/sahamo123/dax-editor/issues/149). S01.05 starts under [#151](https://github.com/sahamo123/dax-editor/issues/151).
+
 * **Update**: S01.04 passed self-review ([issue #144](https://github.com/sahamo123/dax-editor/issues/144), [PR #148](https://github.com/sahamo123/dax-editor/pull/148), published head `77a6c17ccee8854968c0b92567ea847fd9d017a3`). The confirmed [save-as recovery defect #146](https://github.com/sahamo123/dax-editor/issues/146) is being addressed under a separate [contract](specs/save-as-recovery.md); native acceptance remains open.
 
 * **Update**: Restored the preview-slice historical log and error entries that were accidentally replaced when preparing compact-layout [PR #148](https://github.com/sahamo123/dax-editor/pull/148). This is a documentation-only correction; source and browser evidence remain tied to the tested code commit.

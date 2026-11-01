@@ -138,3 +138,9 @@ The compact child then passed its own full source check and complete browser sui
 S01.04 was self-reviewed and published as PR #148 at `77a6c17ccee8854968c0b92567ea847fd9d017a3`. Issue #146 is in progress on `codex/save-as-recovery`; see the save-as contract for collision, partial-publication and recent-project failure semantics. Synthetic regression tests reproduced blocked-history and overwrite behavior before the changes. Another stress test saw an `EPERM` renaming a disposable project temp file on Windows; its cause and any relationship to the earlier intermittent error are unproven. Preserve that distinction and rerun all gates before claiming verification.
 
 After correcting publication order to protect against a competing project, focused recovery tests and the full `pnpm check` passed. The [recovery receipt](save-as-recovery-receipt.md) identifies the private log, counts and remaining filesystem limitations. Independent Windows rename investigation is [issue #149](https://github.com/sahamo123/dax-editor/issues/149). Review and publication remain pending.
+
+## 2026-11-01 - S01.05 entry
+
+Save-as PR #150 was published and separately self-reviewed at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; the review was not independent. Rechecked S01.04 issue #144, PR #148, both private check/browser log hashes and ancestry, then opened S01.05 issue #151 and local branch `codex/s01-05-task-recovery`. Desktop source and existing task controls are being audited; no S01.05 behavior change or acceptance is claimed yet.
+
+The synthetic narrow composer audit measured 48.8 CSS px of message width and overlapping Queue text. A separate action row passed the new browser regression and seven existing chat workflows. A compact disconnected-engine/dock/reconnect regression also passed. Full checks and review are pending; see the [child receipt](s01-05-composer-receipt.md). Raw captures remain private.

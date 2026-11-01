@@ -125,38 +125,40 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
           }}
           onKeyDown={onKeyDown}
         />
-        {busy ? (
+        <div className="composer__actions">
+          {busy ? (
+            <button
+              type="button"
+              className="send-btn send-btn--stop"
+              aria-label="Stop"
+              title="Stop the assistant"
+              onClick={() => void controller.cancelChat()}
+            >
+              <Icon name="stop" size={14} />
+            </button>
+          ) : null}
+          {busy ? (
+            <button
+              type="button"
+              className="btn btn--small"
+              disabled={disabled || submitting || !text.trim()}
+              onClick={() => send(text, true)}
+            >
+              Steer task
+            </button>
+          ) : null}
           <button
             type="button"
-            className="send-btn send-btn--stop"
-            aria-label="Stop"
-            title="Stop the assistant"
-            onClick={() => void controller.cancelChat()}
-          >
-            <Icon name="stop" size={14} />
-          </button>
-        ) : null}
-        <button
-          type="button"
-          className="send-btn"
-          aria-label="Send message"
-          title="Send (Enter)"
-          disabled={disabled || submitting || !text.trim()}
-          onClick={() => send(text)}
-        >
-          {busy ? "Queue" : null}
-          <Icon name="send" size={16} />
-        </button>
-        {busy ? (
-          <button
-            type="button"
-            className="btn btn--small"
+            className={`send-btn${busy ? " send-btn--queue" : ""}`}
+            aria-label={busy ? "Queue message" : "Send message"}
+            title={busy ? "Queue message (Enter)" : "Send (Enter)"}
             disabled={disabled || submitting || !text.trim()}
-            onClick={() => send(text, true)}
+            onClick={() => send(text)}
           >
-            Steer task
+            {busy ? "Queue" : null}
+            <Icon name="send" size={16} />
           </button>
-        ) : null}
+        </div>
       </div>
     </div>
   );

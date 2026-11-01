@@ -15,13 +15,13 @@ generated:
 
 | Item | Current state |
 |---|---|
-| Current work | Confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146), implementation and verification in progress |
+| Current work | S01.05 task/recovery visibility, [issue #151](https://github.com/sahamo123/dax-editor/issues/151); scope and rendered audit in progress |
 | Implementation route | first-improvement, S00–S02 |
-| Active implementation step | Recovery work precedes S01.05; see [save-as contract](../../specs/save-as-recovery.md) |
+| Active implementation step | S01.05 IN_PROGRESS on local `codex/s01-05-task-recovery`; check publication |
 | Completed implementation steps | 10 of 76; S00.06 independently reviewed, others self-reviewed |
-| Next eligible implementation step | S01.05 after recovery and predecessor evidence recheck |
+| Next eligible implementation step | S01.06 after S01.05 verification and predecessor evidence recheck |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
-| Current publication tracking | [Recovery issue #146](https://github.com/sahamo123/dax-editor/issues/146); check `codex/save-as-recovery` publication |
+| Current publication tracking | [S01.05 issue #151](https://github.com/sahamo123/dax-editor/issues/151); recovery [PR #150](https://github.com/sahamo123/dax-editor/pull/150) |
 | Current raw artifact location | Ignored `artifacts/`; original projects are not used |
 
 ## Completed in this planning session
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use local work branch `codex/save-as-recovery`, based on verified `codex/s01-04-responsive-workspace`; confirm remote publication before switching laptops. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
+Use local work branch `codex/s01-05-task-recovery`, based on `codex/save-as-recovery` at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; confirm remote publication before switching laptops. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
 
 ## Next execution action
 
-Implement and verify [#146](https://github.com/sahamo123/dax-editor/issues/146) against the [save-as contract](../../specs/save-as-recovery.md), without using user projects. Keep the separately intermittent save failure open until its cause is established. Read [context](context.md), [progress](progress.md), the [workspace contract](../../specs/workspace-design-contract.md) and [execution contract](execution-contract.md). The owner approved five specific S01.01 screenshots; all other captures remain private under ignored `artifacts/`.
+Verify and publish the first [S01.05](s01-05-task-recovery-visibility.md) / [#151](https://github.com/sahamo123/dax-editor/issues/151) slice for the narrow composer [#136](https://github.com/sahamo123/dax-editor/issues/136), then continue actionable failures and task/restart ordering. The [child receipt](s01-05-composer-receipt.md) records focused browser results and the compact disconnected-banner/dock check; full checks and review remain pending. S01.04's published issue, PR, ancestor and private check/browser log hashes were rechecked; PR #150 changes persistence and docs, not layout. Keep the separately intermittent save failure open under [#149](https://github.com/sahamo123/dax-editor/issues/149). Read [context](context.md), [progress](progress.md), the [workspace contract](../../specs/workspace-design-contract.md) and [execution contract](execution-contract.md). The owner approved five specific S01.01 screenshots; all other captures remain private under ignored `artifacts/`.
 
 The corrected full browser suite passed 51 tests with two opt-in skips and the final full source check passed. Two prior full source attempts each failed an unchanged test: a CLI detection case ([issue #145](https://github.com/sahamo123/dax-editor/issues/145) records a distinct classification finding) and a temporary save-as case ([issue #146](https://github.com/sahamo123/dax-editor/issues/146)). Each exact case passed five isolated reruns; an additional 100 synthetic create/save attempts passed, but the original failure causes remain unknown. A separate deliberate history-write failure confirmed that save-as can report an error after switching the active project path. Preserve failed logs and retain both open risks; the passing full check does not resolve the confirmed save defect.
 
