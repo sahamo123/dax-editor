@@ -25,6 +25,11 @@
 * [S02.04: Make template capability reporting truthful](s02-04-capability-metadata.md) - Plan and evidence gates: Make template capability reporting truthful.
 * [S02.05: Preview and commit a profile as one edit](s02-05-atomic-profile-application.md) - Plan and evidence gates: Preview and commit a profile as one edit.
 * [S02.06: Integrate the profile chooser and template gallery](s02-06-profile-gallery-ui.md) - Plan and evidence gates: Integrate the profile chooser and template gallery.
+* [S02.07: Verify profile contracts across all entry points](s02-07-profile-contract-acceptance.md) - Plan and evidence gates: Verify profile contracts across all entry points.
+* [S02.08: Close the first-improvement development candidate](s02-08-first-improvement-candidate.md) - Plan and evidence gates: Close the first-improvement development candidate.
+* [S03.01: Decide the bounded composition and time-map contract](s03-01-composition-contract.md) - Plan and evidence gates: Decide the bounded composition and time-map contract.
+* [S03.02: Add versioned layers and preserve saved history](s03-02-layer-schema-persistence.md) - Plan and evidence gates: Add versioned layers and preserve saved history.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
+* [S03: Bounded layered composition](stage-03-composition.md) - Versioned video/still layers, bounded transforms/transitions, supplied-matte alpha composition, manual controls and measured review/export coverage.

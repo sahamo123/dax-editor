@@ -30,8 +30,8 @@ Read the [master](master-plan.md) and [execution contract](execution-contract.md
 | S02.04 | [Make template capability reporting truthful](s02-04-capability-metadata.md) | 0.5–0.75 |
 | S02.05 | [Preview and commit a profile as one edit](s02-05-atomic-profile-application.md) | 0.5–0.75 |
 | S02.06 | [Integrate the profile chooser and template gallery](s02-06-profile-gallery-ui.md) | 0.5–0.75 |
-| S02.07 | Verify profile contracts across all entry points (`s02-07-profile-contract-acceptance.md`; later publication batch) | 0.5–0.75 |
-| S02.08 | Close the first-improvement development candidate (`s02-08-first-improvement-candidate.md`; later publication batch) | 0.5–0.75 |
+| S02.07 | [Verify profile contracts across all entry points](s02-07-profile-contract-acceptance.md) | 0.5–0.75 |
+| S02.08 | [Close the first-improvement development candidate](s02-08-first-improvement-candidate.md) | 0.5–0.75 |
 
 ## Deliverables and resources
 
@@ -45,5 +45,5 @@ S02.08 is a first-improvement development candidate, not native distribution cer
 
 Each required step must have a complete [receipt](receipt-template.md), current commit/artifact evidence and passing regression checks. Failed/missing evidence blocks advancement; record the recovery action and do not bypass it.
 
-After stage review, `first-improvement` STOPS with a development-candidate evidence report and remaining release gates for owner review. Only `desktop-creator` or `full-hosted` continues to S03.01 (`s03-01-composition-contract.md`; later publication batch). Complete log/STATUS/concept/index updates in the implementation PR; preserve this plan's original estimates and record actual effort separately.
+After stage review, `first-improvement` STOPS with a development-candidate evidence report and remaining release gates for owner review. Only `desktop-creator` or `full-hosted` continues to [S03.01](s03-01-composition-contract.md). Complete log/STATUS/concept/index updates in the implementation PR; preserve this plan's original estimates and record actual effort separately.
 
