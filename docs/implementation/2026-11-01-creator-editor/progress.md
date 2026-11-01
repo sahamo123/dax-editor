@@ -11,16 +11,16 @@ generated:
 
 # Implementation progress
 
-**0 of 76 steps completed; no implementation goal launched.** Planning review and application completion are separate. This snapshot is initialized on November 1, 2026 from the planning source baseline f05a57b99a2d184900ddd809a7480b30052ae5c1. All application work is NOT_STARTED. The publication branch contains instructions, not completed features.
+**0 of 76 steps verified; the first-improvement goal is active.** S00.01 is VERIFYING under [issue #121](https://github.com/sahamo123/dax-editor/issues/121); its [receipt](s00-01-receipt.md) records the preserved starting tree and evidence. No application feature work is claimed. Remaining steps are NOT_STARTED.
 
 GitHub step issues and tested PR receipts are authoritative. Refresh this mirror after every execution checkpoint and record the synchronization date, exact implementation SHA and issue links. If it conflicts with an issue, inspect the evidence and reconcile both; do not choose the more optimistic state. Current planning delivery: [issue #72](https://github.com/sahamo123/dax-editor/issues/72), [review report](review-report.md).
 
 ## Current cursor
 
-- Selected execution route: not launched; conservative future prompt is first-improvement (21 steps).
-- Active step: none. Next eligible step: S00.01 after owner launch and entry checks.
-- Required scope, clients/providers and machines: declare provisionally at launch/S00.01; freeze/revalidate at S09.01 for broader routes.
-- Implementation issue/PR/receipt: none yet. Create scoped issues when a step is authorized, not fake completion receipts for planning pages.
+- Selected execution route: first-improvement (21 steps), explicitly launched November 1, 2026.
+- Active step: S00.01 VERIFYING. Next eligible step: S00.02 after the receipt, PR and predecessor recheck pass.
+- Required scope, clients/providers and machines: provisional choices are recorded in issue #121 and the S00.01 receipt; freeze/revalidate at S09.01 for broader routes.
+- Implementation issue/receipt: #121 and the S00.01 receipt. PR pending; later steps are unassigned.
 - Resume context: [handoff](handoff.md), [daily log](daily-log.md), [errors and recovery](errors-and-recovery.md), [evidence log](evidence-log.md).
 
 ## Step ledger
@@ -29,7 +29,7 @@ State vocabulary and advancement rules: [execution contract](execution-contract.
 
 | Step | State | Implementation issue / receipt |
 |---|---|---|
-| [S00.01: Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) | NOT_STARTED | Unassigned |
+| [S00.01: Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) | VERIFYING | [Issue #121](https://github.com/sahamo123/dax-editor/issues/121); [receipt](s00-01-receipt.md) |
 | [S00.02: Reconcile source and capability claims](s00-02-source-capability-reconciliation.md) | NOT_STARTED | Unassigned |
 | [S00.03: Build the authorized acceptance fixture inventory](s00-03-authorized-fixtures.md) | NOT_STARTED | Unassigned |
 | [S00.04: Establish measurable timing and resource budgets](s00-04-performance-budgets.md) | NOT_STARTED | Unassigned |

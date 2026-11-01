@@ -16,6 +16,7 @@
 * [Implementation receipt and predecessor double-check](receipt-template.md) - Evidence fields and two-pass review checklist required to verify one implementation step and unlock its successor.
 * [Planning review report - completeness and execution boundaries](review-report.md) - Inventory, independent review findings and deterministic verification for the staged implementation handbook, distinct from application acceptance.
 * [S00.01: Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) - Plan and evidence gates: Verify the continuation and preserve the workspace.
+* [S00.01 execution baseline receipt](s00-01-receipt.md) - Evidence and scope for the first-improvement execution baseline, including private project preservation and remaining acceptance boundaries.
 * [S00.02: Reconcile source and capability claims](s00-02-source-capability-reconciliation.md) - Plan and evidence gates: Reconcile source and capability claims.
 * [S00.03: Build the authorized acceptance fixture inventory](s00-03-authorized-fixtures.md) - Plan and evidence gates: Build the authorized acceptance fixture inventory.
 * [S00.04: Establish measurable timing and resource budgets](s00-04-performance-budgets.md) - Plan and evidence gates: Establish measurable timing and resource budgets.

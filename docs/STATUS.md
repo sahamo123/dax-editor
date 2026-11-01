@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## First-improvement execution — November 1, 2026
+
+The user launched the first-improvement route. S00.01 is VERIFYING under [issue #121](https://github.com/sahamo123/dax-editor/issues/121); [baseline receipt](implementation/2026-11-01-creator-editor/s00-01-receipt.md) records source ancestry, provisional scope, tool versions and a verified private project/history byte backup. Zero of 76 steps are verified and no new application behavior is claimed. The working branch is `codex/s00-01-baseline-receipt`; S00.02 is gated on review and verification of S00.01.
+
 ## Detailed planning delivery — November 1, 2026
 
 The [dated handbook](implementation/2026-11-01-creator-editor/master-plan.md) decomposes the creator proposal into 10 stages and 76 individually specified steps, with predecessor checks, acceptance/recovery instructions and one shared execution contract. [Progress](implementation/2026-11-01-creator-editor/progress.md) starts at **0/76 implementation steps**. [Review report](implementation/2026-11-01-creator-editor/review-report.md) records planning verification only; application acceptance below retains its historical scope. Tracking [#72](https://github.com/sahamo123/dax-editor/issues/72); latest continuation `codex/staged-implementation-handbook`.

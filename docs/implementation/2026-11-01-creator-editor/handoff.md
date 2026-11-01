@@ -11,15 +11,15 @@ generated:
 
 # Current handoff
 
-**Planning delivery: READY_FOR_OWNER_REVIEW. Implementation: NOT_STARTED.** The user requested the handbook and will review it before launching the separate implementation goal. Do not execute a step just because its file is present.
+**Implementation launched: first-improvement route. S00.01 is VERIFYING.** The planning delivery is complete; application feature work has not yet begun. Follow [issue #121](https://github.com/sahamo123/dax-editor/issues/121) and its [baseline receipt](s00-01-receipt.md).
 
 | Item | Current state |
 |---|---|
-| Current work | Completed planning content and review; delivery links are in planning issue #72 |
-| Implementation route | Not launched; future prompt defaults to first-improvement |
-| Active implementation step | None |
+| Current work | S00.01 baseline and preservation evidence; final review and PR pending |
+| Implementation route | first-improvement, S00–S02 |
+| Active implementation step | S00.01 VERIFYING |
 | Completed implementation steps | 0 of 76 |
-| Next eligible implementation step | S00.01 after explicit launch authorization and its entry gate |
+| Next eligible implementation step | S00.02 only after S00.01 is verified and its receipt/current tree are rechecked |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 | Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use continuation branch `codex/staged-implementation-handbook`; [planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the dependent documentation PRs and publication outcome. Main remains older and no PR is automatically merged. The owner reviews route, scope and estimates, then explicitly starts the [future execution goal](execution-goal.md). See [review report](review-report.md) and [evidence log](evidence-log.md) for what was checked.
+Use work branch `codex/s00-01-baseline-receipt` based on `codex/staged-implementation-handbook`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged. The user has launched first-improvement; see issue #121 for the live execution record.
 
-## Next action after owner review
+## Next execution action
 
-Read [context](context.md), [progress](progress.md), [execution contract](execution-contract.md) and [future execution goal](execution-goal.md). Record selected route, required capabilities/clients/providers and target machine, then start S00.01. Check current repo changes and prior receipts first. Do not skip S00 just because the planning process inspected code.
+Finish the second review and PR for S00.01, update issue #121 with the tested head and evidence, then recheck that receipt and current source before S00.02. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). Do not skip S00 because planning inspected code.
 
 ## Known gates to anticipate
 

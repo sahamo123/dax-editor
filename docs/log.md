@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: The owner launched first-improvement execution. S00.01 starts under issue #121; [baseline receipt](implementation/2026-11-01-creator-editor/s00-01-receipt.md) records the starting source, provisional scope and a hash-checked private project/history backup. No application feature work or fresh native acceptance is claimed.
+
 * **Update**: final planning privacy review switches raw evidence to hidden `.local/` inside the dated handbook, excluded by both Git and the existing documentation walker/indexer. Retain the old underscore-folder ignore guard and append a historical correction. A private Markdown probe confirms both boundaries; no application/tooling changes or private-content exposure.
 
 * **Update**: planning-publication batch 24 adds final entrypoints and publication reconciliation. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
