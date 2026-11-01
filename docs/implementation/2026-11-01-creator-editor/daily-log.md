@@ -88,3 +88,19 @@ S00.05 passed a fresh full check, 39 browser tests and a strict decoded offline 
 ## 2026-11-01 - independent baseline review correction
 
 The independent reviewer checked five issue/PR/commit chains, private artifact hashes, seeded-cache timing samples and a fresh strict export decode. The reviewer found 67 skipped package tests rather than the 68 previously reported; 1,801 package passes and 17 script passes are unchanged. Corrected S00.02–S00.05 summaries and their GitHub issue/PR descriptions, with an appended correction to issue #9. The reviewer’s pnpm attempt stopped before tests on sandbox symlink EPERM; the independent decode and a subsequent coordinator-focused regression passed. Correction recheck and stage PR remain pending.
+
+## 2026-11-01 - S01.01 workspace audit
+
+S00.06 correction recheck passed; issue #133 and PR #134 record the verified stage at `1d520153a1f81d2429f815d2db5e655e1a0d538d`. Issue #135 tracks the next audit on `codex/s01-01-workspace-audit`. Fresh synthetic browser walkthroughs covered three sizes and task controls; findings #136/#137 join #130/#131. Automatic approval review rejected screenshot uploads because their sensitive-data content was not independently verified; captures remain ignored locally. The first harness configuration failed before tests, and a sandboxed retry produced no successful result; corrected normal-host sessions passed. Next: preserve the text receipt, resolve portable screenshot evidence, second review and scoped PR before S01.02. Native acceptance remains separate.
+
+## 2026-11-01 - portable audit reproduction
+
+Preserved the synthetic audit harness in the [reproduction guide](s01-01-reproduce-audit.md) without publishing screenshot payloads. Extracted its four code blocks into a fresh ignored directory and ran its three Playwright configurations on the original laptop; each passed, 30 screenshots were produced locally, and the 1366×768 preview measurements matched the earlier run. The reproduction does not verify a second laptop or native app and does not resolve the screenshot-upload rejection. Issue #135 remains IN_PROGRESS; PR #138 contains the audit stack.
+
+## 2026-11-01 - read-only native acceptance preflight
+
+While S01.01's screenshot gate remained unresolved, inspected the existing native acceptance and candidate workflows without running them or changing CI. The native workflow selects historical run 40528351026, its harness writes the same fixed `sourceRun` in success and failure results, and its 1024×700 viewport is not an actual Windows display-scale check. Logged [issue #139](https://github.com/sahamo123/dax-editor/issues/139) for source-bound hashes and real 100/125/150/200% scaling after S01.06. No dependent implementation or native acceptance was started. S01.01 remains IN_PROGRESS.
+
+## 2026-11-01 - approved synthetic audit evidence
+
+The owner approved the five identified synthetic screenshots. Rechecked their SHA-256 values against the audit receipt; GitHub accepted the direct blob uploads. The error image has its account component redacted; unredacted originals and other screenshots remain ignored. Next: publish the linked evidence, recheck the PR and issue, and mark S01.01 verified only if all gates pass.

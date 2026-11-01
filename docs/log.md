@@ -2,6 +2,14 @@
 
 ## 2026-11-01
 
+* **Update**: The owner approved five identified synthetic S01.01 screenshots after the initial automatic upload rejection. Their hashes were rechecked and the direct blob uploads succeeded; publication and audit verification remain pending.
+
+* **Update**: A read-only native test preflight found that the historical installer run ID is fixed both in the workflow and in its result field; viewport resizing does not establish Windows display scaling. [Issue #139](https://github.com/sahamo123/dax-editor/issues/139) tracks source-matched provenance and actual scaling after S01.06. No CI changes or native run occurred.
+
+* **Update**: Added a [reproduction guide](implementation/2026-11-01-creator-editor/s01-01-reproduce-audit.md) for the S01.01 synthetic workspace audit and reran its three browser checks in a fresh private folder on the original laptop. Screenshot upload remains rejected by automatic approval review; S01.01 and native acceptance remain open.
+
+* **Update**: S00.06 passed independent baseline review ([issue #133](https://github.com/sahamo123/dax-editor/issues/133), [PR #134](https://github.com/sahamo123/dax-editor/pull/134)). S01.01 ([issue #135](https://github.com/sahamo123/dax-editor/issues/135)) records fresh synthetic browser workspace captures and routes findings #130, #131, #136 and #137; its second review and publication remain pending. Native/packaged acceptance remains open.
+
 * **Update**: S00.05 passed fresh system-FFmpeg source and browser checks plus an isolated manual edit, grouped undo/redo, project-copy reopen, revision-bound review and strictly decoded export ([issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132)). UI findings #130/#131 remain open. S00.06 independent baseline review is tracked in [issue #133](https://github.com/sahamo123/dax-editor/issues/133); native and packaged acceptance remain separate.
 
 * **Update**: S00.04 passed its short seeded-cache browser measurements and self-review ([issue #127](https://github.com/sahamo123/dax-editor/issues/127), [PR #128](https://github.com/sahamo123/dax-editor/pull/128)). S00.05 ([issue #129](https://github.com/sahamo123/dax-editor/issues/129)) begins fresh isolated offline editing and full/browser verification; native and packaged results remain separate.

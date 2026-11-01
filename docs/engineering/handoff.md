@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.01 — November 1, 2026
+
+Continue `codex/s01-01-workspace-audit`, [issue #135](https://github.com/sahamo123/dax-editor/issues/135). S00.06 passed independent review at [PR #134](https://github.com/sahamo123/dax-editor/pull/134), tested head `1d520153a1f81d2429f815d2db5e655e1a0d538d`. Fresh synthetic browser findings and their limitations are in the [audit receipt](../implementation/2026-11-01-creator-editor/s01-01-audit-receipt.md). Complete the second review and scoped publication, then recheck before S01.02. Native/packaged acceptance remains open.
+
 ## Active S00.06 — November 1, 2026
 
 Continue `codex/s00-06-baseline-stage-review` under [issue #133](https://github.com/sahamo123/dax-editor/issues/133). Independently review S00.01–S00.05 receipts, commits and artifacts; reconcile release gates and findings before preparing the stage-closure PR. The [current handoff](../implementation/2026-11-01-creator-editor/handoff.md) tracks next actions. Do not present browser/system-FFmpeg evidence as native or packaged acceptance.

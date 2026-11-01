@@ -11,7 +11,7 @@ generated:
 
 # S00.06 baseline-stage review
 
-**State: IN_PROGRESS.** [Issue #133](https://github.com/sahamo123/dax-editor/issues/133). Before entry, [issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132), tested head `fca7677085dc291d6cdf8e38eea9ed4c19c71211` and clean source ancestry were rechecked. Independent review passed after its skipped-test count finding was corrected and rechecked. Final PR publication and receipt remain necessary before S00 closes.
+**State: VERIFIED for the scoped baseline.** [Issue #133](https://github.com/sahamo123/dax-editor/issues/133), [PR #134](https://github.com/sahamo123/dax-editor/pull/134), tested commit `1d520153a1f81d2429f815d2db5e655e1a0d538d`, tree `219fd8dbce965c48986b9b445fd4db4d3d2957ea`. Before entry, [issue #129](https://github.com/sahamo123/dax-editor/issues/129), [PR #132](https://github.com/sahamo123/dax-editor/pull/132), tested head `fca7677085dc291d6cdf8e38eea9ed4c19c71211` and clean source ancestry were rechecked. Independent review passed after its skipped-test count finding was corrected and rechecked. The PR is unmerged and this is not release approval.
 
 ## Evidence map
 

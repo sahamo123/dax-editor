@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## First-improvement S01.01 — November 1, 2026
+
+S00.06 passed independent stage review: [issue #133](https://github.com/sahamo123/dax-editor/issues/133), [PR #134](https://github.com/sahamo123/dax-editor/pull/134). The rendered workspace audit is IN_PROGRESS on `codex/s01-01-workspace-audit`, [issue #135](https://github.com/sahamo123/dax-editor/issues/135); its [receipt](implementation/2026-11-01-creator-editor/s01-01-audit-receipt.md) records synthetic browser evidence and findings #130, #131, #136 and #137. Complete its second review and publish before S01.02. Native/packaged and DPI acceptance remain separate and open.
+
 ## First-improvement S00.06 — November 1, 2026
 
 [Issue #133](https://github.com/sahamo123/dax-editor/issues/133) independently reviews the baseline stage on `codex/s00-06-baseline-stage-review`. S00.01–S00.05 have self-reviewed receipts; the S00.05 [offline baseline](implementation/2026-11-01-creator-editor/s00-05-offline-baseline.md) passed the full source check, browser suite and isolated decoded-export walkthrough with system FFmpeg. Native/packaged acceptance remains open; UI issues [#130](https://github.com/sahamo123/dax-editor/issues/130) and [#131](https://github.com/sahamo123/dax-editor/issues/131) remain open.
