@@ -6,7 +6,7 @@ tags: [design, ux, agents, setup, supply-chain]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-11-01T01:28:50-07:00
+  at: 2026-11-01T08:40:21Z
 ---
 
 # Impeccable design setup and editor brief
@@ -69,3 +69,7 @@ Codex can discover the project `.agents/skills/` variant; Antigravity uses `.age
 ## Intake evidence
 
 The actual upstream LICENSE is Apache-2.0 and agrees with package metadata. NOTICE.md identifies MIT-derived platform guidance and is retained. No model, font or dataset is added. The installed variants are approximately 2.2 MB each and execute nothing during copy/verification; there is no running service, hook, telemetry process or added application dependency. No new dependency lockfile needs an OSV scan for this static-only intake. Source archive is HTTPS, commit-pinned and SHA-256 verified; all installed files match its bytes. The launcher can fetch and execute a separately released engine, so that executable surface is excluded from this adoption rather than silently approved. Follow [the intake policy](../research/open-source-radar.md#intake-policy) for any broader tool integration. Tracking: [issue #68](https://github.com/sahamo123/dax-editor/issues/68).
+
+Tree digests hash UTF-8 records of relative POSIX path, NUL, lowercase file SHA-256, LF, ordered by case-sensitive path. This includes the added LICENSE/NOTICE files. Windows case-insensitive path sorting is not the digest order.
+
+November 1 verification PASS: both installed variants match the archive; the exact documented setup snippet succeeds in a fresh temporary folder and reproduces both tree digests. Receipt: `artifacts/impeccable-reinstall-result.json`. Full `pnpm check` passes 1,799 package +17 root tests with 67 explicit platform/opt-in skips; log `artifacts/impeccable-setup-final-check.log`. Docs indexes/OKF, lint, guide links and whitespace checks pass. Initial lint included generated third-party scripts before the exact ignored install path was declared; no app assertions or lint rules were weakened. [PR #69](https://github.com/sahamo123/dax-editor/pull/69) publishes this setup; it does not establish an Antigravity design session or native-app acceptance.

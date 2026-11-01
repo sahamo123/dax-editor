@@ -6,7 +6,7 @@ tags: [handoff, agents, windows, setup]
 status: stable
 generated:
   by: process:scribe
-  at: 2026-10-31T18:54:04-07:00
+  at: 2026-11-01T08:40:21Z
 ---
 
 # Continue on another laptop or agent
