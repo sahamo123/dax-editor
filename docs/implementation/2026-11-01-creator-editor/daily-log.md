@@ -100,3 +100,7 @@ Preserved the synthetic audit harness in the [reproduction guide](s01-01-reprodu
 ## 2026-11-01 - read-only native acceptance preflight
 
 While S01.01's screenshot gate remained unresolved, inspected the existing native acceptance and candidate workflows without running them or changing CI. The native workflow selects historical run 40528351026, its harness writes the same fixed `sourceRun` in success and failure results, and its 1024×700 viewport is not an actual Windows display-scale check. Logged [issue #139](https://github.com/sahamo123/dax-editor/issues/139) for source-bound hashes and real 100/125/150/200% scaling after S01.06. No dependent implementation or native acceptance was started. S01.01 remains IN_PROGRESS.
+
+## 2026-11-01 - approved synthetic audit evidence
+
+The owner approved the five identified synthetic screenshots. Rechecked their SHA-256 values against the audit receipt; GitHub accepted the direct blob uploads. The error image has its account component redacted; unredacted originals and other screenshots remain ignored. Next: publish the linked evidence, recheck the PR and issue, and mark S01.01 verified only if all gates pass.

@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: The owner approved five identified synthetic S01.01 screenshots after the initial automatic upload rejection. Their hashes were rechecked and the direct blob uploads succeeded; publication and audit verification remain pending.
+
 * **Update**: A read-only native test preflight found that the historical installer run ID is fixed both in the workflow and in its result field; viewport resizing does not establish Windows display scaling. [Issue #139](https://github.com/sahamo123/dax-editor/issues/139) tracks source-matched provenance and actual scaling after S01.06. No CI changes or native run occurred.
 
 * **Update**: Added a [reproduction guide](implementation/2026-11-01-creator-editor/s01-01-reproduce-audit.md) for the S01.01 synthetic workspace audit and reran its three browser checks in a fresh private folder on the original laptop. Screenshot upload remains rejected by automatic approval review; S01.01 and native acceptance remain open.

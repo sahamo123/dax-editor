@@ -11,7 +11,7 @@ generated:
 
 # Reproduce the S01.01 synthetic workspace audit
 
-This guide preserves the temporary test harness behind [the audit receipt](s01-01-audit-receipt.md). It creates new synthetic media and an isolated test engine; it does not open the user's projects. It is a reproduction aid, not evidence that a different machine, native app, model or provider has passed. The historical screenshots remain ignored on the original laptop. Automatic approval review rejected uploading screenshot payloads because their sensitive-data content was not independently verified; do not work around that rejection via an indirect upload.
+This guide preserves the temporary test harness behind [the audit receipt](s01-01-audit-receipt.md). It creates new synthetic media and an isolated test engine; it does not open the user's projects. It is a reproduction aid, not evidence that a different machine, native app, model or provider has passed. The owner approved five identified synthetic captures after automatic review initially rejected uploading them; all other screenshots, including unredacted originals, remain private.
 
 On November 1, 2026, the three code blocks and configuration were extracted from this guide into a new ignored folder and the three listed Playwright runs passed individually on the original Windows laptop with Edge and explicit system FFmpeg. They regenerated 30 screenshots; the 1366×768 default/max preview measurements matched the receipt. The normal-host process exited zero and no test preview remained on port 4173. This checks the guide on the same laptop only; no screenshot was uploaded and no other machine or native runtime is certified.
 

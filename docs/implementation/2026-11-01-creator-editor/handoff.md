@@ -34,7 +34,7 @@ Use work branch `codex/s01-01-workspace-audit`, based on `codex/s00-06-baseline-
 
 ## Next execution action
 
-Finish the fresh isolated browser audit, inspect and hash the screenshots, exercise workspace resizing, selection and task controls, then publish a ranked findings receipt and scoped PR. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing required check blocks S01.02. The synthetic audit captures are private under ignored `artifacts/s01-01-workspace-audit-20261101/`; the [reproduction guide](s01-01-reproduce-audit.md) regenerates them and was rechecked on the same laptop. Automatic approval review rejected their upload because sensitive-data content was not independently verified; do not retry through an indirect upload. Preserve the local captures and resolve the portable screenshot evidence before marking the step verified.
+Complete the audit publication and recheck its issue, PR head, linked screenshot hashes and self-review before S01.02. Read [context](context.md), [progress](progress.md) and [execution contract](execution-contract.md). A failed or missing required check blocks S01.02. The owner approved the five identified synthetic screenshots after the initial automatic upload rejection; the other captures remain private under ignored `artifacts/s01-01-workspace-audit-20261101/`. The [reproduction guide](s01-01-reproduce-audit.md) was rechecked on the same laptop.
 
 ## Known gates to anticipate
 
