@@ -37,6 +37,8 @@ Goals: skippable project setup; direct entry for existing projects; contextual i
 
 ## Responsive and focus contract
 
+The preview and panel-sizing part is being implemented as a separate [child slice](../implementation/2026-11-01-creator-editor/s01-04-preview-child-receipt.md); it is not full responsive or native acceptance.
+
 At wide sizes retain resizable chat, preview/timeline and contextual panel. At narrow sizes use a labelled Edit/Assistant switch; an inspector may dock at the bottom and be resized/closed without permanently covering preview and timeline. Keep a visible task summary in both views. Preserve stored dimensions while clamping to the available viewport: chat minimum 260 CSS px when shown, preview column at least 320 CSS px when feasible, timeline at least 150 CSS px, and preview at least 160 CSS px high. If the physical window cannot accommodate all minima, collapse/switch panels and keep primary actions reachable rather than hiding content or creating page-wide horizontal overflow. These are implementation targets, not proof of existing behavior.
 
 Splitters remain named keyboard-operable separators; arrows and Home/End continue to work. Preserve playhead, selection, active tasks and undo stack across resize or mode switch. A temporary panel's Escape closes only that panel, not the active task; explicit Stop remains separate. Restore focus to a still-mounted opener, otherwise a predictable labelled workspace control. Never auto-focus an inspector merely because a selection changed. Text-entry keys must not invoke timeline shortcuts.

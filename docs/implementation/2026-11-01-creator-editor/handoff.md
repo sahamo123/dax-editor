@@ -11,15 +11,15 @@ generated:
 
 # Current handoff
 
-**First-improvement is active: S00.01–S00.06 and S01.01–S01.02 VERIFIED; S01.03 IN_PROGRESS.** Follow [issue #142](https://github.com/sahamo123/dax-editor/issues/142). S01.02's [issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141) and tested commit `f3f019e353493a6050959170c72e33a73dc1b2ae` were rechecked; stacked PRs remain unmerged.
+**First-improvement is active: S00.01–S00.06 and S01.01–S01.03 VERIFIED; S01.04 IN_PROGRESS.** Follow [issue #144](https://github.com/sahamo123/dax-editor/issues/144), split into preview child [#137](https://github.com/sahamo123/dax-editor/issues/137) and dependent compact-layout work. S01.03 [issue #142](https://github.com/sahamo123/dax-editor/issues/142), [PR #143](https://github.com/sahamo123/dax-editor/pull/143), tested commit `6ecf3b533df2029eda17699dbfc7c32d7598a689` and tree `d76163a2df2fe41e0b9187a86cfadd60876d3112` were rechecked; stacked PRs remain unmerged.
 
 | Item | Current state |
 |---|---|
-| Current work | S01.03 setup and contextual inspector implementation |
+| Current work | S01.04 preview/sizing child; compact layout follows |
 | Implementation route | first-improvement, S00–S02 |
-| Active implementation step | S01.03 IN_PROGRESS |
-| Completed implementation steps | 8 of 76; S00.06 independently reviewed, S01.01–S01.02 self-reviewed |
-| Next eligible implementation step | S01.04 after S01.03 verification and evidence recheck |
+| Active implementation step | S01.04 IN_PROGRESS; child #137 under verification |
+| Completed implementation steps | 9 of 76; S00.06 independently reviewed, others self-reviewed |
+| Next eligible implementation step | S01.05 after all S01.04 slices pass and are reviewed |
 | Planning source baseline | f05a57b99a2d184900ddd809a7480b30052ae5c1 |
 | Current publication tracking | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 | Current raw artifact location | Ignored `.local/`; older acceptance artifacts remain where STATUS records them |
@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use work branch `codex/s01-03-setup-inspector`, based on `codex/s01-02-workspace-contract`. [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the earlier handbook publication stack. Main remains older and no PR is automatically merged.
+Use work branch `codex/s01-04-preview-sizing`, based on `codex/s01-03-setup-inspector`, for the preview child. A complete compact-layout candidate is preserved separately in the original laptop worktree; consult #144 for publication state before switching machines. Main remains older and no PR is automatically merged.
 
 ## Next execution action
 
-Finish S01.03's setup/inspector regressions, full browser suite and visual review, record exact evidence and publish a scoped PR before S01.04. Read [context](context.md), [progress](progress.md), the [workspace contract](../../specs/workspace-design-contract.md) and [execution contract](execution-contract.md). The owner approved five specific S01.01 screenshots; all other captures remain private under ignored `artifacts/`.
+Finish and review the [preview child](s01-04-preview-child-receipt.md), publish its scoped PR, and recheck it before the dependent compact layout. The separate confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) requires remediation before reliable recovery can be claimed. Read [context](context.md), [progress](progress.md), the [workspace contract](../../specs/workspace-design-contract.md) and [execution contract](execution-contract.md). The owner approved five specific S01.01 screenshots; all other captures remain private under ignored `artifacts/`.
 
 ## Known gates to anticipate
 

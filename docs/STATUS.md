@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## First-improvement S01.04 preview slice — November 1, 2026
+
+S01.03 is verified with self-review at [issue #142](https://github.com/sahamo123/dax-editor/issues/142) and [PR #143](https://github.com/sahamo123/dax-editor/pull/143). S01.04 [#144](https://github.com/sahamo123/dax-editor/issues/144) is split for review: the preview and sizing child [#137](https://github.com/sahamo123/dax-editor/issues/137) is in progress on `codex/s01-04-preview-sizing`; the compact workspace follows separately. Confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) remains open. Native/packaged and DPI acceptance remain open.
+
 ## First-improvement S01.03 — November 1, 2026
 
 S01.02's product/design contract passed self-review: [issue #140](https://github.com/sahamo123/dax-editor/issues/140), [PR #141](https://github.com/sahamo123/dax-editor/pull/141). Setup and contextual-inspector work is IN_PROGRESS on `codex/s01-03-setup-inspector`, [issue #142](https://github.com/sahamo123/dax-editor/issues/142). Targeted tests pass; full acceptance and publication remain pending. Native/packaged and DPI acceptance remain open.

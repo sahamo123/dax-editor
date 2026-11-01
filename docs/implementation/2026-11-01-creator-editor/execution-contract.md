@@ -11,7 +11,7 @@ generated:
 
 # Execution contract: verify before advancing
 
-This is a future execution contract. Authoring or reviewing a plan page does **not** complete its implementation. All 76 steps start `NOT_STARTED`; the [master plan](master-plan.md) chooses the route. [Root rules](../../../AGENTS.md) and applicable package rules remain authoritative. The user will review this handbook before launching implementation.
+This contract governs execution of the [master plan](master-plan.md). Authoring or reviewing a plan page does **not** complete its implementation. The owner has launched the first-improvement route; consult [progress](progress.md) and the [current handoff](handoff.md) for actual step states. [Root rules](../../../AGENTS.md) and applicable package rules remain authoritative.
 
 ## Two separate completion records
 

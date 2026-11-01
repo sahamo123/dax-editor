@@ -22,7 +22,14 @@ This is the public evidence index for the dated handbook. Raw logs, screenshots 
 | PLAN-STRUCTURE | IDs, sections, source links, counts, effort and route closure | PASS: 100 Markdown files, 1,173 links, route/effort/dependency gates; docs/OKF/lint | [Sanitized final receipt](review-report.md); raw audit receipt ignored |
 | PLAN-PUBLISH | GitHub publication and final laptop/tree comparison | Publication receipt and PR stack tracked separately; verify the checked-out head | [Planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) |
 
-Historical application checks remain in repository STATUS with their original date/source/environment. They are not new runs in this table. The current planning task does not load an LLM, edit media, run native acceptance or deploy a host.
+Historical application checks remain in repository STATUS with their original date/source/environment. They are not new runs in this planning table. The planning work itself did not load a model, edit media, run native acceptance or deploy a host; execution has since begun.
+
+## Current execution evidence
+
+| Run | Scope | Result | Source / evidence |
+|---|---|---|---|
+| S01.03 | Setup and contextual inspection | VERIFIED with self-review | [Receipt](s01-03-setup-receipt.md), [issue #142](https://github.com/sahamo123/dax-editor/issues/142), [PR #143](https://github.com/sahamo123/dax-editor/pull/143) |
+| S01.04 preview child | Preview and saved panel sizes | VERIFYING: isolated source/browser/frame checks passed; review/publication pending | [Child receipt](s01-04-preview-child-receipt.md), [issue #137](https://github.com/sahamo123/dax-editor/issues/137) |
 
 ## Add a verification run
 
