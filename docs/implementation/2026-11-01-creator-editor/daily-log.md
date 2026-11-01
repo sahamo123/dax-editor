@@ -168,3 +168,5 @@ Recovery acceptance PR #160 passed the complete browser suite (62 passed, two sk
 S01.05 parent #151 and reconciliation PR #161 passed a separate self-review at `594f1866bdc760a76a3bd37659ce1d7c25fe7449`. S01.06 #162 starts from that head after rechecking the parent, tested app ancestor and source/browser log hashes; actual accessibility evidence is pending.
 
 The partial generated-media browser keyboard walkthrough exposed repeated review progress updates in a live region (#163) and focus loss when export starts (#164). A focused regression reproduced #163; its correction is under test. Browser chooser assistance was required and native-window access timed out, so full manual and screen-reader evidence remains pending. The keyboard-triggered generated export contained six seconds of video and audio.
+
+Review of #163's first draft found that a transient-progress browser assertion could race very fast rendering. It was removed; the deterministic component regression remains, and the unchanged browser review tests passed again. The generated keyboard export was fully decoded.
