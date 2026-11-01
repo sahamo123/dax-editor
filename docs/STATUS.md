@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Design skill setup — November 1, 2026
+
+Impeccable 4.8.0 is installed at a pinned upstream commit for Codex and the project Antigravity workspace. [Setup, integrity pins and UI/UX brief](engineering/impeccable-design.md) describe manual-context use, private install receipts and reproducible installation on another laptop. Root AGENTS.md governs the skill: no launcher/engine download, hooks, live injection or CSP/permission changes. This adds design guidance only; no application UI or live project has changed. Tracking: [#68](https://github.com/sahamo123/dax-editor/issues/68), branch `codex/impeccable-design-setup`, based on the complete laptop handoff branch below.
+
 ## Cross-laptop handoff — October 31, 2026
 
 Continue from `codex/laptop-agent-handoff`, based on the published October 27 application tree. Read [the current continuation guide](engineering/laptop-continuation.md) for the exact baseline, fresh Windows commands, live MCP configuration, private data boundaries and prioritized issue links. Root README/AGENTS and setup entry points now agree. Default `main` remains older; stacked implementation PRs are not merged by this handoff. Tracking: [#66](https://github.com/sahamo123/dax-editor/issues/66).

@@ -1,5 +1,9 @@
 # Project log
 
+## 2026-11-01
+
+* **Update**: install pinned Impeccable 4.8.0 developer skills for Codex and the Antigravity workspace, retain licences/NOTICE and verify installed bytes against the SHA-256-pinned source archive. [Design setup and editor brief](engineering/impeccable-design.md) records manual-context use and fresh-laptop installation. Keep generated copies ignored and exclude the auto-downloaded engine, hooks/live injection and application dependency changes. Issue #68; no UI or project changes.
+
 ## 2026-10-31
 
 * **Update**: [Cross-laptop/agent continuation](engineering/laptop-continuation.md) records the published baseline, fresh Windows setup without local caches, MCP read-only/edit configuration, private-media/model transfer boundaries, current evidence and ranked remaining release gates. Reconcile stale README/AGENTS and historical setup entry points; add a thin GEMINI.md pointer for agents that use it. Issue #66; application behavior and security policy unchanged.

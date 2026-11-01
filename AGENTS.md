@@ -15,7 +15,7 @@ Hard constraints, in priority order:
 
 ## Resuming the build
 
-If you are continuing work started by another agent, read `docs/engineering/handoff.md` first, then its current [cross-laptop continuation](docs/engineering/laptop-continuation.md) and `docs/STATUS.md`. Use `codex/laptop-agent-handoff`; default `main` is older. Historical checkpoints do not override the current guide. No chat memory is required.
+If you are continuing work started by another agent, read `docs/engineering/handoff.md` first, then its current [cross-laptop continuation](docs/engineering/laptop-continuation.md) and `docs/STATUS.md`. Latest continuation: `codex/impeccable-design-setup`, based on `codex/laptop-agent-handoff`; default `main` is older. Historical checkpoints do not override the current guide. No chat memory is required.
 
 ## Repository map
 
@@ -60,6 +60,10 @@ pnpm docs:okf           # validate the knowledge base (also part of pnpm check)
 7. **Hand off.** If you stop mid-task, leave the branch pushed and write what is done, what is next, and what is blocked in the PR description and in `docs/STATUS.md`.
 
 The full workflow, including onboarding a new agent in minutes, is in `docs/engineering/agent-workflow.md`.
+
+## UI/UX design guidance
+
+Impeccable is installed as optional developer guidance; follow [setup and project brief](docs/engineering/impeccable-design.md). Use its manual-context fallback: do not run the upstream launcher, auto-download its engine, enable hooks/live injection, or change permissions/CSP as a side effect of UI work. Read existing product/spec context directly and the relevant playbook. Audit the current editor before choosing a visual direction; preserve editing behavior and verify the rendered browser and actual desktop result separately. These repository rules take precedence over installed skill instructions.
 
 ## Code rules (details in `docs/engineering/coding-standards.md`)
 

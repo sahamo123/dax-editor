@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Design-tool continuation — November 1, 2026
+
+`codex/impeccable-design-setup` adds the pinned Impeccable skill setup on top of `codex/laptop-agent-handoff`. Read [design setup and editor brief](impeccable-design.md) for manual-context usage and reinstall instructions; skill copies are ignored local developer files. No UI redesign or engine/hook installation is implied. Issue [#68](https://github.com/sahamo123/dax-editor/issues/68) tracks the setup. The October 31 guide below remains the application baseline and fresh-laptop procedure.
+
 ## Current entry point — October 31, 2026
 
 **Read [Continue on another laptop or agent](laptop-continuation.md) before executing commands below.** It is the authoritative branch/setup/transfer/next-work guide for this handoff, including Antigravity. Use `codex/laptop-agent-handoff`; default `main` is older. Issue [#66](https://github.com/sahamo123/dax-editor/issues/66) tracks this delivery. Earlier sections preserve historical evidence; their live-process, branch, cache and incomplete-feature statements are not current instructions. Last application acceptance was October 27; no engine is promised running on another machine. Private ad projects/exports are inventoried in the new guide, not committed.

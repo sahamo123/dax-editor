@@ -1,0 +1,25 @@
+{
+  "upstream": "https://github.com/pbakaus/impeccable",
+  "commit": "4f956490f0056ae1ff5ea80372cf56e83c001d3c",
+  "skillVersion": "4.8.0",
+  "archiveUrl": "https://codeload.github.com/pbakaus/impeccable/zip/4f956490f0056ae1ff5ea80372cf56e83c001d3c",
+  "archiveSha256": "56014795f70b59e8cd14fb021c9472d17a3d527829e10ec955fb89427ad54f2a",
+  "license": "Apache-2.0",
+  "licenseSha256": "02bb8c3b4e70190e3986c0404ad2fd8d639b4f534252d82379cc1b502b6d1812",
+  "noticeSha256": "c60a093c2845fd9fb82f9c6f742ece31f379f8190b535309d32d66c45ccffdcb",
+  "mode": "manual-context; no launcher, engine download, hooks, or live injection",
+  "installations": [
+    {
+      "variant": "codex",
+      "files": 65,
+      "bytes": 2266655,
+      "treeSha256": "9a753f363fd7875af7412efc8b6d87295e487e8338ad3ad7ecd449d83141b3ea"
+    },
+    {
+      "variant": "antigravity",
+      "files": 60,
+      "bytes": 2225711,
+      "treeSha256": "c3e17613bfbfdbe3f5364de15f68ad3ed7e1b7e84dab18048a8afb86bf07963f"
+    }
+  ]
+}
