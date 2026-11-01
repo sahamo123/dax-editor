@@ -42,7 +42,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 |---|---|---:|---:|
 | [S00](stage-00-baseline.md) | Baseline reconciliation and acceptance | 6 | 2-4 |
 | [S01](stage-01-workspace.md) | Control-panel workflow and design contract | 7 | 4-7 |
-| S02 (`stage-02-profiles.md`; later publication batch) | Content profiles and compatibility foundation | 8 | 4-6 |
+| [S02](stage-02-profiles.md) | Content profiles and compatibility foundation | 8 | 4-6 |
 | S03 (`stage-03-composition.md`; later publication batch) | Bounded layered composition | 9 | 10-16 |
 | S04 (`stage-04-long-form.md`; later publication batch) | Long-form podcast and educational workflows | 8 | 8-14 |
 | S05 (`stage-05-reference-style.md`; later publication batch) | Reference-style analysis and editable recipes | 7 | 7-12 |
@@ -72,15 +72,15 @@ Stage overview: [S01](stage-01-workspace.md). Read it before its first step.
 - [S01.02: Record the product and design contract](s01-02-product-design-contract.md) - 0.5-0.75 engineer-days.
 - [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) - 0.75-1.25 engineer-days.
 - [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) - 0.75-1.25 engineer-days.
-- S01.05: Preserve task and recovery controls in the new layout (`s01-05-task-recovery-visibility.md`; later publication batch) - 0.5-1 engineer-days.
-- S01.06: Complete keyboard and accessibility behavior (`s01-06-accessibility.md`; later publication batch) - 0.5-1 engineer-days.
-- S01.07: Verify browser and native workspace acceptance (`s01-07-workspace-acceptance.md`; later publication batch) - 0.5-0.75 engineer-days.
+- [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - 0.5-1 engineer-days.
+- [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - 0.5-1 engineer-days.
+- [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - 0.5-0.75 engineer-days.
 
 ## S02: Content profiles and compatibility foundation
 
-Stage overview: S02 (`stage-02-profiles.md`; later publication batch). Read it before its first step.
+Stage overview: [S02](stage-02-profiles.md). Read it before its first step.
 
-- S02.01: Specify profiles and project compatibility (`s02-01-profile-compatibility-contract.md`; later publication batch) - 0.5-0.75 engineer-days.
+- [S02.01: Specify profiles and project compatibility](s02-01-profile-compatibility-contract.md) - 0.5-0.75 engineer-days.
 - S02.02: Implement safe project and history migration (`s02-02-project-history-migration.md`; later publication batch) - 0.5-0.75 engineer-days.
 - S02.03: Define the four deterministic content profiles (`s02-03-content-profiles.md`; later publication batch) - 0.5-0.75 engineer-days.
 - S02.04: Make template capability reporting truthful (`s02-04-capability-metadata.md`; later publication batch) - 0.5-0.75 engineer-days.
