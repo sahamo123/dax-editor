@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: Review progress [#163 / PR #166](https://github.com/sahamo123/dax-editor/pull/166) passed focused/full checks and self-review at `1a57506035551b4d6cf3ddae414acd54f044274b`. Export-focus child #164 is under verification; S01.06 remains in progress.
+
 * **Incident**: S01.06's partial keyboard walkthrough found progress repeatedly updating a live region ([#163](https://github.com/sahamo123/dax-editor/issues/163)) and export focus loss ([#164](https://github.com/sahamo123/dax-editor/issues/164)); scoped fixes and actual assistive-technology observations remain pending.
 
 * **Update**: S01.05 [#151 / PR #161](https://github.com/sahamo123/dax-editor/pull/161) passed its separate self-review; S01.06 [#162](https://github.com/sahamo123/dax-editor/issues/162) begins with the predecessor evidence rechecked.

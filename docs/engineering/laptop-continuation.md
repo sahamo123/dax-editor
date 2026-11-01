@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.06 export-focus child:** [#164](https://github.com/sahamo123/dax-editor/issues/164), local `codex/s01-06-export-focus`, is based on self-reviewed [PR #166](https://github.com/sahamo123/dax-editor/pull/166) `1a57506035551b4d6cf3ddae414acd54f044274b`. Confirm publication; full checks/review and the rest of S01.06 remain pending.
+
 **Current S01.06:** [#162](https://github.com/sahamo123/dax-editor/issues/162) starts on local `codex/s01-06-review-announcements` from self-reviewed [PR #161](https://github.com/sahamo123/dax-editor/pull/161), head `594f1866bdc760a76a3bd37659ce1d7c25fe7449`. Confirm publication and consult the dated handoff before switching laptops. Keyboard and assistive-technology acceptance is pending.
 
 **Current S01.05 parent reconciliation:** review [#151](https://github.com/sahamo123/dax-editor/issues/151) and the [receipt](../implementation/2026-11-01-creator-editor/s01-05-task-recovery-receipt.md) on `codex/s01-05-stage-reconciliation`, based on tested [PR #160](https://github.com/sahamo123/dax-editor/pull/160) `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. Check publication before changing laptops.

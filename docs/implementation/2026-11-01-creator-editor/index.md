@@ -46,6 +46,7 @@
 * [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - Plan and evidence gates: Preserve task and recovery controls in the new layout.
 * [S01.06 accessibility audit and implementation receipt](s01-06-accessibility-audit-receipt.md) - Entry check, work log and evidence for keyboard, contrast, motion and assistive-technology acceptance.
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.
+* [S01.06 export focus child receipt](s01-06-export-focus-receipt.md) - Reproduction and verification of stable keyboard focus while an export runs.
 * [S01.06 review progress announcement child receipt](s01-06-review-announcement-receipt.md) - Reproduction and verification for accessible rendered-review progress.
 * [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - Plan and evidence gates: Verify browser and native workspace acceptance.
 * [S02.01: Specify profiles and project compatibility](s02-01-profile-compatibility-contract.md) - Plan and evidence gates: Specify profiles and project compatibility.

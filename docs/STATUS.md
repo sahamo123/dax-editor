@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 export focus — November 1, 2026
+
+Review progress [#163 / PR #166](https://github.com/sahamo123/dax-editor/pull/166) is verified with self-review at `1a57506035551b4d6cf3ddae414acd54f044274b`. Export-focus [#164](https://github.com/sahamo123/dax-editor/issues/164) is under test on `codex/s01-06-export-focus`; 34 component tests and seven focused browser tests passed. Full checks and separate review are pending. Hover contrast #165 and real assistive-technology observations remain open. Verify publication before another laptop resumes.
+
 ## S01.06 keyboard and accessibility — November 1, 2026
 
 An isolated partial browser keyboard walkthrough identified [review progress live-region updates #163](https://github.com/sahamo123/dax-editor/issues/163) and [export focus loss #164](https://github.com/sahamo123/dax-editor/issues/164). The first fix is under test; the second remains pending. A browser file-selection helper was required and native-window access timed out, so complete manual and assistive-technology acceptance is not claimed. See the [audit receipt](implementation/2026-11-01-creator-editor/s01-06-accessibility-audit-receipt.md).

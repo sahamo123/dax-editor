@@ -79,3 +79,7 @@ Status FIXED_PENDING_VERIFICATION under [#153](https://github.com/sahamo123/dax-
 ## E014: Synthetic task directory not empty after shutdown — November 1
 
 Status INVESTIGATING, [issue #158](https://github.com/sahamo123/dax-editor/issues/158). The full browser run for #157 had 61 passes, two skips and one failure: cleanup after cancellation and server close saw `ENOTEMPTY` in an isolated generated task data directory. Private log SHA-256 `b1cf200bc46531652f669b431bfcc9e76c8635bdefd486bf05a8b563fe389eb`. A deterministic uncooperative-runner test independently produced the same cleanup symptom and showed running/queued task metadata remaining after shutdown. This establishes a shutdown-ordering defect but does not prove the precise cause of the original browser failure. This is not evidence of the cause of the separate Windows rename issue #149. Do not mark the failed run as passing or advance S01.05.
+
+## E015: Export-focus test type error — November 1
+
+Status FIXED_PENDING_VERIFICATION, [issue #164](https://github.com/sahamo123/dax-editor/issues/164). The first full check failed at desktop TypeScript build because the new component test passed Playwright's `exact` option to Testing Library's `getByRole`, which does not accept it. Private failed log SHA-256 `26c29dac736d88c1777cd5618fbfbace4518bd5d2e96158872510cca5bafadb8`. The test selector was corrected without changing product code; repeat the full check and do not count the failed run as passing.

@@ -201,7 +201,7 @@
 .btn--export {
   min-width: 108px;
 }
-.btn--export.is-busy:disabled {
+.btn--export.is-busy[aria-disabled="true"] {
   opacity: 1;
   background: var(--bg-3);
   border-color: var(--accent-bg);

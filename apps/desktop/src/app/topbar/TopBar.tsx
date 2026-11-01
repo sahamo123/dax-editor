@@ -151,10 +151,12 @@ export function TopBar({
       <button
         type="button"
         className={`btn btn--primary btn--export${exporting ? " is-busy" : ""}`}
-        onClick={() => patchUi({ exportOpen: true })}
-        disabled={
-          !online || Boolean(exporting) || !state || Object.keys(state.project.assets).length === 0
-        }
+        onClick={() => {
+          // Keep the busy control focusable, but never start a second export from it.
+          if (!exporting) patchUi({ exportOpen: true });
+        }}
+        disabled={!online || !state || Object.keys(state.project.assets).length === 0}
+        aria-disabled={exporting ? true : undefined}
         aria-label={exporting ? `Exporting, ${percent} percent` : "Export"}
       >
         {exporting ? (

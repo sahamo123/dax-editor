@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.06 export-focus child — November 1, 2026
+
+Continue [#164](https://github.com/sahamo123/dax-editor/issues/164) on `codex/s01-06-export-focus`, based on self-reviewed [PR #166](https://github.com/sahamo123/dax-editor/pull/166) `1a57506035551b4d6cf3ddae414acd54f044274b`. Focused component/browser checks passed; run full verification and review the published diff. Hover contrast #165 and actual assistive-technology acceptance remain open. Check publication before another laptop resumes.
+
 ## Active S01.06 accessibility audit — November 1, 2026
 
 Continue [#162](https://github.com/sahamo123/dax-editor/issues/162) on local `codex/s01-06-review-announcements`, starting from self-reviewed [PR #161](https://github.com/sahamo123/dax-editor/pull/161) `594f1866bdc760a76a3bd37659ce1d7c25fe7449`. Its [predecessor receipt](../implementation/2026-11-01-creator-editor/s01-05-task-recovery-receipt.md), issue/PR, tested head and log hashes were rechecked. Confirm publication; conduct keyboard, contrast, reduced-motion and actual assistive-technology work. Do not confuse browser and native verification. Earlier headings are historical.
