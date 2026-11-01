@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.02 — November 1, 2026
+
+Continue `codex/s01-02-workspace-contract`, [issue #140](https://github.com/sahamo123/dax-editor/issues/140). Rechecked S01.01's verified [issue #135](https://github.com/sahamo123/dax-editor/issues/135), [PR #138](https://github.com/sahamo123/dax-editor/pull/138) and head `48bb5b00fce1399cd193123e49bc16b43266c99b`. Finish and review the proposed [workspace contract](../specs/workspace-design-contract.md) before S01.03. Native/packaged acceptance remains separate.
+
 ## Active S01.01 — November 1, 2026
 
 Continue `codex/s01-01-workspace-audit`, [issue #135](https://github.com/sahamo123/dax-editor/issues/135). S00.06 passed independent review at [PR #134](https://github.com/sahamo123/dax-editor/pull/134), tested head `1d520153a1f81d2429f815d2db5e655e1a0d538d`. Fresh synthetic browser findings and their limitations are in the [audit receipt](../implementation/2026-11-01-creator-editor/s01-01-audit-receipt.md). Complete the second review and scoped publication, then recheck before S01.02. Native/packaged acceptance remains open.

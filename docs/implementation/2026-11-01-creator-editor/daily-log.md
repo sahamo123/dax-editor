@@ -104,3 +104,7 @@ While S01.01's screenshot gate remained unresolved, inspected the existing nativ
 ## 2026-11-01 - approved synthetic audit evidence
 
 The owner approved the five identified synthetic screenshots. Rechecked their SHA-256 values against the audit receipt; GitHub accepted the direct blob uploads. The error image has its account component redacted; unredacted originals and other screenshots remain ignored. Next: publish the linked evidence, recheck the PR and issue, and mark S01.01 verified only if all gates pass.
+
+## 2026-11-01 - S01.02 workspace contract
+
+S01.01 passed self-review and is recorded in issue #135 and PR #138 at `48bb5b00fce1399cd193123e49bc16b43266c99b`; screenshot hashes and ancestry were rechecked. Started issue #140 on `codex/s01-02-workspace-contract`. PRODUCT.md and DESIGN.md were absent. Draft the product/design context and focused workspace contract, validate documentation and separately review before publishing. No UI behavior or native readiness is claimed.
