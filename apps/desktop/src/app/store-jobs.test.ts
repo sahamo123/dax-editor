@@ -44,3 +44,24 @@ it("retains newly observed jobs when an older snapshot does not contain them", (
   store.getState().applyState(makeState());
   expect(store.getState().state?.jobs).toContainEqual(running);
 });
+
+it("does not replace a newer project revision or its save warning with an older snapshot", () => {
+  const store = createAppStore();
+  const newer = makeState({ projectId: "project-a", revision: 2, saveError: "Disk unavailable" });
+  store.getState().applyState(newer);
+  store.getState().applyState(makeState({ projectId: "project-a", revision: 1 }));
+  expect(store.getState().state).toMatchObject({
+    projectId: "project-a",
+    revision: 2,
+    saveError: "Disk unavailable",
+  });
+  // The same revision may legitimately clear the warning after a successful save.
+  store.getState().applyState(makeState({ projectId: "project-a", revision: 2 }));
+  expect(store.getState().state?.saveError).toBeUndefined();
+  // Revisions are scoped to a session, so a new project may start at zero.
+  store.getState().applyState(makeState({ projectId: "project-b", revision: 0 }));
+  expect(store.getState().state?.projectId).toBe("project-b");
+  // Older engines do not supply revision metadata and continue to work.
+  store.getState().applyState(makeState({ busy: true }));
+  expect(store.getState().state?.busy).toBe(true);
+});

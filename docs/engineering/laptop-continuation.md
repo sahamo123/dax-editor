@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.05 state-ordering child:** [#154](https://github.com/sahamo123/dax-editor/issues/154) starts from [PR #152](https://github.com/sahamo123/dax-editor/pull/152), head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. Work is on local `codex/s01-05-state-ordering`; verify publication before switching laptops. Dependent failure visibility is #153.
+
 **Active S01.05:** [issue #151](https://github.com/sahamo123/dax-editor/issues/151) starts on local `codex/s01-05-task-recovery`, from [PR #150](https://github.com/sahamo123/dax-editor/pull/150) head `5b29ed64956f770febaf2ec6c119215ffd9caca9`. Check branch publication and use the dated [handoff](../implementation/2026-11-01-creator-editor/handoff.md). Later active-work paragraphs below are historical checkpoints.
 
 **Current recovery work:** [issue #146](https://github.com/sahamo123/dax-editor/issues/146) follows verified S01.04 [PR #148](https://github.com/sahamo123/dax-editor/pull/148), head `77a6c17ccee8854968c0b92567ea847fd9d017a3`. Work starts on local `codex/save-as-recovery`; verify whether it has been published before checking out elsewhere. The dated [handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [progress](../implementation/2026-11-01-creator-editor/progress.md) are the live continuation. The next paragraph is a historical checkpoint.

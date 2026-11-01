@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.05 state ordering — November 1, 2026
+
+[Issue #154](https://github.com/sahamo123/dax-editor/issues/154) isolates a reproduced delayed-refresh defect from failure-visibility work [#153](https://github.com/sahamo123/dax-editor/issues/153). Local worktree branch `codex/s01-05-state-ordering` follows self-reviewed composer [PR #152](https://github.com/sahamo123/dax-editor/pull/152), tested head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. See the [receipt](implementation/2026-11-01-creator-editor/s01-05-state-ordering-receipt.md) for pending verification and check publication before resuming elsewhere.
+
 ## First-improvement S01.05 — November 1, 2026
 
 [Issue #151](https://github.com/sahamo123/dax-editor/issues/151) begins task and recovery visibility on local `codex/s01-05-task-recovery`, based on [save-as PR #150](https://github.com/sahamo123/dax-editor/pull/150), tested head `5b29ed64956f770febaf2ec6c119215ffd9caca9`. S01.04's [receipt](implementation/2026-11-01-creator-editor/s01-04-responsive-receipt.md), published issue/PR, log hashes and current-tree ancestry were rechecked; it was self-reviewed, not independently reviewed. Check branch publication before resuming elsewhere. Native/DPI acceptance and the separate Windows rename investigation [#149](https://github.com/sahamo123/dax-editor/issues/149) remain open.

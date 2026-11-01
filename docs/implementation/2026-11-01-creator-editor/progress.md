@@ -18,7 +18,7 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 ## Current cursor
 
 - Selected execution route: first-improvement (21 steps), explicitly launched November 1, 2026.
-- Active step: S01.05, [issue #151](https://github.com/sahamo123/dax-editor/issues/151), local branch `codex/s01-05-task-recovery`, based on self-reviewed recovery [PR #150](https://github.com/sahamo123/dax-editor/pull/150), head `5b29ed64956f770febaf2ec6c119215ffd9caca9`. Check branch publication before relying on it on another laptop.
+- Active step: S01.05 [#151](https://github.com/sahamo123/dax-editor/issues/151); state-ordering child [#154](https://github.com/sahamo123/dax-editor/issues/154) on local `codex/s01-05-state-ordering` follows self-reviewed composer [PR #152](https://github.com/sahamo123/dax-editor/pull/152), head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. Failure visibility [#153](https://github.com/sahamo123/dax-editor/issues/153) is a separate dependent slice. Check publication before resuming elsewhere.
 - Required scope, clients/providers and machines: provisional choices are recorded in issue #121 and the S00.01 receipt; freeze/revalidate at S09.01 for broader routes.
 - Implementation issue/PR pairs: #121/#122, #123/#124, #125/#126, #127/#128, #129/#132, #133/#134, #135/#138, #140/#141, #142/#143, preview child #137/#147 and compact child #144/#148. Later steps are unassigned.
 - Resume context: [handoff](handoff.md), [daily log](daily-log.md), [errors and recovery](errors-and-recovery.md), [evidence log](evidence-log.md).

@@ -16,4 +16,5 @@
 * [Product v1 specification](product-v1.md) - How the desktop editor fits together and what each package must deliver: agent, local model runtime, server, desktop UI and Tauri shell.
 * [Rendered effects preview](rendered-effects-preview.md) - Review the complete edit through the existing renderer without exporting a user-managed file or changing the project.
 * [Save-as failure and recovery contract](save-as-recovery.md) - Safe outcomes for project, history and recent-project writes during save-as.
+* [Preserve newer editor state across delayed refreshes](state-refresh-ordering.md) - Bounded ordering rules for project revisions and in-flight state refreshes.
 * [Desktop workspace product and design contract](workspace-design-contract.md) - Proposed setup, contextual inspection, responsive layout, task, focus and verification rules for the first-improvement editor.

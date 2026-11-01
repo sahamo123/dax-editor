@@ -86,7 +86,7 @@ export interface AppStore {
   setServer(server: ServerConnection | null): void;
   /** Merge changes into the connection status. */
   setConnection(patch: Partial<ConnectionState>): void;
-  /** Apply a server snapshot while retaining newer job events and terminal outcomes. */
+  /** Apply a server snapshot without replacing a newer same-project revision or terminal job outcomes. */
   applyState(state: StateResponse): void;
   /** Update job progress in both store views; completed jobs cannot return to running. */
   applyJob(job: JobInfo): void;
@@ -184,10 +184,18 @@ export function createAppStore(): StoreApi<AppStore> {
       set((s) => {
         const jobs = { ...s.jobs };
         for (const job of state.jobs) mergeJob(jobs, job);
+        const current = s.state;
+        const staleProject =
+          current?.projectId !== undefined &&
+          state.projectId === current.projectId &&
+          current.revision !== undefined &&
+          state.revision !== undefined &&
+          state.revision < current.revision;
+        const accepted = staleProject ? current : state;
         return {
-          state: { ...state, jobs: Object.values(jobs) },
+          state: { ...accepted, jobs: Object.values(jobs) },
           jobs,
-          ui: !s.state && state.projectPath ? { ...s.ui, setupVisible: false } : s.ui,
+          ui: !s.state && accepted.projectPath ? { ...s.ui, setupVisible: false } : s.ui,
         };
       }),
 
