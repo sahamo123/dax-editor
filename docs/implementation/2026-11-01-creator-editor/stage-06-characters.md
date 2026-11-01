@@ -32,10 +32,10 @@ Planning approval is not implementation authorization or evidence. Read current 
 | [S06.01](s06-01-character-intake.md) | Qualify three curated character and scene packs | 1-2 |
 | [S06.02](s06-02-character-contracts.md) | Version bounded character recipes and provenance | 1-2 |
 | [S06.03](s06-03-character-process-limits.md) | Harden owned Blender process execution | 2-3 |
-| S06.04 (`s06-04-character-draft-scenes.md`; later publication batch) | Render curated opaque draft and full scenes | 1-2 |
-| S06.05 (`s06-05-character-alpha.md`; later publication batch) | Preserve alpha through character composition | 1-2 |
-| S06.06 (`s06-06-character-regeneration.md`; later publication batch) | Commit and regenerate character assets atomically | 1-2 |
-| S06.07 (`s06-07-character-configurator.md`; later publication batch) | Expose bounded character configuration and review | 1-2 |
+| [S06.04](s06-04-character-draft-scenes.md) | Render curated opaque draft and full scenes | 1-2 |
+| [S06.05](s06-05-character-alpha.md) | Preserve alpha through character composition | 1-2 |
+| [S06.06](s06-06-character-regeneration.md) | Commit and regenerate character assets atomically | 1-2 |
+| [S06.07](s06-07-character-configurator.md) | Expose bounded character configuration and review | 1-2 |
 | S06.08 (`s06-08-character-close.md`; later publication batch) | Accept curated character rendering across targets | 2-3 |
 
 ## Resources and boundaries

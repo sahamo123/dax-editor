@@ -54,6 +54,10 @@
 * [S06.01: Qualify three curated character and scene packs](s06-01-character-intake.md) - Execute S06.01 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S06.02: Version bounded character recipes and provenance](s06-02-character-contracts.md) - Execute S06.02 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S06.03: Harden owned Blender process execution](s06-03-character-process-limits.md) - Execute S06.03 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S06.04: Render curated opaque draft and full scenes](s06-04-character-draft-scenes.md) - Execute S06.04 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S06.05: Preserve alpha through character composition](s06-05-character-alpha.md) - Execute S06.05 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S06.06: Commit and regenerate character assets atomically](s06-06-character-regeneration.md) - Execute S06.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [S06.07: Expose bounded character configuration and review](s06-07-character-configurator.md) - Execute S06.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.
