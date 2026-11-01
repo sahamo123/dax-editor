@@ -172,3 +172,7 @@ The partial generated-media browser keyboard walkthrough exposed repeated review
 Review of #163's first draft found that a transient-progress browser assertion could race very fast rendering. It was removed; the deterministic component regression remains, and the unchanged browser review tests passed again. The generated keyboard export was fully decoded.
 
 Review progress PR #166 passed self-review at `1a57506035551b4d6cf3ddae414acd54f044274b`. Export-focus #164's regression first failed against the old control; the candidate passed 34 component and seven focused browser tests. Full checks, contrast and actual assistive-technology evidence remain pending.
+
+Export-focus PR #167 passed full checks, compact/wide browser tests and self-review at `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. A rendered hover test reproduced 3.84:1 contrast under #165; the candidate measured 5.79:1. Full checks and assistive-technology observations remain pending.
+
+A separate reduced-motion diagnostic found the Import control retains 0.12-second transitions while reduced motion is requested; [#168](https://github.com/sahamo123/dax-editor/issues/168) tracks it. The test fixture was preserved as a private artifact, not committed to the contrast slice.
