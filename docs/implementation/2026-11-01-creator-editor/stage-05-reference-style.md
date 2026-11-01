@@ -47,4 +47,3 @@ Use local authorized footage and generic editing parameters. No universal downlo
 Authorized local reference yields evidence/confidence, editable recipe, shared-render preview and one undoable application; held-out quality and unsupported cases have explicit outcomes.
 Use the [receipt template](receipt-template.md) and link stage/step receipts from their GitHub implementation issues and current STATUS/handoff. Keep the [master plan](master-plan.md) as static navigation; record SHAs, command exits, artifact hashes, hardware, scope, skips and blockers.
 Complete log/concept/STATUS/index updates in the implementation PR. A source/mock/browser success cannot close a required native, provider, external-client or host gate; failed/blocked evidence stops advancement.
-

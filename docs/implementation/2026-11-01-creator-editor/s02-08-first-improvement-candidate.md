@@ -60,4 +60,3 @@ Complete the [receipt](receipt-template.md) with: Four sample hashes/observation
 
 Include implementation commit, issue/PR, recorded predecessor evidence recheck, commands/exit codes, artifact hashes, remaining risks and rollback/recovery instructions. Mark complete only when every required check passes.
 For `first-improvement`, STOP and report the development candidate, evidence and remaining release gates for review. Only `desktop-creator` or `full-hosted` proceeds, after a fresh evidence recheck, to [S03.01](s03-01-composition-contract.md). Planning-file creation itself does not satisfy this gate.
-

@@ -50,4 +50,3 @@ Freeze optional capability choices before testing. A selected hosted provider/cl
 Every mandatory selected-scope gate has current source-matched evidence; independent readiness and package/handoff delivery remain distinct from publication approval.
 Use the [receipt template](receipt-template.md) and link stage/step receipts from their GitHub implementation issues and current STATUS/handoff. Keep the [master plan](master-plan.md) as static navigation; record SHAs, command exits, artifact hashes, hardware, scope, skips and blockers.
 Complete log/concept/STATUS/index updates in the implementation PR. A source/mock/browser success cannot close a required native, provider, external-client or host gate; failed/blocked evidence stops advancement.
-
