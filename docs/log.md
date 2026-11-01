@@ -2,6 +2,10 @@
 
 ## 2026-11-01
 
+* **Incident**: S01.06's partial keyboard walkthrough found progress repeatedly updating a live region ([#163](https://github.com/sahamo123/dax-editor/issues/163)) and export focus loss ([#164](https://github.com/sahamo123/dax-editor/issues/164)); scoped fixes and actual assistive-technology observations remain pending.
+
+* **Update**: S01.05 [#151 / PR #161](https://github.com/sahamo123/dax-editor/pull/161) passed its separate self-review; S01.06 [#162](https://github.com/sahamo123/dax-editor/issues/162) begins with the predecessor evidence rechecked.
+
 * **Update**: Recovery acceptance [#157 / PR #160](https://github.com/sahamo123/dax-editor/pull/160) passed the complete browser suite and self-review at `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. S01.05 parent evidence reconciliation remains pending.
 
 * **Update**: Shutdown recovery [#158 / PR #159](https://github.com/sahamo123/dax-editor/pull/159) passed source checks, three focused browser repeats and self-review at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Combined recovery acceptance #157 remains pending.

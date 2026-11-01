@@ -159,7 +159,7 @@ export function RenderedReview() {
             ) : null}
             {running ? (
               <>
-                <p role="status">Rendering preview · {Math.round(job.progress * 100)}%</p>
+                <p>Rendering preview · {Math.round(job.progress * 100)}%</p>
                 <progress aria-label="Preview render progress" max={1} value={job.progress} />
               </>
             ) : null}
