@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: planning-publication batch 23 adds progress, review-report. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
+
 * **Update**: planning-publication batch 22 adds decisions, errors-and-recovery, evidence-log, gotchas, handoff. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.
 
 * **Update**: planning-publication batch 21 adds S09.06, S09.07, S09.08, context, daily-log. Issue #72; documentation only, implementation NOT_STARTED. This dependent snapshot passes OKF/index validation.

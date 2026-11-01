@@ -16,7 +16,7 @@ This dated handbook belongs to Dax Editor, the existing Apache-2.0 desktop/CLI/M
 ## Read in this order
 
 1. Root AGENTS and current repository STATUS/handoff.
-2. This context, the dated [handoff](handoff.md) and progress (`progress.md`; later publication batch).
+2. This context, the dated [handoff](handoff.md) and [progress](progress.md).
 3. [Master plan](master-plan.md), [execution contract](execution-contract.md), chosen stage and step.
 4. Relevant [decisions](decisions.md), [gotchas](gotchas.md), [errors](errors-and-recovery.md), [evidence](evidence-log.md) and the step's GitHub receipt.
 

@@ -17,7 +17,7 @@ This is a future execution contract. Authoring or reviewing a plan page does **n
 
 | Record | States | Authority |
 |---|---|---|
-| Planning delivery | DRAFT → SELF_CHECKED → CROSS_REVIEWED → READY_FOR_OWNER_REVIEW | Review report (`review-report.md`; later publication batch), publication PR and planning issue |
+| Planning delivery | DRAFT → SELF_CHECKED → CROSS_REVIEWED → READY_FOR_OWNER_REVIEW | [Review report](review-report.md), publication PR and planning issue |
 | Application step | NOT_STARTED → IN_PROGRESS → VERIFYING → VERIFIED; or BLOCKED / NEEDS_REWORK | Step's GitHub issue, tested PR head and [completion receipt](receipt-template.md) |
 
 `status: draft` in a page is documentation maturity. `execution_state: not_started` is the publication baseline, not a live scheduler. Do not update 76 plan pages to simulate progress: GitHub Issues are the work ledger; STATUS and the current handoff summarize it. When resuming, resolve the receipt from the issue and validate its evidence. Never infer implementation completion from a green planning checklist, a closed issue alone or a previous assistant's assertion.

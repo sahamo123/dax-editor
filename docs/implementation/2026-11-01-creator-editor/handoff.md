@@ -30,11 +30,11 @@ The prior architecture review has been decomposed into 10 stages and 76 individu
 
 ## Delivery and next action
 
-Use continuation branch `codex/staged-implementation-handbook`; [planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the dependent documentation PRs and publication outcome. Main remains older and no PR is automatically merged. The owner reviews route, scope and estimates, then explicitly starts the [future execution goal](execution-goal.md). See review report (`review-report.md`; later publication batch) and [evidence log](evidence-log.md) for what was checked.
+Use continuation branch `codex/staged-implementation-handbook`; [planning issue #72](https://github.com/sahamo123/dax-editor/issues/72) records the dependent documentation PRs and publication outcome. Main remains older and no PR is automatically merged. The owner reviews route, scope and estimates, then explicitly starts the [future execution goal](execution-goal.md). See [review report](review-report.md) and [evidence log](evidence-log.md) for what was checked.
 
 ## Next action after owner review
 
-Read [context](context.md), progress (`progress.md`; later publication batch), [execution contract](execution-contract.md) and [future execution goal](execution-goal.md). Record selected route, required capabilities/clients/providers and target machine, then start S00.01. Check current repo changes and prior receipts first. Do not skip S00 just because the planning process inspected code.
+Read [context](context.md), [progress](progress.md), [execution contract](execution-contract.md) and [future execution goal](execution-goal.md). Record selected route, required capabilities/clients/providers and target machine, then start S00.01. Check current repo changes and prior receipts first. Do not skip S00 just because the planning process inspected code.
 
 ## Known gates to anticipate
 
@@ -47,4 +47,4 @@ See [errors and recovery](errors-and-recovery.md) for status and [gotchas](gotch
 
 ## Required end-of-session update during execution
 
-Append the date/step/head and actual work to [daily log](daily-log.md). Refresh progress (`progress.md`; later publication batch) from the canonical issue receipts. Update this handoff with the exact active step, completed acceptance items, unresolved failures, task-owned running processes, safe recovery state and next command/action. Link [evidence](evidence-log.md), never paste secrets. Do not overwrite old log entries or mark partial work complete to simplify the handoff.
+Append the date/step/head and actual work to [daily log](daily-log.md). Refresh [progress](progress.md) from the canonical issue receipts. Update this handoff with the exact active step, completed acceptance items, unresolved failures, task-owned running processes, safe recovery state and next command/action. Link [evidence](evidence-log.md), never paste secrets. Do not overwrite old log entries or mark partial work complete to simplify the handoff.
