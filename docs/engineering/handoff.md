@@ -11,9 +11,9 @@ generated:
 
 # Handoff: resuming dax-editor
 
-## Active S01.04 preview slice — November 1, 2026
+## Active S01.04 — November 1, 2026
 
-The responsive workspace [#144](https://github.com/sahamo123/dax-editor/issues/144) is split for review. Verify and publish preview/sizing child [#137](https://github.com/sahamo123/dax-editor/issues/137) from `codex/s01-04-preview-sizing`, then continue its dependent compact layout. See the [child receipt](../implementation/2026-11-01-creator-editor/s01-04-preview-child-receipt.md). The independently confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) requires separate remediation; native acceptance remains open.
+Continue `codex/s01-04-responsive-workspace`, [issue #144](https://github.com/sahamo123/dax-editor/issues/144). Rechecked preview child [issue #137](https://github.com/sahamo123/dax-editor/issues/137), [PR #147](https://github.com/sahamo123/dax-editor/pull/147), tested head `798c87ca5872dbb1aaff95a996b4a7b8f52cf0f6` and tree `db3c2c754d71f33c91e47de23aa30e527f39f781`. Retest and publish the dependent compact slice before S01.05; then prioritize confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146). Native/packaged acceptance remains separate.
 
 ## Active S01.03 — November 1, 2026
 

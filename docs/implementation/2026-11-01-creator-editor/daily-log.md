@@ -113,6 +113,18 @@ S01.01 passed self-review and is recorded in issue #135 and PR #138 at `48bb5b00
 
 S01.02 passed self-review, recorded in issue #140 and PR #141 at `f3f019e353493a6050959170c72e33a73dc1b2ae`; rechecked before starting issue #142 on `codex/s01-03-setup-inspector`. Added skippable/reopenable empty-project setup and a project-controls entry while preserving contextual selection focus and the shared command path. Focused browser tests and controller tests pass; the full source check passed with explicit system FFmpeg, and the complete browser suite is running. Earlier red tests and an Escape timing failure were corrected and rerun. Native acceptance remains open.
 
-## 2026-11-01 - S01.04 preview child
+## 2026-11-01 - S01.04 responsive workspace
 
-S01.03 passed self-review at issue #142 and PR #143, tested head `6ecf3b533df2029eda17699dbfc7c32d7598a689`. Responsive work under #144 was split for review; preview/sizing child #137 passed a full source check, focused browser regression and generated-media frame measurement in an isolated worktree. Review and publication remain pending; the compact child follows. A distinct save-as history-write recovery defect was confirmed on disposable data and is tracked as #146; it is not proven to have caused the earlier intermittent save-test failure.
+S01.03 passed self-review at issue #142 and PR #143, tested head `6ecf3b533df2029eda17699dbfc7c32d7598a689`. Rechecked the issue, PR and ancestry before issue #144 on `codex/s01-04-responsive-workspace`. Baseline browser regressions reproduced negative stored dimensions and the compact overlay covering the timeline. A responsive implementation and targeted checks are in progress; full acceptance and publication remain pending. Native and packaged acceptance remain separate.
+
+## 2026-11-01 - S01.04 verification recovery
+
+The first full browser suite exposed two compact manual-workflow failures caused by the dock starting open; a corrected initial state passed both original cases and ten other focused tests. An unrelated unchanged CLI-detection case then failed a full source check and passed five isolated repeats; its cause is unconfirmed. Source review separately identified help-probe error classification, tracked as issue #145. Preserve both failed runs and repeat the full gates; see [errors and recovery](errors-and-recovery.md).
+
+The corrected full browser suite passed 51 tests with two opt-in skips. After another full check exposed an intermittent temporary-project save error, both earlier failed cases passed isolated repeats and the final full source check passed. A separate isolated, deliberately blocked history write confirmed that save-as can return an error after switching the active project location; issue #146 tracks that distinct defect, which is not proven to have caused the intermittent failure. Preserve the private diagnostics; finish S01.04 review/publication, then prioritize save recovery.
+
+## 2026-11-01 - S01.04 preview child and split
+
+S01.04 was split for review. Preview/sizing child #137 independently passed its full source check, browser regression and real-engine frame measurement, and was self-reviewed at PR #147, commit `798c87ca5872dbb1aaff95a996b4a7b8f52cf0f6`. The compact-layout work was retained and based on that exact commit without resetting the working files; retest the dependent tree. The independent save-as recovery defect #146 remains open.
+
+The compact child then passed its own full source check and complete browser suite: 1,804 package tests and 17 script tests passed with 67 package skips; 51 browser tests passed with two opt-in skips. Separate review and publication remain pending. The passing checks do not resolve the confirmed save-as recovery defect.

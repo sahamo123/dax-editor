@@ -11,9 +11,15 @@ generated:
 
 # Project status
 
-## First-improvement S01.04 preview slice — November 1, 2026
+## First-improvement S01.04 — November 1, 2026
 
-S01.03 is verified with self-review at [issue #142](https://github.com/sahamo123/dax-editor/issues/142) and [PR #143](https://github.com/sahamo123/dax-editor/pull/143). S01.04 [#144](https://github.com/sahamo123/dax-editor/issues/144) is split for review: the preview and sizing child [#137](https://github.com/sahamo123/dax-editor/issues/137) is in progress on `codex/s01-04-preview-sizing`; the compact workspace follows separately. Confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) remains open. Native/packaged and DPI acceptance remain open.
+The preview/sizing child is VERIFIED with self-review at [issue #137](https://github.com/sahamo123/dax-editor/issues/137), [PR #147](https://github.com/sahamo123/dax-editor/pull/147), tested head `798c87ca5872dbb1aaff95a996b4a7b8f52cf0f6`. Its dependent compact workspace is VERIFYING on `codex/s01-04-responsive-workspace`, [issue #144](https://github.com/sahamo123/dax-editor/issues/144): the dependent tree passed full source and browser checks, and review/publication remain pending. Native/packaged and DPI acceptance remain open.
+
+During verification, one unchanged CLI-detection test failed in a full run and passed five isolated reruns; its original cause is unconfirmed and a full rerun remains required. Separate source review found that a failed CLI help probe can be classified as unsupported; [issue #145](https://github.com/sahamo123/dax-editor/issues/145) tracks that distinct issue.
+
+A subsequent full run passed that CLI case but one unchanged temporary-project save test returned HTTP 400. Five isolated reruns of the exact case and 100 synthetic create/save attempts passed; the cause and real-project impact remain unknown. [Issue #146](https://github.com/sahamo123/dax-editor/issues/146) tracks the investigation. Do not treat these isolated passes as proof the failure is resolved.
+
+The final full source check subsequently passed. A separate deliberate history-write failure confirmed that save-as can return an error after writing the project and changing its active save location. This is a confirmed recovery defect tracked in [#146](https://github.com/sahamo123/dax-editor/issues/146), independent of the unexplained intermittent failure. Fix it before claiming reliable save-as recovery.
 
 ## First-improvement S01.03 — November 1, 2026
 

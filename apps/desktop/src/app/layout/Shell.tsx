@@ -133,13 +133,17 @@ export function Shell(): ReactElement {
   const dropHover = useApp((s) => s.ui.dropHover);
   const viewport = useViewport();
   const compact = viewport.width < 1180;
+  const [initialCompact] = useState(compact);
+  const [compactView, setCompactView] = useState<"edit" | "assistant">("edit");
   const patchUi = useApp((s) => s.patchUi);
   useEffect(() => {
-    if (compact) patchUi({ drawerOpen: false });
-  }, [compact, patchUi]);
+    // Start with more room to edit, but do not discard panel state on later window resizes.
+    if (initialCompact) patchUi({ drawerOpen: false });
+  }, [initialCompact, patchUi]);
   const [chatW, setChatW] = useStoredNumber("dax.chatWidth", 380);
   const [drawerW, setDrawerW] = useStoredNumber("dax.drawerWidth", 320);
   const [timelineH, setTimelineH] = useStoredNumber("dax.timelineHeight", 300);
+  const [dockH, setDockH] = useStoredNumber("dax.compactDrawerHeight", 180);
   useUndoRedoKeys();
 
   // Keep the middle column usable: panels may not squeeze it below MIN_CENTER.
@@ -161,59 +165,112 @@ export function Shell(): ReactElement {
   const chat = clamp(chatW, 260, chatMax);
   const drawerMax = Math.max(240, Math.min(560, usableWidth - chat - MIN_CENTER - 2 * SPLITTER_PX));
   const drawer = clamp(drawerW, 240, drawerMax);
-  const maxTimeline = Math.max(160, viewport.height - 48 - 180 - SPLITTER_PX);
+  const compactDock = compact && showDrawer;
+  // The narrow top bar can wrap to a second row; reserve its height before sizing the dock.
+  const chromeHeight = viewport.width <= 760 ? 104 : 56;
+  const maxDock = Math.max(150, viewport.height - chromeHeight - 160 - 150 - 2 * SPLITTER_PX);
+  const dock = clamp(dockH, 150, maxDock);
+  const maxTimeline = Math.max(
+    150,
+    viewport.height - chromeHeight - 160 - SPLITTER_PX - (compactDock ? dock + SPLITTER_PX : 0),
+  );
+  const timeline = clamp(timelineH, 150, maxTimeline);
 
-  const columns = inlineDrawer
-    ? `${chat}px ${SPLITTER_PX}px minmax(0, 1fr) ${SPLITTER_PX}px ${drawer}px`
-    : `${chat}px ${SPLITTER_PX}px minmax(0, 1fr)`;
+  const columns = compact
+    ? "minmax(0, 1fr)"
+    : inlineDrawer
+      ? `${chat}px ${SPLITTER_PX}px minmax(0, 1fr) ${SPLITTER_PX}px ${drawer}px`
+      : `${chat}px ${SPLITTER_PX}px minmax(0, 1fr)`;
 
   return (
     <div className="app">
-      <TopBar />
+      <TopBar compact={compact} compactView={compactView} onCompactView={setCompactView} />
       <ConnectionBanner />
       <EditorHost>
         <div className="app__body" style={{ gridTemplateColumns: columns }}>
-          <ChatPanel />
-          <Splitter
-            orientation="vertical"
-            label="Resize chat panel"
-            value={chat}
-            min={260}
-            max={chatMax}
-            onChange={setChatW}
-          />
-          {hasState ? (
-            <Workspace
-              timelineHeight={clamp(timelineH, 150, maxTimeline)}
-              onTimelineHeight={setTimelineH}
-              maxTimeline={maxTimeline}
+          <div className="chat-host" hidden={compact && compactView !== "assistant"}>
+            <ChatPanel />
+          </div>
+          {!compact ? (
+            <Splitter
+              orientation="vertical"
+              label="Resize chat panel"
+              value={chat}
+              min={260}
+              max={chatMax}
+              onChange={setChatW}
             />
-          ) : (
-            <Waiting />
-          )}
-          {showDrawer ? (
-            <>
-              {!compact ? (
+          ) : null}
+          <div
+            className="workspace-host"
+            hidden={compact && compactView !== "edit"}
+            style={{
+              gridTemplateRows: compactDock
+                ? `minmax(0, 1fr) ${SPLITTER_PX}px ${dock}px`
+                : "minmax(0, 1fr)",
+            }}
+          >
+            {hasState ? (
+              <Workspace
+                timelineHeight={timeline}
+                onTimelineHeight={setTimelineH}
+                maxTimeline={maxTimeline}
+              />
+            ) : (
+              <Waiting />
+            )}
+            {compactDock ? (
+              <>
                 <Splitter
-                  orientation="vertical"
-                  label="Resize side panel"
-                  value={drawer}
-                  min={240}
-                  max={drawerMax}
+                  orientation="horizontal"
+                  label="Resize tools panel"
+                  value={dock}
+                  min={150}
+                  max={maxDock}
                   grow="toward-start"
-                  onChange={setDrawerW}
+                  onChange={setDockH}
                 />
-              ) : null}
-              <div className={compact ? "drawer-overlay" : "drawer-host"}>
-                {compact ? (
+                <section
+                  className="drawer-dock"
+                  aria-label="Tools panel dock"
+                  onKeyDown={(event) => {
+                    if (event.key !== "Escape" || event.defaultPrevented) return;
+                    event.preventDefault();
+                    patchUi({ drawerOpen: false });
+                    requestAnimationFrame(() =>
+                      document.getElementById("side-panel-trigger")?.focus(),
+                    );
+                  }}
+                >
                   <button
                     type="button"
                     className="btn"
-                    onClick={() => patchUi({ drawerOpen: false })}
+                    onClick={() => {
+                      patchUi({ drawerOpen: false });
+                      requestAnimationFrame(() =>
+                        document.getElementById("side-panel-trigger")?.focus(),
+                      );
+                    }}
                   >
                     Close tools panel
                   </button>
-                ) : null}
+                  <Drawer />
+                </section>
+              </>
+            ) : null}
+          </div>
+          {inlineDrawer ? (
+            <>
+              <Splitter
+                orientation="vertical"
+                label="Resize side panel"
+                value={drawer}
+                min={240}
+                max={drawerMax}
+                grow="toward-start"
+                onChange={setDrawerW}
+              />
+              <div className="drawer-host">
                 <Drawer />
               </div>
             </>

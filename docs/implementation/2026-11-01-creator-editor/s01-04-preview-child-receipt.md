@@ -11,7 +11,7 @@ generated:
 
 # S01.04 preview and panel sizing child
 
-**State: VERIFYING.** [Preview issue #137](https://github.com/sahamo123/dax-editor/issues/137) is the first dependent slice of [S01.04 #144](https://github.com/sahamo123/dax-editor/issues/144). Parent S01.03 [issue #142](https://github.com/sahamo123/dax-editor/issues/142), [PR #143](https://github.com/sahamo123/dax-editor/pull/143), commit `6ecf3b533df2029eda17699dbfc7c32d7598a689` and tree `d76163a2df2fe41e0b9187a86cfadd60876d3112` were rechecked before this worktree was created.
+**State: VERIFIED (self-reviewed).** [Preview issue #137](https://github.com/sahamo123/dax-editor/issues/137), [PR #147](https://github.com/sahamo123/dax-editor/pull/147), tested commit `798c87ca5872dbb1aaff95a996b4a7b8f52cf0f6`, tree `db3c2c754d71f33c91e47de23aa30e527f39f781`. This is the first dependent slice of [S01.04 #144](https://github.com/sahamo123/dax-editor/issues/144). Parent S01.03 [issue #142](https://github.com/sahamo123/dax-editor/issues/142), [PR #143](https://github.com/sahamo123/dax-editor/pull/143), commit `6ecf3b533df2029eda17699dbfc7c32d7598a689` and tree `d76163a2df2fe41e0b9187a86cfadd60876d3112` were rechecked before this worktree was created.
 
 The candidate moves Review effects above the video rather than reserving a full-height column, clamps saved panel dimensions, and updates vertical bounds when the window height changes. It does not change rendering or project mutation semantics. Compact navigation and the contextual dock remain in the dependent S01.04 slice; this child alone does not complete that step.
 
@@ -23,4 +23,4 @@ The candidate moves Review effects above the video rather than reserving a full-
 
 ## Remaining and recovery
 
-Complete separate review and publish the scoped PR, recording its exact commit/tree before treating this child as verified. The compact view/dock remains in the dependent child; this is not full S01.04 acceptance. The independently confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) remains open; do not claim reliable save recovery from this layout change. Preserve private projects, history and artifacts. Revert the scoped change through the normal reviewed Git workflow if needed, without resetting or deleting project data.
+The coordinator separately reviewed the published diff and evidence; this was self-review, not independent review. The compact view/dock remains in the dependent child; this is not full S01.04 acceptance. The independently confirmed save-as recovery defect [#146](https://github.com/sahamo123/dax-editor/issues/146) remains open; do not claim reliable save recovery from this layout change. Preserve private projects, history and artifacts. Revert the scoped change through the normal reviewed Git workflow if needed, without resetting or deleting project data.
