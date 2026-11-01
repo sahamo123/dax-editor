@@ -27,7 +27,7 @@ export function TaskQueue(): ReactElement {
   const online = useApp((state) => state.connection.status === "online");
   const controller = useController();
   const queued = tasks?.filter((task) => task.status === "queued").length ?? 0;
-  const active = tasks?.find((task) => task.status === "running");
+  const running = tasks?.filter((task) => task.status === "running").length ?? 0;
   const visible = [
     ...(tasks ?? [])
       .filter((task) => task.status === "running" || task.status === "queued")
@@ -42,12 +42,12 @@ export function TaskQueue(): ReactElement {
       className="task-queue"
       open={
         queued > 0 ||
-        Boolean(active) ||
+        running > 0 ||
         visible.some((task) => task.status === "failed" || task.status === "interrupted")
       }
     >
       <summary>
-        Tasks · {active ? "1 running" : "idle"} · {queued} queued
+        Tasks · {running ? `${running} running` : "idle"} · {queued} queued
       </summary>
       <ol aria-label="Task queue">
         {visible.map((task) => (

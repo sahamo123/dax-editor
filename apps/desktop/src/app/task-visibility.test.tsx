@@ -44,20 +44,30 @@ it("shows failed and interrupted work alongside active tasks with accurate job l
             queuePosition: 1,
             createdAt: 4,
           },
+          {
+            id: "active-import",
+            title: "Import footage",
+            kind: "import",
+            mode: "edit",
+            status: "running",
+            createdAt: 5,
+          },
         ],
       }),
     ),
   );
   const work = screen.getByLabelText("Work status");
-  expect(work).toHaveTextContent("2 active/queued");
+  expect(work).toHaveTextContent("3 active/queued");
   expect(work).toHaveTextContent("2 issues");
   await userEvent.click(work);
   const queue = screen.getByRole("list", { name: "Task queue" });
+  expect(screen.getByText("Tasks · 2 running · 1 queued")).toBeVisible();
   expect(within(queue).getByText("Export", { exact: true })).toBeVisible();
   expect(within(queue).getByText("Transcription", { exact: true })).toBeVisible();
   expect(within(queue).getByText("Blender", { exact: true })).toBeVisible();
+  expect(within(queue).getByText("Import", { exact: true })).toBeVisible();
   expect(within(queue).getByText("Output unavailable")).toBeVisible();
-  expect(within(queue).getAllByText("Origin not recorded")).toHaveLength(4);
+  expect(within(queue).getAllByText("Origin not recorded")).toHaveLength(5);
 });
 
 it("shows an autosave failure before opening Project and exposes the existing manual save", async () => {
