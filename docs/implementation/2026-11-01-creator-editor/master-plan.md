@@ -147,10 +147,10 @@ Stage overview: [S07](stage-07-workflows.md). Read it before its first step.
 
 - [S07.01: Define bounded workflow and journal semantics](s07-01-workflow-contract.md) - 0.5-1 engineer-days.
 - [S07.02: Persist journal and idempotent mutation receipts](s07-02-workflow-journal.md) - 1-1.5 engineer-days.
-- S07.03: Execute dependencies and recover interrupted work (`s07-03-workflow-coordinator.md`; later publication batch) - 1-1.5 engineer-days.
-- S07.04: Admit all expensive work under one resource budget (`s07-04-resource-admission.md`; later publication batch) - 1-1.5 engineer-days.
-- S07.05: Wire restricted specialist roles to existing capabilities (`s07-05-specialist-adapters.md`; later publication batch) - 0.5-1 engineer-days.
-- S07.06: Expose workflow trace and live-client controls (`s07-06-workflow-trace.md`; later publication batch) - 0.5-0.75 engineer-days.
+- [S07.03: Execute dependencies and recover interrupted work](s07-03-workflow-coordinator.md) - 1-1.5 engineer-days.
+- [S07.04: Admit all expensive work under one resource budget](s07-04-resource-admission.md) - 1-1.5 engineer-days.
+- [S07.05: Wire restricted specialist roles to existing capabilities](s07-05-specialist-adapters.md) - 0.5-1 engineer-days.
+- [S07.06: Expose workflow trace and live-client controls](s07-06-workflow-trace.md) - 0.5-0.75 engineer-days.
 - S07.07: Accept workflow recovery and actual clients (`s07-07-workflow-close.md`; later publication batch) - 0.5-0.75 engineer-days.
 
 ## S08: Optional private personal hosting
