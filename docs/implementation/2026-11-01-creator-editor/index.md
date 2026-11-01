@@ -103,6 +103,7 @@
 * [S09.06: Verify native accessibility and whole-app endurance](s09-06-release-performance.md) - Execute S09.06 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S09.07: Prepare verified package provenance and transfer](s09-07-release-provenance.md) - Execute S09.07 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
 * [S09.08: Adjudicate readiness and hand off exact release scope](s09-08-release-adjudication.md) - Execute S09.08 with verified predecessor evidence, bounded changes and a resumable acceptance receipt.
+* [Save-as recovery verification receipt](save-as-recovery-receipt.md) - Synthetic recovery checks, limitations and pending review for project save-as.
 * [S00: Baseline reconciliation and acceptance](stage-00-baseline.md) - Reconciled source facts, authorized fixture inventory, reproducible performance budgets and current scoped baseline evidence.
 * [S01: Control-panel workflow and design contract](stage-01-workspace.md) - Documented incumbent design system and an accessible setup, assistant, preview, inspector and timeline workflow.
 * [S02: Content profiles and compatibility foundation](stage-02-profiles.md) - Four deterministic content profiles with truthful capability reporting, explicit override precedence, migration and one-undo application.

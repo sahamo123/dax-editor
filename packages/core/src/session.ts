@@ -168,9 +168,8 @@ export class Session {
     }
   }
 
-  /** Write the history beside the project (no-op without a history file). Prunes first. Throws if the write fails. */
-  protected async saveHistory(): Promise<void> {
-    const file = this.historyFile;
+  /** Write history to `file`, or beside the project by default. Prunes first; throws if the write fails. */
+  protected async saveHistory(file = this.historyFile): Promise<void> {
     if (!file) return;
     this.prune();
     const data = {

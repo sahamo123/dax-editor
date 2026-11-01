@@ -65,3 +65,9 @@ Do not overwrite the original error or call it resolved because a different scen
 - A missing credential, licensed asset, authorized native target or host permission is an external dependency, not a reason to bypass controls.
 
 Logs/screenshots belong under ignored `.local/<date>/<step>/<run>/` when private. Put sanitized metadata and hashes in [evidence log](evidence-log.md). A fresh laptop may not have those raw artifacts; mark that absence and safely reproduce or obtain them before relying on their claims.
+
+## E012: Windows atomic-write failures during save stress — November 1
+
+Status INVESTIGATING, [issue #149](https://github.com/sahamo123/dax-editor/issues/149). On the normal Windows host, an isolated synthetic same-path save stress run encountered `EPERM: operation not permitted, rename` when publishing a project temporary file. A separate stress run returned the truthful new recent-project metadata warning, but its underlying error code was not recorded. The operating-system cause is not established and neither observation proves the cause of E010, whose response body was not captured. Preserve projects and do not disable security policy. The recovery changes in #146 address partial-save reporting and collision protection; they do not claim to fix these atomic-write failures.
+
+The first full #146 verification was deliberately interrupted after review found that publishing history first could associate it with a concurrently created project. The implementation was reordered to publish the project first, its focused regressions passed, and a new full verification was started. The interrupted run is not a pass.

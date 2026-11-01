@@ -132,3 +132,9 @@ The corrected full browser suite passed 51 tests with two opt-in skips. After an
 S01.04 was split for review. Preview/sizing child #137 independently passed its full source check, browser regression and real-engine frame measurement, and was self-reviewed at PR #147, commit `798c87ca5872dbb1aaff95a996b4a7b8f52cf0f6`. The compact-layout work was retained and based on that exact commit without resetting the working files; retest the dependent tree. The independent save-as recovery defect #146 remains open.
 
 The compact child then passed its own full source check and complete browser suite: 1,804 package tests and 17 script tests passed with 67 package skips; 51 browser tests passed with two opt-in skips. Separate review and publication remain pending. The passing checks do not resolve the confirmed save-as recovery defect.
+
+## 2026-11-01 - save-as recovery
+
+S01.04 was self-reviewed and published as PR #148 at `77a6c17ccee8854968c0b92567ea847fd9d017a3`. Issue #146 is in progress on `codex/save-as-recovery`; see the save-as contract for collision, partial-publication and recent-project failure semantics. Synthetic regression tests reproduced blocked-history and overwrite behavior before the changes. Another stress test saw an `EPERM` renaming a disposable project temp file on Windows; its cause and any relationship to the earlier intermittent error are unproven. Preserve that distinction and rerun all gates before claiming verification.
+
+After correcting publication order to protect against a competing project, focused recovery tests and the full `pnpm check` passed. The [recovery receipt](save-as-recovery-receipt.md) identifies the private log, counts and remaining filesystem limitations. Independent Windows rename investigation is [issue #149](https://github.com/sahamo123/dax-editor/issues/149). Review and publication remain pending.
