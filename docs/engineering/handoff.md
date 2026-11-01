@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Execution started — November 1, 2026
+
+The selected route is first-improvement. Continue S00.01 on `codex/s00-01-baseline-receipt` using [issue #121](https://github.com/sahamo123/dax-editor/issues/121), the [current handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [baseline receipt](../implementation/2026-11-01-creator-editor/s00-01-receipt.md). The step is VERIFYING, not completed; finish its review and PR before the next step. The published handbook branch below is its base.
+
 ## Dated implementation handbook — November 1, 2026
 
 Latest full continuation: `codex/staged-implementation-handbook`, based on the creator-plan branch at `f05a57b99a2d184900ddd809a7480b30052ae5c1`. Start with the [dated master index](../implementation/2026-11-01-creator-editor/master-plan.md), [current plan handoff](../implementation/2026-11-01-creator-editor/handoff.md) and [progress snapshot](../implementation/2026-11-01-creator-editor/progress.md). Tracking: [planning #72](https://github.com/sahamo123/dax-editor/issues/72). The folder contains 100 Markdown files: 10 stages, 76 steps, 13 controls/operating records and one generated index. All implementation steps are NOT_STARTED; the [future execution goal](../implementation/2026-11-01-creator-editor/execution-goal.md) remains inactive until owner launch. No application behavior or readiness changes. Earlier continuation entries below are historical; the latest branch includes their source and setup.

@@ -60,3 +60,7 @@ The earlier entries name `_local/`. New evidence now belongs in hidden `.local/`
 ## 2026-11-01 — final staged-file verification
 
 The earlier working-tree whitespace check did not cover newly untracked plan pages. Final staged verification caught redundant blank lines at EOF in 86 stage/step pages. Removed only those trailing blanks, recomputed the content digest and reran the full-baseline diff/structure/docs checks. No instruction, dependency or acceptance criterion changed; all application work remains NOT_STARTED.
+
+## 2026-11-01 - first-improvement launch
+
+The user launched first-improvement. S00.01 is VERIFYING in issue #121 on branch `codex/s00-01-baseline-receipt`. Starting SHA f57af682441e8442700199078e028d860e22418d is descended from the planning base. One saved project/history pair was privately copied, hash checked and parsed; no application feature change or native acceptance is claimed. Next: validate docs and complete the second review and PR, then recheck the receipt before S00.02.
