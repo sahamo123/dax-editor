@@ -92,3 +92,7 @@ The independent reviewer checked five issue/PR/commit chains, private artifact h
 ## 2026-11-01 - S01.01 workspace audit
 
 S00.06 correction recheck passed; issue #133 and PR #134 record the verified stage at `1d520153a1f81d2429f815d2db5e655e1a0d538d`. Issue #135 tracks the next audit on `codex/s01-01-workspace-audit`. Fresh synthetic browser walkthroughs covered three sizes and task controls; findings #136/#137 join #130/#131. Automatic approval review rejected screenshot uploads because their sensitive-data content was not independently verified; captures remain ignored locally. The first harness configuration failed before tests, and a sandboxed retry produced no successful result; corrected normal-host sessions passed. Next: preserve the text receipt, resolve portable screenshot evidence, second review and scoped PR before S01.02. Native acceptance remains separate.
+
+## 2026-11-01 - portable audit reproduction
+
+Preserved the synthetic audit harness in the [reproduction guide](s01-01-reproduce-audit.md) without publishing screenshot payloads. Extracted its four code blocks into a fresh ignored directory and ran its three Playwright configurations on the original laptop; each passed, 30 screenshots were produced locally, and the 1366×768 preview measurements matched the earlier run. The reproduction does not verify a second laptop or native app and does not resolve the screenshot-upload rejection. Issue #135 remains IN_PROGRESS; PR #138 contains the audit stack.

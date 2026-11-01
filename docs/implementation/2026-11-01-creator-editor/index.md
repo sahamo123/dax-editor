@@ -28,6 +28,7 @@
 * [S00.06: Close the reconciled baseline and route its blockers](s00-06-baseline-close.md) - Plan and evidence gates: Close the reconciled baseline and route its blockers.
 * [S00.06 baseline-stage review and external gates](s00-06-stage-review.md) - Consolidated first-stage evidence, independent review status and remaining release or environment gates.
 * [S01.01 rendered workspace audit receipt](s01-01-audit-receipt.md) - Browser-observed editing workflow, prioritized usability findings and design direction for the first-improvement route.
+* [Reproduce the S01.01 synthetic workspace audit](s01-01-reproduce-audit.md) - Portable procedure and test harness for recapturing the browser audit without uploading private screenshots.
 * [S01.01: Audit the current rendered editing workflow](s01-01-workflow-audit.md) - Plan and evidence gates: Audit the current rendered editing workflow.
 * [S01.02: Record the product and design contract](s01-02-product-design-contract.md) - Plan and evidence gates: Record the product and design contract.
 * [S01.03: Separate project setup from contextual inspection](s01-03-setup-inspector.md) - Plan and evidence gates: Separate project setup from contextual inspection.
