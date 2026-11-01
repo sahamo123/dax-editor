@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.05 acceptance child:** [#157](https://github.com/sahamo123/dax-editor/issues/157), `codex/s01-05-recovery-acceptance-v2`, is based on self-reviewed [PR #159](https://github.com/sahamo123/dax-editor/pull/159) at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Confirm publication and rerun the full browser suite as recorded in the [receipt](../implementation/2026-11-01-creator-editor/s01-05-recovery-acceptance-receipt.md).
+
 **Current S01.05 shutdown child:** [#158](https://github.com/sahamo123/dax-editor/issues/158), local `codex/s01-05-chat-shutdown`, starts from self-reviewed [PR #156](https://github.com/sahamo123/dax-editor/pull/156) at `082314a691f1ee1720beaf85c8c1280858727842`. Verify publication before switching laptops; see the [shutdown receipt](../implementation/2026-11-01-creator-editor/s01-05-shutdown-receipt.md) and retain separate pending recovery tests #157.
 
 **Current S01.05 failure child:** [#153](https://github.com/sahamo123/dax-editor/issues/153) is in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed [PR #155](https://github.com/sahamo123/dax-editor/pull/155) head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Fresh child checks and review remain pending.

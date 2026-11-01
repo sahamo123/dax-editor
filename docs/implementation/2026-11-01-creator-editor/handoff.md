@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: combined recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157).** Branch `codex/s01-05-recovery-acceptance-v2` starts from self-reviewed [PR #159](https://github.com/sahamo123/dax-editor/pull/159) head `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Verify publication before switching laptops. Run the full browser suite and complete the [acceptance receipt](s01-05-recovery-acceptance-receipt.md); earlier headings are historical.
+
 **Current work: shutdown recovery [#158](https://github.com/sahamo123/dax-editor/issues/158).** Branch `codex/s01-05-chat-shutdown` starts from self-reviewed PR #156 head `082314a691f1ee1720beaf85c8c1280858727842`. Check publication before switching laptops. The [receipt](s01-05-shutdown-receipt.md) records the reproduced defect, candidate and pending tests. S01.05 recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) is in a separate worktree and must be revalidated on the fix. Earlier paragraphs are historical.
 
 **Current work: S01.05 failure/autosave visibility [#153](https://github.com/sahamo123/dax-editor/issues/153)** in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Run this child's full checks and review. The [failure receipt](s01-05-failure-receipt.md) records earlier synthetic results; the following cursor is a historical checkpoint.

@@ -18,7 +18,7 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 ## Current cursor
 
 - Selected execution route: first-improvement (21 steps), explicitly launched November 1, 2026.
-- Active step: S01.05 [#151](https://github.com/sahamo123/dax-editor/issues/151). Failure-visibility [PR #156](https://github.com/sahamo123/dax-editor/pull/156) is self-reviewed at `082314a691f1ee1720beaf85c8c1280858727842`. Recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) found a cleanup failure and shutdown investigation [#158](https://github.com/sahamo123/dax-editor/issues/158) reproduced a related ordering defect. Verify both children before advancing; see the [shutdown receipt](s01-05-shutdown-receipt.md).
+- Active step: S01.05 [#151](https://github.com/sahamo123/dax-editor/issues/151). Shutdown child [#158 / PR #159](https://github.com/sahamo123/dax-editor/pull/159) is self-reviewed at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`; recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) continues on that baseline and requires a full browser rerun. See the [acceptance receipt](s01-05-recovery-acceptance-receipt.md).
 - Required scope, clients/providers and machines: provisional choices are recorded in issue #121 and the S00.01 receipt; freeze/revalidate at S09.01 for broader routes.
 - Implementation issue/PR pairs: #121/#122, #123/#124, #125/#126, #127/#128, #129/#132, #133/#134, #135/#138, #140/#141, #142/#143, preview child #137/#147 and compact child #144/#148. Later steps are unassigned.
 - Resume context: [handoff](handoff.md), [daily log](daily-log.md), [errors and recovery](errors-and-recovery.md), [evidence log](evidence-log.md).
