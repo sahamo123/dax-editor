@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: Review of the first state-ordering candidate found a provider-refresh edge case; a regression and correction are under verification in [#154](https://github.com/sahamo123/dax-editor/issues/154). Earlier full checks apply to the prior candidate only.
+
 * **Incident**: A delayed state refresh hid a newer autosave warning in a synthetic browser test. [Issue #154](https://github.com/sahamo123/dax-editor/issues/154) isolates the ordering fix ahead of dependent failure visibility [#153](https://github.com/sahamo123/dax-editor/issues/153); verification remains in progress.
 
 * **Update**: Save-as recovery [PR #150](https://github.com/sahamo123/dax-editor/pull/150) passed full source checks and self-review at `5b29ed64956f770febaf2ec6c119215ffd9caca9`; Windows rename failures remain separate in [#149](https://github.com/sahamo123/dax-editor/issues/149). S01.05 starts under [#151](https://github.com/sahamo123/dax-editor/issues/151).

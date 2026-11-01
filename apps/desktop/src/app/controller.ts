@@ -425,7 +425,8 @@ export function createController(deps: ControllerDeps): Controller {
       const r = await client.getProviders();
       const current = store.getState().state;
       if (!r.ok) toast("error", r.error);
-      else if (current) applySnapshot({ ...current, providers: r.value });
+      // Provider-only changes must not supersede an in-flight full project refresh.
+      else if (current) store.getState().applyState({ ...current, providers: r.value });
     },
 
     async project(action, value) {

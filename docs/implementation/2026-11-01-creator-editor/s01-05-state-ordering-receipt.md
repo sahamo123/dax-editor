@@ -18,3 +18,5 @@ A synthetic browser run observed a revision-1 push with a save error followed by
 Full source checks, isolated second review and publication remain pending. This guard is not a cross-client total-ordering protocol. Browser/system-FFmpeg results do not establish native desktop or DPI acceptance.
 
 An initial isolated full check was intentionally stopped before completion to add coverage for two overlapping refreshes; it is not counted as a pass. The offline dependency restore used the existing pinned store with package scripts disabled.
+
+The published first candidate subsequently passed a full source check and ten browser workflows, but review found that a provider-only refresh could suppress a newer project refresh. A new deterministic test reproduced that issue; the correction passed 31 focused controller/store tests. The earlier full and browser passes apply only to the first candidate and do not verify the corrected source; repeat both required checks.

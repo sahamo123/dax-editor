@@ -122,6 +122,24 @@ describe("controller", () => {
     expect(store.getState().state?.projectId).toBe("project-b");
   });
 
+  it("does not discard a project refresh when only provider details changed", async () => {
+    type Result = { ok: true; value: ReturnType<typeof makeState> };
+    let reply: ((value: Result) => void) | undefined;
+    const response = new Promise<Result>((resolve) => {
+      reply = resolve;
+    });
+    const { controller, store } = setup({
+      getState: vi.fn(() => response),
+      getProviders: vi.fn(async () => ({ ok: true, value: [] })),
+    });
+    store.getState().applyState(makeState({ projectId: "project-a", revision: 0 }));
+    const pending = controller.refreshState();
+    await controller.refreshProviders();
+    reply?.({ ok: true, value: makeState({ projectId: "project-a", revision: 1 }) });
+    await pending;
+    expect(store.getState().state?.revision).toBe(1);
+  });
+
   it("opens an initially loaded saved empty project directly", () => {
     const store = createAppStore();
     store.getState().applyState(makeState({ projectPath: "saved.dax.json" }));

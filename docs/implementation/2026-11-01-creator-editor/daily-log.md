@@ -148,3 +148,5 @@ The synthetic narrow composer audit measured 48.8 CSS px of message width and ov
 ## 2026-11-01 - state ordering split
 
 Composer child #136 passed full source/browser checks and self-review in PR #152 at `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. A delayed state refresh was then observed hiding a newer autosave warning. The bounded ordering fix was split into [#154](https://github.com/sahamo123/dax-editor/issues/154) on an isolated worktree, ahead of dependent failure-visibility work #153. See the [state-ordering receipt](s01-05-state-ordering-receipt.md); full verification is pending.
+
+The first state-ordering candidate passed full source and focused browser checks. Separate review identified a provider-only refresh that could suppress a newer project refresh; a focused regression reproduced it and the correction passed the focused suite. The corrected code needs fresh full and browser checks before the child is verified.
