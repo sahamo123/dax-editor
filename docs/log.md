@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: S00.01 is verified with self-review ([issue #121](https://github.com/sahamo123/dax-editor/issues/121), [PR #122](https://github.com/sahamo123/dax-editor/pull/122)); S00.02 began after a fresh issue/PR/tree recheck. Correct misleading transcript availability and deferred-template caption wording without changing caption behavior. A packaged-FFmpeg `spawn UNKNOWN` during core tests is tracked separately from system-FFmpeg evidence.
+
 * **Update**: The owner launched first-improvement execution. S00.01 starts under issue #121; [baseline receipt](implementation/2026-11-01-creator-editor/s00-01-receipt.md) records the starting source, provisional scope and a hash-checked private project/history backup. No application feature work or fresh native acceptance is claimed.
 
 * **Update**: final planning privacy review switches raw evidence to hidden `.local/` inside the dated handbook, excluded by both Git and the existing documentation walker/indexer. Retain the old underscore-folder ignore guard and append a historical correction. A private Markdown probe confirms both boundaries; no application/tooling changes or private-content exposure.

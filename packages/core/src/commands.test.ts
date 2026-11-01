@@ -156,6 +156,14 @@ describe("running commands", () => {
     await expect(runCommand(ctx, "remove_fillers", {})).rejects.toThrow(/no transcript yet/);
   });
 
+  it("explains how to obtain a missing transcript without claiming transcription is absent", async () => {
+    for (const extra of [{}, { transcriber: { transcribe: async () => ({ words: [] }) } }]) {
+      await expect(runCommand(ctxWithClip(extra), "get_transcript", {})).rejects.toThrow(
+        /no transcript yet.*transcribe.*speech/i,
+      );
+    }
+  });
+
   it("removes filler words found in a transcript", async () => {
     const ctx = ctxWithClip();
     await ctx.session.apply((p) => {

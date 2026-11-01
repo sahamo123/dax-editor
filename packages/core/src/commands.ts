@@ -481,7 +481,7 @@ export const COMMANDS: readonly CommandDef[] = [
       const asset = pickAsset(ctx.session.project, a.assetId);
       if (!asset.transcript) {
         throw new CommandError(
-          `${basename(asset.path)} has no transcript yet. Transcribing is not available in this build.`,
+          `${basename(asset.path)} has no transcript yet. Run transcribe after setting up speech recognition.`,
         );
       }
       const from = a.from ?? 0;

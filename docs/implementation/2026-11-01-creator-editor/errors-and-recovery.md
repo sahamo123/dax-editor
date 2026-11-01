@@ -24,6 +24,10 @@ generated:
 
 E005: Git-ignored underscore folders remain visible to the documentation walker. Source inspection and an independent review confirmed that future Markdown logs could enter generated navigation. VERIFIED_RESOLVED for this planning pack: current private evidence guidance now uses hidden `.local/`, both Git and the existing indexer exclude it, and a deliberately invalid private Markdown probe leaves docs validation/indexes unchanged. No exposure of private content was observed. The legacy ignore rule and old journal entries are preserved.
 
+## S00.02 packaged-renderer failure — November 1
+
+E006: A core real-media test's `detect_silence` operation failed with `spawn UNKNOWN` when the development setup selected the packaged FFmpeg executable. The failure reproduced both under the restricted environment and on the normal host. The same two-file suite passed using explicitly selected system FFmpeg/ffprobe; that does not resolve or verify the packaged binary. Keep packaged/native acceptance open and investigate the applicable policy-authorized execution path at its required gate. No machine-security changes were made. See [S00.02 receipt](s00-02-receipt.md) and issue #123.
+
 ## Incident record to append during execution
 
 Use a stable new ID and record: date/time; selected route and step; source/candidate SHA; environment; sanitized exact error; trigger/reproduction; expected versus observed result; severity; impacted prerequisites; task/job/operation ID where safe; evidence-log entry; recovery attempted; outcome; owner/next action. Distinguish OPEN, INVESTIGATING, FIXED_PENDING_VERIFICATION and VERIFIED_RESOLVED.
