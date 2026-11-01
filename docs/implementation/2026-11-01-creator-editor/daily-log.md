@@ -160,3 +160,5 @@ The corrected state-ordering parent passed full source and focused browser check
 The initial failure-visibility candidate passed full source and browser checks. Review found the task list misreported multiple running tasks as one; a focused regression and correction now pass. Repeat full checks on the corrected code; earlier passes do not verify it.
 
 Failure visibility passed source/browser checks and self-review in PR #156 at `082314a691f1ee1720beaf85c8c1280858727842`. Recovery acceptance #157 then found a synthetic cleanup failure; #158 independently reproduced chat shutdown ordering and is under verification. See the [shutdown receipt](s01-05-shutdown-receipt.md).
+
+Shutdown fix PR #159 passed source checks, three focused browser repeats and self-review at `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. The separate recovery-acceptance tests are now based on that commit and require the full browser suite.

@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.05 combined recovery — November 1, 2026
+
+Continue [#157](https://github.com/sahamo123/dax-editor/issues/157) on `codex/s01-05-recovery-acceptance-v2`, based on self-reviewed [shutdown PR #159](https://github.com/sahamo123/dax-editor/pull/159), head `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Check publication before switching laptops. The [receipt](../implementation/2026-11-01-creator-editor/s01-05-recovery-acceptance-receipt.md) records the failed earlier run and the pending combined browser suite; earlier headings are historical.
+
 ## Active S01.05 shutdown recovery — November 1, 2026
 
 Continue [#158](https://github.com/sahamo123/dax-editor/issues/158) on `codex/s01-05-chat-shutdown`, based on self-reviewed [PR #156](https://github.com/sahamo123/dax-editor/pull/156), head `082314a691f1ee1720beaf85c8c1280858727842`; check publication before resuming on another laptop. The [receipt](../implementation/2026-11-01-creator-editor/s01-05-shutdown-receipt.md) records the failed browser run and deterministic shutdown regression. Separate [#157](https://github.com/sahamo123/dax-editor/issues/157) recovery tests remain in an isolated worktree and need revalidation on the fixed baseline. Earlier headings are historical.
