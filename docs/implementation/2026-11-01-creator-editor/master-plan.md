@@ -20,9 +20,9 @@ generated:
 There are **100 Markdown files** here: **10 stage overviews +76 individual sub-stage/step specifications +5 navigation/control/review guides +8 operating records +1 generated index**. A sub-stage is one implementation step in this hierarchy; it has its own stable ID and file. The five guides are this master, execution contract, future goal, receipt template and review report. The eight operating records keep multi-day context, progress, handoff, decisions, pitfalls, errors, evidence and daily checkpoints together in this dated folder. [Generated index](index.md) is a catalogue maintained by docs:index; this master is the execution order. No extra runtime dependency, application code or model is installed by the plan.
 
 1. Read context (`context.md`; later publication batch), current handoff (`handoff.md`; later publication batch) and progress (`progress.md`; later publication batch), then review the audit report (`review-report.md`; later publication batch), then [execution contract](execution-contract.md).
-2. Declare the provisional capability/provider/client/machine matrix at launch/S00.01; S09 freezes and revalidates it. Choose a route and explicitly start the future execution goal (`execution-goal.md`; later publication batch) only after review. Merely opening the goal file does not start implementation.
+2. Declare the provisional capability/provider/client/machine matrix at launch/S00.01; S09 freezes and revalidates it. Choose a route and explicitly start the [future execution goal](execution-goal.md) only after review. Merely opening the goal file does not start implementation.
 3. Read the current stage page and first eligible step. Recheck the predecessor's actual receipt and current source before proceeding; no failed/blocked required check may be bypassed.
-4. Track actual work in scoped GitHub issues/PRs using the receipt template (`receipt-template.md`; later publication batch). Page status records the publication baseline; it is not a live progress database.
+4. Track actual work in scoped GitHub issues/PRs using the [receipt template](receipt-template.md). Page status records the publication baseline; it is not a live progress database.
 5. After a checkpoint, refresh handoff (`handoff.md`; later publication batch) and progress (`progress.md`; later publication batch) from issue receipts; append daily log (`daily-log.md`; later publication batch) and evidence (`evidence-log.md`; later publication batch), record errors/recovery (`errors-and-recovery.md`; later publication batch), decisions (`decisions.md`; later publication batch) and gotchas (`gotchas.md`; later publication batch). Keep raw logs in ignored `_local/`; do not commit media, keys or personal data.
 6. At a stage boundary, verify every child receipt and stage acceptance before entering the next selected stage. At a route endpoint, report its exact evidence scope and stop.
 
@@ -40,7 +40,7 @@ These estimates include engineering tests/review fixes, not elapsed agent time. 
 
 | Stage | Deliverable | Step files | Person-days |
 |---|---|---:|---:|
-| S00 (`stage-00-baseline.md`; later publication batch) | Baseline reconciliation and acceptance | 6 | 2-4 |
+| [S00](stage-00-baseline.md) | Baseline reconciliation and acceptance | 6 | 2-4 |
 | S01 (`stage-01-workspace.md`; later publication batch) | Control-panel workflow and design contract | 7 | 4-7 |
 | S02 (`stage-02-profiles.md`; later publication batch) | Content profiles and compatibility foundation | 8 | 4-6 |
 | S03 (`stage-03-composition.md`; later publication batch) | Bounded layered composition | 9 | 10-16 |
@@ -55,9 +55,9 @@ Strict default execution is the ordered selected route. Explicit data prerequisi
 
 ## S00: Baseline reconciliation and acceptance
 
-Stage overview: S00 (`stage-00-baseline.md`; later publication batch). Read it before its first step.
+Stage overview: [S00](stage-00-baseline.md). Read it before its first step.
 
-- S00.01: Verify the continuation and preserve the workspace (`s00-01-baseline-evidence.md`; later publication batch) - 0.25-0.5 engineer-days.
+- [S00.01: Verify the continuation and preserve the workspace](s00-01-baseline-evidence.md) - 0.25-0.5 engineer-days.
 - S00.02: Reconcile source and capability claims (`s00-02-source-capability-reconciliation.md`; later publication batch) - 0.25-0.5 engineer-days.
 - S00.03: Build the authorized acceptance fixture inventory (`s00-03-authorized-fixtures.md`; later publication batch) - 0.25-0.5 engineer-days.
 - S00.04: Establish measurable timing and resource budgets (`s00-04-performance-budgets.md`; later publication batch) - 0.5-1 engineer-days.
