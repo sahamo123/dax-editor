@@ -39,7 +39,7 @@ Finish the fresh isolated browser audit, inspect and hash the screenshots, exerc
 ## Known gates to anticipate
 
 - Native startup/DPI/installation needs a policy-authorized Windows target; owner-laptop history does not promise it is available now. A required unavailable test blocks advancement.
-- Source-matched packaging must precede packaged AI/native acceptance. Inspect the old fixed installer selection before trusting a green workflow.
+- Source-matched packaging must precede packaged AI/native acceptance. [Issue #139](https://github.com/sahamo123/dax-editor/issues/139) records that both the existing workflow's installer selection and the native result's `sourceRun` are fixed to an older run; its browser viewport setting is not actual Windows scaling. No new native run was performed during this read-only preflight.
 - Hosted providers and actual external clients need their declared configuration/access for real checks; mocks and transport probes are separate evidence.
 - Character assets and host infrastructure have separate provenance/access requirements; their existence is not implied by a plan.
 

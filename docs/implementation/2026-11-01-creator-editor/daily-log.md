@@ -96,3 +96,7 @@ S00.06 correction recheck passed; issue #133 and PR #134 record the verified sta
 ## 2026-11-01 - portable audit reproduction
 
 Preserved the synthetic audit harness in the [reproduction guide](s01-01-reproduce-audit.md) without publishing screenshot payloads. Extracted its four code blocks into a fresh ignored directory and ran its three Playwright configurations on the original laptop; each passed, 30 screenshots were produced locally, and the 1366×768 preview measurements matched the earlier run. The reproduction does not verify a second laptop or native app and does not resolve the screenshot-upload rejection. Issue #135 remains IN_PROGRESS; PR #138 contains the audit stack.
+
+## 2026-11-01 - read-only native acceptance preflight
+
+While S01.01's screenshot gate remained unresolved, inspected the existing native acceptance and candidate workflows without running them or changing CI. The native workflow selects historical run 40528351026, its harness writes the same fixed `sourceRun` in success and failure results, and its 1024×700 viewport is not an actual Windows display-scale check. Logged [issue #139](https://github.com/sahamo123/dax-editor/issues/139) for source-bound hashes and real 100/125/150/200% scaling after S01.06. No dependent implementation or native acceptance was started. S01.01 remains IN_PROGRESS.
