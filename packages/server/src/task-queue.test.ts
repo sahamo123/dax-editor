@@ -219,6 +219,79 @@ describe("chat task queue", () => {
       await first.cleanup();
     }
   });
+  it("seals unfinished chat before shutdown returns even if a runner ignores cancellation", async () => {
+    let release: (() => void) | undefined;
+    let attempted = false;
+    let accepted: boolean | undefined;
+    const h = await startHarness({
+      agentRunner: {
+        async run(_message, ctx) {
+          await new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          const result = await ctx.executeCommand?.({ session: ctx.session }, "set_format", {
+            preset: "square-1080",
+          });
+          accepted = result?.ok;
+          ctx.onEvent({ type: "status", text: "late status" });
+          attempted = true;
+        },
+      },
+    });
+    try {
+      await h.post("/api/chat", { message: "running" });
+      await vi.waitFor(() => expect(release).toBeTypeOf("function"));
+      await h.post("/api/chat", { message: "queued", queue: true });
+      await h.server.close();
+      const before = await readFile(`${h.dataDir}/tasks.json`, "utf8");
+      expect(JSON.parse(before)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ title: "running", status: "interrupted" }),
+          expect.objectContaining({ title: "queued", status: "interrupted" }),
+        ]),
+      );
+      release?.();
+      await vi.waitFor(() => expect(attempted).toBe(true));
+      expect(accepted).toBe(false);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(await readFile(`${h.dataDir}/tasks.json`, "utf8")).toBe(before);
+    } finally {
+      release?.();
+      // Allow the deliberately delayed runner to finish before deleting the test's own directory.
+      await vi.waitFor(() => expect(attempted).toBe(true));
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await h.cleanup();
+    }
+  });
+  it("retains an explicit cancellation when shutdown follows before the runner returns", async () => {
+    let release: (() => void) | undefined;
+    let returned = false;
+    const h = await startHarness({
+      agentRunner: {
+        async run() {
+          await new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          returned = true;
+        },
+      },
+    });
+    try {
+      await h.post("/api/chat", { message: "cancel me" });
+      await vi.waitFor(() => expect(release).toBeTypeOf("function"));
+      await h.post("/api/chat/cancel", {});
+      await h.server.close();
+      expect(JSON.parse(await readFile(`${h.dataDir}/tasks.json`, "utf8"))).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ title: "cancel me", status: "cancelled" }),
+        ]),
+      );
+    } finally {
+      release?.();
+      await vi.waitFor(() => expect(returned).toBe(true));
+      await h.cleanup();
+    }
+  });
   it("queues FIFO, captures modes, cancels queued work and persists results", async () => {
     const started: string[] = [];
     const modes: Array<string | undefined> = [];

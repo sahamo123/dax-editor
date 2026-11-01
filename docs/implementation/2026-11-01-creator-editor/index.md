@@ -39,6 +39,7 @@
 * [S01.04: Keep the preview usable across workspace sizes](s01-04-responsive-workspace.md) - Plan and evidence gates: Keep the preview usable across workspace sizes.
 * [S01.05 narrow composer and recovery child receipt](s01-05-composer-receipt.md) - Browser evidence and verification status for the first task-visibility slice.
 * [S01.05 task failure and autosave recovery child receipt](s01-05-failure-receipt.md) - Findings, synthetic recovery evidence and pending verification for task status visibility.
+* [S01.05 chat shutdown recovery child receipt](s01-05-shutdown-receipt.md) - Reproduction and validation of task persistence when a chat runner outlives shutdown.
 * [S01.05 state refresh ordering child receipt](s01-05-state-ordering-receipt.md) - Reproduction and verification of stale desktop state handling.
 * [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - Plan and evidence gates: Preserve task and recovery controls in the new layout.
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.

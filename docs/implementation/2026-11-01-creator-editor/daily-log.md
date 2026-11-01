@@ -158,3 +158,5 @@ The already-developed failure-visibility work was copied into a separate worktre
 The corrected state-ordering parent passed full source and focused browser checks and self-review in PR #155 at `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Failure-visibility PR #156 is published as a draft on that head; its fresh full checks and review remain pending.
 
 The initial failure-visibility candidate passed full source and browser checks. Review found the task list misreported multiple running tasks as one; a focused regression and correction now pass. Repeat full checks on the corrected code; earlier passes do not verify it.
+
+Failure visibility passed source/browser checks and self-review in PR #156 at `082314a691f1ee1720beaf85c8c1280858727842`. Recovery acceptance #157 then found a synthetic cleanup failure; #158 independently reproduced chat shutdown ordering and is under verification. See the [shutdown receipt](s01-05-shutdown-receipt.md).

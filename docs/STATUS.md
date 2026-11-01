@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.05 chat shutdown investigation — November 1, 2026
+
+The corrected failure-visibility [PR #156](https://github.com/sahamo123/dax-editor/pull/156) passed source/browser checks and self-review at `082314a691f1ee1720beaf85c8c1280858727842`. Recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157) found a shutdown cleanup failure. The independently reproduced ordering defect is being fixed in [#158](https://github.com/sahamo123/dax-editor/issues/158), local branch `codex/s01-05-chat-shutdown`; see the [receipt](implementation/2026-11-01-creator-editor/s01-05-shutdown-receipt.md). This step is not verified; confirm publication before resuming elsewhere.
+
 ## S01.05 failure visibility — November 1, 2026
 
 [Child #153](https://github.com/sahamo123/dax-editor/issues/153) implements task failure and autosave visibility in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed state-ordering [PR #155](https://github.com/sahamo123/dax-editor/pull/155), tested head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. The [failure receipt](implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) records earlier synthetic checks; this child's full verification remains pending.

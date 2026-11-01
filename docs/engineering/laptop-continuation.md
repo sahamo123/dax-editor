@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.05 shutdown child:** [#158](https://github.com/sahamo123/dax-editor/issues/158), local `codex/s01-05-chat-shutdown`, starts from self-reviewed [PR #156](https://github.com/sahamo123/dax-editor/pull/156) at `082314a691f1ee1720beaf85c8c1280858727842`. Verify publication before switching laptops; see the [shutdown receipt](../implementation/2026-11-01-creator-editor/s01-05-shutdown-receipt.md) and retain separate pending recovery tests #157.
+
 **Current S01.05 failure child:** [#153](https://github.com/sahamo123/dax-editor/issues/153) is in draft [PR #156](https://github.com/sahamo123/dax-editor/pull/156), based on self-reviewed [PR #155](https://github.com/sahamo123/dax-editor/pull/155) head `8ccea14c08fe51610be5ddb2715480c1117fc7c2`. Fresh child checks and review remain pending.
 
 **Current S01.05 state-ordering child:** [#154](https://github.com/sahamo123/dax-editor/issues/154) starts from [PR #152](https://github.com/sahamo123/dax-editor/pull/152), head `1ea0507cf7c0b00ffbf688f45b3b2f8803305072`. Work is on local `codex/s01-05-state-ordering`; verify publication before switching laptops. Dependent failure visibility is #153.
