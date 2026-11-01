@@ -11,7 +11,7 @@ generated:
 
 # S01.05 task and recovery completion receipt
 
-**State: VERIFYING.** First-improvement route, [parent issue #151](https://github.com/sahamo123/dax-editor/issues/151). The final tested application/test head is [PR #160](https://github.com/sahamo123/dax-editor/pull/160) `3760930c9f1de626ab3ce341f8cf2e5823e81e67`, tree `9f7e9d90cf30e2a7df9552da403ce4c9db0527c3`. This receipt is a documentation-only reconciliation on top. Each child received a separate **self-review**, not independent review. Draft PRs remain unmerged.
+**State: VERIFIED with self-review.** First-improvement route, [parent issue #151](https://github.com/sahamo123/dax-editor/issues/151). The final tested application/test head is [PR #160](https://github.com/sahamo123/dax-editor/pull/160) `3760930c9f1de626ab3ce341f8cf2e5823e81e67`, tree `9f7e9d90cf30e2a7df9552da403ce4c9db0527c3`; the documentation-only reconciliation [PR #161](https://github.com/sahamo123/dax-editor/pull/161) is `594f1866bdc760a76a3bd37659ce1d7c25fe7449`, tree `8552ff3751e0abe84885048f31786b6dc9caca27`. Each child and the parent reconciliation received a separate **self-review**, not independent review. Draft PRs remain unmerged.
 
 ## Entry double-check
 
@@ -38,4 +38,4 @@ All evidence here used a Windows development host, Edge browser, system FFmpeg, 
 
 ## Second review and next action
 
-Review the published reconciliation diff and these evidence identities separately; mark #151 VERIFIED only after that review. The next step is [S01.06 keyboard and accessibility](s01-06-accessibility.md), whose entry gate must recheck this receipt, #151 and the tested parent head. S01.06 requires an actual keyboard walkthrough, contrast measurement and assistive-technology observations; browser automation alone is insufficient.
+On November 1, a separate self-review checked the published reconciliation diff, child issues, parent/prerequisite ancestry, source and browser log hashes, and compact/wide private screenshots. [#151](https://github.com/sahamo123/dax-editor/issues/151) and PR #161 record that review. The next step is [S01.06 keyboard and accessibility](s01-06-accessibility.md); its entry gate rechecked this receipt, #151 and the tested parent head. S01.06 requires an actual keyboard walkthrough, contrast measurement and assistive-technology observations; browser automation alone is insufficient.

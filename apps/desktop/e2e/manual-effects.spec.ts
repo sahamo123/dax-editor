@@ -75,6 +75,15 @@ test("manually edits zooms, music and images, undoes and exports without AI", as
   if (await closeTools.isVisible()) await closeTools.click();
   const beforeReview = await server.api.project();
   await page.getByRole("button", { name: "Review effects", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Rendered effects preview" });
+  await expect(dialog.getByRole("progressbar", { name: "Preview render progress" })).toBeVisible();
+  const changingProgress = dialog.getByText(/Rendering preview · \d+%/);
+  await expect(changingProgress).toBeVisible();
+  expect(
+    await changingProgress.evaluate((element) =>
+      Boolean(element.closest('[role="status"], [aria-live="polite"], [aria-live="assertive"]')),
+    ),
+  ).toBe(false);
   const review = page.getByLabel("Complete edit review", { exact: true });
   await expect(review).toBeVisible({ timeout: 30_000 });
   await expect

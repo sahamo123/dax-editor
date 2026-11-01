@@ -25,6 +25,16 @@ it("shows progress, sends explicit cancellation, plays the finished review and i
     "value",
     "0.4",
   );
+  const progressText = screen.getByText("Rendering preview · 40%");
+  expect(
+    progressText.closest('[role="status"], [aria-live="polite"], [aria-live="assertive"]'),
+  ).toBeNull();
+  view.setApi({ ...api, state: { ...state, jobs: [{ ...running, progress: 0.5 }] } });
+  expect(screen.getByText("Rendering preview · 50%")).toBeVisible();
+  expect(screen.getByRole("progressbar", { name: "Preview render progress" })).toHaveAttribute(
+    "value",
+    "0.5",
+  );
   fireEvent.click(screen.getByRole("button", { name: "Stop preview render" }));
   await waitFor(() =>
     expect(api.run).toHaveBeenCalledWith("cancel_task", { taskId: review.jobId }),

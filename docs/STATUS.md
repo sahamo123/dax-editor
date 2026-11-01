@@ -11,6 +11,12 @@ generated:
 
 # Project status
 
+## S01.06 keyboard and accessibility — November 1, 2026
+
+An isolated partial browser keyboard walkthrough identified [review progress live-region updates #163](https://github.com/sahamo123/dax-editor/issues/163) and [export focus loss #164](https://github.com/sahamo123/dax-editor/issues/164). The first fix is under test; the second remains pending. A browser file-selection helper was required and native-window access timed out, so complete manual and assistive-technology acceptance is not claimed. See the [audit receipt](implementation/2026-11-01-creator-editor/s01-06-accessibility-audit-receipt.md).
+
+S01.05 [#151 / PR #161](https://github.com/sahamo123/dax-editor/pull/161) is verified with self-review at documentation head `594f1866bdc760a76a3bd37659ce1d7c25fe7449`, following tested application/test head `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. S01.06 [#162](https://github.com/sahamo123/dax-editor/issues/162) begins on local `codex/s01-06-review-announcements`; confirm publication before another laptop resumes. The [progress mirror](implementation/2026-11-01-creator-editor/progress.md) records 11 of 76 steps verified. Actual keyboard, contrast and assistive-technology observations are pending.
+
 ## S01.05 parent evidence reconciliation — November 1, 2026
 
 All five scoped children now have self-reviewed draft PRs, most recently [recovery acceptance #157 / PR #160](https://github.com/sahamo123/dax-editor/pull/160), tested head `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. The [parent receipt](implementation/2026-11-01-creator-editor/s01-05-task-recovery-receipt.md) reconciles the checklist and is awaiting its separate review; the step is not yet verified. Check branch publication before resuming elsewhere.

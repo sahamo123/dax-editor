@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: S01.06 [#162](https://github.com/sahamo123/dax-editor/issues/162).** The S01.05 parent [receipt](s01-05-task-recovery-receipt.md) is verified with self-review. Its [PR #161](https://github.com/sahamo123/dax-editor/pull/161) head `594f1866bdc760a76a3bd37659ce1d7c25fe7449`, tested ancestor #160 and both private log hashes were rechecked. Continue `codex/s01-06-review-announcements` after confirming publication; begin the actual keyboard and assistive-technology audit. Earlier headings are historical.
+
 **Current work: parent reconciliation [#151](https://github.com/sahamo123/dax-editor/issues/151).** All children are self-reviewed; tested application/test head [PR #160](https://github.com/sahamo123/dax-editor/pull/160) is `3760930c9f1de626ab3ce341f8cf2e5823e81e67`. On `codex/s01-05-stage-reconciliation`, review the [parent receipt](s01-05-task-recovery-receipt.md), verify publication, then update #151; earlier headings are historical.
 
 **Current work: combined recovery acceptance [#157](https://github.com/sahamo123/dax-editor/issues/157).** Branch `codex/s01-05-recovery-acceptance-v2` starts from self-reviewed [PR #159](https://github.com/sahamo123/dax-editor/pull/159) head `368fd843ba4fd7984e0d12c49440b5a2914ec4dc`. Verify publication before switching laptops. Run the full browser suite and complete the [acceptance receipt](s01-05-recovery-acceptance-receipt.md); earlier headings are historical.
