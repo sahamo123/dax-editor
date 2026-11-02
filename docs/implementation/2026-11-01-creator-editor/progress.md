@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#270 / draft PR #271](https://github.com/sahamo123/dax-editor/pull/271): three browser checks, fast checks and dead-code analysis passed at test head `b80ab8d09fa0024d6b492c2a705b2e778d592246`; see the [receipt](s01-06-notice-focus-receipt.md). S01.06 and actual native/screen-reader gates remain open.
+
 - [#268 / draft PR #269](https://github.com/sahamo123/dax-editor/pull/269): nine combined browser checks, three repeated full-size preview checks and full source checks passed on test head `192fcaac08aa21c831ebf8b59a2f3677b860de96`; see the [receipt](s01-06-preview-lifecycle-receipt.md). The original failure's sequence remains unproven; S01.06 stays open.
 
 - [#265 / draft PR #267](https://github.com/sahamo123/dax-editor/pull/267): bounded notice queue passed full source checks at corrected head `3b7a9e9aa0e948988c6dcc9acc325a942b69f690`. Exact-head browser checks had one preview failure followed by a passing isolated retry; see the [receipt](s01-06-notice-burst-receipt.md) and [#268](https://github.com/sahamo123/dax-editor/issues/268). S01.06 remains open.

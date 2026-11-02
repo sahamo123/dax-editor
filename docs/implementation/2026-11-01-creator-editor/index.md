@@ -70,6 +70,7 @@
 * [S01.06 native accessibility acceptance handoff](s01-06-native-acceptance-receipt.md) - Exact computer-use access blocker, safe restart and remaining keyboard and Narrator evidence.
 * [S01.06 non-export job outcome notices](s01-06-non-export-outcomes-receipt.md) - Reproduction, reconciliation and verification for speech, motion and local-model job outcomes.
 * [Bounded task notification bursts](s01-06-notice-burst-receipt.md) - Reproduction, bounded queue candidate, verification and rendered-preview follow-up.
+* [Notification keyboard focus and contrast samples](s01-06-notice-focus-receipt.md) - Rendered keyboard focus, text contrast, geometry and overflow samples in synthetic Settings dialogs.
 * [Task notice reading time](s01-06-notice-reading-time-receipt.md) - Reproduction, scoped timer pause, browser evidence and remaining notice-eviction and accessibility gates.
 * [S01.06 timeline overlay label contrast](s01-06-overlay-label-contrast-receipt.md) - Reproduced timeline label contrast gaps, scoped fix and verification limits.
 * [S01.06 contextual panel contrast](s01-06-panel-contrast-receipt.md) - Measured media, settings and assistant tool text against rendered backgrounds, with scope and remaining issues.
