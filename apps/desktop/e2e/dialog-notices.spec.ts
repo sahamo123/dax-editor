@@ -69,13 +69,16 @@ test("a completed preview notice stays inside the review dialog and is keyboard 
   sampleVideo,
   shot,
 }) => {
+  // A full 1080p synthetic review can legitimately exceed 30 seconds on a laptop; retain the
+  // real renderer and bound both its wait and the total test duration separately.
+  test.setTimeout(120_000);
   const server = await startServer();
   await server.importPaths([sampleVideo]);
   await openApp(server);
   await page.getByRole("button", { name: "Review effects", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Rendered effects preview" });
   const notice = dialog.locator(".toast").filter({ hasText: "Effects preview ready." });
-  await expect(notice).toBeVisible({ timeout: 30000 });
+  await expect(notice).toBeVisible({ timeout: 90_000 });
   const back = dialog.getByRole("button", { name: "Back to editing" });
   await expect(back).toBeVisible();
   await shot("dialog-notice-rendered-review");

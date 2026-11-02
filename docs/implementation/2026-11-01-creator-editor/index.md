@@ -73,6 +73,7 @@
 * [Task notice reading time](s01-06-notice-reading-time-receipt.md) - Reproduction, scoped timer pause, browser evidence and remaining notice-eviction and accessibility gates.
 * [S01.06 timeline overlay label contrast](s01-06-overlay-label-contrast-receipt.md) - Reproduced timeline label contrast gaps, scoped fix and verification limits.
 * [S01.06 contextual panel contrast](s01-06-panel-contrast-receipt.md) - Measured media, settings and assistant tool text against rendered backgrounds, with scope and remaining issues.
+* [Rendered-preview browser lifecycle investigation](s01-06-preview-lifecycle-receipt.md) - Scoped timeout reproduction, teardown ordering, full-size render timings and browser test correction.
 * [S01.06 primary-button contrast child receipt](s01-06-primary-contrast-receipt.md) - Rendered primary-button contrast measurements and verification.
 * [S01.06 reduced-motion child receipt](s01-06-reduced-motion-receipt.md) - Reproduction and verification for reduced-motion editor controls and working feedback.
 * [S01.06 review progress announcement child receipt](s01-06-review-announcement-receipt.md) - Reproduction and verification for accessible rendered-review progress.
