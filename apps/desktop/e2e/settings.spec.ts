@@ -107,7 +107,7 @@ test("saves an OpenAI-compatible provider and never shows the key again", async 
   await shot("08-settings-api");
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
 
-  await expect(page.getByText("Settings saved.")).toBeVisible();
+  await expect(page.locator(".toasts").getByText("Settings saved.")).toBeVisible();
   await expect(dialog).toBeHidden();
   expect(server.settings.activeProvider).toBe("openai-compatible");
   expect(server.settings.providers["openai-compatible"]).toEqual({

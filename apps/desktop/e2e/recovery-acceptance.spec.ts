@@ -88,7 +88,9 @@ for (const width of [1000, 1366]) {
       const output = join(outputDir, "recovered.mp4");
       await dialog.getByLabel("Save as").fill(output);
       await dialog.getByRole("button", { name: "Export", exact: true }).click();
-      await expect(page.getByText("Exported recovered.mp4.")).toBeVisible({ timeout: 60_000 });
+      await expect(page.locator(".toasts").getByText("Exported recovered.mp4.")).toBeVisible({
+        timeout: 60_000,
+      });
       expect(exportRequests).toBe(1);
       execFileSync(process.env.DAX_FFMPEG ?? "ffmpeg", [
         "-v",

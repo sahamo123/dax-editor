@@ -41,7 +41,9 @@ test("uploads a selected video and shows it in the editor and the media bin", as
   await page.getByRole("banner").getByRole("button", { name: "Import" }).click();
   await (await picker).setFiles(sampleVideo);
 
-  await expect(page.getByText("Imported interview.mp4.", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".toasts").getByText("Imported interview.mp4.", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("Drop a video here or click Import")).toBeHidden();
   expect(Object.keys((await server.project()).assets)).toHaveLength(1);
 
@@ -109,7 +111,7 @@ test("a dropped path imports; a drop without paths explains what to do", async (
   await shot("03-drop-overlay");
 
   await drag("drop", `file://${sampleVideo}`);
-  await expect(page.getByText("Video imported.")).toBeVisible();
+  await expect(page.locator(".toasts").getByText("Video imported.")).toBeVisible();
   await expect(page.getByText("Drop to import")).toBeHidden();
 
   await drag("drop", "not a path");

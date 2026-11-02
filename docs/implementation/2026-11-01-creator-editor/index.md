@@ -50,6 +50,7 @@
 * [S01.06 modal shortcut isolation receipt](s01-06-dialog-shortcuts-receipt.md) - Reproduction and verification for keeping project shortcuts outside active modal dialogs.
 * [S01.06 export focus child receipt](s01-06-export-focus-receipt.md) - Reproduction and verification of stable keyboard focus while an export runs.
 * [S01.06 history contrast child receipt](s01-06-history-contrast-receipt.md) - Rendered history contrast measurements, branch labels and verification.
+* [S01.06 live accessibility and export announcements](s01-06-live-announcement-receipt.md) - Partial keyboard and Narrator observations, export announcement changes, and remaining acceptance evidence.
 * [S01.06 native accessibility acceptance handoff](s01-06-native-acceptance-receipt.md) - Exact computer-use access blocker, safe restart and remaining keyboard and Narrator evidence.
 * [S01.06 primary-button contrast child receipt](s01-06-primary-contrast-receipt.md) - Rendered primary-button contrast measurements and verification.
 * [S01.06 reduced-motion child receipt](s01-06-reduced-motion-receipt.md) - Reproduction and verification for reduced-motion editor controls and working feedback.

@@ -18,7 +18,9 @@ test("sample isolated browser acknowledgement and seeded 720p cached seeks", asy
   const picker = page.waitForEvent("filechooser");
   await page.getByRole("banner").getByRole("button", { name: "Import" }).click();
   await (await picker).setFiles(sampleVideo);
-  await expect(page.getByText("Imported interview.mp4.", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".toasts").getByText("Imported interview.mp4.", { exact: true }),
+  ).toBeVisible();
   await engine.api.settled(90_000);
   const assetId = Object.keys((await engine.api.project()).assets)[0];
   expect(assetId).toBeTruthy();

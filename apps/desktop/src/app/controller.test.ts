@@ -362,13 +362,28 @@ describe("controller", () => {
       path: "/tmp/out.mp4",
       overwrite: false,
     });
-    // "started" is not news once the job events are doing the talking.
-    expect(store.getState().toasts).toHaveLength(0);
+    expect(store.getState().toasts.map((t) => t.text)).toEqual(["Starting export…"]);
+    socket().onEvent({ type: "job", job: { ...job, progress: 0.8 } });
+    expect(store.getState().toasts.map((t) => t.text)).toEqual(["Starting export…"]);
     socket().onEvent({
       type: "job",
       job: { ...job, progress: 1, status: "done", result: "/tmp/out.mp4" },
     });
-    expect(store.getState().toasts.map((t) => t.text)).toEqual(["Exported out.mp4."]);
+    expect(store.getState().toasts.map((t) => t.text)).toEqual([
+      "Starting export…",
+      "Exported out.mp4.",
+    ]);
+  });
+
+  it("reports an immediately rejected export without waiting for a job", async () => {
+    const { store, controller } = setup({
+      run: vi.fn(async () => ({ ok: false, error: "Choose another filename." })),
+    });
+    expect(await controller.exportTo("/tmp/existing.mp4", false)).toBe(false);
+    expect(store.getState().toasts.map(({ tone, text }) => ({ tone, text }))).toEqual([
+      { tone: "info", text: "Starting export…" },
+      { tone: "error", text: "Choose another filename." },
+    ]);
   });
 
   it("announces a review without displaying its internal cache filename", () => {
@@ -393,7 +408,10 @@ describe("controller", () => {
       run: vi.fn(async () => ({ ok: true, summary: "Exported to /tmp/out.mp4." })),
     });
     await controller.exportTo("/tmp/out.mp4", true);
-    expect(store.getState().toasts[0]?.text).toBe("Exported to /tmp/out.mp4.");
+    expect(store.getState().toasts.map((t) => t.text)).toEqual([
+      "Starting export…",
+      "Exported to /tmp/out.mp4.",
+    ]);
     const job = {
       id: "j2",
       kind: "export" as const,

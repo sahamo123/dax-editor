@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.06 live accessibility — November 1, 2026
+
+Continue [#185 / draft PR #187](https://github.com/sahamo123/dax-editor/pull/187) on `codex/s01-06-live-acceptance`, application/test head `6c3fbea9723fcf17018d736f518e749cb7533860`, based on [PR #184](https://github.com/sahamo123/dax-editor/pull/184) head `0bb231d7848b416be11c2801ef59d08f67aa0081`. The full source check passed in an authorized isolated test environment; the browser suite found an intermittent disconnected-engine failure tracked as [#186](https://github.com/sahamo123/dax-editor/issues/186). The earlier live keyboard/Narrator run was partial: the operator used the mouse in the file picker, heard preview completion, and reported missing export-start/progress and existing-file-error speech. The user is away. Actual post-change speech and complete keyboard-only import remain pending under [#177](https://github.com/sahamo123/dax-editor/issues/177); do not advance S01.06. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-live-announcement-receipt.md). Earlier headings are historical.
+
 ## Active S01.06 setup and error contrast — November 1, 2026
 
 Setup and task-error contrast [#183 / PR #184](https://github.com/sahamo123/dax-editor/pull/184) passed focused browser, fast, dead-code and docs checks and was separately self-reviewed at test/docs head `6fdb6a7f7958b723c618226d02ae42dce4753ffe` (not independently reviewed). The earlier full check is reused only for unchanged application source. Actual keyboard-only and Narrator acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) remain blocked on computer-use access. Do not advance to S01.07. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-setup-error-contrast-receipt.md). Earlier headings are historical.
