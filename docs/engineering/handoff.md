@@ -13,7 +13,7 @@ generated:
 
 ## Active S01.06 task cancellation names — November 1, 2026
 
-Task-cancellation naming [#179](https://github.com/sahamo123/dax-editor/issues/179) is IN_PROGRESS on `codex/s01-06-task-cancel-names`, based on self-reviewed handoff [PR #178](https://github.com/sahamo123/dax-editor/pull/178) `44ccac4c1111a0e1de0ebb30de96b167a01c036a`. Focused component and browser tests pass; the full source check passed; publication and self-review remain pending. Actual keyboard-only and Narrator acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) remain blocked on computer-use access. Do not advance to S01.07. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-task-cancel-receipt.md). Earlier headings are historical.
+Task-cancellation naming [#179 / PR #180](https://github.com/sahamo123/dax-editor/pull/180) passed focused component/browser and full source checks and was separately self-reviewed at application/test head `d92bc08a210312d68403a870e3fffac97e584f0e` (not independently reviewed). Actual keyboard-only and Narrator acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) remain blocked on computer-use access. Do not advance to S01.07. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-task-cancel-receipt.md). Earlier headings are historical.
 
 ## Active S01.06 native accessibility — November 1, 2026
 
