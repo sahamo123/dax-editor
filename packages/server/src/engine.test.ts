@@ -20,13 +20,14 @@ afterEach(async () => {
 async function makeEngine(
   localModel: LocalModelController = new NullLocalModelController(),
   providers: ProviderRegistry = new NullProviderRegistry(),
+  runner: ScriptedRunner = new ScriptedRunner(),
 ): Promise<Engine> {
   const dir = await mkdtemp(join(tmpdir(), "dax-engine-"));
   dirs.push(dir);
   const engine = new Engine({
     dataDir: dir,
     allowedRoots: [dir],
-    runner: new ScriptedRunner(),
+    runner,
     providers,
     localModel,
     log: createLogger(() => undefined),
@@ -38,6 +39,218 @@ async function makeEngine(
 }
 
 describe("Engine ordering of manual edits and AI runs", () => {
+  it.each(["start", "stop", "uninstall"] as const)(
+    "rejects local chat during %s and recovers afterward",
+    async (operation) => {
+      let release = () => {};
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const model: LocalModelController = {
+        status: async () => ({ installed: true, running: true, detail: "fake" }),
+        install: async () => {},
+        start: async () => (operation === "start" ? gate : undefined),
+        stop: async () => (operation === "stop" ? gate : undefined),
+        uninstall: async () => (operation === "uninstall" ? gate : undefined),
+      };
+      const engine = await makeEngine(model);
+      let pending: Promise<void> | undefined;
+      try {
+        await engine.updateSettings({ activeProvider: "local", providers: {} });
+        const before = await engine.buildState();
+        const jobId = operation === "start" ? engine.startLocalModel() : undefined;
+        if (operation === "stop") pending = engine.stopLocalModel();
+        if (operation === "uninstall") pending = engine.uninstallLocalModel();
+        const during = await engine.buildState();
+        expect(during.providerContextVersion).not.toBe(before.providerContextVersion);
+        expect(() => engine.startChat("during transition")).toThrow(/local.*changing/i);
+        expect(
+          (await engine.buildState()).tasks?.some((task) => task.title === "during transition"),
+        ).toBe(false);
+        release();
+        if (jobId)
+          await vi.waitFor(() =>
+            expect(engine.jobs.list().find((job) => job.id === jobId)?.status).toBe("done"),
+          );
+        await pending;
+        await vi.waitFor(async () =>
+          expect((await engine.buildState()).providerContextVersion).not.toBe(
+            during.providerContextVersion,
+          ),
+        );
+        expect(() =>
+          engine.startChat("stale", {
+            expectedProjectId: before.projectId,
+            expectedProviderEpoch: before.providerContextVersion,
+          }),
+        ).toThrow(/configuration changed/i);
+      } finally {
+        release();
+        await pending;
+        await engine.shutdown();
+      }
+    },
+  );
+
+  it("protects active and queued local chats from explicit model changes", async () => {
+    const runner = new ScriptedRunner([{ type: "until_aborted" }]);
+    const engine = await makeEngine(undefined, undefined, runner);
+    try {
+      await engine.updateSettings({ activeProvider: "local", providers: {} });
+      engine.startChat("active");
+      engine.startChat("queued", { queue: true });
+      expect(() => engine.installLocalModel()).toThrow(/local assistant tasks/i);
+      expect(() => engine.startLocalModel()).toThrow(/local assistant tasks/i);
+      await expect(engine.stopLocalModel()).rejects.toThrow(/local assistant tasks/i);
+    } finally {
+      await engine.shutdown();
+    }
+  });
+
+  it("protects a queued local chat even after switching to a hosted provider", async () => {
+    const runner = new ScriptedRunner([{ type: "until_aborted" }]);
+    const engine = await makeEngine(undefined, undefined, runner);
+    try {
+      await engine.updateSettings({ activeProvider: "openrouter", providers: {} });
+      engine.startChat("hosted active");
+      await engine.updateSettings({ activeProvider: "local", providers: {} });
+      const queued = engine.startChat("local queued", { queue: true });
+      await engine.updateSettings({ activeProvider: "openrouter", providers: {} });
+      expect(() => engine.startLocalModel()).toThrow(/local assistant tasks/i);
+      expect(engine.cancelTask(queued)).toBe(true);
+      expect(() => engine.startLocalModel()).not.toThrow();
+    } finally {
+      await engine.shutdown();
+    }
+  });
+
+  it("clears the model transition after an explicit stop fails", async () => {
+    const model = new NullLocalModelController();
+    vi.spyOn(model, "stop").mockRejectedValueOnce(new Error("synthetic stop failure"));
+    const engine = await makeEngine(model);
+    try {
+      await engine.updateSettings({ activeProvider: "local", providers: {} });
+      const before = await engine.buildState();
+      await expect(engine.stopLocalModel()).rejects.toThrow("synthetic stop failure");
+      const after = await engine.buildState();
+      expect(after.providerContextVersion).not.toBe(before.providerContextVersion);
+      expect(() => engine.startChat("after failure")).not.toThrow();
+    } finally {
+      await engine.shutdown();
+    }
+  });
+
+  it("clears the model transition after cancelling an installation", async () => {
+    let entered = () => {};
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const model: LocalModelController = {
+      status: async () => ({ installed: false, running: false, detail: "fake" }),
+      install: async (_id, task) =>
+        new Promise<void>((_resolve, reject) => {
+          entered();
+          task.signal.addEventListener("abort", () => reject(new Error("cancelled")), {
+            once: true,
+          });
+        }),
+      start: async () => {},
+      stop: async () => {},
+    };
+    const engine = await makeEngine(model);
+    try {
+      await engine.updateSettings({ activeProvider: "local", providers: {} });
+      const id = engine.installLocalModel();
+      await started;
+      expect(engine.cancelLocalTask()).toBe(true);
+      await vi.waitFor(() =>
+        expect(engine.jobs.list().find((job) => job.id === id)?.status).toBe("error"),
+      );
+      await Promise.resolve();
+      expect(() => engine.startChat("after cancel")).not.toThrow();
+    } finally {
+      await engine.shutdown();
+    }
+  });
+
+  it("blocks local chat during asynchronous idle unload and accepts it afterward", async () => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const model = new NullLocalModelController();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    vi.spyOn(model, "stop").mockImplementationOnce(async () => gate);
+    const engine = await makeEngine(model);
+    try {
+      await engine.updateSettings({ activeProvider: "local", providers: {}, localIdleMinutes: 1 });
+      const before = await engine.buildState();
+      await vi.advanceTimersByTimeAsync(60_000);
+      expect(() => engine.startChat("while unloading")).toThrow(/local.*changing/i);
+      release();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      expect((await engine.buildState()).providerContextVersion).not.toBe(
+        before.providerContextVersion,
+      );
+      expect(() => engine.startChat("after unload")).not.toThrow();
+    } finally {
+      release();
+      await engine.shutdown();
+    }
+  });
+
+  it("allows a fresh hosted chat while a local installation is pending", async () => {
+    const model = new NullLocalModelController();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    vi.spyOn(model, "install").mockImplementation(async () => gate);
+    const engine = await makeEngine(model);
+    try {
+      engine.installLocalModel("example");
+      await engine.updateSettings({ activeProvider: "openrouter", providers: {} });
+      const current = await engine.buildState();
+      expect(() =>
+        engine.startChat("hosted", {
+          expectedProjectId: current.projectId,
+          expectedProviderEpoch: current.providerContextVersion,
+        }),
+      ).not.toThrow();
+    } finally {
+      release();
+      await engine.shutdown();
+    }
+  });
+
+  it("rejects local chat while a model installation is changing its context", async () => {
+    const model = new NullLocalModelController();
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    vi.spyOn(model, "install").mockImplementation(async () => gate);
+    const engine = await makeEngine(model);
+    try {
+      await engine.updateSettings({ activeProvider: "local", providers: {} });
+      const before = await engine.buildState();
+      engine.installLocalModel("different-model");
+      expect(() =>
+        engine.startChat("during installation", {
+          expectedProjectId: before.projectId,
+          expectedProviderEpoch: before.providerContextVersion,
+        }),
+      ).toThrow(/assistant.*changing|local.*(changing|progress)/i);
+      expect(
+        (await engine.buildState()).tasks?.some((t) => t.title === "during installation"),
+      ).toBe(false);
+    } finally {
+      release();
+      await engine.shutdown();
+    }
+  });
   it("rejects chat while provider settings are being saved", async () => {
     const engine = await makeEngine();
     let entered: (() => void) | undefined;

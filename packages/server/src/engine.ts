@@ -103,6 +103,7 @@ export class Engine {
   private readonly processes = new ProcessRegistry();
   private chat: ChatRun | undefined;
   private localTask: AbortController | undefined;
+  private localTransition = false;
   private idleTimer: ReturnType<typeof setTimeout> | undefined;
   /** Set from the moment an export is accepted until it ends; aborting it kills FFmpeg. */
   private exportAbort: AbortController | undefined;
@@ -893,6 +894,8 @@ export class Engine {
         409,
         "The assistant configuration is changing. Wait for it to finish and try again.",
       );
+    if (this.localTransition && this.settings.get().activeProvider === "local")
+      throw new HttpError(409, "The local model is changing. Wait for it to finish and try again.");
     if ((options.expectedProjectId === undefined) !== (options.expectedProviderEpoch === undefined))
       throw new HttpError(400, "Both chat context guards must be supplied together.");
     if (
@@ -1352,9 +1355,13 @@ export class Engine {
 
   /** Stop the local model. */
   async stopLocalModel(): Promise<void> {
+    this.beginLocalTransition();
     clearTimeout(this.idleTimer);
-    await this.cfg.localModel.stop();
-    this.invalidateProviders();
+    try {
+      await this.cfg.localModel.stop();
+    } finally {
+      this.endLocalTransition();
+    }
   }
 
   /**
@@ -1364,10 +1371,13 @@ export class Engine {
   async uninstallLocalModel(): Promise<void> {
     const model = this.cfg.localModel;
     if (!model.uninstall) throw new HttpError(501, "Removing the local model is not supported");
-    if (this.localTask) throw new HttpError(409, "A local model task is already running.");
-    await model.stop();
-    await model.uninstall();
-    this.invalidateProviders();
+    this.beginLocalTransition();
+    try {
+      await model.stop();
+      await model.uninstall();
+    } finally {
+      this.endLocalTransition();
+    }
   }
 
   /** Abort a running install or start. Returns false if nothing was running. */
@@ -1382,36 +1392,50 @@ export class Engine {
     label: string,
     fn: (task: { onProgress: (f: number) => void; signal: AbortSignal }) => Promise<void>,
   ): string {
-    if (this.localTask) throw new HttpError(409, "A local model task is already running.");
+    this.beginLocalTransition();
     const job = this.jobs.create(kind, label);
     const abort = new AbortController();
     this.localTask = abort;
-    void fn({ onProgress: (f) => job.progress(f), signal: abort.signal })
+    void (async () => fn({ onProgress: (f) => job.progress(f), signal: abort.signal }))()
       .then(() => job.done())
       .catch((err) => job.fail(abort.signal.aborted ? "Cancelled" : errorMessage(err)))
       .finally(() => {
         this.localTask = undefined;
         this.armIdleUnload();
-        this.invalidateProviders();
+        this.endLocalTransition();
       });
     return job.id;
   }
 
   // ---------- shutdown ----------
 
+  private beginLocalTransition(): void {
+    if (this.localTransition) throw new HttpError(409, "A local model task is already running.");
+    if ([...this.queuedSettings.values()].some((settings) => settings.activeProvider === "local"))
+      throw new HttpError(409, "Finish or cancel local assistant tasks before changing the model.");
+    this.localTransition = true;
+    this.invalidateProviders();
+  }
+
+  private endLocalTransition(): void {
+    this.localTransition = false;
+    this.invalidateProviders();
+  }
+
   private armIdleUnload(): void {
     clearTimeout(this.idleTimer);
     if (this.closing) return;
     this.idleTimer = setTimeout(
       () => {
-        if (this.chat || this.chatQueue.length || this.localTask) {
+        if (this.chat || this.chatQueue.length || this.localTransition) {
           this.armIdleUnload();
           return;
         }
-        void this.cfg.localModel
-          .stop()
-          .then(() => this.invalidateProviders())
-          .catch(() => undefined);
+        this.beginLocalTransition();
+        void Promise.resolve()
+          .then(() => this.cfg.localModel.stop())
+          .catch(() => undefined)
+          .finally(() => this.endLocalTransition());
       },
       (this.settings.get().localIdleMinutes ?? 5) * 60_000,
     );

@@ -2,6 +2,10 @@
 
 ## 2026-11-02
 
+* **Investigate**: Full host check for [PR #220](https://github.com/sahamo123/dax-editor/pull/220) failed a bridge status test, tracked in [#222](https://github.com/sahamo123/dax-editor/issues/222). The [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md) records the failure and successful server/desktop tests.
+
+* **Fix**: [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220) guards model transitions and accepted local work; focused tests passed. Full check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
+
 * **Test**: Host-authorized full `pnpm check` passed for [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) after the earlier failures documented in the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md); review remains pending.
 
 * **Investigate**: Full check for [PR #216](https://github.com/sahamo123/dax-editor/pull/216) failed two timeout classification tests; [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) tracks deterministic coverage. Nineteen focused tests passed. See the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
