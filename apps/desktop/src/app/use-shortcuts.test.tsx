@@ -23,6 +23,11 @@ function Shortcuts() {
   );
 }
 
+function UndoOnly() {
+  useUndoRedoKeys();
+  return null;
+}
+
 it("keeps undo and redo out of the project when a modal owns the keyboard", () => {
   const { controller } = renderApp(<Shortcuts />);
   const close = screen.getByRole("button", { name: "Close settings" });
@@ -37,6 +42,35 @@ it("keeps undo and redo out of the project when a modal owns the keyboard", () =
   });
   expect(controller.undo).not.toHaveBeenCalled();
   fireEvent.click(close);
+  fireEvent.keyDown(screen.getByRole("button", { name: "Editor control" }), {
+    key: "z",
+    ctrlKey: true,
+  });
+  expect(controller.undo).toHaveBeenCalledOnce();
+});
+
+it("does not undo or redo if focus leaves an open modal", () => {
+  const { controller } = renderApp(<Shortcuts />);
+  const background = screen.getByRole("button", { name: "Editor control" });
+  background.focus();
+  expect(background).toHaveFocus();
+  fireEvent.keyDown(background, { key: "z", ctrlKey: true });
+  fireEvent.keyDown(background, { key: "y", ctrlKey: true });
+  expect(controller.undo).not.toHaveBeenCalled();
+  expect(controller.redo).not.toHaveBeenCalled();
+});
+
+it("does not block history for hidden or non-modal dialogs", () => {
+  const { controller } = renderApp(
+    <>
+      <UndoOnly />
+      <button type="button">Editor control</button>
+      <div role="dialog" aria-modal="true" hidden>
+        Hidden modal
+      </div>
+      <dialog open>Non-modal dialog</dialog>
+    </>,
+  );
   fireEvent.keyDown(screen.getByRole("button", { name: "Editor control" }), {
     key: "z",
     ctrlKey: true,

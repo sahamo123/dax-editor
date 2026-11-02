@@ -23,6 +23,8 @@ If attachment staging fails before a chat request is attempted, retain the origi
 
 Task notices use separate polite and urgent live regions. Pending notices are independent of the limited visible toast stack, so a batch or immediate dismissal does not silently omit a queued notice. Each priority retains up to eight pending notices and reports overflow; a batch is grouped into one region update per priority. Actual assistive-technology speech and its handling of simultaneous priorities require separate platform verification.
 
+While a visible modal owns the workspace, project editing and history shortcuts do not run even if focus temporarily falls outside the dialog. Hidden and non-modal dialogs do not disable background shortcuts. Modal focus containment and actual keyboard and assistive-technology behavior remain separately verified requirements.
+
 Speech is required: setup, verified runtime/model provisioning, transcript correction, captions and reviewable filler/silence cuts. Blender is an optional separate user-installed process. First templates are title card, logo intro and 3D text; scripts belong to the application, parameters are validated, and renders return as media. Arbitrary model-generated Python is excluded.
 
 ## Delivery sequence

@@ -17,6 +17,31 @@ const NON_TEXT_INPUTS = [
   "image",
 ];
 
+/** Whether a visible modal owns the workspace, including a native dialog opened modally. */
+export function hasActiveModal(): boolean {
+  for (const dialog of document.querySelectorAll<HTMLElement>(
+    '[role="dialog"][aria-modal="true"]',
+  )) {
+    if (dialog.closest("[hidden], [inert]")) continue;
+    const visibility = getComputedStyle(dialog).visibility;
+    if (visibility === "hidden" || visibility === "collapse") continue;
+    let displayed = true;
+    for (let node: HTMLElement | null = dialog; node; node = node.parentElement) {
+      if (getComputedStyle(node).display === "none") {
+        displayed = false;
+        break;
+      }
+    }
+    if (displayed) return true;
+  }
+  try {
+    return document.querySelector("dialog:modal") !== null;
+  } catch {
+    // Older selector engines may not support :modal; custom modals are checked above.
+    return false;
+  }
+}
+
 /** True if the event came from something that should keep the key for itself (typing, or button activation). */
 function isEditableTarget(target: EventTarget | null, key: string): boolean {
   if (!(target instanceof HTMLElement)) return false;
@@ -68,8 +93,8 @@ export function useEditorShortcuts(): void {
       if (
         e.defaultPrevented ||
         e.isComposing ||
-        (e.target instanceof Element &&
-          e.target.closest('[role="dialog"][aria-modal="true"], dialog[open]'))
+        hasActiveModal() ||
+        (e.target instanceof Element && e.target.closest("dialog[open]"))
       )
         return;
       if (isEditableTarget(e.target, e.key)) return;

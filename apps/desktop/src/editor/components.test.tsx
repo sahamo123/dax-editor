@@ -246,6 +246,55 @@ describe("useEditorShortcuts", () => {
     expect(editor().selection).toEqual({ kind: "clip", id: "c1" });
   });
 
+  it("does not edit or play when focus leaves an open modal", () => {
+    const api = makeApi(makeState(defaultProject()));
+    renderEditor(
+      <>
+        <Probe />
+        <button type="button">Editor control</button>
+        <div role="dialog" aria-modal="true" aria-label="Settings">
+          <button type="button">Close settings</button>
+        </div>
+      </>,
+      api,
+    );
+    act(() => {
+      editor().setPlayhead(2);
+      editor().select({ kind: "clip", id: "c1" });
+    });
+    const background = screen.getByRole("button", { name: "Editor control" });
+    background.focus();
+    expect(background).toHaveFocus();
+    key("s", {}, background);
+    key("Delete", {}, background);
+    key(" ", {}, background);
+    expect(api.run).not.toHaveBeenCalled();
+    expect(editor().playing).toBe(false);
+    expect(editor().selection).toEqual({ kind: "clip", id: "c1" });
+  });
+
+  it("keeps shortcuts available when dialogs are hidden or non-modal", () => {
+    const api = makeApi(makeState(defaultProject()));
+    renderEditor(
+      <>
+        <Probe />
+        <div role="dialog" aria-modal="true" hidden>
+          Hidden modal
+        </div>
+        <div style={{ display: "none" }}>
+          <div role="dialog" aria-modal="true">
+            CSS-hidden modal
+          </div>
+        </div>
+        <dialog open>Non-modal dialog</dialog>
+      </>,
+      api,
+    );
+    act(() => editor().setPlayhead(2));
+    key("s");
+    expect(api.run).toHaveBeenCalledWith("split", { at: 2 });
+  });
+
   it("S splits at the playhead", () => {
     const api = makeApi(makeState(defaultProject()));
     renderEditor(<Probe />, api);
