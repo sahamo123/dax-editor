@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: [staged attachment investigation #202 / draft PR #211](https://github.com/sahamo123/dax-editor/pull/211).** Nine generated-media upload/retention tests passed at test head `175e8845077307ee3a27078ee38a41814744d6c3`. Review the [receipt](s01-06-staged-attachment-investigation.md) and [ownership proposal](../../research/staged-attachment-lifetime.md). No cleanup is implemented; never sweep existing uploads. Keyboard-only picker and actual Narrator acceptance remain open; do not advance S01.06. Following current-work entries are historical.
+
 **Current work: [saved-connection diagnostics #207 / draft PR #210](https://github.com/sahamo123/dax-editor/pull/210).** The initial full run returned HTTP 500 without diagnostic details; 25 isolated synthetic runs and the full retry passed, so the original cause remains unknown. Review the published test-only diagnostic at test head `5524223eb48236c9344c7009b066266c62dc4f2b`. See the [receipt](s01-06-chat-context-guard.md). Keyboard-only picker and actual Narrator acceptance remain open; do not advance S01.06. Following current-work entries are historical.
 
 **Current work: [chat context browser regression #206 / draft PR #209](https://github.com/sahamo123/dax-editor/pull/209).** Six context-switch races and ten existing chat browser workflows passed at test head `93f0fddbe8f144079433b6144e35ecf972f7679b`; review remains pending. See the [receipt](s01-06-chat-context-guard.md). The saved-connection failure investigation [#207](https://github.com/sahamo123/dax-editor/issues/207) remains open. Keyboard-only picker and actual Narrator acceptance remain open; do not advance S01.06. Following current-work entries are historical.

@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 staged attachment storage — November 1, 2026
+
+Generated-media tests for [#202 / draft PR #211](https://github.com/sahamo123/dax-editor/pull/211) reproduced an unsubmitted staged file retained after upload failure and restart, and showed staged sources referenced by saved projects and interrupted tasks. Nine focused tests passed at test head `175e8845077307ee3a27078ee38a41814744d6c3`. No cleanup was performed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md) and [ownership proposal](research/staged-attachment-lifetime.md) explain why legacy sources must remain durable. Review is pending.
+
 ## S01.06 saved-connection diagnostics — November 1, 2026
 
 The intermittent [#207](https://github.com/sahamo123/dax-editor/issues/207) saved-connection HTTP 500 did not recur in 25 isolated synthetic runs or the full retry. [Draft PR #210](https://github.com/sahamo123/dax-editor/pull/210), test head `5524223eb48236c9344c7009b066266c62dc4f2b`, adds a test-only diagnostic exposing the response and redacted harness logs on failure. The original cause is unknown and review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
