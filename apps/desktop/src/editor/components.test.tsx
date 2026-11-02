@@ -330,6 +330,25 @@ describe("useEditorShortcuts", () => {
     expect(editor().playing).toBe(true);
   });
 
+  it("leaves Space and Enter available for native disclosure summaries", () => {
+    renderEditor(
+      <>
+        <Probe />
+        <details>
+          <summary>Project</summary>
+          <p>Project options</p>
+        </details>
+      </>,
+      makeApi(makeState(defaultProject())),
+    );
+    const summary = screen.getByText("Project");
+    expect(fireEvent.keyDown(summary, { key: " ", bubbles: true, cancelable: true })).toBe(true);
+    expect(fireEvent.keyDown(summary, { key: "Enter", bubbles: true, cancelable: true })).toBe(
+      true,
+    );
+    expect(editor().playing).toBe(false);
+  });
+
   it("ignores unknown keys and keys with Alt held", () => {
     const api = makeApi(makeState(defaultProject()));
     renderEditor(<Probe />, api);

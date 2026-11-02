@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: Focused native disclosures retain Space/Enter activation instead of triggering playback [#215 / PR #216](https://github.com/sahamo123/dax-editor/pull/216); focused tests passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
+
 * **Investigate**: A synthetic Windows sharing lock reproduced atomic-write `EPERM` for [#149 / PR #214](https://github.com/sahamo123/dax-editor/pull/214) without touching a user project. See the [receipt](implementation/2026-11-01-creator-editor/windows-sharing-investigation.md); no production retry is implemented.
 
 * **Test**: Chat attachment preflight [#212 / PR #213](https://github.com/sahamo123/dax-editor/pull/213) passed full `pnpm check`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md).

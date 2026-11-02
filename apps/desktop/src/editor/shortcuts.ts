@@ -29,10 +29,13 @@ function isEditableTarget(target: EventTarget | null, key: string): boolean {
     return textual || key.startsWith("Arrow") || key === " " || key === "Home" || key === "End";
   }
   if (tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable) return true;
-  // A focused button/link is activated by Space and Enter; do not also play/pause.
+  // Focused buttons, links and disclosure summaries own their activation keys.
   if (
     (key === " " || key === "Enter") &&
-    (tag === "BUTTON" || tag === "A" || target.getAttribute("role") === "button")
+    (tag === "BUTTON" ||
+      tag === "A" ||
+      tag === "SUMMARY" ||
+      target.getAttribute("role") === "button")
   ) {
     return true;
   }
