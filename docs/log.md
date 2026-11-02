@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Test**: The current [#177](https://github.com/sahamo123/dax-editor/issues/177) keyboard recheck opened a visible but untargetable Windows picker; no file was selected. Automatic approval review rejected reading Narrator's full recap due to unrelated private speech risk. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md); S01.06 remains open.
+
 * **Fix**: [#238 / draft PR #239](https://github.com/sahamo123/dax-editor/pull/239) makes side-panel content keyboard reachable and retains labelled panel targets. Full source and affected browser checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-side-panel-accessibility-receipt.md). Native and assistive-technology acceptance remain open.
 
 * **Fix**: [#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237) recovers active-dialog focus after a control is disabled; focused, generated-video browser and full source checks passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-recovery-receipt.md); native and assistive-technology acceptance remain open.
