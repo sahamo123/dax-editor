@@ -97,6 +97,142 @@ it("keeps an error notice while a keyboard user reads the scrollable region", ()
   expect(notice).not.toBeInTheDocument();
 });
 
+it("retains a focused notice when several later notices arrive", () => {
+  const { store } = renderApp(<Fixture />);
+  fireEvent.click(screen.getByRole("button", { name: "Open outer" }));
+  act(() => store.getState().pushToast("error", "First error being read."));
+  const region = within(screen.getByRole("dialog", { name: "Outer" })).getByRole("region", {
+    name: "Task notifications",
+  });
+  act(() => region.focus());
+  act(() => {
+    for (let index = 1; index <= 4; index++) {
+      store.getState().pushToast("error", `Later error ${index}.`);
+    }
+  });
+  expect(within(region).getByText("First error being read.")).toBeInTheDocument();
+  expect(within(region).getByText(/1 notification waiting/)).toBeInTheDocument();
+  expect(within(region).queryByText("Later error 4.")).toBeNull();
+  const dismiss = within(region).getAllByRole("button", { name: "Dismiss message" })[0];
+  if (!dismiss) throw new Error("Missing dismiss button");
+  act(() => dismiss.focus());
+  fireEvent.click(dismiss);
+  expect(region).toHaveFocus();
+  expect(within(region).getByText("Later error 4.")).toBeInTheDocument();
+  expect(within(region).queryByText(/notification waiting/)).toBeNull();
+});
+
+it("makes queue overflow explicit without evicting the notice being read", () => {
+  const { store } = renderApp(<Fixture />);
+  fireEvent.click(screen.getByRole("button", { name: "Open outer" }));
+  act(() => store.getState().pushToast("error", "First retained error."));
+  const region = within(screen.getByRole("dialog", { name: "Outer" })).getByRole("region", {
+    name: "Task notifications",
+  });
+  act(() => region.focus());
+  act(() => {
+    for (let index = 1; index <= 38; index++) {
+      store.getState().pushToast("info", `Later notice ${index}.`);
+    }
+  });
+  expect(within(region).getByText("First retained error.")).toBeInTheDocument();
+  expect(within(region).getByText(/32 notifications waiting/)).toBeInTheDocument();
+  expect(
+    within(region).getByText(/3 additional notifications could not be retained/),
+  ).toBeInTheDocument();
+  expect(store.getState().queuedToasts).toHaveLength(32);
+  fireEvent.click(within(region).getByRole("button", { name: "Dismiss overflow warning" }));
+  expect(within(region).queryByText(/could not be retained/)).toBeNull();
+});
+
+it("retains a later error over a queued routine notice when the queue is full", () => {
+  const { store } = renderApp(<Fixture />);
+  fireEvent.click(screen.getByRole("button", { name: "Open outer" }));
+  act(() => {
+    for (let index = 1; index <= 36; index++) {
+      store.getState().pushToast("info", `Routine notice ${index}.`);
+    }
+  });
+  const region = within(screen.getByRole("dialog", { name: "Outer" })).getByRole("region", {
+    name: "Task notifications",
+  });
+  act(() => region.focus());
+  act(() => store.getState().pushToast("error", "Urgent error after burst."));
+  expect(within(region).getByText("Routine notice 1.")).toBeInTheDocument();
+  expect(within(region).getByText(/1 error/)).toBeInTheDocument();
+  expect(store.getState().queuedToasts.at(-1)?.text).toBe("Urgent error after burst.");
+  expect(store.getState().queuedToasts.some((toast) => toast.text === "Routine notice 36.")).toBe(
+    false,
+  );
+  expect(store.getState().omittedToastCount).toBe(1);
+  expect(screen.getByRole("alert")).toHaveTextContent("Urgent error after burst.");
+});
+
+it("retains hovered notices and explicitly counts an error omitted from an all-error queue", () => {
+  const { store } = renderApp(<Toasts />);
+  act(() => store.getState().pushToast("error", "Hovered error."));
+  const notice = screen.getByText("Hovered error.", { selector: ".toast__text" });
+  const stack = notice.closest(".toasts");
+  if (!stack) throw new Error("Missing standalone notice stack");
+  fireEvent.pointerEnter(stack);
+  act(() => {
+    for (let index = 1; index <= 36; index++) {
+      store.getState().pushToast("error", `Queued error ${index}.`);
+    }
+  });
+  expect(notice).toBeInTheDocument();
+  expect(store.getState().queuedToasts).toHaveLength(32);
+  expect(store.getState().queuedToasts.at(-1)?.text).toBe("Queued error 35.");
+  expect(store.getState().omittedToastCount).toBe(1);
+  expect(
+    within(stack).getByText(/1 additional notification could not be retained/),
+  ).toBeInTheDocument();
+});
+
+it("promotes queued notices in order on expiry without repeating their announcement", () => {
+  vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
+  const { store } = renderApp(<Toasts />);
+  act(() => {
+    for (let index = 1; index <= 6; index++) {
+      store.getState().pushToast("info", `Ordered notice ${index}.`);
+    }
+  });
+  const announcement = screen.getByRole("status").firstElementChild;
+  expect(store.getState().queuedToasts.map((toast) => toast.text)).toEqual([
+    "Ordered notice 5.",
+    "Ordered notice 6.",
+  ]);
+  act(() => vi.advanceTimersByTime(6000));
+  expect(store.getState().toasts.map((toast) => toast.text)).toEqual([
+    "Ordered notice 5.",
+    "Ordered notice 6.",
+  ]);
+  expect(screen.getByRole("status").firstElementChild).toBe(announcement);
+  act(() => vi.advanceTimersByTime(5999));
+  expect(screen.getByText("Ordered notice 5.", { selector: ".toast__text" })).toBeInTheDocument();
+  act(() => vi.advanceTimersByTime(1));
+  expect(screen.queryByText("Ordered notice 5.", { selector: ".toast__text" })).toBeNull();
+});
+
+it("preserves the waiting queue when the notice area moves between nested dialogs", () => {
+  const { store } = renderApp(<Fixture />);
+  fireEvent.click(screen.getByRole("button", { name: "Open outer" }));
+  act(() => {
+    for (let index = 1; index <= 5; index++) {
+      store.getState().pushToast("error", `Moving error ${index}.`);
+    }
+  });
+  const outer = screen.getByRole("dialog", { name: "Outer" });
+  const first = within(outer).getByText("Moving error 1.");
+  fireEvent.click(within(outer).getByRole("button", { name: "Open inner" }));
+  const inner = screen.getByRole("dialog", { name: "Inner" });
+  expect(within(inner).getByText("Moving error 1.")).toBe(first);
+  expect(within(inner).getByText(/1 notification waiting/)).toBeInTheDocument();
+  fireEvent.click(within(inner).getByRole("button", { name: "Close" }));
+  expect(within(outer).getByText("Moving error 1.")).toBe(first);
+  expect(store.getState().queuedToasts.map((toast) => toast.text)).toEqual(["Moving error 5."]);
+});
+
 it("pauses stacked notices on pointer hover, including notices added during the hover", () => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "performance"] });
   const { store } = renderApp(<Fixture />);

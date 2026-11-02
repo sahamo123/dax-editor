@@ -62,6 +62,8 @@ interface PendingAnnouncements {
 }
 
 const MAX_PENDING_ANNOUNCEMENTS = 8;
+const MAX_VISIBLE_TOASTS = 4;
+const MAX_QUEUED_TOASTS = 32;
 
 function emptyAnnouncements(): PendingAnnouncements {
   return { polite: [], urgent: [], politeOverflow: false, urgentOverflow: false };
@@ -113,6 +115,10 @@ export interface AppStore {
   /** Last `GET /api/local-model`; `"unavailable"` when that request failed, `null` before the first answer. */
   localModel: LocalModelStatus | "unavailable" | null;
   toasts: Toast[];
+  /** Notices waiting for a visible slot, in arrival order. Not persisted. */
+  queuedToasts: Toast[];
+  /** Number of incoming notices omitted because the waiting queue was full. */
+  omittedToastCount: number;
   /** Notices awaiting delivery to the separate polite and urgent live regions. */
   pendingAnnouncements: PendingAnnouncements;
   ui: UiState;
@@ -143,6 +149,8 @@ export interface AppStore {
   pushToast(tone: Toast["tone"], text: string): void;
   /** Remove a toast. */
   dismissToast(id: number): void;
+  /** Acknowledge the session-only warning about omitted notices. */
+  dismissToastOverflow(): void;
   /** Atomically return and clear pending live-region notices without removing visible toasts. */
   consumeAnnouncements(): PendingAnnouncements;
   /** Merge changes into the UI state (open dialogs, drawer tab, ...). */
@@ -204,6 +212,8 @@ export function createAppStore(): StoreApi<AppStore> {
     chatSending: false,
     localModel: null,
     toasts: [],
+    queuedToasts: [],
+    omittedToastCount: 0,
     pendingAnnouncements: emptyAnnouncements(),
     ui: {
       settingsOpen: false,
@@ -303,12 +313,43 @@ export function createAppStore(): StoreApi<AppStore> {
     pushToast: (tone, text) =>
       set((s) => {
         const toast = { id: nextId++, tone, text };
+        const pendingAnnouncements = queueAnnouncement(s.pendingAnnouncements, toast);
+        if (s.toasts.length < MAX_VISIBLE_TOASTS && s.queuedToasts.length === 0) {
+          return { toasts: [...s.toasts, toast], pendingAnnouncements };
+        }
+        if (s.queuedToasts.length < MAX_QUEUED_TOASTS) {
+          return { queuedToasts: [...s.queuedToasts, toast], pendingAnnouncements };
+        }
+        // Keep a later error in preference to an undelivered routine notice, without evicting
+        // anything visible or disturbing the arrival order of the notices that remain.
+        let replaceIndex = -1;
+        if (tone === "error") {
+          for (let index = s.queuedToasts.length - 1; index >= 0; index--) {
+            if (s.queuedToasts[index]?.tone !== "error") {
+              replaceIndex = index;
+              break;
+            }
+          }
+        }
         return {
-          toasts: [...s.toasts.slice(-3), toast],
-          pendingAnnouncements: queueAnnouncement(s.pendingAnnouncements, toast),
+          queuedToasts:
+            replaceIndex < 0
+              ? s.queuedToasts
+              : [...s.queuedToasts.filter((_, index) => index !== replaceIndex), toast],
+          omittedToastCount: Math.min(Number.MAX_SAFE_INTEGER, s.omittedToastCount + 1),
+          pendingAnnouncements,
         };
       }),
-    dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+    dismissToast: (id) =>
+      set((s) => {
+        if (!s.toasts.some((toast) => toast.id === id)) return s;
+        const toasts = s.toasts.filter((toast) => toast.id !== id);
+        const next = s.queuedToasts[0];
+        return next
+          ? { toasts: [...toasts, next], queuedToasts: s.queuedToasts.slice(1) }
+          : { toasts };
+      }),
+    dismissToastOverflow: () => set({ omittedToastCount: 0 }),
     consumeAnnouncements: () => {
       const batch = get().pendingAnnouncements;
       set({ pendingAnnouncements: emptyAnnouncements() });
