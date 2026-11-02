@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Recovered job notices — November 2, 2026
+
+[#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246) announces previously observed running jobs that finish in snapshots and first-observed terminal live events, while leaving historical snapshots silent. Focused and browser checks and full `pnpm check` passed at application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). A locally initiated job first seen terminal in a snapshot remains [#247](https://github.com/sahamo123/dax-editor/issues/247). Review, actual screen-reader and native acceptance remain open.
+
 ## Timeline modal focus correction — November 2, 2026
 
 Self-review of [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) reproduced and fixed focus recovery behind a simulated open modal. Fourteen browser checks and full `pnpm check` passed at corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). Review, actual screen-reader and native acceptance remain open; S01.06 remains IN_PROGRESS.

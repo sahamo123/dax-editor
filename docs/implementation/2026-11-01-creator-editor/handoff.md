@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246).** On `codex/s01-06-snapshot-job-notices`, application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79` passed focused and browser checks and full `pnpm check`. Review the [receipt](s01-06-job-snapshot-notices-receipt.md), then investigate [#247](https://github.com/sahamo123/dax-editor/issues/247). Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
+
 **Current work: [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244).** Corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7` passed 14 browser checks and full `pnpm check` after a modal focus fix. Review the [receipt](s01-06-timeline-keyboard-receipt.md), verify publication and continue S01.06. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
 
 **Current work: [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244).** On `codex/s01-06-timeline-keyboard`, application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4` passed integrated browser, expanded offscreen and full source checks. Review the [receipt](s01-06-timeline-keyboard-receipt.md), verify publication and continue S01.06. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.

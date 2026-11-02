@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current recovered-job notice candidate — November 2, 2026
+
+[#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246), `codex/s01-06-snapshot-job-notices`, application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79`, passed focused and browser checks and full `pnpm check`. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). Next investigate locally initiated jobs first seen terminal [#247](https://github.com/sahamo123/dax-editor/issues/247). Review, picker, actual screen-reader and native acceptance remain open; earlier entries are historical.
+
 ## Current corrected timeline candidate — November 2, 2026
 
 [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7`, prevents focus recovery behind a modal. Fourteen browser checks and full `pnpm check` passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). Review and actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
