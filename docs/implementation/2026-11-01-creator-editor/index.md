@@ -77,6 +77,7 @@
 * [S01.06 contextual panel contrast](s01-06-panel-contrast-receipt.md) - Measured media, settings and assistant tool text against rendered backgrounds, with scope and remaining issues.
 * [Rendered-preview browser lifecycle investigation](s01-06-preview-lifecycle-receipt.md) - Scoped timeout reproduction, teardown ordering, full-size render timings and browser test correction.
 * [S01.06 primary-button contrast child receipt](s01-06-primary-contrast-receipt.md) - Rendered primary-button contrast measurements and verification.
+* [Recent accessibility evidence self-review](s01-06-recent-evidence-review.md) - Second review of task-status and keyboard workflow browser evidence.
 * [S01.06 reduced-motion child receipt](s01-06-reduced-motion-receipt.md) - Reproduction and verification for reduced-motion editor controls and working feedback.
 * [S01.06 review progress announcement child receipt](s01-06-review-announcement-receipt.md) - Reproduction and verification for accessible rendered-review progress.
 * [S01.06 setup and task-error contrast receipt](s01-06-setup-error-contrast-receipt.md) - Rendered large and normal text contrast measurements on composed surfaces.

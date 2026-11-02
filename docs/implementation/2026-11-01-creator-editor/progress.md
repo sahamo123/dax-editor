@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#282](https://github.com/sahamo123/dax-editor/issues/282): task-status and keyboard-workflow evidence passed a second self-review and four combined browser cases; see the [receipt](s01-06-recent-evidence-review.md). This is not independent review. S01.06 remains open.
+
 - [#177](https://github.com/sahamo123/dax-editor/issues/177): current synthetic preview reached the Windows file chooser, but it was not separately targetable and no file was selected; owned resources were stopped. See the [receipt](s01-06-native-acceptance-receipt.md). S01.06 remains open.
 
 - [#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280): two generated-media keyboard edit, review and export workflows passed at bf81963207096c47db76c0f428600d57b9f05b25; see the [receipt](s01-06-keyboard-edit-export-receipt.md). The clip was pre-imported; review and actual picker/screen-reader acceptance remain open.

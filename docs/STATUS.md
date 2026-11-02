@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Recent accessibility evidence self-review — November 2, 2026
+
+[#282](https://github.com/sahamo123/dax-editor/issues/282) rechecked task-status and keyboard-workflow evidence; four combined generated-media browser cases passed on c41e17744bdc9bd8aa9aef276f694dc127e5e7f9. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-recent-evidence-review.md). This is self-review, not independent review. S01.06, real picker/screen-reader and native acceptance remain open.
+
 ## Current native picker recheck — November 2, 2026
 
 [#177](https://github.com/sahamo123/dax-editor/issues/177) opened the Windows file chooser by keyboard on the current synthetic preview, but the dialog was not separately targetable and no file was selected. Owned test services and tab were closed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 and actual picker/screen-reader/native acceptance remain open.
