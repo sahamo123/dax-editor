@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current corrected timeline candidate — November 2, 2026
+
+[#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7`, prevents focus recovery behind a modal. Fourteen browser checks and full `pnpm check` passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). Review and actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 ## Current timeline candidate — November 2, 2026
 
 [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4`, passed integrated browser, expanded offscreen and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md); review, actual picker and screen-reader acceptance remain open. The investigation below is historical.

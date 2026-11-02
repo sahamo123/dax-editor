@@ -11,6 +11,12 @@ generated:
 
 # Timeline keyboard interaction
 
+## Modal focus correction — November 2
+
+After the earlier passing run, self-review reproduced a focus-recovery defect: when a simulated modal was open and an external edit removed the focused clip, recovery focused a clip behind the modal (private failing log `f049d1efef52fabb5397e085adf8899dd5b94b5f016b579a38346593239fd560`). Application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7` clears pending timeline recovery while a modal owns focus.
+
+Fourteen integrated generated-media Edge checks passed at this corrected head (private log `843b4eff7ab28dbdbf84001d42f70d6e7b51fa577adbdc2ebb5a315e80c2cd1d`), including the synthetic modal scenario. The final focus screenshots were inspected at wide and compact sizes (hashes `69a639cfc01d5d6570c01e11e0aff7e5dc9ed72baabe1b807cbc6e1147ed0f40` and `08d98ce1f66da13e8e8c7534694db2638102b309d0edec4f8057722fcb625ef8`); both previews were preparing. Host-authorized `pnpm check` passed at the corrected head: 1,896 package tests passed, 67 skipped, and 17 script tests passed (private log `2f9b270b983b5fd10316137c42d48f1f404b3583beca1a426748b2a6c76fb21c`). Actual screen-reader speech, native picker and packaged/DPI acceptance remain open. Earlier results below are historical.
+
 **State: IN_PROGRESS.** [Issue #243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), branch `codex/s01-06-timeline-keyboard`, application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4`, builds on [PR #242](https://github.com/sahamo123/dax-editor/pull/242) documentation head `510b5be4c7fe7a64aa1c6a63c73a645cc6d4cc0b`. The [investigation](s01-06-timeline-semantics-investigation.md) records the predecessor behavior. The S01.06 parent remains open.
 
 ## Change

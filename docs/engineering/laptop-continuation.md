@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current work:** [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7`. Fourteen browser checks and full `pnpm check` passed after a modal focus correction. Review the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md); actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 **Current work:** [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4`. Integrated browser, expanded offscreen and full source checks passed. Review the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md), verify publication and continue S01.06; actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
 
 **Current investigation:** [#243](https://github.com/sahamo123/dax-editor/issues/243), `codex/s01-06-timeline-keyboard`, based on PR #242 head `510b5be4c7fe7a64aa1c6a63c73a645cc6d4cc0b`. A generated-media browser diagnostic reproduced a listbox/keyboard mismatch; no fix is included. Read the [investigation](../implementation/2026-11-01-creator-editor/s01-06-timeline-semantics-investigation.md) and preserve editing shortcuts while designing and verifying the fix. Earlier entries are historical; S01.06 remains open.

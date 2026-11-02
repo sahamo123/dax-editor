@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Timeline modal focus correction — November 2, 2026
+
+Self-review of [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) reproduced and fixed focus recovery behind a simulated open modal. Fourteen browser checks and full `pnpm check` passed at corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). Review, actual screen-reader and native acceptance remain open; S01.06 remains IN_PROGRESS.
+
 ## Timeline keyboard navigation — November 2, 2026
 
 [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) aligns listbox navigation and reading order, retains contextual transport shortcuts, reaches offscreen items and recovers focus after removal. Thirteen integrated browser checks, an expanded offscreen test and full `pnpm check` passed at application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). Review, actual assistive-technology and native acceptance remain open; S01.06 remains IN_PROGRESS.
