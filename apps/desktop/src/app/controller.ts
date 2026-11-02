@@ -160,6 +160,19 @@ export function createController(deps: ControllerDeps): Controller {
           ? "Effects preview ready."
           : `Exported ${job.result ? basename(job.result) : "the video"}.`,
       );
+    } else if (job.status === "done") {
+      const messages: Partial<Record<JobInfo["kind"], string>> = {
+        transcribe: "Transcript ready.",
+        "speech-setup": "Offline speech ready.",
+        "model-download": "Local model downloaded.",
+        "model-start": "Local model started.",
+        blender: "Motion template ready.",
+      };
+      const message = messages[job.kind];
+      if (message) {
+        announcedJobs.add(job);
+        toast("success", message);
+      }
     }
   }
 
@@ -168,10 +181,10 @@ export function createController(deps: ControllerDeps): Controller {
     announceJob(previous, job, liveEvent || claimed);
   }
 
-  function claimLocalJob(response: CommandResponse, before: Record<string, JobInfo>): void {
-    if (!response.ok || typeof response.data !== "object" || response.data === null) return;
-    if (!("jobId" in response.data) || typeof response.data.jobId !== "string") return;
-    const id = response.data.jobId;
+  function claimLocalJob(data: unknown, before: Record<string, JobInfo>): void {
+    if (typeof data !== "object" || data === null) return;
+    if (!("jobId" in data) || typeof data.jobId !== "string") return;
+    const id = data.jobId;
     if (!id || id.length > 128 || before[id]) return;
     const known = store.getState().jobs[id];
     if (known) {
@@ -245,7 +258,7 @@ export function createController(deps: ControllerDeps): Controller {
     if (!r.ok && !quiet) toast("error", r.error);
     if (!r.ok && r.error.includes("project changed")) await refreshState();
     if (r.ok) {
-      claimLocalJob(r, jobsBefore);
+      claimLocalJob(r.data, jobsBefore);
       await refreshState();
     }
     return r;
@@ -365,7 +378,7 @@ export function createController(deps: ControllerDeps): Controller {
         toast("error", r.error);
         return false;
       }
-      claimLocalJob(r, jobsBefore);
+      claimLocalJob(r.data, jobsBefore);
       // With a job id the end of the export is announced by its job events; without one it already ended.
       const started = typeof r.data === "object" && r.data !== null && "jobId" in r.data;
       if (!started) toast("success", r.summary);
@@ -603,8 +616,10 @@ export function createController(deps: ControllerDeps): Controller {
       return r.ok ? r.value : null;
     },
     async renderMotion(request) {
+      const jobsBefore = store.getState().jobs;
       const r = await client.renderMotion(request);
       if (!r.ok) toast("error", r.error);
+      else claimLocalJob(r.value, jobsBefore);
       await refreshState();
     },
     async stageLogo(file) {
@@ -644,8 +659,10 @@ export function createController(deps: ControllerDeps): Controller {
     },
 
     async speech(action, assetId) {
+      const jobsBefore = store.getState().jobs;
       const r = await client.speech(action, assetId);
       if (!r.ok) toast("error", r.error);
+      else if (action !== "remove") claimLocalJob(r.value, jobsBefore);
       await refreshState();
     },
 
@@ -670,11 +687,14 @@ export function createController(deps: ControllerDeps): Controller {
     loadLocalModel,
 
     async localModel(action) {
+      const jobsBefore = store.getState().jobs;
       const r = await client.localModel(action);
       if (!r.ok) {
         toast("error", r.error);
         return;
       }
+      if (action.action === "install" || action.action === "start")
+        claimLocalJob(r.value, jobsBefore);
       // None of the replies carries the new status (install and start only name a job), so ask for it.
       await loadLocalModel();
     },

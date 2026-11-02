@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Non-export job notices — November 2, 2026
+
+[#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250) reconciles speech, motion and local-model job IDs and adds fixed completion notices. Focused, browser and full `pnpm check` passed at application/test head `5136c40914e064386397a7e46e603a2337a8ee7f`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md). Investigate cancellation classification [#251](https://github.com/sahamo123/dax-editor/issues/251). Review, actual screen-reader and native acceptance remain open; S01.06 is IN_PROGRESS.
+
 ## Local job outcome reconciliation — November 2, 2026
 
 [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248) reconciles local exports and previews first seen terminal in snapshots. Focused and browser checks and full `pnpm check` passed at application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md). Review, actual screen-reader and native acceptance remain open; S01.06 is IN_PROGRESS.

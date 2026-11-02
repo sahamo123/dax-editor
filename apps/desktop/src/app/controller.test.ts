@@ -423,6 +423,212 @@ describe("controller", () => {
     },
   );
 
+  it.each([
+    ["transcribe", "Transcript ready."],
+    ["speech-setup", "Offline speech ready."],
+    ["model-download", "Local model downloaded."],
+    ["model-start", "Local model started."],
+    ["blender", "Motion template ready."],
+  ] as const)("announces a completed %s job once without its internal label", (kind, message) => {
+    const { store, socket } = setup();
+    const running: JobInfo = {
+      id: kind,
+      kind,
+      label: "/private/path",
+      progress: 0,
+      status: "running",
+    };
+    const done: JobInfo = { ...running, status: "done", progress: 1 };
+    socket().onEvent({ type: "job", job: running });
+    socket().onEvent({ type: "job", job: done });
+    socket().onEvent({ type: "state", state: makeState({ jobs: [{ ...done }] }) });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual([message]);
+  });
+
+  it("keeps completed background proxy work silent", () => {
+    const { store, socket } = setup();
+    const job: JobInfo = {
+      id: "proxy",
+      kind: "proxy",
+      label: "Proxy",
+      progress: 0,
+      status: "running",
+    };
+    socket().onEvent({ type: "job", job });
+    socket().onEvent({ type: "job", job: { ...job, status: "done", progress: 1 } });
+    expect(store.getState().toasts).toEqual([]);
+  });
+
+  it.each(["speech-install", "transcribe", "motion", "model-install", "model-start"] as const)(
+    "reconciles the returned %s job when a failure first arrives in a snapshot",
+    async (action) => {
+      const jobId = "local-non-export";
+      const response = vi.fn(async () => ({ ok: true, value: { jobId } }));
+      const { store, controller, socket } = setup({
+        speech: response,
+        renderMotion: response,
+        localModel: response,
+      });
+      if (action === "speech-install") await controller.speech("install");
+      if (action === "transcribe") await controller.speech("transcribe", "asset");
+      if (action === "motion")
+        await controller.renderMotion({
+          template: "title-card",
+          text: "Title",
+          color: "#ffffff",
+          duration: 3,
+          width: 640,
+          height: 360,
+          fps: 24,
+        });
+      if (action === "model-install") await controller.localModel({ action: "install" });
+      if (action === "model-start") await controller.localModel({ action: "start" });
+      const kind: JobInfo["kind"] =
+        action === "speech-install"
+          ? "speech-setup"
+          : action === "motion"
+            ? "blender"
+            : action === "model-install"
+              ? "model-download"
+              : action === "model-start"
+                ? "model-start"
+                : "transcribe";
+      const job: JobInfo = {
+        id: jobId,
+        kind,
+        label: "Job",
+        status: "error",
+        progress: 1,
+        error: "Job failed",
+      };
+      socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+      socket().onEvent({ type: "state", state: makeState({ jobs: [{ ...job }] }) });
+      expect(response).toHaveBeenCalledTimes(1);
+      expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Job failed"]);
+    },
+  );
+
+  it.each(["speech", "motion", "model"] as const)(
+    "reconciles a completed %s snapshot before its endpoint reply without repeating it",
+    async (action) => {
+      const reply: { resolve?: (value: { ok: true; value: { jobId: string } }) => void } = {};
+      const pending = new Promise<{ ok: true; value: { jobId: string } }>((resolve) => {
+        reply.resolve = resolve;
+      });
+      const endpoint = vi.fn(() => pending);
+      const { store, controller, socket } = setup({
+        speech: endpoint,
+        renderMotion: endpoint,
+        localModel: endpoint,
+      });
+      const request =
+        action === "speech"
+          ? controller.speech("transcribe", "asset")
+          : action === "model"
+            ? controller.localModel({ action: "start" })
+            : controller.renderMotion({
+                template: "title-card",
+                text: "Title",
+                color: "#ffffff",
+                duration: 3,
+                width: 640,
+                height: 360,
+                fps: 24,
+              });
+      const kind: JobInfo["kind"] =
+        action === "speech" ? "transcribe" : action === "model" ? "model-start" : "blender";
+      const job: JobInfo = {
+        id: "local",
+        kind,
+        label: "/private/path",
+        status: "done",
+        progress: 1,
+      };
+      socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+      if (!reply.resolve) throw new Error("Endpoint reply not initialized");
+      reply.resolve({ ok: true, value: { jobId: "local" } });
+      await request;
+      socket().onEvent({ type: "job", job: { ...job } });
+      expect(endpoint).toHaveBeenCalledTimes(1);
+      const message =
+        action === "speech"
+          ? "Transcript ready."
+          : action === "model"
+            ? "Local model started."
+            : "Motion template ready.";
+      expect(store.getState().toasts.map((toast) => toast.text)).toEqual([message]);
+    },
+  );
+
+  it.each(["remove", "stop", "cancel", "uninstall"] as const)(
+    "does not treat synchronous %s replies as newly started jobs",
+    async (action) => {
+      const response = vi.fn(async () => ({ ok: true, value: { jobId: "unrelated" } }));
+      const { store, controller, socket } = setup({ speech: response, localModel: response });
+      if (action === "remove") await controller.speech("remove");
+      else await controller.localModel({ action });
+      const job: JobInfo = {
+        id: "unrelated",
+        kind: "transcribe",
+        label: "Job",
+        status: "error",
+        progress: 1,
+        error: "Unrelated error",
+      };
+      socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+      expect(store.getState().toasts).toEqual([]);
+    },
+  );
+
+  it("does not infer a speech job from an ambiguous failed endpoint", async () => {
+    const speech = vi.fn(async () => ({ ok: false, error: "Connection lost" }));
+    const { store, controller, socket } = setup({ speech });
+    await controller.speech("install");
+    const job: JobInfo = {
+      id: "unknown",
+      kind: "speech-setup",
+      label: "Job",
+      status: "done",
+      progress: 1,
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+    expect(speech).toHaveBeenCalledTimes(1);
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Connection lost"]);
+  });
+
+  it("does not replay a historical non-export job when an endpoint returns its ID", async () => {
+    const { store, controller, socket } = setup({
+      speech: vi.fn(async () => ({ ok: true, value: { jobId: "old" } })),
+    });
+    const job: JobInfo = {
+      id: "old",
+      kind: "speech-setup",
+      label: "Job",
+      status: "done",
+      progress: 1,
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+    await controller.speech("install");
+    socket().onEvent({ type: "state", state: makeState({ jobs: [{ ...job }] }) });
+    expect(store.getState().toasts).toEqual([]);
+  });
+
+  it("announces a motion command's locally identified completion", async () => {
+    const { store, controller, socket } = setup({
+      run: vi.fn(async () => ({ ok: true, summary: "Started", data: { jobId: "motion" } })),
+    });
+    await controller.run("render_motion_template");
+    const job: JobInfo = {
+      id: "motion",
+      kind: "blender",
+      label: "/private/path",
+      status: "done",
+      progress: 1,
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Motion template ready."]);
+  });
+
   it("does not repeat a live terminal notice delivered before the command reply", async () => {
     const reply: {
       resolve?: (value: { ok: true; summary: string; data: { jobId: string } }) => void;

@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250) reconciles and announces non-export job outcomes. Focused, browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md). Cancellation classification [#251](https://github.com/sahamo123/dax-editor/issues/251) and S01.06 remain open.
+
 * **Fix**: [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248) reconciles locally initiated jobs first observed terminal. Focused, browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md). S01.06 remains open.
 
 * **Fix**: [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246) announces recovered outcomes for known running jobs. Focused, browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). First-seen terminal local jobs remain [#247](https://github.com/sahamo123/dax-editor/issues/247); S01.06 remains open.
