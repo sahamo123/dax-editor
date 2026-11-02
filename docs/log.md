@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#254 / PR #255](https://github.com/sahamo123/dax-editor/pull/255) and [#253 / PR #256](https://github.com/sahamo123/dax-editor/pull/256) propose typed cancellation outcomes and polite notices. Focused and browser checks passed with limits; corrected-head full checks remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md) and compact toast follow-up [#257](https://github.com/sahamo123/dax-editor/issues/257).
+
 * **Investigate**: [#251](https://github.com/sahamo123/dax-editor/issues/251) reproduced error-styled cancellation for fake speech setup and the error-shaped job outcome for a generated-media export. The [investigation](implementation/2026-11-01-creator-editor/s01-06-job-cancellation-investigation.md) records limitations and typed-contract follow-up; no application fix is claimed.
 
 * **Fix**: [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250) reconciles and announces non-export job outcomes. Focused, browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md). Cancellation classification [#251](https://github.com/sahamo123/dax-editor/issues/251) and S01.06 remain open.

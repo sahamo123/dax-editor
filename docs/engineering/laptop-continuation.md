@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current work:** corrected foundation [PR #255](https://github.com/sahamo123/dax-editor/pull/255), application/test head `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`, and dependent [PR #256](https://github.com/sahamo123/dax-editor/pull/256), application/test head `6e32425648e52de20ddc92275a5f61d37cfd077c`. Their [receipt](../implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md) lists pending full checks and [#257](https://github.com/sahamo123/dax-editor/issues/257). Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
+
 **Current investigation:** [#251](https://github.com/sahamo123/dax-editor/issues/251), branch `codex/s01-06-cancelled-job-notices`, based on [PR #250](https://github.com/sahamo123/dax-editor/pull/250) documentation head `3328ecf4777eb13e00dbee795184c65ccec42909`. The [investigation](../implementation/2026-11-01-creator-editor/s01-06-job-cancellation-investigation.md) reproduces error-styled cancellation and outlines typed-contract work; no product fix is claimed. Publish the diagnostic and continue. Earlier entries are historical.
 
 **Current work:** [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250), `codex/s01-06-non-export-outcomes`, application/test head `5136c40914e064386397a7e46e603a2337a8ee7f`. Focused, browser and full source checks passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md), then investigate [#251](https://github.com/sahamo123/dax-editor/issues/251). Actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
