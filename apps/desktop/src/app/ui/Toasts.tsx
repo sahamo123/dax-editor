@@ -10,7 +10,17 @@ import { Icon } from "./icons";
 
 const LIFETIME_MS = 6000;
 
-function ToastItem({ toast, paused }: { toast: Toast; paused: boolean }): ReactElement {
+function ToastItem({
+  toast,
+  paused,
+  focusArea,
+  keepFocus,
+}: {
+  toast: Toast;
+  paused: boolean;
+  focusArea: HTMLElement;
+  keepFocus: boolean;
+}): ReactElement {
   const dismiss = useApp((s) => s.dismissToast);
   const remaining = useRef(toast.tone === "error" ? LIFETIME_MS * 1.5 : LIFETIME_MS);
   useLayoutEffect(() => {
@@ -32,7 +42,10 @@ function ToastItem({ toast, paused }: { toast: Toast; paused: boolean }): ReactE
         type="button"
         className="icon-btn icon-btn--sm"
         aria-label="Dismiss message"
-        onClick={() => dismiss(toast.id)}
+        onClick={(event) => {
+          if (keepFocus && document.activeElement === event.currentTarget) focusArea.focus();
+          dismiss(toast.id);
+        }}
       >
         <Icon name="x" size={14} />
       </button>
@@ -83,6 +96,12 @@ function useNoticeInteraction(container: HTMLElement, host: HTMLElement | null):
 /** The stack of current toasts, bottom right. */
 export function Toasts(): ReactElement {
   const toasts = useApp((s) => s.toasts);
+  const queuedCount = useApp((s) => s.queuedToasts.length);
+  const queuedErrors = useApp(
+    (s) => s.queuedToasts.filter((toast) => toast.tone === "error").length,
+  );
+  const omittedCount = useApp((s) => s.omittedToastCount);
+  const dismissOverflow = useApp((s) => s.dismissToastOverflow);
   const pending = useApp((s) => s.pendingAnnouncements);
   const consumeAnnouncements = useApp((s) => s.consumeAnnouncements);
   const [polite, setPolite] = useState<Toast | null>(null);
@@ -90,20 +109,23 @@ export function Toasts(): ReactElement {
   const host = useNoticeHost();
   const fallback = useRef<HTMLDivElement>(null);
   const [container] = useState(() => document.createElement("div"));
+  const hasNotices = toasts.length > 0 || omittedCount > 0;
+  const overflowMessage = `${omittedCount} additional ${omittedCount === 1 ? "notification" : "notifications"} could not be retained. Check Work for task results.`;
 
   useLayoutEffect(() => {
     container.className = host ? "toasts toasts--dialog" : "toasts";
+    container.tabIndex = -1;
     (host ?? fallback.current)?.appendChild(container);
     return () => container.remove();
   }, [container, host]);
   const paused = useNoticeInteraction(container, host);
 
   useLayoutEffect(() => {
-    container.hidden = toasts.length === 0;
-  }, [container, toasts.length]);
+    container.hidden = !hasNotices;
+  }, [container, hasNotices]);
 
   useLayoutEffect(() => {
-    if (!host || toasts.length === 0) return;
+    if (!host || !hasNotices) return;
     host.tabIndex = 0;
     host.setAttribute("role", "region");
     host.setAttribute("aria-label", "Task notifications");
@@ -112,7 +134,7 @@ export function Toasts(): ReactElement {
       host.removeAttribute("role");
       host.removeAttribute("aria-label");
     };
-  }, [host, toasts.length]);
+  }, [host, hasNotices]);
 
   useEffect(() => {
     if (!pending.polite.length && !pending.urgent.length) return;
@@ -140,11 +162,50 @@ export function Toasts(): ReactElement {
       <div className="sr-only" role="alert" aria-atomic="true">
         {error ? <span key={error.id}>{error.text}</span> : null}
       </div>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {omittedCount > 0 ? overflowMessage : ""}
+      </div>
       <div ref={fallback} />
       {createPortal(
         <div aria-live="off">
+          {omittedCount > 0 ? (
+            <div className="toast toast--error">
+              <Icon name="alert" />
+              <span className="toast__text">{overflowMessage}</span>
+              <button
+                type="button"
+                className="icon-btn icon-btn--sm"
+                aria-label="Dismiss overflow warning"
+                onClick={(event) => {
+                  if (toasts.length > 0 && document.activeElement === event.currentTarget) {
+                    (host ?? container).focus();
+                  }
+                  dismissOverflow();
+                }}
+              >
+                <Icon name="x" size={14} />
+              </button>
+            </div>
+          ) : null}
+          {queuedCount > 0 ? (
+            <div className="toast">
+              <span className="toast__text">
+                {queuedCount} {queuedCount === 1 ? "notification" : "notifications"} waiting.
+                Dismiss a message to see the next.
+                {queuedErrors > 0
+                  ? ` (${queuedErrors} ${queuedErrors === 1 ? "error" : "errors"}).`
+                  : ""}
+              </span>
+            </div>
+          ) : null}
           {toasts.map((t) => (
-            <ToastItem key={t.id} toast={t} paused={paused} />
+            <ToastItem
+              key={t.id}
+              toast={t}
+              paused={paused}
+              focusArea={host ?? container}
+              keepFocus={toasts.length > 1 || queuedCount > 0 || omittedCount > 0}
+            />
           ))}
         </div>,
         container,

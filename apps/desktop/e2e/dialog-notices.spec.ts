@@ -187,3 +187,55 @@ test("keeps a notice while keyboard focus or pointer hover remains in its region
   await dialog.getByRole("button", { name: "Save", exact: true }).hover();
   await expect(notice).toHaveCount(0, { timeout: 8000 });
 });
+
+test("keeps a focused notice during a burst and reveals waiting notices on dismissal", async ({
+  page,
+  startServer,
+  openApp,
+  shot,
+}) => {
+  const detail = "Synthetic setup error from a failed offline task.";
+  const server = await startServer({
+    speechWaitForCancel: true,
+    speechFailureAfterCancel: true,
+    speechFailureMessage: detail,
+  });
+  await openApp(server);
+  await page.getByRole("button", { name: /Run a model on this computer/ }).click();
+  await page.setViewportSize({ width: 1024, height: 700 });
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  const errors = dialog.locator(".toast--error").filter({ hasText: detail });
+  for (let index = 0; index < 5; index++) {
+    const started = await server.api.call("POST", "/api/speech/install", {});
+    if (
+      !started.body ||
+      typeof started.body !== "object" ||
+      !("jobId" in started.body) ||
+      typeof started.body.jobId !== "string"
+    )
+      throw new Error("Synthetic speech job did not start");
+    await server.api.call("POST", `/api/tasks/${started.body.jobId}/cancel`, {});
+    if (index < 4) await expect(errors).toHaveCount(index + 1);
+    if (index === 0) await dialog.getByRole("region", { name: "Task notifications" }).focus();
+  }
+  const host = dialog.getByRole("region", { name: "Task notifications" });
+  await expect(host).toBeFocused();
+  await expect(host.getByText(/1 notification waiting/)).toBeVisible();
+  await expect(host.getByText(/1 error/)).toBeVisible();
+  const waitingBox = await host.getByText(/1 notification waiting/).boundingBox();
+  const hostBox = await host.boundingBox();
+  if (!waitingBox || !hostBox) throw new Error("Waiting status or notification area has no box");
+  expect(waitingBox.y).toBeGreaterThanOrEqual(hostBox.y);
+  expect(waitingBox.y + waitingBox.height).toBeLessThanOrEqual(hostBox.y + hostBox.height);
+  await expect(errors).toHaveCount(4);
+  const first = await errors.first().elementHandle();
+  if (!first) throw new Error("First error notice missing");
+  await shot("notice-burst-waiting");
+  await errors.first().getByRole("button", { name: "Dismiss message" }).focus();
+  await page.keyboard.press("Enter");
+  await expect(host).toBeFocused();
+  await expect(host.getByText(/notification waiting/)).toHaveCount(0);
+  expect(await first.evaluate((element) => element.isConnected)).toBe(false);
+  await expect(errors).toHaveCount(4);
+  await expect(dialog.getByRole("button", { name: "Save", exact: true })).toBeVisible();
+});

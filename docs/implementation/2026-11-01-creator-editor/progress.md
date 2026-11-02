@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#265 / draft PR #267](https://github.com/sahamo123/dax-editor/pull/267): bounded notice queue passed full source checks at corrected head `3b7a9e9aa0e948988c6dcc9acc325a942b69f690`. Exact-head browser checks had one preview failure followed by a passing isolated retry; see the [receipt](s01-06-notice-burst-receipt.md) and [#268](https://github.com/sahamo123/dax-editor/issues/268). S01.06 remains open.
+
 - [#264 / draft PR #266](https://github.com/sahamo123/dax-editor/pull/266): notice timer pause passed focused, eleven browser and full source checks at `0e4881d7c9f145e1edb496d9580db4ccebd56d1a`; see the [receipt](s01-06-notice-reading-time-receipt.md). Burst eviction [#265](https://github.com/sahamo123/dax-editor/issues/265) and S01.06 remain open.
 
 - [#262 / draft PR #263](https://github.com/sahamo123/dax-editor/pull/263): synthetic browser accessibility-tree audit passed at test head `2ea06cf90aa1f30423a195748e8becfd222e4f8c`; see the [receipt](s01-06-modal-live-region-receipt.md). No actual screen-reader or native acceptance is claimed. S01.06 remains IN_PROGRESS.

@@ -819,10 +819,17 @@ describe("controller", () => {
       })),
     });
     for (let index = 0; index < 129; index++) await controller.exportTo("/tmp/out.mp4", false);
-    expect(store.getState().toasts.at(-1)).toMatchObject({
+    expect(store.getState().queuedToasts.at(-1)).toMatchObject({
       tone: "error",
       text: expect.stringContaining("Check Work"),
     });
+    expect(store.getState().omittedToastCount).toBeGreaterThan(0);
+    // Simulate a reader clearing the bounded stack before checking subsequent outcomes.
+    while (store.getState().toasts.length) {
+      const first = store.getState().toasts[0];
+      if (!first) throw new Error("Missing visible notice");
+      store.getState().dismissToast(first.id);
+    }
     const finished: JobInfo = {
       id: "job-0",
       kind: "export",

@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Task notice burst candidate — November 2, 2026
+
+[#265 / draft PR #267](https://github.com/sahamo123/dax-editor/pull/267) adds bounded, recoverable-in-session notice queuing and an explicit overflow warning. Full source checks passed at corrected application/test head `3b7a9e9aa0e948988c6dcc9acc325a942b69f690`. Exact-head browser checks had six passes and one preview failure; an isolated retry passed, while cause remains open in [#268](https://github.com/sahamo123/dax-editor/issues/268). See the [receipt](implementation/2026-11-01-creator-editor/s01-06-notice-burst-receipt.md). S01.06, actual picker, screen-reader and native acceptance remain open.
+
 ## Task notice reading time — November 2, 2026
 
 [#264 / draft PR #266](https://github.com/sahamo123/dax-editor/pull/266) pauses notice timers during focus or pointer interaction. Focused, eleven browser and full source checks passed at `0e4881d7c9f145e1edb496d9580db4ccebd56d1a`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-notice-reading-time-receipt.md). Burst eviction [#265](https://github.com/sahamo123/dax-editor/issues/265), S01.06 and actual screen-reader/native acceptance remain open.
