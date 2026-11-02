@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: reduced motion [#168](https://github.com/sahamo123/dax-editor/issues/168).** Start from self-reviewed [PR #169](https://github.com/sahamo123/dax-editor/pull/169) `bb087001bfd21a8b570a82be2afb09f69fa2a6f1` on `codex/s01-06-reduced-motion`; source and focused browser checks passed; publication and self-review are pending. Confirm branch publication. Actual assistive-technology and native/DPI acceptance remain open. Earlier headings are historical.
+
 **Current work: primary contrast [#165](https://github.com/sahamo123/dax-editor/issues/165).** Start from self-reviewed [PR #167](https://github.com/sahamo123/dax-editor/pull/167) `ee1c4726c7e4fb03986fe986440521f428dc5b4c` on `codex/s01-06-primary-contrast`; rendered before/after measurements are recorded, full checks and review are pending. Confirm branch publication. Actual assistive-technology and native/DPI acceptance remain open. Earlier headings are historical.
 
 **Current work: export focus [#164](https://github.com/sahamo123/dax-editor/issues/164).** Start from self-reviewed [PR #166](https://github.com/sahamo123/dax-editor/pull/166) `1a57506035551b4d6cf3ddae414acd54f044274b` on `codex/s01-06-export-focus`; focused tests passed, full checks and review are pending. Check branch publication. Hover contrast #165 and actual assistive-technology evidence remain open. Earlier headings are historical.

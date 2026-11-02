@@ -176,3 +176,5 @@ Review progress PR #166 passed self-review at `1a57506035551b4d6cf3ddae414acd54f
 Export-focus PR #167 passed full checks, compact/wide browser tests and self-review at `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. A rendered hover test reproduced 3.84:1 contrast under #165; the candidate measured 5.79:1. Full checks and assistive-technology observations remain pending.
 
 A separate reduced-motion diagnostic found the Import control retains 0.12-second transitions while reduced motion is requested; [#168](https://github.com/sahamo123/dax-editor/issues/168) tracks it. The test fixture was preserved as a private artifact, not committed to the contrast slice.
+
+Primary contrast PR #169 passed full checks, rendered measurements and self-review at `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Reduced-motion #168's candidate passes focused tests in both preference modes; full checks and assistive-technology observations remain pending.

@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.06 reduced-motion child:** [#168](https://github.com/sahamo123/dax-editor/issues/168), local `codex/s01-06-reduced-motion`, starts from self-reviewed [PR #169](https://github.com/sahamo123/dax-editor/pull/169) `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Source and focused browser checks passed; confirm publication. Self-review and actual assistive-technology evidence remain pending.
+
 **Current S01.06 contrast child:** [#165](https://github.com/sahamo123/dax-editor/issues/165), local `codex/s01-06-primary-contrast`, starts from self-reviewed [PR #167](https://github.com/sahamo123/dax-editor/pull/167) `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. Confirm publication; full checks/review and actual assistive-technology evidence remain pending.
 
 **Current S01.06 export-focus child:** [#164](https://github.com/sahamo123/dax-editor/issues/164), local `codex/s01-06-export-focus`, is based on self-reviewed [PR #166](https://github.com/sahamo123/dax-editor/pull/166) `1a57506035551b4d6cf3ddae414acd54f044274b`. Confirm publication; full checks/review and the rest of S01.06 remain pending.

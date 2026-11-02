@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 reduced motion — November 1, 2026
+
+Primary contrast [#165 / PR #169](https://github.com/sahamo123/dax-editor/pull/169) is verified with self-review at `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Reduced motion [#168](https://github.com/sahamo123/dax-editor/issues/168) is under test on `codex/s01-06-reduced-motion`; full source and focused browser checks pass; publication and self-review remain pending. Confirm publication before switching laptops. Actual assistive-technology and native/DPI evidence remain open.
+
 ## S01.06 primary-button contrast — November 1, 2026
 
 Export-focus [#164 / PR #167](https://github.com/sahamo123/dax-editor/pull/167) is verified with self-review at `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. Primary-hover contrast [#165](https://github.com/sahamo123/dax-editor/issues/165) is under test on local `codex/s01-06-primary-contrast`: a rendered regression measured the original hover at 3.84:1; the adjusted color measured 5.79:1. Full checks and review remain pending. Confirm publication before switching laptops; actual assistive-technology and native/DPI evidence remain open.
