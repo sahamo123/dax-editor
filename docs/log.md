@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#274 / draft PR #276](https://github.com/sahamo123/dax-editor/pull/276) reserves wrapped toolbar height. Thirteen browser checks and the full source check rerun passed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-layout-receipt.md) preserves the initial Windows rename failure and limitations.
+
 * **Test**: [#273 / draft PR #275](https://github.com/sahamo123/dax-editor/pull/275) measures toolbar icon contrast and keyboard-operated toggles. Two browser checks and fast checks passed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-contrast-receipt.md) records limits and the separately tracked wrapped toolbar overlap [#274](https://github.com/sahamo123/dax-editor/issues/274).
 
 * **Test**: The current [#177](https://github.com/sahamo123/dax-editor/issues/177) synthetic keyboard recheck reached the Windows picker, whose filename control was unavailable to the supported automation. No file was selected; owned test resources were stopped. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 and native/screen-reader acceptance remain open.

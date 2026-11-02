@@ -88,6 +88,7 @@
 * [S01.06 timeline keyboard interaction](s01-06-timeline-keyboard-receipt.md) - Scoped listbox navigation, focus recovery, shortcut changes and verification evidence.
 * [S01.06 timeline keyboard semantics investigation](s01-06-timeline-semantics-investigation.md) - Rendered evidence of conflicting timeline listbox semantics and editing shortcuts, with unresolved design constraints.
 * [Toolbar icon contrast audit](s01-06-toolbar-contrast-receipt.md) - Browser measurements and a separately tracked wrapped toolbar overlap.
+* [Wrapped toolbar layout correction](s01-06-toolbar-layout-receipt.md) - Browser hit testing and source checks for wrapped editing controls.
 * [S01.06 typed cancellation candidate](s01-06-typed-cancellation-receipt.md) - Current evidence, compatibility limits and pending checks for typed cancellation outcomes.
 * [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - Plan and evidence gates: Verify browser and native workspace acceptance.
 * [S02.01: Specify profiles and project compatibility](s02-01-profile-compatibility-contract.md) - Plan and evidence gates: Specify profiles and project compatibility.
