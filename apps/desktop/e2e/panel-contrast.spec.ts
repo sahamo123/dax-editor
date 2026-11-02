@@ -127,3 +127,57 @@ test("assistant tool details and hover summary remain readable", async ({
   await measure("tool detail label", label);
   await shot("s01-06-tool-context-contrast");
 });
+
+test("clip inspector labels, values and actions remain readable", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+  shot,
+}) => {
+  const server = await startServer();
+  await server.importPaths([sampleVideo]);
+  await openApp(server);
+  await page.getByRole("region", { name: "Timeline" }).getByTestId("clip").first().click();
+  const inspector = page.getByTestId("inspector-clip");
+  await measure("inspector file label", inspector.locator(".dx-facts dt").first());
+  await measure("inspector file value", inspector.locator(".dx-facts dd").first());
+  await measure("inspector source-in label", inspector.locator(".dx-field-label").first());
+  await measure("inspector source-in value", page.getByTestId("clip-source-in"));
+  await measure("inspector source-in unit", inspector.locator(".dx-unit").first());
+  await measure(
+    "inspector split action",
+    inspector.getByRole("button", { name: "Split at playhead" }),
+  );
+  await measure("inspector delete action", inspector.getByRole("button", { name: "Delete clip" }));
+  await shot("s01-06-inspector-contrast");
+});
+
+test("export dialog labels, values and actions remain readable", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+  shot,
+}) => {
+  const server = await startServer();
+  await server.importPaths([sampleVideo]);
+  await openApp(server);
+  await page.getByRole("banner").getByRole("button", { name: "Export", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Export video" });
+  await measure("export dialog heading", dialog.getByRole("heading", { name: "Export video" }));
+  await measure("export save-as label", dialog.locator(".field__label"));
+  await dialog.getByLabel("Save as").press("End");
+  await measure("export save-as value", dialog.getByLabel("Save as"));
+  await measure("export hint", dialog.locator("#export-hint"));
+  await measure("export overwrite label", dialog.locator(".check"));
+  await measure("export cancel action", dialog.getByRole("button", { name: "Cancel" }));
+  const exportButton = dialog.getByRole("button", { name: "Export", exact: true });
+  await measure("export dialog action normal", exportButton);
+  await exportButton.hover();
+  await exportButton.evaluate(async (element) => {
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
+  });
+  await measure("export dialog action hover", exportButton);
+  await shot("s01-06-export-dialog-contrast");
+});
