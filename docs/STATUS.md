@@ -11,6 +11,14 @@ generated:
 
 # Project status
 
+## Wrapped toolbar self-review — November 2, 2026
+
+[#274 / draft PR #276](https://github.com/sahamo123/dax-editor/pull/276) adds minimum-height clip reachability coverage. Four browser checks and fast checks passed at test-only head 6ae11d2d0616d8afe5e425b14f505f7c6e42e4a8; the application source matches the earlier full-check head. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-layout-receipt.md). Independent review, S01.06 and native/accessibility acceptance remain open.
+
+## Wrapped toolbar candidate — November 2, 2026
+
+[#274 / draft PR #276](https://github.com/sahamo123/dax-editor/pull/276) reserves wrapped toolbar height. Thirteen browser checks and a full pnpm check rerun passed at application/test head d1dadc7bb4ec9c9b563cd18b89542da9fff1b467; the first full run failed a Windows rename test and the cause remains unproven. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-layout-receipt.md). Review, S01.06 and native/accessibility acceptance remain open.
+
 ## Toolbar contrast and layout finding — November 2, 2026
 
 [#273 / draft PR #275](https://github.com/sahamo123/dax-editor/pull/275) passed two browser contrast checks and fast checks at test head 419eba4778b27590b1d6a7da9e296a3519e59c8a. An overlapping wrapped toolbar is tracked in [#274](https://github.com/sahamo123/dax-editor/issues/274); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-contrast-receipt.md). S01.06 and native/accessibility acceptance remain open.
