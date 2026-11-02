@@ -13,7 +13,7 @@ generated:
 
 ## S01.06 inspector and export contrast — November 1, 2026
 
-Targeted rendered samples [#196](https://github.com/sahamo123/dax-editor/issues/196) passed in generated-media browser tests; the [receipt](implementation/2026-11-01-creator-editor/s01-06-panel-contrast-receipt.md) records values and an earlier concurrent-build failure. Publication and review remain pending. The broader keyboard, screen-reader and native/DPI gates remain open.
+Targeted rendered samples [#196](https://github.com/sahamo123/dax-editor/issues/196) passed in generated-media browser tests; the [receipt](implementation/2026-11-01-creator-editor/s01-06-panel-contrast-receipt.md) records values and an earlier concurrent-build failure. [Draft PR #197](https://github.com/sahamo123/dax-editor/pull/197) is published at test head `65eb6458a3db471b13803e02fa6ab3e76705bdde`; review remains pending. The broader keyboard, screen-reader and native/DPI gates remain open.
 
 ## S01.06 relink evidence — November 1, 2026
 
