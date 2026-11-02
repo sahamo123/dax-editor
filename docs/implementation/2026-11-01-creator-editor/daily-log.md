@@ -182,3 +182,9 @@ Primary contrast PR #169 passed full checks, rendered measurements and self-revi
 Reduced-motion PR #170 passed source, focused browser and self-review at `5f766c48f1ec329b8d111593ee638849681f717f`. Dialog shortcut child [#171](https://github.com/sahamo123/dax-editor/issues/171) reproduced split/delete and undo behind a modal in component tests; candidate focused tests pass. Edge exited during a subsequent test launch, so browser verification is pending.
 
 Dialog shortcut child #171 passed the focused Chrome regression and host-permission full check; publication and self-review remain. The restricted full check had earlier reported two EPERM symbolic-link failures and was interrupted after stalling; both cases passed on the authorized rerun.
+
+Dialog-shortcut PR #172 passed focused browser and full checks and was self-reviewed at `3f5a185e6861268621c21bbe0f68138a5ea528b5`. History contrast [#173](https://github.com/sahamo123/dax-editor/issues/173) reproduced 4.303:1 hovered text and about 2.44:1 on an alternate branch; focused candidate browser measurements pass. Full verification remains pending.
+
+History contrast #173 passed the full source check and the final browser regression, including restoring an alternate branch and verifying its clips and overlays. A test-only assertion was added after the full check; fast checks and publication/self-review remain pending.
+
+The added branch-restoration browser assertion and subsequent `pnpm check:fast` both passed. No application source changed after the full check; the new assertion is test-only.
