@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Investigate**: [#262 / draft PR #263](https://github.com/sahamo123/dax-editor/pull/263) checked task live-region nodes in the browser accessibility tree around synthetic Settings and rendered-review dialogs. The [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-live-region-receipt.md) records evidence and its limits; actual screen-reader/native acceptance remains open.
+
 * **Test**: [#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261) corrects invalid engine session fixtures. The engine test-specific typecheck, affected tests and full source check passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-engine-test-fixtures-receipt.md). No production code or CI settings changed.
 
 * **Fix**: [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260) keeps the shared notice stack within the active dialog, scrollable and clear of actions. Focused, nine browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-dialog-notices-receipt.md). Native and actual screen-reader acceptance remain open.

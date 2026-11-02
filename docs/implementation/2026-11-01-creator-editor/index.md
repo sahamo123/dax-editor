@@ -66,6 +66,7 @@
 * [S01.06 media card action layout](s01-06-media-actions-receipt.md) - Regression evidence for readable and usable media-card controls at two viewport widths.
 * [S01.06 modal shortcut protection after focus loss](s01-06-modal-focus-loss-receipt.md) - Reproduced background project edits while a modal is open, scoped guard and focus-containment follow-up.
 * [S01.06 modal focus recovery](s01-06-modal-focus-recovery-receipt.md) - Reproduction, scoped recovery, verification and remaining native acceptance for active dialogs.
+* [Modal task announcement accessibility-tree audit](s01-06-modal-live-region-receipt.md) - Synthetic Edge accessibility-tree evidence and remaining real assistive-technology acceptance.
 * [S01.06 native accessibility acceptance handoff](s01-06-native-acceptance-receipt.md) - Exact computer-use access blocker, safe restart and remaining keyboard and Narrator evidence.
 * [S01.06 non-export job outcome notices](s01-06-non-export-outcomes-receipt.md) - Reproduction, reconciliation and verification for speech, motion and local-model job outcomes.
 * [S01.06 timeline overlay label contrast](s01-06-overlay-label-contrast-receipt.md) - Reproduced timeline label contrast gaps, scoped fix and verification limits.
