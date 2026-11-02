@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Timeline semantics investigation — November 2, 2026
+
+[#243](https://github.com/sahamo123/dax-editor/issues/243) reproduces a mismatch between the timeline's horizontal listbox semantics and its keyboard behavior at wide and compact browser sizes. No fix is claimed; choose and test a coherent interaction that preserves editing shortcuts. See the [investigation](implementation/2026-11-01-creator-editor/s01-06-timeline-semantics-investigation.md). S01.06 remains open.
+
 ## Timeline overlay label contrast — November 2, 2026
 
 [#241 / draft PR #242](https://github.com/sahamo123/dax-editor/pull/242) improves measured timeline overlay label and glyph contrast without changing saved or rendered overlay styles. Five generated-media browser checks and full `pnpm check` passed at corrected head `7e0989e58bf4fc45858cd9dd53bb73ca10720a17`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-overlay-label-contrast-receipt.md). Review, S01.06 and native/accessibility acceptance remain open.
