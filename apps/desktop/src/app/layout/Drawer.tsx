@@ -1,5 +1,5 @@
 // The tabbed side drawer: Presets and Inspector (from the editor module), Media bin and History (app shell).
-// Implements the WAI-ARIA tabs pattern: arrow keys move between tabs, only the active panel is mounted.
+// Implements the WAI-ARIA tabs pattern: arrow keys move between tabs, only active panel content is mounted.
 
 import { type KeyboardEvent, type ReactElement, useRef } from "react";
 import { Inspector, PresetsPanel } from "../../editor";
@@ -75,21 +75,26 @@ export function Drawer(): ReactElement {
           </button>
         ))}
       </div>
-      <div
-        className="drawer__panel"
-        role="tabpanel"
-        id={`panel-${tab}`}
-        aria-labelledby={`tab-${tab}`}
-      >
-        {tab === "presets" ? <PresetsPanel /> : null}
-        {tab === "inspector" ? <Inspector /> : null}
-        {tab === "media" ? <MediaBin /> : null}
-        {tab === "history" ? <HistoryPanel /> : null}
-        {tab === "tools" ? <ProjectTools /> : null}
-        {tab === "speech" ? <SpeechPanel /> : null}
-        {tab === "connections" ? <ConnectionsPanel /> : null}
-        {tab === "motion" ? <MotionPanel /> : null}
-      </div>
+      {TABS.map((item) => (
+        <div
+          key={item.id}
+          className="drawer__panel"
+          role="tabpanel"
+          id={`panel-${item.id}`}
+          aria-labelledby={`tab-${item.id}`}
+          hidden={tab !== item.id}
+          tabIndex={tab === item.id ? 0 : -1}
+        >
+          {tab === item.id && tab === "presets" ? <PresetsPanel /> : null}
+          {tab === item.id && tab === "inspector" ? <Inspector /> : null}
+          {tab === item.id && tab === "media" ? <MediaBin /> : null}
+          {tab === item.id && tab === "history" ? <HistoryPanel /> : null}
+          {tab === item.id && tab === "tools" ? <ProjectTools /> : null}
+          {tab === item.id && tab === "speech" ? <SpeechPanel /> : null}
+          {tab === item.id && tab === "connections" ? <ConnectionsPanel /> : null}
+          {tab === item.id && tab === "motion" ? <MotionPanel /> : null}
+        </div>
+      ))}
     </aside>
   );
 }
