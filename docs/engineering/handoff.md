@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current continuation — November 2, 2026
+
+Start with the [cross-laptop guide](laptop-continuation.md), [status](../STATUS.md) and [dated handoff](../implementation/2026-11-01-creator-editor/handoff.md). The current S01.06 child is [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; focused checks passed and full validation is running. Keep S01.06 and native acceptance open. All continuation headings below are historical snapshots, not instructions to resume their older branches.
+
 ## Current S01.06 bridge probe errors — November 1, 2026
 
 Continue [#203 / draft PR #205](https://github.com/sahamo123/dax-editor/pull/205) on `codex/s01-06-bridge-probe-errors`, application/test head `84a1c09e20dff39d4dc10e39e9f37e454205ac1d`, based on [draft PR #204](https://github.com/sahamo123/dax-editor/pull/204) head `f034dbf908656109a5cadef2cc867200aaafce15`. Fake-CLI and combined full checks passed; review remains pending. The original full-check failure's exact probe stage is unproven. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-bridge-probe-errors.md). S01.06, project/provider context [#201](https://github.com/sahamo123/dax-editor/issues/201), and native gates remain open. Earlier headings are historical.

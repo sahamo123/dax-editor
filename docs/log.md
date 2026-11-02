@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) preserves unrelated drafts when sending chat suggestions. Focused checks passed; full check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-suggestion-draft-receipt.md).
+
 * **Test**: Full host-authorized `pnpm check` passed for [#227 / draft PR #228](https://github.com/sahamo123/dax-editor/pull/228); details are in [status](STATUS.md). Native acceptance remains open.
 
 * **Design**: [#227 / draft PR #228](https://github.com/sahamo123/dax-editor/pull/228) proposes a [lease contract](specs/staged-attachment-leases.md) and [draft decision](adr/0017-staged-attachment-leases.md) for new staged attachments. Legacy files remain durable and no cleanup is implemented.

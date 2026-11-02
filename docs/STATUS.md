@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Suggestion draft preservation — November 2, 2026
+
+[#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) preserves an unrelated chat draft when a suggestion is sent. Focused component and generated-media browser checks passed at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; full check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-suggestion-draft-receipt.md). S01.06 and native acceptance remain open.
+
 ## Staged attachment lease design — November 2, 2026
 
 [#227 / draft PR #228](https://github.com/sahamo123/dax-editor/pull/228) proposes a separate opt-in [lease contract](specs/staged-attachment-leases.md) and [draft decision](adr/0017-staged-attachment-leases.md). Legacy sources remain durable; no cleanup is implemented. Host-authorized `pnpm check` passed at design head `ee0ccf4a5de05801d45b054a20f5dae3354a6e32`: 1,879 package tests passed, 67 skipped and 17 script tests passed. Private log SHA-256 `1df17fbce4577285a51307d7eba1f9e605121d36b2d06036c7d0a8f4eff40197`. Review, S01.06 and native acceptance remain open.
