@@ -2,6 +2,12 @@
 
 ## 2026-11-02
 
+* **Fix**: Self-review of [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) found focus recovery behind an open modal; the corrected head passed 14 browser checks and full `pnpm check`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md); S01.06 remains open.
+
+* **Fix**: [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) aligns timeline listbox navigation, reading order and focus recovery. Integrated browser, offscreen and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). S01.06 remains open.
+
+* **Investigate**: [#243](https://github.com/sahamo123/dax-editor/issues/243) reproduced a timeline listbox/keyboard mismatch in wide and compact generated-media browser diagnostics. See the [investigation](implementation/2026-11-01-creator-editor/s01-06-timeline-semantics-investigation.md); no application fix or S01.06 completion is claimed.
+
 * **Fix**: [#241 / draft PR #242](https://github.com/sahamo123/dax-editor/pull/242) improves measured timeline overlay label and glyph contrast. Five browser checks and full `pnpm check` passed after a test-only correction. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-overlay-label-contrast-receipt.md); S01.06 remains open.
 
 * **Test**: The current [#177](https://github.com/sahamo123/dax-editor/issues/177) keyboard recheck opened a visible but untargetable Windows picker; no file was selected. Automatic approval review rejected reading Narrator's full recap due to unrelated private speech risk. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md); S01.06 remains open.

@@ -222,7 +222,9 @@ export function ProjectTools(): ReactElement {
         <summary>Keyboard shortcuts</summary>
         <p className="muted">
           Space: play/pause · S: split · Delete: remove selection · Ctrl+Z: undo · Shift+Ctrl+Z:
-          redo · +/-: zoom · Shift+Z: fit timeline · arrows: step frames.
+          redo · +/-: zoom · Shift+Z: fit timeline · arrows: step frames. In the timeline, arrows
+          move between items; Enter selects. Ctrl (Command on Mac) + arrows steps frames; Shift +
+          arrows steps seconds.
         </p>
       </details>
     </div>

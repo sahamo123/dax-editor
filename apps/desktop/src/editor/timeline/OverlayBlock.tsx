@@ -21,6 +21,10 @@ export interface OverlayBlockProps {
   /** Top offset of the first overlay lane within the timeline content. */
   lanesTop: number;
   selected: boolean;
+  /** Roving tab stop and position among all timeline items, including virtualized items. */
+  tabIndex: number;
+  position: number;
+  setSize: number;
   dragging: boolean;
   onBodyDown(e: ReactPointerEvent, id: string): void;
   /** Keyboard selection (Enter on a focused block). */
@@ -46,9 +50,12 @@ export const OverlayBlock = memo(function OverlayBlock(p: OverlayBlockProps) {
       role="option"
       aria-selected={p.selected}
       aria-label={`Text overlay "${p.text}"`}
-      tabIndex={0}
+      aria-posinset={p.position}
+      aria-setsize={p.setSize}
+      tabIndex={p.tabIndex}
       data-testid="overlay"
       data-overlay-id={p.id}
+      data-timeline-key={`overlay:${p.id}`}
       data-start={p.start.toFixed(3)}
       data-duration={p.duration.toFixed(3)}
       style={{

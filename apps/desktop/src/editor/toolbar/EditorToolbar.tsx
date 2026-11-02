@@ -173,7 +173,7 @@ export function EditorToolbar({
           <Tool
             icon="stepBack"
             label="Previous frame"
-            shortcut="Left"
+            shortcut="Left; Ctrl/Command+Left in timeline"
             disabled={!hasMedia}
             onClick={() => store.stepFrames(-1)}
           />
@@ -189,7 +189,7 @@ export function EditorToolbar({
           <Tool
             icon="stepForward"
             label="Next frame"
-            shortcut="Right"
+            shortcut="Right; Ctrl/Command+Right in timeline"
             disabled={!hasMedia}
             onClick={() => store.stepFrames(1)}
           />

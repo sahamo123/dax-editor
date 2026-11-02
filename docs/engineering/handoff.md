@@ -11,6 +11,18 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current corrected timeline candidate — November 2, 2026
+
+[#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7`, prevents focus recovery behind a modal. Fourteen browser checks and full `pnpm check` passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). Review and actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
+## Current timeline candidate — November 2, 2026
+
+[#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4`, passed integrated browser, expanded offscreen and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md); review, actual picker and screen-reader acceptance remain open. The investigation below is historical.
+
+## Current timeline investigation — November 2, 2026
+
+[#243](https://github.com/sahamo123/dax-editor/issues/243) reproduces a horizontal listbox/keyboard mismatch on PR #242 head `510b5be4c7fe7a64aa1c6a63c73a645cc6d4cc0b`. No application fix is included. Read the [investigation](../implementation/2026-11-01-creator-editor/s01-06-timeline-semantics-investigation.md), design a coherent interaction that preserves practical editing shortcuts and accounts for virtualized offscreen items, then implement and test it under this issue. Actual picker and screen-reader gates remain open.
+
 ## Current contrast child — November 2, 2026
 
 [#241 / draft PR #242](https://github.com/sahamo123/dax-editor/pull/242), branch `codex/s01-06-overlay-label-contrast`, has application change head `6a52fe4120f80845446cf9e9a0212ddebab74974` and test correction `7e0989e58bf4fc45858cd9dd53bb73ca10720a17`. Five browser checks and full `pnpm check` passed. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-overlay-label-contrast-receipt.md). Review and S01.06 acceptance remain open.

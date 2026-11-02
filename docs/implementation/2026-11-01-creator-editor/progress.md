@@ -17,6 +17,12 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) passed 14 browser checks and full `pnpm check` at modal-corrected head `f9a46b3564289781177974b9437f9de8a37bc0f7`. See the [receipt](s01-06-timeline-keyboard-receipt.md). Review and S01.06 acceptance remain open.
+
+- [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) implements timeline listbox navigation and focus recovery. Integrated browser, expanded offscreen and full `pnpm check` passed at `9d331ebf28713a377599fcd208b7e2dd9d6beab4`. See the [receipt](s01-06-timeline-keyboard-receipt.md). Review and S01.06 acceptance remain open.
+
+- [#243](https://github.com/sahamo123/dax-editor/issues/243) reproduces a timeline listbox/keyboard mismatch in generated-media browser diagnostics. The [investigation](s01-06-timeline-semantics-investigation.md) records design constraints; no fix or acceptance is claimed. S01.06 remains IN_PROGRESS.
+
 - [#241 / draft PR #242](https://github.com/sahamo123/dax-editor/pull/242) improves timeline overlay label contrast. Five browser checks and full `pnpm check` passed at corrected head `7e0989e58bf4fc45858cd9dd53bb73ca10720a17`. See the [receipt](s01-06-overlay-label-contrast-receipt.md). S01.06 remains IN_PROGRESS.
 
 - [#177](https://github.com/sahamo123/dax-editor/issues/177) was rechecked on PR #239: keyboard navigation opened a visible but untargetable Windows picker; no file was selected. Automatic approval review rejected reading Narrator's full recap because it could contain unrelated private speech. The [receipt](s01-06-native-acceptance-receipt.md) records cleanup and limits. S01.06 remains IN_PROGRESS.
