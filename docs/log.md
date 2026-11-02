@@ -2,7 +2,7 @@
 
 ## 2026-11-02
 
-* **Test**: The first full check for [#232 / PR #233](https://github.com/sahamo123/dax-editor/pull/233) failed an unused type export; the type-only correction passed dead-code analysis and a full retry is running. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-batched-announcements-receipt.md).
+* **Test**: The first full check for [#232 / PR #233](https://github.com/sahamo123/dax-editor/pull/233) failed an unused type export; the type-only correction passed dead-code analysis and full `pnpm check`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-batched-announcements-receipt.md).
 
 * **Fix**: [#232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233) preserves batched pending urgent and polite notices. Focused checks passed; full check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-batched-announcements-receipt.md).
 

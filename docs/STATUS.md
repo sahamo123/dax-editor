@@ -13,7 +13,7 @@ generated:
 
 ## Batched task notices — November 2, 2026
 
-[#232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233) preserves pending urgent and polite notices when React batches updates. Focused component/controller/store and generated-media browser checks passed at application/test head `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3`. Its full check failed an unused type export; type-only correction `3183a609eec3ee7bc68d1da0420848daad0067a3` passed `pnpm deadcode` and a full retry is running. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-batched-announcements-receipt.md). Review, actual screen-reader, S01.06 and native acceptance remain open.
+[#232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233) preserves pending urgent and polite notices when React batches updates. Focused component/controller/store and generated-media browser checks passed at application/test head `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3`. Its full check failed an unused type export; type-only correction `3183a609eec3ee7bc68d1da0420848daad0067a3` passed `pnpm deadcode` and full `pnpm check`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-batched-announcements-receipt.md). Review, actual screen-reader, S01.06 and native acceptance remain open.
 
 ## Unattended keyboard recheck — November 2, 2026
 
