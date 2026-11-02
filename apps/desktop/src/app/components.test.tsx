@@ -85,6 +85,57 @@ describe("ChatPanel", () => {
     expect(controller.sendChat).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps an existing draft when a different suggestion is submitted", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(makeState({ providers: providers(["local"]) })),
+    );
+    controller.sendChat.mockResolvedValueOnce("chat-attempted");
+    const box = screen.getByLabelText("Message to the assistant");
+    await userEvent.type(box, "  My unfinished edit  ");
+    await userEvent.click(screen.getByRole("button", { name: "Add a title" }));
+    await waitFor(() => expect(box).toBeEnabled());
+    expect(box).toHaveValue("  My unfinished edit  ");
+    expect(controller.sendChat).toHaveBeenCalledOnce();
+    expect(controller.sendChat).toHaveBeenCalledWith("Add a title", {
+      mode: "edit",
+      steer: false,
+      files: [],
+    });
+  });
+
+  it("clears a matching draft when its suggestion has been attempted", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(makeState({ providers: providers(["local"]) })),
+    );
+    controller.sendChat.mockResolvedValueOnce("chat-attempted");
+    const box = screen.getByLabelText("Message to the assistant");
+    await userEvent.type(box, "  Add a title  ");
+    await userEvent.click(screen.getByRole("button", { name: "Add a title" }));
+    await waitFor(() => expect(box).toBeEnabled());
+    expect(box).toHaveValue("");
+    expect(controller.sendChat).toHaveBeenCalledOnce();
+  });
+
+  it("disables suggestions while a chat submission is pending", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(makeState({ providers: providers(["local"]) })),
+    );
+    let complete: (() => void) | undefined;
+    controller.sendChat.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          complete = () => resolve("chat-attempted");
+        }),
+    );
+    const suggestion = screen.getByRole("button", { name: "Add a title" });
+    await userEvent.click(suggestion);
+    expect(suggestion).toBeDisabled();
+    await userEvent.click(suggestion);
+    expect(controller.sendChat).toHaveBeenCalledOnce();
+    act(() => complete?.());
+    await waitFor(() => expect(suggestion).toBeEnabled());
+  });
+
   it.each([
     { original: "Existing draft", restored: "Existing draft" },
     { original: "   ", restored: "Add a title" },

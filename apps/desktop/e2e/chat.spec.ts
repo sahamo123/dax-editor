@@ -127,6 +127,27 @@ test("a suggestion chip sends its text", async ({ page, startServer, openApp, sa
   await expect(log.locator("details.tool", { hasText: "Keep only" })).toBeVisible();
 });
 
+test("a suggestion leaves an unrelated draft available", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+  shot,
+}) => {
+  const server = await startServer({ aiReady: true });
+  await server.importPaths([sampleVideo]);
+  await openApp(server);
+  const draft = "  Please keep this unfinished draft  ";
+  await chatInput(page).fill(draft);
+  await page.getByRole("button", { name: "Add a title" }).click();
+  const log = page.getByRole("log", { name: "Conversation" });
+  await expect(log.getByText("Add a title", { exact: true })).toBeVisible();
+  await expect(log.locator("details.tool", { hasText: "Add overlay" })).toBeVisible();
+  await expect(chatInput(page)).toHaveValue(draft);
+  await expect(log.getByText(draft.trim(), { exact: true })).toHaveCount(0);
+  await shot("suggestion-draft-preserved");
+});
+
 test("queues follow-ups with captured Planning mode and cancels a specific queued task", async ({
   page,
   startServer,
