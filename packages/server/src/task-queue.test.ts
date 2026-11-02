@@ -5,6 +5,56 @@ import { describe, expect, it, vi } from "vitest";
 import { startHarness } from "./test/harness.js";
 
 describe("chat task queue", () => {
+  it("does not cancel a newer run when a delayed task-specific Stop targets the finished run", async () => {
+    let finishFirst = () => {};
+    let finishSecond = () => {};
+    let firstStarted = () => {};
+    let secondStarted = () => {};
+    const firstGate = new Promise<void>((resolve) => {
+      finishFirst = resolve;
+    });
+    const secondGate = new Promise<void>((resolve) => {
+      finishSecond = resolve;
+    });
+    const firstReady = new Promise<void>((resolve) => {
+      firstStarted = resolve;
+    });
+    const secondReady = new Promise<void>((resolve) => {
+      secondStarted = resolve;
+    });
+    let secondSignal: AbortSignal | undefined;
+    const h = await startHarness({
+      agentRunner: {
+        async run(message, ctx) {
+          if (message === "first") {
+            firstStarted();
+            await firstGate;
+          } else {
+            secondSignal = ctx.signal;
+            secondStarted();
+            await secondGate;
+          }
+        },
+      },
+    });
+    try {
+      const first = await h.post("/api/chat", { message: "first" });
+      const firstId = first.json<{ runId: string }>().runId;
+      await firstReady;
+      expect((await h.post("/api/chat", { message: "second", queue: true })).status).toBe(202);
+      finishFirst();
+      await secondReady;
+      const cancelled = await h.post(`/api/tasks/${firstId}/cancel`, {});
+      expect(cancelled.status).toBe(200);
+      expect(cancelled.json()).toMatchObject({ cancelled: false });
+      expect(secondSignal?.aborted).toBe(false);
+    } finally {
+      finishFirst();
+      finishSecond();
+      await h.cleanup();
+    }
+  });
+
   it("preserves omitted fit and frame rate for guarded assistant preset calls", async () => {
     let done = false;
     const h = await startHarness({

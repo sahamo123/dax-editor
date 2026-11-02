@@ -18,6 +18,7 @@ function setup(clientOver: Record<string, unknown> = {}) {
     getState: vi.fn(async () => ({ ok: true, value: makeState() })),
     chat: vi.fn(async () => ({ ok: true, value: {} })),
     chatCancel: vi.fn(async () => ({ ok: true, value: {} })),
+    cancelTask: vi.fn(async () => ({ ok: true, value: { cancelled: true } })),
     setApiKey: vi.fn(async () => ({ ok: true, value: {} })),
     putSettings: vi.fn(async () => ({ ok: true, value: {} })),
     importMedia: vi.fn(async () => ({ ok: true, summary: "Imported" })),
@@ -436,6 +437,150 @@ describe("controller", () => {
     expect(await controller.sendChat("hello")).toBe("chat-rejected");
     expect(chat).toHaveBeenCalledTimes(1);
     expect(store.getState().chat.some((item) => item.kind === "notice")).toBe(true);
+  });
+
+  it("does not mark the next run stopped when a prior Stop response arrives late", async () => {
+    let release: (value: { ok: true; value: { cancelled: boolean } }) => void = () => {};
+    const reply = new Promise<{ ok: true; value: { cancelled: boolean } }>((resolve) => {
+      release = resolve;
+    });
+    const cancel = vi.fn(() => reply);
+    const { store, controller } = setup({ chatCancel: cancel, cancelTask: cancel });
+    store.getState().applyChat("first", { type: "status", text: "Working" });
+    const stopping = controller.cancelChat();
+    expect(cancel).toHaveBeenCalledWith("first");
+    store.getState().applyChat("first", { type: "done", turns: 1 });
+    store.getState().applyChat("second", { type: "status", text: "Next task working" });
+    release({ ok: true, value: { cancelled: true } });
+    await stopping;
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "first"),
+    ).toMatchObject({
+      status: "cancelled",
+    });
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "second"),
+    ).toMatchObject({
+      status: "running",
+    });
+  });
+
+  it("preserves a completed outcome if the targeted Stop finds the task already finished", async () => {
+    let release: (value: { ok: true; value: { cancelled: boolean } }) => void = () => {};
+    const reply = new Promise<{ ok: true; value: { cancelled: boolean } }>((resolve) => {
+      release = resolve;
+    });
+    const { store, controller } = setup({ cancelTask: vi.fn(() => reply) });
+    store.getState().applyChat("first", { type: "status", text: "Working" });
+    const stopping = controller.cancelChat();
+    store.getState().applyChat("first", { type: "done", turns: 1 });
+    store.getState().applyChat("second", { type: "status", text: "Next task" });
+    release({ ok: true, value: { cancelled: false } });
+    await stopping;
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "first"),
+    ).toMatchObject({
+      status: "done",
+      cancelling: false,
+    });
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "second"),
+    ).toMatchObject({
+      status: "running",
+    });
+    expect(store.getState().toasts.some((item) => /already finished/i.test(item.text))).toBe(true);
+  });
+
+  it("preserves a terminal error when the Stop request fails", async () => {
+    let release: (value: { ok: false; error: string }) => void = () => {};
+    const reply = new Promise<{ ok: false; error: string }>((resolve) => {
+      release = resolve;
+    });
+    const { store, controller } = setup({ cancelTask: vi.fn(() => reply) });
+    store.getState().applyChat("first", { type: "status", text: "Working" });
+    const stopping = controller.cancelChat();
+    store.getState().applyChat("first", { type: "error", message: "Synthetic failure" });
+    release({ ok: false, error: "Stop unavailable" });
+    await stopping;
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "first"),
+    ).toMatchObject({
+      status: "error",
+      error: "Synthetic failure",
+      cancelling: false,
+    });
+  });
+
+  it("keeps a confirmed Stop tied to a task before its first transcript event", async () => {
+    const { store, controller, client } = setup();
+    store.getState().applyState(
+      makeState({
+        tasks: [
+          {
+            id: "first",
+            title: "First",
+            kind: "chat",
+            mode: "edit",
+            status: "running",
+            createdAt: 1,
+          },
+        ],
+      }),
+    );
+    await controller.cancelChat();
+    expect(client.cancelTask).toHaveBeenCalledWith("first");
+    store.getState().applyChat("first", { type: "status", text: "Late event" });
+    store.getState().applyChat("first", { type: "done", turns: 1 });
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "first"),
+    ).toMatchObject({
+      status: "cancelled",
+    });
+  });
+
+  it("records Stop intent before the first event while the cancellation is pending", async () => {
+    let release: (value: { ok: true; value: { cancelled: boolean } }) => void = () => {};
+    const reply = new Promise<{ ok: true; value: { cancelled: boolean } }>((resolve) => {
+      release = resolve;
+    });
+    const { store, controller } = setup({ cancelTask: vi.fn(() => reply) });
+    store.getState().applyState(
+      makeState({
+        tasks: [
+          {
+            id: "first",
+            title: "First",
+            kind: "chat",
+            mode: "edit",
+            status: "running",
+            createdAt: 1,
+          },
+        ],
+      }),
+    );
+    const stopping = controller.cancelChat();
+    store.getState().applyChat("first", { type: "status", text: "Late start" });
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "first"),
+    ).toMatchObject({
+      cancelling: true,
+    });
+    store.getState().applyChat("first", { type: "done", turns: 1 });
+    release({ ok: true, value: { cancelled: true } });
+    await stopping;
+    expect(
+      store.getState().chat.find((item) => item.kind === "run" && item.id === "first"),
+    ).toMatchObject({
+      status: "cancelled",
+    });
+  });
+
+  it("does not issue an unqualified Stop when no active task can be identified", async () => {
+    const { store, controller, client } = setup();
+    await controller.cancelChat();
+    expect(client.cancelTask).not.toHaveBeenCalled();
+    expect(client.chatCancel).not.toHaveBeenCalled();
+    expect(store.getState().toasts.some((item) => /still loading/i.test(item.text))).toBe(true);
   });
 
   it("flags a run as stopping before the cancel request returns", async () => {

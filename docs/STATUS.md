@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Targeted Stop and task identity — November 2, 2026
+
+The [#224 / draft PR #226](https://github.com/sahamo123/dax-editor/pull/226) candidate fixes a reproduced delayed-Stop transcript race and targets cancellation by task ID. Ninety-two desktop, 15 server, three generated-media browser tests and full host-authorized `pnpm check` passed at application/test head `a632ef032e6d6be9f39a28ed69b7a5ce6b9d4829`; fast check passed after correcting a fixture. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). S01.06 and native acceptance remain open.
+
 ## Steering provider context — November 2, 2026
 
 The [#221 / draft PR #225](https://github.com/sahamo123/dax-editor/pull/225) candidate rejects steering when the selected connection differs from the active task; 34 server tests, a focused browser scenario and host-authorized full `pnpm check` passed at application/test head `d66db87d2ce9d03f20bf967bee1d88df293e7651`. An existing Stop scenario showed a possible task/transcript race [#224](https://github.com/sahamo123/dax-editor/issues/224); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). S01.06 and native acceptance remain open.
