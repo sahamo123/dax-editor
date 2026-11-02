@@ -2,6 +2,7 @@
 import { renderedPreviewUrl } from "@dax/protocol";
 import { useEffect, useRef, useState } from "react";
 import { useEditorApi, useEditorStore } from "../context";
+import { useModalFocusRecovery } from "../modal-focus";
 
 interface Review {
   previewId: string;
@@ -20,15 +21,19 @@ export function RenderedReview() {
     [error, setError] = useState("");
   const [missingStatus, setMissingStatus] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null),
-    closeButton = useRef<HTMLButtonElement>(null);
+    closeButton = useRef<HTMLButtonElement>(null),
+    dialog = useRef<HTMLElement>(null);
   const submitting = useRef(false);
   const job = api.state.jobs.find((item) => item.id === review?.jobId);
   const stale =
     review !== null &&
     (review.projectId !== api.state.projectId || review.revision !== api.state.revision);
   const running = !stale && job?.status === "running";
+  useModalFocusRecovery(dialog, open, () => setOpen(false));
   useEffect(() => {
-    if (open) closeButton.current?.focus();
+    if (!open) return;
+    closeButton.current?.focus();
+    return () => trigger.current?.focus();
   }, [open]);
   useEffect(() => {
     setMissingStatus(false);
@@ -38,7 +43,6 @@ export function RenderedReview() {
   }, [review, job, stale]);
   const close = () => {
     setOpen(false);
-    trigger.current?.focus();
   };
   const render = async () => {
     if (submitting.current) return;
@@ -105,8 +109,10 @@ export function RenderedReview() {
       {open ? (
         <div className="dx-review-backdrop">
           <section
+            ref={dialog}
             className="dx-review-dialog"
             role="dialog"
+            tabIndex={-1}
             aria-modal="true"
             aria-label="Rendered effects preview"
             onKeyDown={(event) => {

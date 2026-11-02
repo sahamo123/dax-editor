@@ -9,6 +9,7 @@ import {
   useId,
   useRef,
 } from "react";
+import { useModalFocusRecovery } from "../../editor";
 import { Icon } from "./icons";
 
 const FOCUSABLE =
@@ -31,6 +32,8 @@ export interface ModalProps {
 export function Modal({ title, onClose, children, footer, size = "md" }: ModalProps): ReactElement {
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useId();
+
+  useModalFocusRecovery(ref, true, onClose);
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
@@ -75,6 +78,7 @@ export function Modal({ title, onClose, children, footer, size = "md" }: ModalPr
         ref={ref}
         className={`modal modal--${size}`}
         role="dialog"
+        tabIndex={-1}
         aria-modal="true"
         aria-labelledby={titleId}
         onKeyDown={onKeyDown}
