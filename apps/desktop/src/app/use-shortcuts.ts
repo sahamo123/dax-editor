@@ -2,6 +2,7 @@
 // keys can never disagree. Typing in a text box keeps the browser's own text undo.
 
 import { useEffect } from "react";
+import { hasActiveModal } from "../editor";
 import { useController } from "./context";
 
 function isTextTarget(target: EventTarget | null): boolean {
@@ -22,12 +23,8 @@ export function useUndoRedoKeys(): void {
     const onKey = (e: KeyboardEvent) => {
       // Another handler (for example a dialog or the editor) already used this key press.
       // Do not change project history while a dialog owns the keyboard.
-      if (e.defaultPrevented || !(e.ctrlKey || e.metaKey) || e.altKey) return;
-      if (
-        e.target instanceof Element &&
-        e.target.closest('[role="dialog"][aria-modal="true"], dialog[open]')
-      )
-        return;
+      if (e.defaultPrevented || !(e.ctrlKey || e.metaKey) || e.altKey || hasActiveModal()) return;
+      if (e.target instanceof Element && e.target.closest("dialog[open]")) return;
       if (isTextTarget(e.target)) return;
       const key = e.key.toLowerCase();
       if (key === "z" && !e.shiftKey) {

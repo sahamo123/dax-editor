@@ -13,6 +13,8 @@ generated:
 
 ## Current continuation — November 2, 2026
 
+The current child is [#234 / draft PR #236](https://github.com/sahamo123/dax-editor/pull/236) on `codex/s01-06-modal-focus-loss`, application/test head `8658ee94f0c5d279eaf3a20dcb2cca29ffa80335`. Focused, browser and full source checks passed. Actual modal focus containment is separately tracked in [#235](https://github.com/sahamo123/dax-editor/issues/235). See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-modal-focus-loss-receipt.md). S01.06 remains open.
+
 The current S01.06 child is [#232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233) on `codex/s01-06-batched-announcements`. Focused checks passed at `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3`; its full check failed an unused type export. Corrected head `3183a609eec3ee7bc68d1da0420848daad0067a3` passed full `pnpm check`; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-batched-announcements-receipt.md). Keep actual speech and native acceptance open.
 
 An unattended [#177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231) browser recheck on `codex/s01-06-unattended-picker-recheck` reached Import by keyboard, but no native file dialog was exposed as a target; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). Continue independent work without asking the away user to participate. S01.06 remains open.

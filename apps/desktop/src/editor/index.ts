@@ -8,7 +8,7 @@ export { EditorProvider, useEditor } from "./context";
 export { Inspector } from "./inspector/Inspector";
 export { PresetsPanel } from "./presets/PresetsPanel";
 export { PreviewPane } from "./preview/PreviewPane";
-export { useEditorShortcuts } from "./shortcuts";
+export { hasActiveModal, useEditorShortcuts } from "./shortcuts";
 export { Timeline } from "./timeline/Timeline";
 export { EditorToolbar } from "./toolbar/EditorToolbar";
 export type { EditorApi } from "./types";
