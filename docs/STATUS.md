@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 chat context guard — November 1, 2026
+
+The [#201](https://github.com/sahamo123/dax-editor/issues/201) candidate guards chat against project or provider changes during attachment staging. Focused protocol, server, desktop and four synthetic browser tests passed. Full checks, publication and review remain pending; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Legacy clients remain unguarded. S01.06 and native acceptance remain open.
+
 ## S01.06 bridge probe errors — November 1, 2026
 
 The [#203 / draft PR #205](https://github.com/sahamo123/dax-editor/pull/205) candidate distinguishes a failed or timed-out CLI capability probe from verified missing security options; both remain unavailable. Combined application/test head `84a1c09e20dff39d4dc10e39e9f37e454205ac1d` passed `pnpm check`; the original full-check failure remains recorded. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-bridge-probe-errors.md). Review, S01.06 and native acceptance remain open.

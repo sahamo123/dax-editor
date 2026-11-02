@@ -38,6 +38,58 @@ async function makeEngine(
 }
 
 describe("Engine ordering of manual edits and AI runs", () => {
+  it("rejects chat while provider settings are being saved", async () => {
+    const engine = await makeEngine();
+    let entered: (() => void) | undefined;
+    let release: (() => void) | undefined;
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const original = engine.settings.set.bind(engine.settings);
+    vi.spyOn(engine.settings, "set").mockImplementation(async (settings, connections) => {
+      entered?.();
+      await gate;
+      return original(settings, connections);
+    });
+    const saving = engine.updateSettings(engine.settings.get());
+    try {
+      await started;
+      expect(() => engine.startChat("during save")).toThrow(/assistant.*changing/i);
+    } finally {
+      release?.();
+      await saving;
+      await engine.shutdown();
+    }
+  });
+  it("rejects chat while a project replacement is already in progress", async () => {
+    const engine = await makeEngine();
+    let entered: (() => void) | undefined;
+    let release: (() => void) | undefined;
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const switching = engine.withIdleProject(async () => {
+      entered?.();
+      await gate;
+      await engine.projects.createNew({ name: "Second" });
+    });
+    try {
+      await started;
+      expect(() => engine.startChat("during switch")).toThrow(
+        /project.*(changing|switch|progress)/i,
+      );
+    } finally {
+      release?.();
+      await switching;
+      await engine.shutdown();
+    }
+  });
   it("captures current edits and completed jobs after a slow provider check", async () => {
     let finish: (value: ProviderStatus[]) => void = () => {
       throw new Error("Provider resolver missing");

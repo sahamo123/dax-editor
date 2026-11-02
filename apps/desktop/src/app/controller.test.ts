@@ -327,6 +327,7 @@ describe("controller", () => {
     const { store, controller } = setup({
       chat: vi.fn(async () => ({ ok: false, error: "No assistant is set up" })),
     });
+    store.getState().applyState(makeState());
     expect(await controller.sendChat("hello")).toBe("chat-attempted");
     const kinds = store.getState().chat.map((i) => i.kind);
     expect(kinds).toEqual(["user", "notice"]);
@@ -340,6 +341,7 @@ describe("controller", () => {
     const uploadMedia = vi.fn(async () => uploadReply);
     const chat = vi.fn(async () => ({ ok: true, value: {} }));
     const { controller, store } = setup({ uploadMedia, chat });
+    store.getState().applyState(makeState());
     const file = new File(["video"], "sample.mp4", { type: "video/mp4" });
     expect(await controller.sendChat("hello", { mode: "plan", files: [file] })).toBe(
       "attachment-failed",
@@ -355,7 +357,8 @@ describe("controller", () => {
       .mockResolvedValueOnce({ ok: true, summary: "Uploaded", data: { path: "/staged/one.mp4" } })
       .mockResolvedValueOnce({ ok: false, error: "Second upload failed" });
     const chat = vi.fn(async () => ({ ok: true, value: {} }));
-    const { controller } = setup({ uploadMedia, chat });
+    const { controller, store } = setup({ uploadMedia, chat });
+    store.getState().applyState(makeState());
     const files = [
       new File(["one"], "one.mp4", { type: "video/mp4" }),
       new File(["two"], "two.mp4", { type: "video/mp4" }),
@@ -363,6 +366,56 @@ describe("controller", () => {
     expect(await controller.sendChat("hello", { files })).toBe("attachment-failed");
     expect(uploadMedia).toHaveBeenCalledTimes(2);
     expect(chat).not.toHaveBeenCalled();
+  });
+
+  it("does not upload or send when the engine cannot confirm context", async () => {
+    const uploadMedia = vi.fn();
+    const chat = vi.fn();
+    const { controller, store } = setup({ uploadMedia, chat });
+    store.getState().applyState(makeState({ providerContextVersion: undefined }));
+    const file = new File(["video"], "sample.mp4");
+    expect(await controller.sendChat("hello", { files: [file] })).toBe("context-unavailable");
+    expect(uploadMedia).not.toHaveBeenCalled();
+    expect(chat).not.toHaveBeenCalled();
+  });
+
+  it("uses the original project and provider context across attachment staging", async () => {
+    let release:
+      | ((value: { ok: true; summary: string; data: { path: string } }) => void)
+      | undefined;
+    const uploadMedia = vi.fn(
+      () =>
+        new Promise<{ ok: true; summary: string; data: { path: string } }>((resolve) => {
+          release = resolve;
+        }),
+    );
+    const chat = vi.fn(async () => ({ ok: true, value: {} }));
+    const { controller, store } = setup({ uploadMedia, chat });
+    store.getState().applyState(makeState({ projectId: "first", providerContextVersion: 3 }));
+    const sending = controller.sendChat("hello", {
+      mode: "plan",
+      files: [new File(["video"], "test.mp4")],
+    });
+    store.getState().applyState(makeState({ projectId: "second", providerContextVersion: 4 }));
+    release?.({ ok: true, summary: "Uploaded", data: { path: "/staged/test.mp4" } });
+    expect(await sending).toBe("chat-attempted");
+    expect(chat).toHaveBeenCalledWith(
+      "hello",
+      expect.objectContaining({
+        mode: "plan",
+        expectedProjectId: "first",
+        expectedProviderEpoch: 3,
+      }),
+    );
+  });
+
+  it("reports a pre-task conflict without retrying", async () => {
+    const chat = vi.fn(async () => ({ ok: false, error: "Project changed", status: 409 }));
+    const { controller, store } = setup({ chat });
+    store.getState().applyState(makeState());
+    expect(await controller.sendChat("hello")).toBe("chat-rejected");
+    expect(chat).toHaveBeenCalledTimes(1);
+    expect(store.getState().chat.some((item) => item.kind === "notice")).toBe(true);
   });
 
   it("flags a run as stopping before the cancel request returns", async () => {

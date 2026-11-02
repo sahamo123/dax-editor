@@ -244,7 +244,7 @@ export class DaxClient {
   /**
    * `POST /api/chat`: start an AI run (HTTP 202 `{ runId }`). Progress arrives as `chat` events over the
    * WebSocket. A provider that is not set up is not a failed request: the run's first event is an `error`.
-   * Only an already-running AI run (409) or a malformed message (400) is refused here.
+   * A 409 refusal occurs before a task is accepted, including when the submitted context is stale.
    */
   async chat(
     message: string,

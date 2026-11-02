@@ -91,13 +91,16 @@ export interface Controller {
    */
   exportTo(path: string, overwrite: boolean): Promise<boolean>;
   /**
-   * Stage attachments and attempt chat once. Returns `attachment-failed` only when no chat request was made;
-   * `chat-attempted` does not imply the server accepted it. Errors are shown in the transcript.
+   * Stage attachments and attempt chat once. Context and attachment failures occur before a request;
+   * `chat-rejected` is a confirmed pre-task refusal. `chat-attempted` may have been accepted.
+   * Errors are shown in the transcript.
    */
   sendChat(
     text: string,
     options?: { mode?: "edit" | "plan"; steer?: boolean; files?: File[] },
-  ): Promise<"empty" | "attachment-failed" | "chat-attempted">;
+  ): Promise<
+    "empty" | "attachment-failed" | "context-unavailable" | "chat-rejected" | "chat-attempted"
+  >;
   /** Cancel one queued or running task while preserving its history entry. */
   cancelTask(id: string): Promise<void>;
   /** Stop the running AI run; the transcript shows "Stopped." */
@@ -323,6 +326,23 @@ export function createController(deps: ControllerDeps): Controller {
     async sendChat(text, options = {}) {
       const message = text.trim();
       if (!message) return "empty";
+      const snapshot = store.getState().state;
+      const projectId = snapshot?.projectId;
+      const providerEpoch = snapshot?.providerContextVersion;
+      if (
+        !projectId ||
+        typeof providerEpoch !== "number" ||
+        !Number.isSafeInteger(providerEpoch) ||
+        providerEpoch < 0
+      ) {
+        store
+          .getState()
+          .addNotice(
+            "error",
+            "The editor cannot verify the project and assistant. Reconnect to an updated engine and try again.",
+          );
+        return "context-unavailable";
+      }
       const attachments: string[] = [];
       for (const file of options.files ?? []) {
         const uploaded = await client.uploadMedia(file, true);
@@ -350,9 +370,13 @@ export function createController(deps: ControllerDeps): Controller {
         queue: true,
         steer: options.steer ?? false,
         attachments,
+        expectedProjectId: projectId,
+        expectedProviderEpoch: providerEpoch,
       });
-      if (!r.ok) store.getState().addNotice("error", r.error);
-      else if (queued)
+      if (!r.ok) {
+        store.getState().addNotice("error", r.error);
+        if (r.status === 409) return "chat-rejected";
+      } else if (queued)
         store
           .getState()
           .addNotice(

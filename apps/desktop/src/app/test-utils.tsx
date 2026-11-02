@@ -85,6 +85,8 @@ export function providers(ready: string[] = []): ProviderStatus[] {
 export function makeState(over: Partial<StateResponse> = {}): StateResponse {
   return {
     project: sampleProject(),
+    projectId: "test-project",
+    providerContextVersion: 0,
     history: [historyItem({ id: 0, label: "Start", source: "system", current: true })],
     canUndo: false,
     canRedo: false,
@@ -123,7 +125,9 @@ export function fakeController(): { [K in keyof Controller]: ReturnType<typeof v
     uploadFiles: vi.fn(async () => true),
     exportTo: vi.fn(async () => true),
     sendChat: vi.fn(
-      async (): Promise<"attachment-failed" | "chat-attempted" | "empty"> => "chat-attempted",
+      async (): Promise<
+        "attachment-failed" | "context-unavailable" | "chat-rejected" | "chat-attempted" | "empty"
+      > => "chat-attempted",
     ),
     cancelTask: vi.fn(async () => {}),
     cancelChat: vi.fn(async () => {}),

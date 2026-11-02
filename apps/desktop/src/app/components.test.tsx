@@ -39,30 +39,33 @@ describe("Toast announcements", () => {
 });
 
 describe("ChatPanel", () => {
-  it("restores the message, mode and attachments only when staging fails before chat", async () => {
-    const { controller } = renderApp(<ChatPanel />, (state) =>
-      state.applyState(makeState({ providers: providers(["local"]) })),
-    );
-    controller.sendChat.mockResolvedValueOnce("attachment-failed");
-    await userEvent.selectOptions(screen.getByLabelText("Chat mode"), "plan");
-    await userEvent.click(screen.getByRole("button", { name: "Attach videos" }));
-    const file = new File(["video"], "attached.mp4", { type: "video/mp4" });
-    await userEvent.upload(screen.getByLabelText("Choose videos"), file);
-    const box = screen.getByLabelText("Message to the assistant");
-    await userEvent.type(box, "Plan the edit");
-    await userEvent.click(screen.getByRole("button", { name: "Send message" }));
-    await waitFor(() => expect(box).toHaveValue("Plan the edit"));
-    expect(screen.getByLabelText("Chat mode")).toHaveValue("plan");
-    expect(screen.getByRole("button", { name: "Remove attachment attached.mp4" })).toBeVisible();
-    expect(controller.sendChat).toHaveBeenCalledTimes(1);
-    await userEvent.click(screen.getByRole("button", { name: "Send message" }));
-    expect(controller.sendChat).toHaveBeenCalledTimes(2);
-    expect(controller.sendChat).toHaveBeenLastCalledWith("Plan the edit", {
-      mode: "plan",
-      steer: false,
-      files: [file],
-    });
-  });
+  it.each(["attachment-failed", "context-unavailable", "chat-rejected"] as const)(
+    "restores the message, mode and attachments after %s",
+    async (result) => {
+      const { controller } = renderApp(<ChatPanel />, (state) =>
+        state.applyState(makeState({ providers: providers(["local"]) })),
+      );
+      controller.sendChat.mockResolvedValueOnce(result);
+      await userEvent.selectOptions(screen.getByLabelText("Chat mode"), "plan");
+      await userEvent.click(screen.getByRole("button", { name: "Attach videos" }));
+      const file = new File(["video"], "attached.mp4", { type: "video/mp4" });
+      await userEvent.upload(screen.getByLabelText("Choose videos"), file);
+      const box = screen.getByLabelText("Message to the assistant");
+      await userEvent.type(box, "Plan the edit");
+      await userEvent.click(screen.getByRole("button", { name: "Send message" }));
+      await waitFor(() => expect(box).toHaveValue("Plan the edit"));
+      expect(screen.getByLabelText("Chat mode")).toHaveValue("plan");
+      expect(screen.getByRole("button", { name: "Remove attachment attached.mp4" })).toBeVisible();
+      expect(controller.sendChat).toHaveBeenCalledTimes(1);
+      await userEvent.click(screen.getByRole("button", { name: "Send message" }));
+      expect(controller.sendChat).toHaveBeenCalledTimes(2);
+      expect(controller.sendChat).toHaveBeenLastCalledWith("Plan the edit", {
+        mode: "plan",
+        steer: false,
+        files: [file],
+      });
+    },
+  );
 
   it("does not restore or resubmit a draft after chat has been attempted", async () => {
     const { controller } = renderApp(<ChatPanel />, (state) =>

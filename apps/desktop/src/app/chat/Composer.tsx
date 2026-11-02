@@ -62,8 +62,12 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
     void controller
       .sendChat(clean, { mode, steer, files: attachments })
       .then((result) => {
-        if (result === "attachment-failed") {
-          // No chat request was sent, so keeping the draft cannot replay an edit.
+        if (
+          result === "attachment-failed" ||
+          result === "context-unavailable" ||
+          result === "chat-rejected"
+        ) {
+          // These outcomes guarantee that no task was accepted.
           setText(draft);
           setFiles(attachments);
         }

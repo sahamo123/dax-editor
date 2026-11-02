@@ -31,6 +31,29 @@ describe("protocol schemas", () => {
     expect(() => ChatRequestSchema.parse({ message: "x".repeat(8001) })).toThrow();
   });
 
+  it("accepts paired chat context guards and retains unguarded legacy requests", () => {
+    const guarded = ChatRequestSchema.parse({
+      message: "hello",
+      expectedProjectId: "project-a",
+      expectedProviderEpoch: 3,
+    });
+    expect(guarded).toMatchObject({ expectedProjectId: "project-a", expectedProviderEpoch: 3 });
+    expect(ChatRequestSchema.safeParse({ message: "legacy" }).success).toBe(true);
+    expect(
+      ChatRequestSchema.safeParse({ message: "x", expectedProjectId: "project-a" }).success,
+    ).toBe(false);
+    expect(ChatRequestSchema.safeParse({ message: "x", expectedProviderEpoch: 0 }).success).toBe(
+      false,
+    );
+    expect(
+      ChatRequestSchema.safeParse({
+        message: "x",
+        expectedProjectId: "p",
+        expectedProviderEpoch: -1,
+      }).success,
+    ).toBe(false);
+  });
+
   it("defaults a new project's name", () => {
     expect(ProjectNewRequestSchema.parse({}).name).toBe("Untitled");
   });
