@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 relink evidence — November 1, 2026
+
+Review found a false-pass possibility in the media-card relink test. [#194](https://github.com/sahamo123/dax-editor/issues/194) requires the original asset and its file to exist after relinking; both generated-video viewport tests passed. [Draft PR #195](https://github.com/sahamo123/dax-editor/pull/195) is published at test head `a9f1eaaee79d16f39b5325ab4431060ac1b99e82`; review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-media-actions-receipt.md). S01.06 and native acceptance remain open.
+
 ## S01.06 keyboard recheck — November 1, 2026
 
 [Draft PR #193](https://github.com/sahamo123/dax-editor/pull/193), evidence head `328c6c0349078ff4aa9453ec6e5c7e6198a65e87`: a fresh synthetic keyboard attempt reached the real Windows Open dialog from setup and Import without a mouse. The automation tool could not target the dialog for keyboard input, so file selection and the full keyboard-only workflow remain unverified. See the [native acceptance receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). The screen-reader and native/DPI gates also remain open; do not advance S01.06.

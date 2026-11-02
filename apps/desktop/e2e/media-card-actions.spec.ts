@@ -1,4 +1,5 @@
 // Media-card controls must stay readable and usable when the drawer changes width.
+import { stat } from "node:fs/promises";
 import { expect, test } from "./fixtures";
 
 for (const width of [1440, 1000]) {
@@ -56,7 +57,13 @@ for (const width of [1440, 1000]) {
     await page.keyboard.press("Enter");
     await (await chooser).setFiles(sampleVideo);
     await expect
-      .poll(async () => (await server.project()).assets[asset.id]?.path)
-      .not.toBe(asset.path);
+      .poll(async () => {
+        const path = (await server.project()).assets[asset.id]?.path;
+        return Boolean(path && path !== asset.path);
+      })
+      .toBe(true);
+    const relinked = (await server.project()).assets[asset.id];
+    if (!relinked) throw new Error("Relink removed the original asset");
+    expect((await stat(relinked.path)).isFile()).toBe(true);
   });
 }
