@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Notification focus samples — November 2, 2026
+
+[#270 / draft PR #271](https://github.com/sahamo123/dax-editor/pull/271) measures keyboard focus and message contrast in scrollable and overflow notification areas. Three browser checks, fast checks and dead-code analysis passed at test head `b80ab8d09fa0024d6b492c2a705b2e778d592246`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-notice-focus-receipt.md). This is a limited browser sample; S01.06 and actual picker, screen-reader and native acceptance remain open.
+
 ## Rendered-preview lifecycle investigation — November 2, 2026
 
 [#268 / draft PR #269](https://github.com/sahamo123/dax-editor/pull/269) documents a reproducible full-size preview deadline problem and adjusts the browser test only. Nine combined browser checks, three repeat checks and full source checks passed at test head `192fcaac08aa21c831ebf8b59a2f3677b860de96`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-preview-lifecycle-receipt.md). The original failure's sequence remains unproven. S01.06 and actual picker, screen-reader and native acceptance remain open.
