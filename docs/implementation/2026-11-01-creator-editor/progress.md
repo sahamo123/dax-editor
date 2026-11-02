@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280): two generated-media keyboard edit, review and export workflows passed at f81963207096c47db76c0f428600d57b9f05b25; see the [receipt](s01-06-keyboard-edit-export-receipt.md). The clip was pre-imported; review and actual picker/screen-reader acceptance remain open.
+
 - [#277 / draft PR #278](https://github.com/sahamo123/dax-editor/pull/278): two task-status contrast browser checks, fast checks and dead-code analysis passed at 6bca226ee40c886b49ed449aa7f64c61c5a70158; see the [receipt](s01-06-task-status-contrast-receipt.md). Review and S01.06 remain open.
 
 - [#274 / draft PR #276](https://github.com/sahamo123/dax-editor/pull/276): self-review added four passing minimum-height clip reachability browser checks and fast checks at 6ae11d2d0616d8afe5e425b14f505f7c6e42e4a8. See the [receipt](s01-06-toolbar-layout-receipt.md); independent review and S01.06 remain open.
