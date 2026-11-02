@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 chat attachment recovery — November 1, 2026
+
+The scoped [#200 / draft PR #204](https://github.com/sahamo123/dax-editor/pull/204) candidate preserves a message, attachments and mode when staging fails before chat is attempted, without automatically replaying an uncertain request. Application/test head `85ae44268e4228e2f8f6efc7936e8e4688c7d8d0`; focused component/controller and generated-media browser tests passed. An earlier full check failed an unrelated bridge test [#203](https://github.com/sahamo123/dax-editor/issues/203); review and a passing final full check remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-attachment-recovery.md). Context switching [#201](https://github.com/sahamo123/dax-editor/issues/201) and staged-file retention [#202](https://github.com/sahamo123/dax-editor/issues/202) are separate open investigations. S01.06 and native acceptance remain open.
+
 ## S01.06 handoff integrity — November 1, 2026
 
 The continuation handoff contained two corrupted commit references. [Issue #198](https://github.com/sahamo123/dax-editor/issues/198) restores both verified Git commit IDs; a Markdown control-character scan and documentation checks passed. [Draft PR #199](https://github.com/sahamo123/dax-editor/pull/199) is published at evidence head `399b872a0205d3101d02bce8e24f09d162f2e8ee`; review remains pending. S01.06 and native acceptance remain open.

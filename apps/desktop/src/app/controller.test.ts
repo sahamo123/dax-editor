@@ -327,9 +327,42 @@ describe("controller", () => {
     const { store, controller } = setup({
       chat: vi.fn(async () => ({ ok: false, error: "No assistant is set up" })),
     });
-    await controller.sendChat("hello");
+    expect(await controller.sendChat("hello")).toBe("chat-attempted");
     const kinds = store.getState().chat.map((i) => i.kind);
     expect(kinds).toEqual(["user", "notice"]);
+  });
+
+  it.each([
+    { ok: false, error: "Upload failed" },
+    { ok: true, summary: "Uploaded", data: {} },
+    { ok: true, summary: "Uploaded", data: { path: "" } },
+  ])("does not attempt chat when attachment staging fails: %o", async (uploadReply) => {
+    const uploadMedia = vi.fn(async () => uploadReply);
+    const chat = vi.fn(async () => ({ ok: true, value: {} }));
+    const { controller, store } = setup({ uploadMedia, chat });
+    const file = new File(["video"], "sample.mp4", { type: "video/mp4" });
+    expect(await controller.sendChat("hello", { mode: "plan", files: [file] })).toBe(
+      "attachment-failed",
+    );
+    expect(uploadMedia).toHaveBeenCalledWith(file, true);
+    expect(chat).not.toHaveBeenCalled();
+    expect(store.getState().chat.some((item) => item.kind === "notice")).toBe(true);
+  });
+
+  it("does not send chat if a later attachment fails after an earlier one staged", async () => {
+    const uploadMedia = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, summary: "Uploaded", data: { path: "/staged/one.mp4" } })
+      .mockResolvedValueOnce({ ok: false, error: "Second upload failed" });
+    const chat = vi.fn(async () => ({ ok: true, value: {} }));
+    const { controller } = setup({ uploadMedia, chat });
+    const files = [
+      new File(["one"], "one.mp4", { type: "video/mp4" }),
+      new File(["two"], "two.mp4", { type: "video/mp4" }),
+    ];
+    expect(await controller.sendChat("hello", { files })).toBe("attachment-failed");
+    expect(uploadMedia).toHaveBeenCalledTimes(2);
+    expect(chat).not.toHaveBeenCalled();
   });
 
   it("flags a run as stopping before the cancel request returns", async () => {

@@ -122,7 +122,9 @@ export function fakeController(): { [K in keyof Controller]: ReturnType<typeof v
     importPaths: vi.fn(async () => true),
     uploadFiles: vi.fn(async () => true),
     exportTo: vi.fn(async () => true),
-    sendChat: vi.fn(async () => {}),
+    sendChat: vi.fn(
+      async (): Promise<"attachment-failed" | "chat-attempted" | "empty"> => "chat-attempted",
+    ),
     cancelTask: vi.fn(async () => {}),
     cancelChat: vi.fn(async () => {}),
     undoRun: vi.fn(async () => {}),

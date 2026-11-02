@@ -90,11 +90,14 @@ export interface Controller {
    * and the "Exported ..." toast come from job events; a refusal (bad path, file exists) is toasted here.
    */
   exportTo(path: string, overwrite: boolean): Promise<boolean>;
-  /** Show `text` as the user's message and start an AI run. A refusal (no assistant, busy) lands in the transcript. */
+  /**
+   * Stage attachments and attempt chat once. Returns `attachment-failed` only when no chat request was made;
+   * `chat-attempted` does not imply the server accepted it. Errors are shown in the transcript.
+   */
   sendChat(
     text: string,
     options?: { mode?: "edit" | "plan"; steer?: boolean; files?: File[] },
-  ): Promise<void>;
+  ): Promise<"empty" | "attachment-failed" | "chat-attempted">;
   /** Cancel one queued or running task while preserving its history entry. */
   cancelTask(id: string): Promise<void>;
   /** Stop the running AI run; the transcript shows "Stopped." */
@@ -319,23 +322,24 @@ export function createController(deps: ControllerDeps): Controller {
 
     async sendChat(text, options = {}) {
       const message = text.trim();
-      if (!message) return;
+      if (!message) return "empty";
       const attachments: string[] = [];
       for (const file of options.files ?? []) {
         const uploaded = await client.uploadMedia(file, true);
         if (!uploaded.ok) {
           store.getState().addNotice("error", uploaded.error);
-          return;
+          return "attachment-failed";
         }
         const data = uploaded.data;
         if (
           typeof data !== "object" ||
           data === null ||
           !("path" in data) ||
-          typeof data.path !== "string"
+          typeof data.path !== "string" ||
+          !data.path.trim()
         ) {
           store.getState().addNotice("error", "The editor did not confirm the attachment.");
-          return;
+          return "attachment-failed";
         }
         attachments.push(data.path);
       }
@@ -357,6 +361,7 @@ export function createController(deps: ControllerDeps): Controller {
               ? "Steering added. The current task continues from its present state."
               : "Request queued. See task status below.",
           );
+      return "chat-attempted";
     },
 
     async cancelTask(id) {
