@@ -354,3 +354,5 @@
 * **Update**: 2026-11-01 scoped [task cancellation names #179](https://github.com/sahamo123/dax-editor/issues/179); the [receipt](implementation/2026-11-01-creator-editor/s01-06-task-cancel-receipt.md) records before and focused candidate tests and remaining acceptance.
 
 * **Update**: 2026-11-01 self-reviewed [task cancellation PR #180](https://github.com/sahamo123/dax-editor/pull/180) and reconciled the [receipt](implementation/2026-11-01-creator-editor/s01-06-task-cancel-receipt.md). Actual keyboard and Narrator acceptance remains open.
+
+* **Update**: 2026-11-01 scoped [task-state labels #181](https://github.com/sahamo123/dax-editor/issues/181); the [receipt](implementation/2026-11-01-creator-editor/s01-06-task-state-receipt.md) records synthetic text, scrolling and cancellation evidence and remaining checks.

@@ -55,6 +55,7 @@
 * [S01.06 reduced-motion child receipt](s01-06-reduced-motion-receipt.md) - Reproduction and verification for reduced-motion editor controls and working feedback.
 * [S01.06 review progress announcement child receipt](s01-06-review-announcement-receipt.md) - Reproduction and verification for accessible rendered-review progress.
 * [S01.06 task cancellation names receipt](s01-06-task-cancel-receipt.md) - Reproduction and verification for distinguishable task cancellation controls.
+* [S01.06 task-state labels receipt](s01-06-task-state-receipt.md) - Synthetic browser evidence that task states have text labels independent of color.
 * [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - Plan and evidence gates: Verify browser and native workspace acceptance.
 * [S02.01: Specify profiles and project compatibility](s02-01-profile-compatibility-contract.md) - Plan and evidence gates: Specify profiles and project compatibility.
 * [S02.02: Implement safe project and history migration](s02-02-project-history-migration.md) - Plan and evidence gates: Implement safe project and history migration.

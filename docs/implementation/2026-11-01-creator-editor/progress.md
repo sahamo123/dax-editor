@@ -18,7 +18,7 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 ## Current cursor
 
 - Selected execution route: first-improvement (21 steps), explicitly launched November 1, 2026.
-- Active step: S01.06 [#162](https://github.com/sahamo123/dax-editor/issues/162). Task cancellation [#179 / PR #180](https://github.com/sahamo123/dax-editor/pull/180) was self-reviewed at application/test head `d92bc08a210312d68403a870e3fffac97e584f0e`. Actual keyboard and Narrator acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) remain blocked on computer-use access; do not advance.
+- Active step: S01.06 [#162](https://github.com/sahamo123/dax-editor/issues/162). Task-state evidence [#181](https://github.com/sahamo123/dax-editor/issues/181) is in progress on `codex/s01-06-task-state-evidence`; focused browser and applicable repository checks passed; publication and self-review remain pending. Actual keyboard and Narrator acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) remain blocked; do not advance.
 - Required scope, clients/providers and machines: provisional choices are recorded in issue #121 and the S00.01 receipt; freeze/revalidate at S09.01 for broader routes.
 - Implementation issue/PR pairs: #121/#122, #123/#124, #125/#126, #127/#128, #129/#132, #133/#134, #135/#138, #140/#141, #142/#143, preview child #137/#147 and compact child #144/#148. Later steps are unassigned.
 - Resume context: [handoff](handoff.md), [daily log](daily-log.md), [errors and recovery](errors-and-recovery.md), [evidence log](evidence-log.md).

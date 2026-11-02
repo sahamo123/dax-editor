@@ -107,3 +107,7 @@ The first full-check run for #179 was deliberately interrupted when review found
 The interrupted #179 full-check log SHA-256 is `92be32b14f2feab523eec9c963df44d68e5aa6d9047cdc828d30eb31789612ef`; the final code's focused checks passed and a fresh full check is running.
 
 The refined #179 candidate's fresh authorized full check passed; private log SHA-256 `6dd361c51f0885500ad4814f02803d6094da31ab6ad8859d594113c17d28e6eb`. This does not change the interrupted attempt's status.
+
+## 2026-11-01 — Task-state test fixture restart
+
+The initial #181 browser run timed out because stopping the test server also stopped its fake local model, leaving chat disabled after restart. Private log SHA-256 `a074e6dd0ddae7b4d2a1bd5f0e5121cae90f593aa965fbe6c4d02ec6b389956f`. The fixture explicitly restarts the fake model and waits for availability; the corrected browser test passed. This was a test setup error, not a finding about a real model.
