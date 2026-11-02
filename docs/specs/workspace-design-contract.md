@@ -61,6 +61,8 @@ At wide sizes retain resizable chat, preview/timeline and contextual panel. At n
 
 Splitters remain named keyboard-operable separators; arrows and Home/End continue to work. Preserve playhead, selection, active tasks and undo stack across resize or mode switch. A temporary panel's Escape closes only that panel, not the active task; explicit Stop remains separate. Restore focus to a still-mounted opener, otherwise a predictable labelled workspace control. Never auto-focus an inspector merely because a selection changed. Text-entry keys must not invoke timeline shortcuts.
 
+The editing toolbar must reserve its full wrapped height before the timeline starts. At supported compact, standard and resized layouts, every control and the zoom slider remain within the toolbar and unobscured by the timeline. Preserve their labels, keyboard operation, focus and editing behavior; the remaining timeline viewport must be usable at the minimum supported timeline height. Verify real hit targets and resize/panel changes rather than relying on visibility alone. [#274](https://github.com/sahamo123/dax-editor/issues/274) tracks this correction.
+
 ## Audit-to-acceptance mapping
 
 | Finding | Required verification |
