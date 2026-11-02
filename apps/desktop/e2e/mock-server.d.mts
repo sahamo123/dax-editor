@@ -20,6 +20,8 @@ export interface MockServerOptions {
   chatDelayMs?: number;
   /** Milliseconds per step of the fake model download (default 150). */
   modelStepMs?: number;
+  /** Install a fake speech feature whose setup waits until cancelled; no network or model files. */
+  speechWaitForCancel?: boolean;
   /** Data folder (default: a temp folder removed on close). */
   dataDir?: string;
 }

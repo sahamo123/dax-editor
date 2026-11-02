@@ -56,6 +56,7 @@
 * [S01.06 modal shortcut isolation receipt](s01-06-dialog-shortcuts-receipt.md) - Reproduction and verification for keeping project shortcuts outside active modal dialogs.
 * [S01.06 export focus child receipt](s01-06-export-focus-receipt.md) - Reproduction and verification of stable keyboard focus while an export runs.
 * [S01.06 history contrast child receipt](s01-06-history-contrast-receipt.md) - Rendered history contrast measurements, branch labels and verification.
+* [S01.06 cancellation outcome investigation](s01-06-job-cancellation-investigation.md) - Reproduction of task cancellation as an urgent job error and the remaining typed-contract work.
 * [S01.06 recovered job outcome notices](s01-06-job-snapshot-notices-receipt.md) - Reproduction and verification of job completion and failure notices recovered from snapshots.
 * [S01.06 live accessibility and export announcements](s01-06-live-announcement-receipt.md) - Partial keyboard and Narrator observations, export announcement changes, and remaining acceptance evidence.
 * [S01.06 locally initiated job outcomes](s01-06-local-job-outcomes-receipt.md) - Reproduction, bounded reconciliation and verification of locally initiated jobs first observed terminal.

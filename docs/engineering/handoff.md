@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current cancellation investigation — November 2, 2026
+
+[#251](https://github.com/sahamo123/dax-editor/issues/251) has an opt-in real-server reproduction for speech and generated-media export cancellation. Read the [investigation](../implementation/2026-11-01-creator-editor/s01-06-job-cancellation-investigation.md), publish its diagnostic branch, then specify and implement a safe typed distinction without string heuristics. This is not an application fix; S01.06 and actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 ## Current non-export job candidate — November 2, 2026
 
 [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250), `codex/s01-06-non-export-outcomes`, application/test head `5136c40914e064386397a7e46e603a2337a8ee7f`, passed focused, browser and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md) and investigate cancellation classification [#251](https://github.com/sahamo123/dax-editor/issues/251). Earlier entries are historical; S01.06, picker, screen-reader and native acceptance remain open.

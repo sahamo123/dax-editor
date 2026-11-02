@@ -185,6 +185,7 @@ function createScriptedAssistant(registry, chatDelay) {
  * Options: `port` (0 = any), `token` (at least 16 characters), `aiReady` (a downloaded, running local model, so
  * chat works), `allowedRoots` (folders imports/exports may use), `origins` (browser origins allowed),
  * `chatDelayMs` (pause between scripted chat events), `modelStepMs` (delay per step of the fake model download),
+ * `speechWaitForCancel` (provide a fake speech setup that waits for cancellation),
  * `dataDir` (default: a fresh temp folder that `close()` deletes).
  */
 export async function startMockServer(options = {}) {
@@ -234,6 +235,30 @@ export async function startMockServer(options = {}) {
       agentRunner: createScriptedAssistant(registry, chatDelay),
       providers: registry,
       localModel: fakeModel.controller,
+      ...(options.speechWaitForCancel
+        ? {
+            speech: {
+              async status() {
+                return {
+                  ready: false,
+                  runtimeInstalled: false,
+                  modelInstalled: false,
+                  modelId: "synthetic",
+                  sizeBytes: 0,
+                  detail: "Synthetic speech setup",
+                };
+              },
+              async install(task) {
+                task.onProgress(0.4);
+                await new Promise((resolve) => {
+                  if (task.signal.aborted) resolve();
+                  else task.signal.addEventListener("abort", resolve, { once: true });
+                });
+              },
+              async remove() {},
+            },
+          }
+        : {}),
       logger: log,
     });
     port = running.info.port;

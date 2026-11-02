@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Investigate**: [#251](https://github.com/sahamo123/dax-editor/issues/251) reproduced error-styled cancellation for fake speech setup and the error-shaped job outcome for a generated-media export. The [investigation](implementation/2026-11-01-creator-editor/s01-06-job-cancellation-investigation.md) records limitations and typed-contract follow-up; no application fix is claimed.
+
 * **Fix**: [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250) reconciles and announces non-export job outcomes. Focused, browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md). Cancellation classification [#251](https://github.com/sahamo123/dax-editor/issues/251) and S01.06 remain open.
 
 * **Fix**: [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248) reconciles locally initiated jobs first observed terminal. Focused, browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md). S01.06 remains open.
