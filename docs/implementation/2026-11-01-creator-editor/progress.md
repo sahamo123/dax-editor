@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260): dialog notification placement passed focused, nine browser and full source checks at `b106ba0a4edd5d9a862497b850d482ed8b2a31ef`; see the [receipt](s01-06-dialog-notices-receipt.md). S01.06 and native/accessibility acceptance remain open.
+
 - [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259): test-only fake-CLI assertion diagnostics; a full check passed at `24cfae7c85441dfcd1b08edfbf1027e1d35ece29`, after two earlier failures with unproven causes. S01.06 remains IN_PROGRESS.
 
 - [#254 / PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed its foundation full check. Dependent [#253 / PR #256](https://github.com/sahamo123/dax-editor/pull/256) head `23f1417f7b247c7e76f189bfa20a97f907038821` passed focused/browser checks but failed the full check in bridge detection. See the [receipt](s01-06-typed-cancellation-receipt.md), [#203](https://github.com/sahamo123/dax-editor/issues/203) and compact toast overlap [#257](https://github.com/sahamo123/dax-editor/issues/257). S01.06 remains IN_PROGRESS.

@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260) keeps the shared notice stack within the active dialog, scrollable and clear of actions. Focused, nine browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-dialog-notices-receipt.md). Native and actual screen-reader acceptance remain open.
+
 * **Investigate**: [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259) adds fake-CLI error detail to detector assertions after two distinct full-check failures. The focused suite and instrumented full check passed; the earlier failures remain unexplained. Production security restrictions and timeouts are unchanged.
 
 * **Fix**: [#254 / PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed its foundation full check. Dependent [#253 / PR #256](https://github.com/sahamo123/dax-editor/pull/256) adds typed cancellation, notices and Blender cleanup; focused/browser checks passed but two full checks failed bridge assertions. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md), [#203](https://github.com/sahamo123/dax-editor/issues/203), and compact toast follow-up [#257](https://github.com/sahamo123/dax-editor/issues/257).

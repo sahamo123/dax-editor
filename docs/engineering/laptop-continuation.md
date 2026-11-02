@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current work:** [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260), `codex/s01-06-dialog-notice-layout`, application/test head `b106ba0a4edd5d9a862497b850d482ed8b2a31ef` passed focused, nine browser and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-dialog-notices-receipt.md); continue S01.06, with actual picker, screen-reader and native acceptance open.
+
 **Current diagnostic:** [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259), `codex/s01-06-bridge-probe-diagnostics`, test head `4925f5c6d740944e2500a592365ed2ff68556821`. A full check passed at `24cfae7c85441dfcd1b08edfbf1027e1d35ece29`; prior bridge failures remain unexplained. Continue with self-review and [#257](https://github.com/sahamo123/dax-editor/issues/257). Native and actual screen-reader acceptance remain open.
 
 **Current work:** foundation [PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed a full check at `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`. Dependent [PR #256](https://github.com/sahamo123/dax-editor/pull/256) application/test head `23f1417f7b247c7e76f189bfa20a97f907038821` has focused/browser passes but its full check failed. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md), diagnose [#203](https://github.com/sahamo123/dax-editor/issues/203), and investigate [#257](https://github.com/sahamo123/dax-editor/issues/257). Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
