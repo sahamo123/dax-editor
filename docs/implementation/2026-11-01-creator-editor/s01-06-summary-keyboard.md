@@ -11,7 +11,7 @@ generated:
 
 # S01.06 disclosure keyboard activation
 
-**State: IN_PROGRESS.** [Issue #215](https://github.com/sahamo123/dax-editor/issues/215) is on local `codex/s01-06-summary-shortcut`, based on [draft PR #214](https://github.com/sahamo123/dax-editor/pull/214) documentation head `0fda3f1d21372c6e8aad9430e1895a7e80b6709b`. Verify publication before moving laptops; full source check and review remain pending.
+**State: IN_PROGRESS.** [Issue #215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) is published on `codex/s01-06-summary-shortcut`, application/test head `563028eb83ca88705c004024d9b630213ff0f354`, based on [draft PR #214](https://github.com/sahamo123/dax-editor/pull/214) documentation head `0fda3f1d21372c6e8aad9430e1895a7e80b6709b`. Full source check and review remain pending.
 
 Before the fix, the editor's global Space handler prevented the native key default on a focused summary. A focused component regression failed and a generated-media browser test confirmed the Project menu remained closed; the shortcut code routed Space to playback. The corrected browser reproduction log SHA-256 is `42a19c6b908be9e9ee782d311319c43afdf3830c5b47e1ecc183b3a16494418c`. The first attempt used an ambiguous selector shared by Project and Work status and failed before interaction; log `352f6ecbb10b07f96568d9e6b6c8664329617dcc38820e25dc3d70ee3221ea35`.
 

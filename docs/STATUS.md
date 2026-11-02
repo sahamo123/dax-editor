@@ -13,7 +13,7 @@ generated:
 
 ## S01.06 disclosure keyboard activation — November 2, 2026
 
-The [#215](https://github.com/sahamo123/dax-editor/issues/215) candidate fixes Space interception on the focused Project and Work status disclosures. Forty-six component tests and focused generated-media browser checks passed; full source check, publication and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 and native acceptance remain open.
+The [#215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) candidate fixes Space interception on the focused Project and Work status disclosures. Forty-six component tests and focused generated-media browser checks passed at application/test head `563028eb83ca88705c004024d9b630213ff0f354`; full source check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 and native acceptance remain open.
 
 ## Windows atomic replacement investigation — November 2, 2026
 

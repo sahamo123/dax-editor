@@ -11,7 +11,7 @@ generated:
 
 # Continue on another laptop or agent
 
-**Current S01.06 child:** [#215](https://github.com/sahamo123/dax-editor/issues/215), local `codex/s01-06-summary-shortcut`, based on [draft PR #214](https://github.com/sahamo123/dax-editor/pull/214) documentation head `0fda3f1d21372c6e8aad9430e1895a7e80b6709b`. Focused component and browser checks pass; full check, publication and review remain pending. Verify publication before switching laptops; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). Older entries below are historical.
+**Current S01.06 child:** [#215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216), `codex/s01-06-summary-shortcut`, application/test head `563028eb83ca88705c004024d9b630213ff0f354`, based on [draft PR #214](https://github.com/sahamo123/dax-editor/pull/214) documentation head `0fda3f1d21372c6e8aad9430e1895a7e80b6709b`. Focused component and browser checks pass; full check and review remain pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). Older entries below are historical.
 
 **Current independent investigation:** [#149 / draft PR #214](https://github.com/sahamo123/dax-editor/pull/214), `codex/windows-atomic-rename-investigation`, test head `49c1a48f2f5d6e4d4e6dc398a6e657d60d8c57b1`, based on [draft PR #213](https://github.com/sahamo123/dax-editor/pull/213) documentation head `f6527efb9da55e37f87fc3924b3c3d6f93ec58ec`. A synthetic sharing lock reproduced server atomic-write `EPERM`; focused and fast checks passed and no production retry was added. Review remains pending; see the [receipt](../implementation/2026-11-01-creator-editor/windows-sharing-investigation.md). Older child entries below are historical.
 
