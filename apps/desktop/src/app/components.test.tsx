@@ -1,7 +1,7 @@
 // Component tests for the app shell pieces that do not need the editor module: chat, settings, history,
 // media bin, banner, empty state, top bar. Each renders against a real store and a fake controller.
 
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { ChatPanel } from "./chat/ChatPanel";
@@ -39,6 +39,72 @@ describe("Toast announcements", () => {
 });
 
 describe("ChatPanel", () => {
+  it("restores the message, mode and attachments only when staging fails before chat", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(makeState({ providers: providers(["local"]) })),
+    );
+    controller.sendChat.mockResolvedValueOnce("attachment-failed");
+    await userEvent.selectOptions(screen.getByLabelText("Chat mode"), "plan");
+    await userEvent.click(screen.getByRole("button", { name: "Attach videos" }));
+    const file = new File(["video"], "attached.mp4", { type: "video/mp4" });
+    await userEvent.upload(screen.getByLabelText("Choose videos"), file);
+    const box = screen.getByLabelText("Message to the assistant");
+    await userEvent.type(box, "Plan the edit");
+    await userEvent.click(screen.getByRole("button", { name: "Send message" }));
+    await waitFor(() => expect(box).toHaveValue("Plan the edit"));
+    expect(screen.getByLabelText("Chat mode")).toHaveValue("plan");
+    expect(screen.getByRole("button", { name: "Remove attachment attached.mp4" })).toBeVisible();
+    expect(controller.sendChat).toHaveBeenCalledTimes(1);
+    await userEvent.click(screen.getByRole("button", { name: "Send message" }));
+    expect(controller.sendChat).toHaveBeenCalledTimes(2);
+    expect(controller.sendChat).toHaveBeenLastCalledWith("Plan the edit", {
+      mode: "plan",
+      steer: false,
+      files: [file],
+    });
+  });
+
+  it("does not restore or resubmit a draft after chat has been attempted", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(makeState({ providers: providers(["local"]) })),
+    );
+    controller.sendChat.mockResolvedValueOnce("chat-attempted");
+    await userEvent.click(screen.getByRole("button", { name: "Attach videos" }));
+    await userEvent.upload(
+      screen.getByLabelText("Choose videos"),
+      new File(["video"], "attached.mp4", { type: "video/mp4" }),
+    );
+    const box = screen.getByLabelText("Message to the assistant");
+    await userEvent.type(box, "Add a title{Enter}");
+    await waitFor(() => expect(box).toBeEnabled());
+    expect(box).toHaveValue("");
+    expect(screen.queryByRole("button", { name: "Remove attachment attached.mp4" })).toBeNull();
+    expect(controller.sendChat).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { original: "Existing draft", restored: "Existing draft" },
+    { original: "   ", restored: "Add a title" },
+  ])(
+    "keeps the right draft when a suggestion's attachment fails: $original",
+    async ({ original, restored }) => {
+      const { controller } = renderApp(<ChatPanel />, (state) =>
+        state.applyState(makeState({ providers: providers(["local"]) })),
+      );
+      controller.sendChat.mockResolvedValueOnce("attachment-failed");
+      await userEvent.click(screen.getByRole("button", { name: "Attach videos" }));
+      await userEvent.upload(
+        screen.getByLabelText("Choose videos"),
+        new File(["video"], "attached.mp4", { type: "video/mp4" }),
+      );
+      const box = screen.getByLabelText("Message to the assistant");
+      await userEvent.type(box, original);
+      await userEvent.click(screen.getByRole("button", { name: "Add a title" }));
+      await waitFor(() => expect(box).toHaveValue(restored));
+      expect(controller.sendChat).toHaveBeenCalledOnce();
+    },
+  );
+
   it("keeps composing while busy, captures Planning mode and steers with video attachments", async () => {
     const { controller } = renderApp(<ChatPanel />, (state) =>
       state.applyState(makeState({ busy: true, providers: providers(["local"]) })),

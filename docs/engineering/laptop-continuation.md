@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.06 child:** [#200](https://github.com/sahamo123/dax-editor/issues/200) on `codex/s01-06-chat-attachment-recovery` preserves an unsent draft after staging failure. Focused tests passed; an earlier full check failed bridge test [#203](https://github.com/sahamo123/dax-editor/issues/203). Publication and a passing final full check remain pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-attachment-recovery.md). Project/provider context [#201](https://github.com/sahamo123/dax-editor/issues/201), staged-file retention [#202](https://github.com/sahamo123/dax-editor/issues/202), S01.06 and native acceptance remain open.
+
 **Current S01.06 handoff integrity:**
 
 Continue [#198](https://github.com/sahamo123/dax-editor/issues/198) on codex/s01-06-handoff-integrity, based on draft PR #197 documentation head fce4a5479989d511902bf846c184c450ddef2e9e. The handoff references are corrected; [draft PR #199](https://github.com/sahamo123/dax-editor/pull/199) is published at evidence head `399b872a0205d3101d02bce8e24f09d162f2e8ee`; review remains pending. S01.06 and native gates remain open.

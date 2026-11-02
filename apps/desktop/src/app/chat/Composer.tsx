@@ -1,12 +1,19 @@
 // The message box at the bottom of the chat: suggestion chips, a growing text area, Send and (during a run) Stop.
 
-import { type KeyboardEvent, type ReactElement, useRef, useState } from "react";
+import { type KeyboardEvent, type ReactElement, useLayoutEffect, useRef, useState } from "react";
 import { pickBrowserFiles } from "../../platform";
 import { useApp, useController } from "../context";
 import { Icon } from "../ui/icons";
 
 /** Example requests offered as one-click chips. They are plain sentences the assistant already understands. */
 const SUGGESTIONS = ["Remove silences", "Add a title", "Cut to 30 seconds"] as const;
+
+/** Fit visible draft text up to the textarea's CSS maximum height. */
+function fitDraft(input: HTMLTextAreaElement): void {
+  if (input.getClientRects().length === 0) return;
+  input.style.height = "auto";
+  input.style.height = `${input.scrollHeight}px`;
+}
 
 /** Props of {@link Composer}. */
 export interface ComposerProps {
@@ -28,13 +35,40 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
 
   const disabled = blockedReason !== null;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: resize after React commits each text value
+  useLayoutEffect(() => {
+    const input = ref.current;
+    if (!input) return;
+    // Also resize after restoring a failed multi-line draft, not only while typing.
+    fitDraft(input);
+  }, [text]);
+
+  useLayoutEffect(() => {
+    const input = ref.current;
+    if (!input || typeof ResizeObserver === "undefined") return;
+    // Compact view can hide the composer while an upload finishes.
+    const observer = new ResizeObserver(() => fitDraft(input));
+    observer.observe(input);
+    return () => observer.disconnect();
+  }, []);
+
   const send = (message: string, steer = false) => {
     const clean = message.trim();
     if (!clean || disabled || submitting) return;
+    const draft = text.trim() ? text : message;
+    const attachments = files;
     setText("");
-    if (ref.current) ref.current.style.height = "";
     setSubmitting(true);
-    void controller.sendChat(clean, { mode, steer, files }).finally(() => setSubmitting(false));
+    void controller
+      .sendChat(clean, { mode, steer, files: attachments })
+      .then((result) => {
+        if (result === "attachment-failed") {
+          // No chat request was sent, so keeping the draft cannot replay an edit.
+          setText(draft);
+          setFiles(attachments);
+        }
+      })
+      .finally(() => setSubmitting(false));
     setFiles([]);
   };
 
@@ -117,12 +151,7 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
               ? "Queue a follow-up or steer this task…"
               : "Describe an edit, e.g. cut the pauses")
           }
-          onChange={(e) => {
-            setText(e.target.value);
-            // Grow with the text, up to the CSS max-height.
-            e.target.style.height = "auto";
-            e.target.style.height = `${e.target.scrollHeight}px`;
-          }}
+          onChange={(e) => setText(e.target.value)}
           onKeyDown={onKeyDown}
         />
         <div className="composer__actions">

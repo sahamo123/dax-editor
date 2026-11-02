@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current S01.06 chat attachment recovery — November 1, 2026
+
+Continue [#200](https://github.com/sahamo123/dax-editor/issues/200) on `codex/s01-06-chat-attachment-recovery`, based on [draft PR #199](https://github.com/sahamo123/dax-editor/pull/199) head `e193332cdb533d38e98a848a0ea9a9e6e1970f31`. Focused tests passed; an earlier full check failed bridge test [#203](https://github.com/sahamo123/dax-editor/issues/203), and publication and a passing final full check remain pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-attachment-recovery.md). Investigate project/provider context [#201](https://github.com/sahamo123/dax-editor/issues/201) and staged-file retention [#202](https://github.com/sahamo123/dax-editor/issues/202) separately. S01.06 and native gates remain open. Earlier headings are historical.
+
 ## Current S01.06 handoff integrity — November 1, 2026
 
 Continue [#198](https://github.com/sahamo123/dax-editor/issues/198) on codex/s01-06-handoff-integrity, based on draft PR #197 documentation head fce4a5479989d511902bf846c184c450ddef2e9e. Two corrupted commit references below were restored from verified Git objects; [draft PR #199](https://github.com/sahamo123/dax-editor/pull/199) is published at evidence head `399b872a0205d3101d02bce8e24f09d162f2e8ee`; review remains pending. S01.06 keyboard, screen-reader and native gates remain open. Earlier headings are historical.

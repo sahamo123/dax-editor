@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Fix**: Chat attachment recovery [#200](https://github.com/sahamo123/dax-editor/issues/200) preserves an unsent draft on staging failure; focused tests passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-attachment-recovery.md).
+
 * **Fix**: Repaired two corrupted continuation commit references in the handoff; [#198](https://github.com/sahamo123/dax-editor/issues/198) tracks the correction.
 
 * **Test**: Inspector and export dialog contrast samples [#196](https://github.com/sahamo123/dax-editor/issues/196) passed. The [receipt](implementation/2026-11-01-creator-editor/s01-06-panel-contrast-receipt.md) also records a failed overlapping-build run.

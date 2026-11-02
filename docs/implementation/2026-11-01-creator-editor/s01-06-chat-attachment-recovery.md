@@ -1,0 +1,24 @@
+---
+type: Guide
+title: S01.06 chat attachment recovery
+description: Preserve unsent drafts after attachment staging fails without replaying an uncertain edit.
+tags: [implementation, chat, accessibility, recovery]
+status: draft
+generated:
+  by: process:implementer
+  at: 2026-11-02T06:19:00Z
+---
+
+# S01.06 chat attachment recovery
+
+**State: IN_PROGRESS.** [Issue #200](https://github.com/sahamo123/dax-editor/issues/200), on `codex/s01-06-chat-attachment-recovery`, starts from [draft PR #199](https://github.com/sahamo123/dax-editor/pull/199) documentation head `e193332cdb533d38e98a848a0ea9a9e6e1970f31`.
+
+The composer previously cleared the message and selected files before the controller staged attachments. An upload rejection or malformed staging reply returned before any chat request but lost the draft. The controller now distinguishes a pre-chat attachment failure from a chat attempt whose outcome may be uncertain. Only the former restores the original draft and selected files; if no draft existed, it restores the attempted suggestion. Mode remains selected, the error is visible, and the user decides whether to retry. Nothing automatically resends a request. The composer resizes restored multi-line text, including after a compact panel becomes visible again.
+
+Before the change, focused tests reproduced four failures, including the missing draft and unreported staging boundary. With the candidate, 71 component/controller tests passed, including rejected and malformed staging replies, later-file failure, suggestion recovery, no chat request on staging failure, and the attempted-chat boundary. In installed Edge, ten generated-media browser workflows passed: the recovery test observed zero chat requests for a rejected empty file, preserved the four-line draft, mode and attachment, and submitted exactly one Planning request after an intentional replacement. A separate compact-view test held a synthetic upload pending, switched away, then verified the restored multi-line draft after a failure; existing chat, queue, steering and Stop flows passed. Both generated screenshots were inspected privately. A later focused rerun of both recovery cases passed and observed no resize-observer errors.
+
+The first browser run passed eight existing tests but the new test timed out because it tried to locate a hidden file input instead of waiting for the chooser; log SHA-256 `135357d0b9267bdc55c52d290c83baab35d8c9183f8805dfff92e988b7b4addb`. After correcting the test, a four-line recovery check exposed a shrunken composer (72 px after versus at least 87 px expected); log `19c08c3b3b2ae80e88e17c6acf1be3897ebf0621bdb3eb1cba9bdb52475a4ef8`. A later compact-view test exposed the same issue after switching back from a hidden panel; log `eaefcd611872efec72b332cd83212be9aa0e1bff2bd7cf3e9541b433e1a2641f`. After the fixes, the ten-test run passed, log `273dc372ae0a2b3a256b6cd9fd410b7affa341a40279634170d25e6b56708ea6`; a focused two-test observer run also passed, log `cc4794eb930e6a8e69c8deb6b9e6e9ed017d1a0bb5756f399e514cfb3455966d`. These use a synthetic engine, generated media and explicitly selected system FFmpeg, not a native or packaged-runtime pass.
+
+Application source SHA-256: composer `74ae2bc4f385e003bf7ce1b785d9ab14aedb5a1494bd652f48e6e612a4f444cd`; controller `b6a362667ba465792a307bd00caeedc2e41a5a79ac41aa47a26b8c78b3661b06`. Browser test SHA-256 `a1b7b6e0f65870f8e7833dba5509b0ce68b9d42a953c57e282427687b5d25dd0`. The latest `pnpm check:fast` passed. An earlier full `pnpm check` stopped at lint on the resize effect; after documenting the intentional dependency, a further full run failed one unrelated bridge timeout classification test, with 105 bridge tests passing and one skipped. The final full run preceded the compact-view resize follow-up. Its private log SHA-256 is `d922448011d5e1b0b599d3cfc9ee9f8a1cfb8a13fab5e0f67f0dbeb428bf4ce1`. One isolated rerun of that bridge test passed, log `89bc21e79ec6a19396caac8193d5ab8210df95786ab4bd4a004c0217933ecda3`, but does not erase the failure; [#203](https://github.com/sahamo123/dax-editor/issues/203) tracks investigation. Full verification, publication and review remain pending.
+
+Separate source-level risks require their own reproductions: project/provider changes during staging [#201](https://github.com/sahamo123/dax-editor/issues/201), and retained files after abandoned or partially staged attachments [#202](https://github.com/sahamo123/dax-editor/issues/202). This fix does not establish the cause of intermittent chat focus loss [#186](https://github.com/sahamo123/dax-editor/issues/186). Keep S01.06 keyboard-only, actual screen-reader, native and DPI acceptance open.
