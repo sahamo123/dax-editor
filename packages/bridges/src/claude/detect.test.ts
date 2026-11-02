@@ -1,6 +1,7 @@
 // Tests for Claude Code detection against a fake executable: not installed, too old, not signed in, ready, slow, and hygiene.
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import * as proc from "../proc.js";
 import { type FakeScenario, makeTempDir, removeTempDir, writeFakeCli } from "../test/fake-cli.js";
 import { ClaudeDetector, type ClaudeDetectorOptions } from "./detect.js";
 
@@ -8,7 +9,10 @@ let dir: string;
 beforeEach(() => {
   dir = makeTempDir("dax-detect-");
 });
-afterEach(() => removeTempDir(dir));
+afterEach(() => {
+  vi.restoreAllMocks();
+  removeTempDir(dir);
+});
 
 /** A detector pointed at a fake CLI with the given behavior. */
 function detectorFor(scenario: FakeScenario, options: ClaudeDetectorOptions = {}) {
@@ -145,23 +149,30 @@ describe("installed", () => {
     });
   });
 
-  it("reports a slow sign-in check as an error that is worth retrying, instead of hanging", async () => {
-    const { detector, fake } = detectorFor({ authDelayMs: 5000 }, { probeTimeoutMs: 1500 });
-    const started = Date.now();
-    const { status } = await detector.detect();
-    expect(Date.now() - started).toBeLessThan(5000);
-    expect(status.state).toBe("error");
-    expect(status.detail).toMatch(/sign-in check.*did not answer in time/);
-    expect(fake.calls().some((call) => call.mode === "auth")).toBe(true);
-  });
-
-  it("reports a timed-out help probe as a retryable error and does not start authentication", async () => {
-    const { detector, fake } = detectorFor({ helpDelayMs: 5000 }, { probeTimeoutMs: 1500 });
+  it.each([
+    ["--version", /--version.*did not answer in time/],
+    ["--help", /--help.*did not answer in time/],
+    ["auth", /sign-in check.*did not answer in time/],
+  ])("reports a timed-out %s probe without starting later phases", async (phase, detail) => {
+    const { detector } = detectorFor({}, { probeTimeoutMs: 1500 });
+    const successful = { exitCode: 0, stderr: "", timedOut: false };
+    const probe = vi.spyOn(proc, "runProbe").mockImplementation(async (_file, args) => {
+      if (args[0] === phase) return { exitCode: null, stdout: "", stderr: "", timedOut: true };
+      if (args[0] === "--version") return { ...successful, stdout: "2.1.302 (Claude Code)" };
+      if (args[0] === "--help")
+        return {
+          ...successful,
+          stdout:
+            "--output-format --include-partial-messages --mcp-config --strict-mcp-config --allowedTools --tools --permission-mode dontAsk",
+        };
+      return { ...successful, stdout: '{"loggedIn":true}' };
+    });
     const { status, install } = await detector.detect();
     expect(status).toMatchObject({ state: "error", available: false });
-    expect(status.detail).toMatch(/--help.*did not answer in time/);
+    expect(status.detail).toMatch(detail);
     expect(install).toBeUndefined();
-    expect(fake.calls().some((call) => call.mode === "auth")).toBe(false);
+    expect(probe.mock.calls.every((call) => call[2].timeoutMs === 1500)).toBe(true);
+    expect(probe.mock.calls.some((call) => call[1][0] === "auth")).toBe(phase === "auth");
   });
 
   it("reports a nonzero help probe as an error instead of assuming missing capabilities", async () => {

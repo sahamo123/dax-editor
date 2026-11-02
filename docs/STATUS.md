@@ -11,9 +11,13 @@ generated:
 
 # Project status
 
+## Bridge timeout test follow-up — November 2, 2026
+
+The full check of [draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) failed two fake-CLI timeout classification tests; the earlier-probe timeouts and log hash are recorded in the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). [Issue #218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) covers deterministic phase tests and an actual process timeout test. Nineteen focused tests and the host-authorized full check passed at test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`; review remains pending. S01.06 remains open.
+
 ## S01.06 disclosure keyboard activation — November 2, 2026
 
-The [#215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) candidate fixes Space interception on the focused Project and Work status disclosures. Forty-six component tests and focused generated-media browser checks passed at application/test head `563028eb83ca88705c004024d9b630213ff0f354`; full source check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 and native acceptance remain open.
+The [#215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) candidate fixes Space interception on the focused Project and Work status disclosures. Forty-six component tests and focused generated-media browser checks passed at application/test head `563028eb83ca88705c004024d9b630213ff0f354`; the full check failed in bridge tests and review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 and native acceptance remain open.
 
 ## Windows atomic replacement investigation — November 2, 2026
 
