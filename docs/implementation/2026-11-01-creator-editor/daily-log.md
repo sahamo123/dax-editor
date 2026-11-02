@@ -178,3 +178,7 @@ Export-focus PR #167 passed full checks, compact/wide browser tests and self-rev
 A separate reduced-motion diagnostic found the Import control retains 0.12-second transitions while reduced motion is requested; [#168](https://github.com/sahamo123/dax-editor/issues/168) tracks it. The test fixture was preserved as a private artifact, not committed to the contrast slice.
 
 Primary contrast PR #169 passed full checks, rendered measurements and self-review at `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Reduced-motion #168's candidate passes focused tests in both preference modes; full checks and assistive-technology observations remain pending.
+
+Reduced-motion PR #170 passed source, focused browser and self-review at `5f766c48f1ec329b8d111593ee638849681f717f`. Dialog shortcut child [#171](https://github.com/sahamo123/dax-editor/issues/171) reproduced split/delete and undo behind a modal in component tests; candidate focused tests pass. Edge exited during a subsequent test launch, so browser verification is pending.
+
+Dialog shortcut child #171 passed the focused Chrome regression and host-permission full check; publication and self-review remain. The restricted full check had earlier reported two EPERM symbolic-link failures and was interrupted after stalling; both cases passed on the authorized rerun.

@@ -76,3 +76,5 @@ Splitters remain named keyboard-operable separators; arrows and Home/End continu
 | Repository | Changed behavior has meaningful tests and public contracts; `pnpm check`, relevant desktop/browser tests, scribe, `pnpm docs:index` and `pnpm docs:okf` pass before the corresponding step is VERIFIED. |
 
 Preserve projects and local data. Do not send media or credentials to a provider in tests. Failed or unavailable required evidence remains open and blocks its dependent step; do not weaken policy or treat this specification as acceptance evidence.
+
+A modal dialog owns its keyboard interactions: editor playback and project mutation shortcuts, including global undo/redo, must not act on the background project when the event originates inside the modal. The dialog retains its own controls and Escape handling. After it closes, normal shortcuts resume; text entry retains its native undo behavior.

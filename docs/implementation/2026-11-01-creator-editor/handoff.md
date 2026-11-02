@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: dialog shortcuts [#171](https://github.com/sahamo123/dax-editor/issues/171).** Start from self-reviewed [PR #170](https://github.com/sahamo123/dax-editor/pull/170) `5f766c48f1ec329b8d111593ee638849681f717f` on `codex/s01-06-dialog-shortcuts`. The [receipt](s01-06-dialog-shortcuts-receipt.md) records component failures and the candidate; component, browser and host-permission full checks passed; publication and self-review remain pending. Confirm publication before switching laptops. Earlier headings are historical.
+
 **Current work: reduced motion [#168](https://github.com/sahamo123/dax-editor/issues/168).** Start from self-reviewed [PR #169](https://github.com/sahamo123/dax-editor/pull/169) `bb087001bfd21a8b570a82be2afb09f69fa2a6f1` on `codex/s01-06-reduced-motion`; source and focused browser checks passed; publication and self-review are pending. Confirm branch publication. Actual assistive-technology and native/DPI acceptance remain open. Earlier headings are historical.
 
 **Current work: primary contrast [#165](https://github.com/sahamo123/dax-editor/issues/165).** Start from self-reviewed [PR #167](https://github.com/sahamo123/dax-editor/pull/167) `ee1c4726c7e4fb03986fe986440521f428dc5b4c` on `codex/s01-06-primary-contrast`; rendered before/after measurements are recorded, full checks and review are pending. Confirm branch publication. Actual assistive-technology and native/DPI acceptance remain open. Earlier headings are historical.

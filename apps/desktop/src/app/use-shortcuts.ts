@@ -21,7 +21,13 @@ export function useUndoRedoKeys(): void {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // Another handler (for example a dialog or the editor) already used this key press.
+      // Do not change project history while a dialog owns the keyboard.
       if (e.defaultPrevented || !(e.ctrlKey || e.metaKey) || e.altKey) return;
+      if (
+        e.target instanceof Element &&
+        e.target.closest('[role="dialog"][aria-modal="true"], dialog[open]')
+      )
+        return;
       if (isTextTarget(e.target)) return;
       const key = e.key.toLowerCase();
       if (key === "z" && !e.shiftKey) {

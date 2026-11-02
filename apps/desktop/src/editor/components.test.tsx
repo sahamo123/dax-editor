@@ -222,6 +222,30 @@ describe("useEditorShortcuts", () => {
     expect(editor().playing).toBe(true);
   });
 
+  it("does not edit the timeline when a modal dialog owns focus", () => {
+    const api = makeApi(makeState(defaultProject()));
+    renderEditor(
+      <>
+        <Probe />
+        <div role="dialog" aria-modal="true" aria-label="Settings">
+          <button type="button">Close settings</button>
+        </div>
+      </>,
+      api,
+    );
+    act(() => {
+      editor().setPlayhead(2);
+      editor().select({ kind: "clip", id: "c1" });
+    });
+    const button = screen.getByRole("button", { name: "Close settings" });
+    key("s", {}, button);
+    key("Delete", {}, button);
+    key("ArrowRight", {}, button);
+    expect(api.run).not.toHaveBeenCalled();
+    expect(editor().playhead).toBe(2);
+    expect(editor().selection).toEqual({ kind: "clip", id: "c1" });
+  });
+
   it("S splits at the playhead", () => {
     const api = makeApi(makeState(defaultProject()));
     renderEditor(<Probe />, api);

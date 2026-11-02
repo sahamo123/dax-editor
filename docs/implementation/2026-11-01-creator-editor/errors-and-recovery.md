@@ -83,3 +83,15 @@ Status INVESTIGATING, [issue #158](https://github.com/sahamo123/dax-editor/issue
 ## E015: Export-focus test type error — November 1
 
 Status FIXED_PENDING_VERIFICATION, [issue #164](https://github.com/sahamo123/dax-editor/issues/164). The first full check failed at desktop TypeScript build because the new component test passed Playwright's `exact` option to Testing Library's `getByRole`, which does not accept it. Private failed log SHA-256 `26c29dac736d88c1777cd5618fbfbace4518bd5d2e96158872510cca5bafadb8`. The test selector was corrected without changing product code; repeat the full check and do not count the failed run as passing.
+
+## 2026-11-01 — Browser test launch interruption
+
+Edge exited during a focused test launch with a crashpad named-pipe error; the test body did not run. An owned retry was interrupted after its runner failed to exit promptly. Preserve private logs under `artifacts/s01-06-dialog-shortcuts-evidence/`; do not treat this as product behavior or as native acceptance. Re-run on a working browser and record exact outcome; do not change system security.
+
+A Chrome browser case passed, but Playwright-owned preview cleanup stalled; that run was interrupted. Rerunning against a separately started owned preview completed with exit 0. The preview was stopped afterward. This resolves the focused browser verification only, not the Edge launch cause or native acceptance.
+
+## 2026-11-01 — Full-check symbolic-link permission failures
+
+Two existing core safety tests failed to create Windows symbolic links with EPERM in the restricted test run. That runner was interrupted after it did not exit promptly; private log SHA-256 `938eb59c1ecf8dbf22fe93e1e263a7bdb8c125ff32f8ae6d2b7f7d5772f547c5`. A separately authorized host-permission rerun is in progress; no security settings or tests were weakened. Record its actual result separately.
+
+The authorized rerun passed both symbolic-link cases and `pnpm check` (exit 0); private full log SHA-256 `6f3516b7921d5f389421fd9445440a40a774263f1a2b69cfcef6c3ed6080d3b6`. This does not change the interrupted restricted-run result.
