@@ -53,6 +53,7 @@
 * [S01.06 history contrast child receipt](s01-06-history-contrast-receipt.md) - Rendered history contrast measurements, branch labels and verification.
 * [S01.06 live accessibility and export announcements](s01-06-live-announcement-receipt.md) - Partial keyboard and Narrator observations, export announcement changes, and remaining acceptance evidence.
 * [S01.06 native accessibility acceptance handoff](s01-06-native-acceptance-receipt.md) - Exact computer-use access blocker, safe restart and remaining keyboard and Narrator evidence.
+* [S01.06 contextual panel contrast](s01-06-panel-contrast-receipt.md) - Measured media, settings and assistant tool text against rendered backgrounds, with scope and remaining issues.
 * [S01.06 primary-button contrast child receipt](s01-06-primary-contrast-receipt.md) - Rendered primary-button contrast measurements and verification.
 * [S01.06 reduced-motion child receipt](s01-06-reduced-motion-receipt.md) - Reproduction and verification for reduced-motion editor controls and working feedback.
 * [S01.06 review progress announcement child receipt](s01-06-review-announcement-receipt.md) - Reproduction and verification for accessible rendered-review progress.
