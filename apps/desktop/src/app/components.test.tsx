@@ -1,10 +1,14 @@
 // Component tests for the app shell pieces that do not need the editor module: chat, settings, history,
 // media bin, banner, empty state, top bar. Each renders against a real store and a fake controller.
 
+import type { JobInfo, WsEvent } from "@dax/protocol";
 import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { DaxClient } from "../api";
+import type { LiveSocketOptions } from "../api/socket";
 import { ChatPanel } from "./chat/ChatPanel";
+import { createController } from "./controller";
 import { HistoryPanel } from "./history/HistoryPanel";
 import { ConnectionBanner } from "./layout/ConnectionBanner";
 import { EmptyState } from "./layout/EmptyState";
@@ -15,6 +19,53 @@ import { TopBar } from "./topbar/TopBar";
 import { Toasts } from "./ui/Toasts";
 
 describe("Toast announcements", () => {
+  it("exposes recovered job outcomes in the appropriate live regions once", () => {
+    const { store } = renderApp(<Toasts />);
+    let socket: LiveSocketOptions | null = null;
+    const controller = createController({
+      store,
+      client: { baseUrl: "http://x", token: "t" } as unknown as DaxClient,
+      openSocket: (options) => {
+        socket = options;
+        return { close: vi.fn(), retryNow: vi.fn() };
+      },
+    });
+    const send = (event: WsEvent) => {
+      if (!socket) throw new Error("Socket not opened");
+      socket.onEvent(event);
+    };
+    const running: JobInfo = {
+      id: "export",
+      kind: "export",
+      label: "Export",
+      progress: 0.2,
+      status: "running",
+    };
+    const failing: JobInfo = { ...running, id: "failed" };
+    const done: JobInfo = { ...running, progress: 1, status: "done", result: "/tmp/out.mp4" };
+    const error: JobInfo = { ...failing, status: "error", error: "Disk full" };
+    act(() => {
+      controller.start();
+      send({ type: "state", state: makeState({ jobs: [running, failing] }) });
+    });
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
+    act(() => send({ type: "state", state: makeState({ jobs: [done, error] }) }));
+    const status = screen.getByRole("status");
+    const alert = screen.getByRole("alert");
+    expect(status).toHaveTextContent("Exported out.mp4.");
+    expect(alert).toHaveTextContent("Disk full");
+    const statusNotice = status.firstElementChild;
+    const alertNotice = alert.firstElementChild;
+    act(() => {
+      send({ type: "job", job: done });
+      send({ type: "job", job: error });
+    });
+    expect(status.firstElementChild).toBe(statusNotice);
+    expect(alert.firstElementChild).toBe(alertNotice);
+    controller.stop();
+  });
+
   it.each(["error-first", "info-first"] as const)(
     "keeps both priorities when notices arrive together: %s",
     (order) => {

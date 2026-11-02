@@ -8,6 +8,7 @@ import type {
   CommandResponse,
   ConnectionRequest,
   ImportResult,
+  JobInfo,
   ProviderKind,
   Settings,
   SpeechStatus,
@@ -137,9 +138,31 @@ export function createController(deps: ControllerDeps): Controller {
   const toast = (tone: "info" | "success" | "error", text: string) =>
     store.getState().pushToast(tone, text);
 
+  // A snapshot may be the first way an already-known running job is seen to finish.
+  function announceJob(previous: JobInfo | undefined, job: JobInfo, liveEvent: boolean): void {
+    if (job.status === "running" || (previous && previous.status !== "running")) return;
+    if (!previous && !liveEvent) return; // Initial snapshots include historical completed jobs.
+    if (job.status === "error") {
+      toast("error", job.error ?? `${job.label} failed.`);
+    } else if (job.status === "done" && job.kind === "export") {
+      toast(
+        "success",
+        job.label === "Render complete edit preview"
+          ? "Effects preview ready."
+          : `Exported ${job.result ? basename(job.result) : "the video"}.`,
+      );
+    }
+  }
+
   function applySnapshot(state: StateResponse): void {
     stateEpoch++;
+    const previous = store.getState().jobs;
     store.getState().applyState(state);
+    const current = store.getState().jobs;
+    for (const id of new Set(state.jobs.map((job) => job.id))) {
+      const accepted = current[id];
+      if (accepted) announceJob(previous[id], accepted, false);
+    }
   }
 
   async function refreshState(): Promise<void> {
@@ -236,21 +259,8 @@ export function createController(deps: ControllerDeps): Controller {
           } else if (event.type === "job") {
             const prev = s.jobs[event.job.id];
             s.applyJob(event.job);
-            // The export command answers when FFmpeg starts, so the job events announce how it ended.
-            if (prev?.status === "running" && event.job.status === "error") {
-              toast("error", event.job.error ?? `${event.job.label} failed.`);
-            } else if (
-              prev?.status === "running" &&
-              event.job.status === "done" &&
-              event.job.kind === "export"
-            ) {
-              toast(
-                "success",
-                event.job.label === "Render complete edit preview"
-                  ? "Effects preview ready."
-                  : `Exported ${event.job.result ? basename(event.job.result) : "the video"}.`,
-              );
-            }
+            const accepted = store.getState().jobs[event.job.id];
+            if (accepted) announceJob(prev, accepted, true);
           } else {
             s.applyChat(event.runId, event.event, event.startStateId);
           }
