@@ -18,3 +18,4 @@
 * [ADR 0014: Live desktop tools and bounded background integrations](0014-functional-desktop-integrations.md) - Share one authoritative session with local MCP clients and run speech and Blender as bounded jobs.
 * [Preserve omitted format options in live editor sessions](0015-editor-format-preservation.md) - Keep footage fit and frame rate during editor format changes while retaining standalone CLI preset defaults.
 * [Publish save-as files without replacing existing destinations](0016-save-as-publication.md) - Stage project and history separately and publish exclusively, with explicit partial-save recovery.
+* [Isolate new temporary attachments behind explicit leases](0017-staged-attachment-leases.md) - Propose opaque attachment leases with durable promotion and conservative recovery, while preserving all legacy uploads.

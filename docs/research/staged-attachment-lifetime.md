@@ -26,3 +26,5 @@ The current `stage=true` API returns a usable file path. Chat, image and audio f
 5. Keep durable sources for active, queued, interrupted, completed and historical work and all project/history references. Retention and eventual user-directed management of durable sources need a separate design; a saved project on another disk cannot be safely discovered by scanning the current session alone.
 
 This is a proposal, not an implemented cleanup policy or an architectural approval. Before implementation, write the detailed spec and ADR, settle atomic write and crash recovery semantics, review cross-client and external-project compatibility, and test concurrent claim/delete, crashes at every transition, legacy clients, quotas, symlinks, history/undo and explicit cancellation. No existing user files were removed by these tests.
+
+The draft [lease decision](../adr/0017-staged-attachment-leases.md) and [detailed contract](../specs/staged-attachment-leases.md) now describe these boundaries for review in [#227](https://github.com/sahamo123/dax-editor/issues/227). They do not implement cleanup or approve deletion.
