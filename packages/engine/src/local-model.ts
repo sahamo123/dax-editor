@@ -3,6 +3,7 @@
 
 import {
   DEFAULT_MODEL_ID,
+  DownloadAbortedError,
   getModel,
   type LocalModelManager,
   type LocalModelStatus as ManagerStatus,
@@ -174,10 +175,19 @@ export function createLocalModelController(options: EmbeddedModelOptions): Embed
     },
     async install(modelId, task) {
       // `undefined` lets the manager pick the model recommended for this machine.
-      await manager.install(modelId, {
-        onProgress: (p) => task.onProgress(p.fraction),
-        signal: task.signal,
-      });
+      try {
+        await manager.install(modelId, {
+          onProgress: (p) => task.onProgress(p.fraction),
+          signal: task.signal,
+        });
+      } catch (error) {
+        if (task.signal.aborted && error instanceof DownloadAbortedError) {
+          const cancelled = new Error("Local model download was cancelled.", { cause: error });
+          cancelled.name = "AbortError";
+          throw cancelled;
+        }
+        throw error;
+      }
     },
     async start(task) {
       const s = await manager.status();

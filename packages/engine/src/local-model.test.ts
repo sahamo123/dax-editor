@@ -1,6 +1,10 @@
 // Tests for the embedded local model controller, using a fake manager: no disk model files, no runtime, no network.
 
-import type { LocalModelStatus as ManagerStatus, ServerHandle } from "@dax/local-llm";
+import {
+  DownloadAbortedError,
+  type LocalModelStatus as ManagerStatus,
+  type ServerHandle,
+} from "@dax/local-llm";
 import { describe, expect, it } from "vitest";
 import {
   chooseInstalledModel,
@@ -271,6 +275,32 @@ describe("createLocalModelController", () => {
     // The server aborts the task's signal on cancel; the manager must see that same signal.
     abort.abort();
     expect(manager.installs[0]?.signal?.aborted).toBe(true);
+  });
+
+  it("translates only a signalled typed download abort into a cancellation error", async () => {
+    const manager = new FakeManager();
+    const abort = new AbortController();
+    manager.install = async () => {
+      abort.abort();
+      throw new DownloadAbortedError("synthetic");
+    };
+    const controller = createLocalModelController({ manager });
+    await expect(
+      controller.install(undefined, { onProgress: () => undefined, signal: abort.signal }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("keeps an unrelated model-install failure even when cancellation races it", async () => {
+    const manager = new FakeManager();
+    const abort = new AbortController();
+    manager.install = async () => {
+      abort.abort();
+      throw new Error("Disk full");
+    };
+    const controller = createLocalModelController({ manager });
+    await expect(
+      controller.install(undefined, { onProgress: () => undefined, signal: abort.signal }),
+    ).rejects.toMatchObject({ name: "Error", message: "Disk full" });
   });
 
   it("starts the installed model with its catalog context window", async () => {

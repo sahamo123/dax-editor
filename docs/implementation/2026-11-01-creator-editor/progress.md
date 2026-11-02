@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#254 / draft PR #255](https://github.com/sahamo123/dax-editor/pull/255): corrected typed cancellation foundation passed an independent full check at `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`. See the [receipt](s01-06-cancellation-foundation-receipt.md); dependent [PR #256](https://github.com/sahamo123/dax-editor/pull/256) and S01.06 remain open.
+
 - [#251](https://github.com/sahamo123/dax-editor/issues/251): opt-in real-server speech and generated-media export cancellation reproductions passed; the [investigation](s01-06-job-cancellation-investigation.md) records the urgent-error notice and typed-contract work. No fix or S01.06 completion is claimed.
 
 - [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250) reconciles and announces non-export job outcomes. Focused, browser and full `pnpm check` passed at `5136c40914e064386397a7e46e603a2337a8ee7f`; see the [receipt](s01-06-non-export-outcomes-receipt.md). Investigate cancellation classification [#251](https://github.com/sahamo123/dax-editor/issues/251); S01.06 acceptance remains open.
