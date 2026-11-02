@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Side-panel keyboard access — November 2, 2026
+
+[#238 / draft PR #239](https://github.com/sahamo123/dax-editor/pull/239) makes side-panel content keyboard reachable and preserves tab-to-panel references. Full `pnpm check` passed at application/test head `5706eae39e484e114081bb48b723cebda7f9f1d9`; a later test-only compact check and 13 affected browser tests passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-side-panel-accessibility-receipt.md). Review, S01.06 and actual native/accessibility acceptance remain open.
+
 ## Modal focus recovery — November 2, 2026
 
 [#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237) recovers focus within Settings and rendered-effects review. Focused tests, generated-video Edge checks and full `pnpm check` passed at application/test head `1c59e472ab99a9cb8697d6b2fc1e782a854f3575`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-recovery-receipt.md). Review, S01.06, actual keyboard/screen-reader and native acceptance remain open.

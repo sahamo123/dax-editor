@@ -927,6 +927,9 @@ textarea.input {
   min-height: 0;
   overflow-y: auto;
 }
+.drawer__panel:focus-visible {
+  outline-offset: -2px;
+}
 
 /* media bin */
 .media {

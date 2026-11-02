@@ -11,6 +11,8 @@ generated:
 
 # Desktop workspace product and design contract
 
+Side-panel tabs retain labelled panel targets, including for inactive sections. The active panel is reachable by keyboard so its instructions remain available even when it contains no focusable controls; inactive editor controls remain unmounted.
+
 This is the proposed contract for S01.03–S01.07, not a claim that those changes exist. The [audit](../implementation/2026-11-01-creator-editor/s01-01-audit-receipt.md), [product brief](../../PRODUCT.md) and [design context](../../DESIGN.md) establish scope. Tracking: [issue #140](https://github.com/sahamo123/dax-editor/issues/140).
 
 S01.03 was verified with self-review under [issue #142](https://github.com/sahamo123/dax-editor/issues/142): an empty-project setup surface can be skipped or reopened, with project options separate from selected-item inspection. Its [receipt](../implementation/2026-11-01-creator-editor/s01-03-setup-receipt.md) records tests and limitations. The later native acceptance below remains proposed.
