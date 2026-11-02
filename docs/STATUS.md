@@ -13,7 +13,7 @@ generated:
 
 ## Targeted Stop and task identity — November 2, 2026
 
-The local [#224](https://github.com/sahamo123/dax-editor/issues/224) candidate fixes a reproduced delayed-Stop transcript race and targets cancellation by task ID. Ninety-two desktop, 15 server and three generated-media browser tests passed; fast check passed after correcting a fixture. Publication and full check remain pending; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). S01.06 and native acceptance remain open.
+The [#224 / draft PR #226](https://github.com/sahamo123/dax-editor/pull/226) candidate fixes a reproduced delayed-Stop transcript race and targets cancellation by task ID. Ninety-two desktop, 15 server and three generated-media browser tests passed at application/test head `a632ef032e6d6be9f39a28ed69b7a5ce6b9d4829`; fast check passed after correcting a fixture. Full check remains pending; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). S01.06 and native acceptance remain open.
 
 ## Steering provider context — November 2, 2026
 
