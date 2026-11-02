@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current local work:** [#217](https://github.com/sahamo123/dax-editor/issues/217), `codex/s01-06-local-model-context`, based on PR #219 documentation head `9bf098731d19b0393d079c17db301ab6f276ae9e`. The local candidate guards model transitions and passed focused server and launcher tests. Publish, run the full host check and review; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Do not advance S01.06.
+
 **Current follow-up:** [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219), `codex/s01-06-deterministic-probes`, test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`, based on PR #216 documentation head `1e5a304b1f1c2b1db1f5be8cc7d5fcc7964caa74`. Nineteen focused tests and host-authorized full `pnpm check` pass; review remains pending. The earlier failed full checks and passing log are recorded in the [keyboard receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md); no native acceptance is implied.
 
 **Current S01.06 child:** [#215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216), `codex/s01-06-summary-shortcut`, application/test head `563028eb83ca88705c004024d9b630213ff0f354`, based on [draft PR #214](https://github.com/sahamo123/dax-editor/pull/214) documentation head `0fda3f1d21372c6e8aad9430e1895a7e80b6709b`. Focused component and browser checks pass; full check and review remain pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). Older entries below are historical.

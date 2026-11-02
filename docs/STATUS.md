@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Local-model context guard — November 2, 2026
+
+The local [#217](https://github.com/sahamo123/dax-editor/issues/217) candidate guards chat against model changes and protects accepted local work; 62 server and 13 launcher/runner tests passed. A provider-switch failure remains unexplained; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Full check, publication and review remain pending. S01.06 and native acceptance remain open.
+
 ## Bridge timeout test follow-up — November 2, 2026
 
 The full check of [draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) failed two fake-CLI timeout classification tests; the earlier-probe timeouts and log hash are recorded in the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). [Issue #218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) covers deterministic phase tests and an actual process timeout test. Nineteen focused tests and the host-authorized full check passed at test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`; review remains pending. S01.06 remains open.
