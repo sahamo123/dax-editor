@@ -82,11 +82,15 @@ function runBlender(
     child.stderr.on("data", (chunk: Buffer) => {
       tail = (tail + chunk.toString()).slice(-3000);
     });
-    child.once("error", fail);
+    let processError: Error | undefined;
+    child.once("error", (error) => {
+      processError = error;
+    });
     child.once("close", (code) => {
       clearTimeout(timer);
       signal?.removeEventListener("abort", abort);
-      if (code === 0) done();
+      if (processError) fail(processError);
+      else if (code === 0) done();
       else if (signal?.aborted && killedForCancellation) fail(cancellationError());
       else fail(new Error(`Blender render failed (${code}): ${tail.slice(-800)}`));
     });

@@ -90,4 +90,27 @@ describe("Blender cancellation", () => {
     await rejected;
     expect(await readdir(join(root, "renders"))).toEqual([]);
   });
+
+  it("waits for close and preserves a process error even if cancellation follows it", async () => {
+    const { root, motion } = await renderer();
+    const controller = new AbortController();
+    const child = new FakeChild();
+    vi.mocked(spawn).mockReturnValueOnce(child as unknown as ReturnType<typeof spawn>);
+    let settled = false;
+    const result = motion.render(request, { signal: controller.signal }).finally(() => {
+      settled = true;
+    });
+    const rejected = expect(result).rejects.toMatchObject({
+      name: "Error",
+      message: "Process error",
+    });
+    await vi.waitFor(() => expect(spawn).toHaveBeenCalledOnce());
+    child.emit("error", new Error("Process error"));
+    controller.abort();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    expect(settled).toBe(false);
+    child.emit("close", null, "SIGKILL");
+    await rejected;
+    expect(await readdir(join(root, "renders"))).toEqual([]);
+  });
 });
