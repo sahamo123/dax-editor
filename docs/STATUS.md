@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 chat submission investigation — November 1, 2026
+
+Investigate intermittent unsent synthetic chat under [#186](https://github.com/sahamo123/dax-editor/issues/186) on `codex/s01-06-engine-reconnect`, based on [draft PR #187](https://github.com/sahamo123/dax-editor/pull/187) documentation head `c3ad581055db52e5a716363c6c60fdf21a5c65b9`. Pre-teardown evidence showed the engine reachable and socket open while the prompt had not appeared and no edit was made. The earlier disconnected snapshot may reflect test cleanup; the root cause remains unproven. See the [investigation receipt](implementation/2026-11-01-creator-editor/s01-06-chat-submission-investigation.md). Keyboard-only import, actual post-change screen-reader speech and S01.06 remain open; do not advance to S01.07.
+
 ## S01.06 live accessibility and export announcements — November 1, 2026
 
 The live walkthrough [#177](https://github.com/sahamo123/dax-editor/issues/177) is partial: the generated clip was selected with a mouse; Narrator was heard announcing preview completion, but the operator reported no export-start or progress speech and did not hear the existing-file error. The candidate fix [#185 / draft PR #187](https://github.com/sahamo123/dax-editor/pull/187) is under verification at application/test head `6c3fbea9723fcf17018d736f518e749cb7533860`. Full source checks passed in an authorized isolated test environment; the affected browser suite exposed an intermittent disconnected-engine failure, tracked separately in [#186](https://github.com/sahamo123/dax-editor/issues/186). The user is away, so actual post-change speech and a complete keyboard-only import remain pending. Do not advance to S01.07. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-live-announcement-receipt.md); earlier entries are historical.
