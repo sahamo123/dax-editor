@@ -13,7 +13,7 @@ generated:
 
 ## Bridge status deadline follow-up — November 2, 2026
 
-The local [#222](https://github.com/sahamo123/dax-editor/issues/222) candidate replaces a fixed fake-CLI wait with a bounded wait for the actual result while retaining the initial deadline assertion. Thirty-one focused tests passed; full check, publication and review remain pending. The prior failed run is recorded in the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
+The [#222 / draft PR #223](https://github.com/sahamo123/dax-editor/pull/223) candidate replaces a fixed fake-CLI wait with a bounded wait for the actual result while retaining the initial deadline assertion. Thirty-one focused tests passed at test head `6833c86e983c4b48b22872c066296b4308a866c4`; full check and review remain pending. The prior failed run is recorded in the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
 
 ## Local-model context guard — November 2, 2026
 
