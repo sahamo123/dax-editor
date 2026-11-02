@@ -2,7 +2,9 @@
 
 ## 2026-11-02
 
-* **Investigate**: Full check for [PR #216](https://github.com/sahamo123/dax-editor/pull/216) failed two timeout classification tests; [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) tracks deterministic coverage. Nineteen focused tests passed; full rerun and review remain pending. See the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
+* **Test**: Host-authorized full `pnpm check` passed for [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) after the earlier failures documented in the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md); review remains pending.
+
+* **Investigate**: Full check for [PR #216](https://github.com/sahamo123/dax-editor/pull/216) failed two timeout classification tests; [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) tracks deterministic coverage. Nineteen focused tests passed. See the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
 
 * **Fix**: Focused native disclosures retain Space/Enter activation instead of triggering playback [#215 / PR #216](https://github.com/sahamo123/dax-editor/pull/216); focused tests passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
 

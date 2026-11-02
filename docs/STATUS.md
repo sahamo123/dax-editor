@@ -13,7 +13,7 @@ generated:
 
 ## Bridge timeout test follow-up — November 2, 2026
 
-The full check of [draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) failed two fake-CLI timeout classification tests; the earlier-probe timeouts and log hash are recorded in the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). [Issue #218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) covers deterministic phase tests and an actual process timeout test. Nineteen focused tests passed at test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`; the full rerun and review remain pending. S01.06 remains open.
+The full check of [draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) failed two fake-CLI timeout classification tests; the earlier-probe timeouts and log hash are recorded in the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). [Issue #218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) covers deterministic phase tests and an actual process timeout test. Nineteen focused tests and the host-authorized full check passed at test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`; review remains pending. S01.06 remains open.
 
 ## S01.06 disclosure keyboard activation — November 2, 2026
 
