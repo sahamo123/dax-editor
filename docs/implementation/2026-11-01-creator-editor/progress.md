@@ -17,7 +17,7 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
-- Local follow-up [#218](https://github.com/sahamo123/dax-editor/issues/218): deterministic probe classification and a real subprocess timeout test passed 19 focused tests; full check and publication remain pending. The preceding full check failed as recorded in the [receipt](s01-06-summary-keyboard.md).
+- Follow-up [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219): deterministic probe classification and a real subprocess timeout test passed 19 focused tests at `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`; full check and review remain pending. The preceding full check failed as recorded in the [receipt](s01-06-summary-keyboard.md).
 
 - Selected execution route: first-improvement (21 steps), explicitly launched November 1, 2026.
 - Current S01.06 child [#215 / PR #216](https://github.com/sahamo123/dax-editor/pull/216): Space/Enter disclosure-key fix passed focused checks at application/test head `563028eb83ca88705c004024d9b630213ff0f354`; the full check failed in bridge tests and review remains pending. See the [receipt](s01-06-summary-keyboard.md).

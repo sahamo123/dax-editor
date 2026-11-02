@@ -11,7 +11,7 @@ generated:
 
 # Current handoff
 
-**Current local follow-up: [bridge timeout tests #218](https://github.com/sahamo123/dax-editor/issues/218).** On `codex/s01-06-deterministic-probes`, based on PR #216 documentation head `1e5a304b1f1c2b1db1f5be8cc7d5fcc7964caa74`, the candidate isolates timeout classification by probe phase and retains an actual subprocess timeout test. Nineteen focused tests passed locally; full check, publication and review remain pending. The full check of #216 failed and its [receipt](s01-06-summary-keyboard.md) records the evidence. Do not advance S01.06.
+**Current follow-up: [bridge timeout tests #218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219).** On `codex/s01-06-deterministic-probes`, test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`, based on PR #216 documentation head `1e5a304b1f1c2b1db1f5be8cc7d5fcc7964caa74`, the candidate isolates timeout classification by probe phase and retains an actual subprocess timeout test. Nineteen focused tests passed; full check and review remain pending. The full check of #216 failed and its [receipt](s01-06-summary-keyboard.md) records the evidence. Do not advance S01.06.
 
 **Current work: [disclosure keyboard #215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216).** The published candidate on `codex/s01-06-summary-shortcut`, application/test head `563028eb83ca88705c004024d9b630213ff0f354`, preserves Space/Enter on Project and Work status summaries; focused component and browser checks pass. Complete full checks and review; see the [receipt](s01-06-summary-keyboard.md). Actual keyboard-only picker and Narrator observations remain open; do not advance S01.06. Following current-work entries are historical.
 

@@ -11,7 +11,7 @@ generated:
 
 # Continue on another laptop or agent
 
-**Current local follow-up:** [#218](https://github.com/sahamo123/dax-editor/issues/218), `codex/s01-06-deterministic-probes`, based on PR #216 documentation head `1e5a304b1f1c2b1db1f5be8cc7d5fcc7964caa74`. Focused fake-CLI and process tests pass locally; publish and complete a full check and review. The failed prior full check is recorded in the [keyboard receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md); no native acceptance is implied.
+**Current follow-up:** [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219), `codex/s01-06-deterministic-probes`, test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`, based on PR #216 documentation head `1e5a304b1f1c2b1db1f5be8cc7d5fcc7964caa74`. Nineteen focused tests pass; the full check and review remain pending. The failed prior full check is recorded in the [keyboard receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md); no native acceptance is implied.
 
 **Current S01.06 child:** [#215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216), `codex/s01-06-summary-shortcut`, application/test head `563028eb83ca88705c004024d9b630213ff0f354`, based on [draft PR #214](https://github.com/sahamo123/dax-editor/pull/214) documentation head `0fda3f1d21372c6e8aad9430e1895a7e80b6709b`. Focused component and browser checks pass; full check and review remain pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). Older entries below are historical.
 
