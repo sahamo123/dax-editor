@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.06 child:** History contrast [#173](https://github.com/sahamo123/dax-editor/issues/173) is IN_PROGRESS on `codex/s01-06-contrast-sweep`, based on self-reviewed [PR #172](https://github.com/sahamo123/dax-editor/pull/172) `3f5a185e6861268621c21bbe0f68138a5ea528b5`. The focused browser checks pass after improving history text and labelling other-branch entries. The full source check and final focused browser tests passed; fast checks for the later test-only assertion also passed; publication and self-review remain pending. Actual assistive-technology and native/DPI evidence remain open. Confirm publication before switching laptops. Earlier headings are historical.
+
 **Current S01.06 child:** [#171](https://github.com/sahamo123/dax-editor/issues/171), branch `codex/s01-06-dialog-shortcuts`, follows self-reviewed [PR #170](https://github.com/sahamo123/dax-editor/pull/170) `5f766c48f1ec329b8d111593ee638849681f717f`. Confirm publication; component, browser and host-permission full checks passed; publication and self-review remain pending. See dated handoff. Earlier headings are historical.
 
 **Current S01.06 reduced-motion child:** [#168](https://github.com/sahamo123/dax-editor/issues/168), local `codex/s01-06-reduced-motion`, starts from self-reviewed [PR #169](https://github.com/sahamo123/dax-editor/pull/169) `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Source and focused browser checks passed; confirm publication. Self-review and actual assistive-technology evidence remain pending.

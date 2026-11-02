@@ -344,3 +344,5 @@
 * **Creation**: engine core in `packages/core`: timeline model with undo/redo, FFmpeg probe, silence and scene detection, renderer, transcript helpers, and the Connector interface. 28 tests. Draft PR: https://github.com/sahamo123/dax-editor/pull/1
 
 * **Update**: 2026-11-01 self-reviewed reduced-motion PR #170; investigated dialog shortcut isolation [#171](https://github.com/sahamo123/dax-editor/issues/171). See the [receipt](implementation/2026-11-01-creator-editor/s01-06-dialog-shortcuts-receipt.md) for pre-fix failures and pending verification.
+
+* **Update**: 2026-11-01 self-reviewed dialog-shortcut PR #172 and investigated [history contrast #173](https://github.com/sahamo123/dax-editor/issues/173). The [receipt](implementation/2026-11-01-creator-editor/s01-06-history-contrast-receipt.md) records measured before/after states and outstanding verification.

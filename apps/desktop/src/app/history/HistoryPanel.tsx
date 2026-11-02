@@ -123,6 +123,7 @@ export function HistoryPanel(): ReactElement {
                       {h.clips === 1 ? "" : "s"}
                       {h.overlays > 0 ? ` · ${h.overlays} text` : ""}
                       {h.name ? ` · ${h.name}` : ""}
+                      {onPath.has(h.id) ? "" : " · Other branch"}
                     </span>
                   </span>
                   <span className="state-row__time">

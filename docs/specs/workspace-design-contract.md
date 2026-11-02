@@ -78,3 +78,5 @@ Splitters remain named keyboard-operable separators; arrows and Home/End continu
 Preserve projects and local data. Do not send media or credentials to a provider in tests. Failed or unavailable required evidence remains open and blocks its dependent step; do not weaken policy or treat this specification as acceptance evidence.
 
 A modal dialog owns its keyboard interactions: editor playback and project mutation shortcuts, including global undo/redo, must not act on the background project when the event originates inside the modal. The dialog retains its own controls and Escape handling. After it closes, normal shortcuts resume; text entry retains its native undo behavior.
+
+Restorable history entries must keep readable text in normal and hover states. Entries from other history branches remain fully legible and carry an explicit Other branch label and a visual border; their distinction must not depend on reduced opacity or color alone.
