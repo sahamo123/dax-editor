@@ -660,7 +660,7 @@ body.dx-dragging {
 
 /* overlays */
 .dx-ovl {
-  --dx-ovl-color: #ec4899;
+  --dx-ovl-color: #bb2874;
   position: absolute;
   display: flex;
   align-items: center;
@@ -674,16 +674,16 @@ body.dx-dragging {
   touch-action: none;
 }
 .dx-ovl--title {
-  --dx-ovl-color: #7a58ff;
+  --dx-ovl-color: #744cea;
 }
 .dx-ovl--lower-third {
-  --dx-ovl-color: #3b82f6;
+  --dx-ovl-color: #1766cf;
 }
 .dx-ovl--caption {
-  --dx-ovl-color: #0ea5a4;
+  --dx-ovl-color: #087d7b;
 }
 .dx-ovl--callout {
-  --dx-ovl-color: #d98a0b;
+  --dx-ovl-color: #a05e00;
 }
 .dx-ovl.is-selected {
   box-shadow:
@@ -709,7 +709,6 @@ body.dx-dragging {
 .dx-ovl-glyph {
   font-weight: 700;
   font-size: 10px;
-  opacity: 0.8;
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 3px;
   padding: 0 3px;
