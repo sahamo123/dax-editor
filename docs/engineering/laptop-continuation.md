@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.06 child:** [#206](https://github.com/sahamo123/dax-editor/issues/206), local browser regression `codex/s01-06-chat-context-browser`, based on [draft PR #208](https://github.com/sahamo123/dax-editor/pull/208) documentation head `660995f4cf1621b8349a92ec65381d5e9454598f`. Six race scenarios and ten existing chat workflows passed; publication and review are pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Verify publication before changing laptops. Older child entries below are historical.
+
 **Current S01.06 child:** [#201 / draft PR #208](https://github.com/sahamo123/dax-editor/pull/208), branch `codex/s01-06-chat-context-race`, application/test head `c1b128fc4bf459b9c8d9ae5d234ecc2dfa608348`. Full retry passed; an earlier unexplained connection failure remains in [#207](https://github.com/sahamo123/dax-editor/issues/207). Publish browser regression [#206](https://github.com/sahamo123/dax-editor/issues/206) and review. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Earlier current-child entries below are historical.
 
 **Current S01.06 child:** [#203 / draft PR #205](https://github.com/sahamo123/dax-editor/pull/205) on `codex/s01-06-bridge-probe-errors`, application/test head `84a1c09e20dff39d4dc10e39e9f37e454205ac1d`. Fake-CLI and combined full checks passed; review remains pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-bridge-probe-errors.md). S01.06 and native acceptance remain open.
