@@ -173,7 +173,7 @@ it("retains hovered notices and explicitly counts an error omitted from an all-e
   act(() => store.getState().pushToast("error", "Hovered error."));
   const notice = screen.getByText("Hovered error.", { selector: ".toast__text" });
   const stack = notice.closest(".toasts");
-  if (!stack) throw new Error("Missing standalone notice stack");
+  if (!(stack instanceof HTMLElement)) throw new Error("Missing standalone notice stack");
   fireEvent.pointerEnter(stack);
   act(() => {
     for (let index = 1; index <= 36; index++) {
