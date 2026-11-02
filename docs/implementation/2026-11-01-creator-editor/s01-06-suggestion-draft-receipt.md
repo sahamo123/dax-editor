@@ -23,4 +23,4 @@ Two generated-video browser scenarios passed in installed Edge with a scripted a
 
 ## Next checks
 
-Host-authorized full `pnpm check` is running at the application/test head. Record its exact outcome and log digest; review the diff and do not treat this child as completing S01.06. Actual keyboard-only import, post-change Narrator speech, native Windows and DPI gates remain separate. No private projects or user media were used.
+Host-authorized full `pnpm check` passed at the application/test head: 1,882 package tests passed, 67 skipped, and 17 script tests passed. Private log SHA-256 `60734e75ff7b676560b8bf2dda28a5d5c0c924d3258e997e063aca9afc036048`. Review the diff and do not treat this child as completing S01.06. Actual keyboard-only import, post-change Narrator speech, native Windows and DPI gates remain separate. No private projects or user media were used.

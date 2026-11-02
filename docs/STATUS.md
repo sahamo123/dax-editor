@@ -13,7 +13,7 @@ generated:
 
 ## Suggestion draft preservation — November 2, 2026
 
-[#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) preserves an unrelated chat draft when a suggestion is sent. Focused component and generated-media browser checks passed at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; full check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-suggestion-draft-receipt.md). S01.06 and native acceptance remain open.
+[#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) preserves an unrelated chat draft when a suggestion is sent. Focused component and generated-media browser checks and host-authorized full `pnpm check` passed at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-suggestion-draft-receipt.md). S01.06 and native acceptance remain open.
 
 ## Staged attachment lease design — November 2, 2026
 

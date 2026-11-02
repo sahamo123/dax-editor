@@ -13,7 +13,7 @@ generated:
 
 ## Current continuation — November 2, 2026
 
-Start with the [cross-laptop guide](laptop-continuation.md), [status](../STATUS.md) and [dated handoff](../implementation/2026-11-01-creator-editor/handoff.md). The current S01.06 child is [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; focused checks passed and full validation is running. Keep S01.06 and native acceptance open. All continuation headings below are historical snapshots, not instructions to resume their older branches.
+Start with the [cross-laptop guide](laptop-continuation.md), [status](../STATUS.md) and [dated handoff](../implementation/2026-11-01-creator-editor/handoff.md). The current S01.06 child is [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; focused and full source checks passed. Keep S01.06 and native acceptance open. All continuation headings below are historical snapshots, not instructions to resume their older branches.
 
 ## Current S01.06 bridge probe errors — November 1, 2026
 
