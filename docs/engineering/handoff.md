@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current engine test fixtures — November 2, 2026
+
+[#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261), `codex/s01-06-engine-test-fixtures`, application/test head `7960135d19d8842fe9e6a5132d0eab6ed302ac76`, passed the engine test-specific typecheck, 15 affected tests and a full source check. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-engine-test-fixtures-receipt.md). Continue independent S01.06 work; actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 ## Current dialog notices — November 2, 2026
 
 [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260), branch `codex/s01-06-dialog-notice-layout`, passed focused, nine browser and full source checks at application/test head `b106ba0a4edd5d9a862497b850d482ed8b2a31ef`. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-dialog-notices-receipt.md), continue S01.06 and keep actual picker, screen-reader and native acceptance open. Self-review is not independent review; earlier entries are historical.

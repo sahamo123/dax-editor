@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Engine test fixtures — November 2, 2026
+
+[#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261) gives runner tests valid empty project sessions. The engine test-specific typecheck, affected tests and full source check passed at `7960135d19d8842fe9e6a5132d0eab6ed302ac76`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-engine-test-fixtures-receipt.md). Self-review is not independent review. S01.06 and actual screen-reader/native acceptance remain open.
+
 ## Dialog notification placement — November 2, 2026
 
 [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260) moves task notices into active dialogs so they do not cover actions. Nine browser checks and the full source check passed at `b106ba0a4edd5d9a862497b850d482ed8b2a31ef`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-dialog-notices-receipt.md). Self-review is complete; independent review, S01.06, actual screen-reader and native acceptance remain open.
