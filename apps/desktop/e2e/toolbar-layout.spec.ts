@@ -72,6 +72,17 @@ for (const viewport of [
     const timeline = page.getByTestId("timeline-scroll");
     const timelineBounds = await timeline.boundingBox();
     expect(timelineBounds?.height ?? 0).toBeGreaterThan(30);
+    // The minimum-height viewport must still let a user reach the video track.
+    await clip.focus();
+    await expect(clip).toBeFocused();
+    const clipCenterReachable = await clip.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      return hit !== null && element.contains(hit);
+    });
+    expect(clipCenterReachable).toBe(true);
+    await clip.click();
+    await expect(clip).toHaveAttribute("aria-selected", "true");
     const loop = toolbar.getByRole("button", { name: "Loop", exact: true });
     const before = await loop.getAttribute("aria-pressed");
     await loop.focus();
