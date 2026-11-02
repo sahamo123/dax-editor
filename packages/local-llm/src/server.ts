@@ -348,7 +348,12 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
       if (this.currentState !== "stopped") this.setState("stopped");
       const tail = this.buffer.tail(40);
       if (error instanceof ServerError) {
-        throw new ServerError(error.message.split("\n--- last log")[0] ?? error.message, tail);
+        const wrapped = new ServerError(
+          error.message.split("\n--- last log")[0] ?? error.message,
+          tail,
+        );
+        if (error.name === "AbortError") wrapped.name = "AbortError";
+        throw wrapped;
       }
       throw error;
     }
@@ -362,7 +367,11 @@ export class LlamaServer extends EventEmitter<LlamaServerEvents> {
     const deadline = Date.now() + (o.healthTimeoutMs ?? 300_000);
     const url = `http://127.0.0.1:${this.chosenPort}/health`;
     for (;;) {
-      if (signal?.aborted) throw new ServerError("Starting the server was cancelled");
+      if (signal?.aborted) {
+        const cancelled = new ServerError("Starting the server was cancelled");
+        cancelled.name = "AbortError";
+        throw cancelled;
+      }
       if (child.exitCode !== null || child.signalCode !== null) {
         throw new ServerError(
           `llama-server exited during start-up (code ${child.exitCode}, signal ${child.signalCode})`,

@@ -9,6 +9,7 @@
 * [Creator workflows - architecture review and implementation plan](creator-platform-plan.md) - Evidence-backed review and staged proposal for content profiles, layered editing, Blender characters, reference styles, specialist tasks and optional hosting.
 * [Effects layers (zoom, music with ducking, image overlays)](effects-layers.md) - How the engine zooms the picture, mixes music and sound effects under speech with automatic ducking, and draws logos and stickers, and how templates use them.
 * [Functional desktop release](functional-desktop-release.md) - Delivery contract and acceptance gates for manual editing, optional AI providers, speech, live MCP and Blender templates.
+* [Typed background job cancellation outcomes](job-cancellation-outcomes.md) - Backward-compatible cancellation identity from command execution through job status, task tracking and desktop notices.
 * [Background job completion ordering](job-completion-ordering.md) - Keep editor task status current when full state snapshots wait for provider diagnostics.
 * [Lightweight local AI and API provider setup](lightweight-ai-providers.md) - Measure a smaller local model and provide explicit OpenRouter and direct API configuration without making hosted services mandatory.
 * [Manual effects controls](manual-effects.md) - Manual zoom, music, sound effect and image controls over the existing validated editing registry.

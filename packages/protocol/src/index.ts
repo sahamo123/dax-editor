@@ -428,6 +428,8 @@ export interface JobInfo {
   progress: number;
   status: "running" | "done" | "error";
   error?: string;
+  /** True only after an owned job has settled as a confirmed cancellation; legacy clients still see status error. */
+  cancelled?: true;
   /** For exports: the path written. */
   result?: string;
 }

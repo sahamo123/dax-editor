@@ -118,6 +118,9 @@ export interface CommandDef {
 /** Thrown for bad arguments or a command that cannot do what was asked. The message is safe to show to a model. */
 export class CommandError extends Error {}
 
+/** A command stopped by its explicitly signalled cancellation; it remains a CommandError for existing callers. */
+export class CommandCancelledError extends CommandError {}
+
 const seconds = (what: string) => z.number().finite().min(0).describe(`${what}, in seconds`);
 const assetIdArg = z
   .string()
@@ -149,7 +152,7 @@ function define<S extends ZodTypeAny>(def: {
 async function edit(ctx: CommandContext, label: string, fn: (p: Project) => Project) {
   // A cancelled command must not change the project after the user has stopped it: long commands reach this
   // point only after their analysis, and that analysis may have been cut short.
-  if (ctx.signal?.aborted) throw new CommandError("Cancelled. Nothing was changed.");
+  if (ctx.signal?.aborted) throw new CommandCancelledError("Cancelled. Nothing was changed.");
   await ctx.session.apply(fn, { label, source: ctx.source ?? "manual" });
 }
 
@@ -1196,7 +1199,7 @@ export async function runCommand(
   const parsed = def.schema.safeParse(rawArgs ?? {});
   if (!parsed.success) throw new CommandError(formatIssues(name, parsed.error));
   if (ctx.signal?.aborted)
-    throw new CommandError("Cancelled before it started. Nothing was changed.");
+    throw new CommandCancelledError("Cancelled before it started. Nothing was changed.");
   try {
     const result = await def.run(ctx, parsed.data as never);
     // The edit is applied even when autosave fails; say so, or the user and the model believe it is safely on disk.
@@ -1209,13 +1212,17 @@ export async function runCommand(
       : result;
   } catch (err) {
     if (err instanceof CommandError) throw err;
+    if (ctx.signal?.aborted && err instanceof Error && err.name === "AbortError")
+      throw new CommandCancelledError(err.message);
     // Edit functions throw plain Errors with clear messages ("No clip can be split at 4s").
     throw new CommandError(err instanceof Error ? err.message : String(err));
   }
 }
 
 /** The outcome of {@link tryRunCommand}: never throws, so an agent loop can feed errors back to the model. */
-export type CommandOutcome = ({ ok: true } & CommandResult) | { ok: false; error: string };
+export type CommandOutcome =
+  | ({ ok: true } & CommandResult)
+  | { ok: false; error: string; cancelled?: true };
 
 /** Like {@link runCommand} but returns errors as values instead of throwing. */
 export async function tryRunCommand(
@@ -1226,7 +1233,11 @@ export async function tryRunCommand(
   try {
     return { ok: true, ...(await runCommand(ctx, name, rawArgs)) };
   } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : String(err),
+      ...(err instanceof CommandCancelledError ? { cancelled: true as const } : {}),
+    };
   }
 }
 

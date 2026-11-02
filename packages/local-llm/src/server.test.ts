@@ -243,7 +243,10 @@ describe("LlamaServer", () => {
     const controller = new AbortController();
     const started = server.start(controller.signal);
     setTimeout(() => controller.abort(), 200);
-    await expect(started).rejects.toThrow(/cancelled/);
+    await expect(started).rejects.toMatchObject({
+      name: "AbortError",
+      message: expect.stringMatching(/cancelled/),
+    });
     expect(server.state).toBe("stopped");
   });
 
