@@ -11,7 +11,7 @@ generated:
 
 # S01.06 intermittent chat submission investigation
 
-**State: IN_PROGRESS.** [Issue #186](https://github.com/sahamo123/dax-editor/issues/186), branch `codex/s01-06-engine-reconnect`, starts from [draft PR #187](https://github.com/sahamo123/dax-editor/pull/187), documentation head `c3ad581055db52e5a716363c6c60fdf21a5c65b9`. Its application/test head is `6c3fbea9723fcf17018d736f518e749cb7533860`.
+**State: IN_PROGRESS.** [Issue #186 / draft PR #188](https://github.com/sahamo123/dax-editor/pull/188), diagnostic/test head `31dd07bd42f0e260220d476aeebcf3dc5f478298`, tree `6ff3a92f21b31180df3586280e85493f2b066dc4`, starts from [draft PR #187](https://github.com/sahamo123/dax-editor/pull/187), documentation head `c3ad581055db52e5a716363c6c60fdf21a5c65b9`. Its application/test head is `6c3fbea9723fcf17018d736f518e749cb7533860`. This diagnostic does not fix the issue and has not been independently reviewed.
 
 ## Corrected observation
 
