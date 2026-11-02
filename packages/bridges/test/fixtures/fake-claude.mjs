@@ -50,6 +50,7 @@ if (args[0] === "--version") {
 
 if (args[0] === "--help") {
   record({ mode: "help", envKeys: Object.keys(process.env) });
+  if (scenario.helpDelayMs) await sleep(scenario.helpDelayMs);
   const flags = scenario.helpFlags ?? [
     "--output-format <format>   (choices: text, json, stream-json)",
     "--include-partial-messages",
@@ -64,7 +65,7 @@ if (args[0] === "--help") {
   process.stdout.write(
     `Usage: claude [options]\n\nOptions:\n${flags.map((f) => `  ${f}`).join("\n")}\n`,
   );
-  process.exit(0);
+  process.exit(scenario.helpExitCode ?? 0);
 }
 
 if (args[0] === "auth" && args[1] === "status") {

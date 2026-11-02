@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 bridge probe errors — November 1, 2026
+
+The [#203](https://github.com/sahamo123/dax-editor/issues/203) candidate distinguishes a failed or timed-out CLI capability probe from verified missing security options; both remain unavailable. Fake-CLI bridge tests passed, while the original full-check failure remains recorded. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-bridge-probe-errors.md). Full verification and publication remain pending. S01.06 and native acceptance remain open.
+
 ## S01.06 chat attachment recovery — November 1, 2026
 
 The scoped [#200 / draft PR #204](https://github.com/sahamo123/dax-editor/pull/204) candidate preserves a message, attachments and mode when staging fails before chat is attempted, without automatically replaying an uncertain request. Application/test head `85ae44268e4228e2f8f6efc7936e8e4688c7d8d0`; focused component/controller and generated-media browser tests passed. An earlier full check failed an unrelated bridge test [#203](https://github.com/sahamo123/dax-editor/issues/203); review and a passing final full check remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-attachment-recovery.md). Context switching [#201](https://github.com/sahamo123/dax-editor/issues/201) and staged-file retention [#202](https://github.com/sahamo123/dax-editor/issues/202) are separate open investigations. S01.06 and native acceptance remain open.
