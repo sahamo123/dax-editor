@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250).** On `codex/s01-06-non-export-outcomes`, application/test head `5136c40914e064386397a7e46e603a2337a8ee7f` passed focused, browser and full source checks. Review the [receipt](s01-06-non-export-outcomes-receipt.md) and investigate [#251](https://github.com/sahamo123/dax-editor/issues/251). Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
+
 **Current work: [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248).** On `codex/s01-06-local-job-outcomes`, application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc` passed focused, browser and full source checks. Review the [receipt](s01-06-local-job-outcomes-receipt.md) and continue S01.06. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
 
 **Current work: [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246).** On `codex/s01-06-snapshot-job-notices`, application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79` passed focused and browser checks and full `pnpm check`. Review the [receipt](s01-06-job-snapshot-notices-receipt.md), then investigate [#247](https://github.com/sahamo123/dax-editor/issues/247). Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.

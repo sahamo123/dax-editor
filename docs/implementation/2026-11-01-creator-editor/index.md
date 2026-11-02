@@ -63,6 +63,7 @@
 * [S01.06 modal shortcut protection after focus loss](s01-06-modal-focus-loss-receipt.md) - Reproduced background project edits while a modal is open, scoped guard and focus-containment follow-up.
 * [S01.06 modal focus recovery](s01-06-modal-focus-recovery-receipt.md) - Reproduction, scoped recovery, verification and remaining native acceptance for active dialogs.
 * [S01.06 native accessibility acceptance handoff](s01-06-native-acceptance-receipt.md) - Exact computer-use access blocker, safe restart and remaining keyboard and Narrator evidence.
+* [S01.06 non-export job outcome notices](s01-06-non-export-outcomes-receipt.md) - Reproduction, reconciliation and verification for speech, motion and local-model job outcomes.
 * [S01.06 timeline overlay label contrast](s01-06-overlay-label-contrast-receipt.md) - Reproduced timeline label contrast gaps, scoped fix and verification limits.
 * [S01.06 contextual panel contrast](s01-06-panel-contrast-receipt.md) - Measured media, settings and assistant tool text against rendered backgrounds, with scope and remaining issues.
 * [S01.06 primary-button contrast child receipt](s01-06-primary-contrast-receipt.md) - Rendered primary-button contrast measurements and verification.

@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current work:** [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250), `codex/s01-06-non-export-outcomes`, application/test head `5136c40914e064386397a7e46e603a2337a8ee7f`. Focused, browser and full source checks passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md), then investigate [#251](https://github.com/sahamo123/dax-editor/issues/251). Actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 **Current work:** [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248), `codex/s01-06-local-job-outcomes`, application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc`. Focused, browser and full source checks passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md). Review and continue S01.06; actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
 
 **Current work:** [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246), `codex/s01-06-snapshot-job-notices`, application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79`. Focused and browser checks and full `pnpm check` passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). Next investigate [#247](https://github.com/sahamo123/dax-editor/issues/247); actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.

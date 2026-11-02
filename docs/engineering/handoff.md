@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current non-export job candidate — November 2, 2026
+
+[#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250), `codex/s01-06-non-export-outcomes`, application/test head `5136c40914e064386397a7e46e603a2337a8ee7f`, passed focused, browser and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-non-export-outcomes-receipt.md) and investigate cancellation classification [#251](https://github.com/sahamo123/dax-editor/issues/251). Earlier entries are historical; S01.06, picker, screen-reader and native acceptance remain open.
+
 ## Current local job candidate — November 2, 2026
 
 [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248), `codex/s01-06-local-job-outcomes`, application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc`, passed focused, browser and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md), review this candidate and continue independent S01.06 work. Earlier entries are historical; actual picker, screen-reader and native acceptance remain open.
