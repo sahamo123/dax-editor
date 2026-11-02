@@ -10,16 +10,18 @@ import { Icon } from "./icons";
 
 const LIFETIME_MS = 6000;
 
-function ToastItem({ toast }: { toast: Toast }): ReactElement {
+function ToastItem({ toast, paused }: { toast: Toast; paused: boolean }): ReactElement {
   const dismiss = useApp((s) => s.dismissToast);
-  useEffect(() => {
-    // Errors stay a little longer; they are the ones people need to read.
-    const t = setTimeout(
-      () => dismiss(toast.id),
-      toast.tone === "error" ? LIFETIME_MS * 1.5 : LIFETIME_MS,
-    );
-    return () => clearTimeout(t);
-  }, [dismiss, toast.id, toast.tone]);
+  const remaining = useRef(toast.tone === "error" ? LIFETIME_MS * 1.5 : LIFETIME_MS);
+  useLayoutEffect(() => {
+    if (paused) return;
+    const started = performance.now();
+    const timer = setTimeout(() => dismiss(toast.id), remaining.current);
+    return () => {
+      clearTimeout(timer);
+      remaining.current = Math.max(0, remaining.current - (performance.now() - started));
+    };
+  }, [dismiss, paused, toast.id]);
   return (
     <div className={`toast toast--${toast.tone}`}>
       <Icon
@@ -38,6 +40,46 @@ function ToastItem({ toast }: { toast: Toast }): ReactElement {
   );
 }
 
+function useNoticeInteraction(container: HTMLElement, host: HTMLElement | null): boolean {
+  const [focused, setFocused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  useLayoutEffect(() => {
+    const area = host ?? container;
+    const syncFocus = () =>
+      setFocused(document.hasFocus() && area.contains(document.activeElement));
+    const onFocus = () => setFocused(true);
+    const onBlur = (event: FocusEvent) =>
+      setFocused(event.relatedTarget instanceof Node && area.contains(event.relatedTarget));
+    const onWindowBlur = () => {
+      setFocused(false);
+      setHovered(false);
+    };
+    const onWindowFocus = () => {
+      syncFocus();
+      setHovered(area.matches(":hover"));
+    };
+    const onEnter = () => setHovered(true);
+    const onLeave = () => setHovered(false);
+    syncFocus();
+    setHovered(area.matches(":hover"));
+    area.addEventListener("focusin", onFocus);
+    area.addEventListener("focusout", onBlur);
+    area.addEventListener("pointerenter", onEnter);
+    area.addEventListener("pointerleave", onLeave);
+    window.addEventListener("focus", onWindowFocus);
+    window.addEventListener("blur", onWindowBlur);
+    return () => {
+      area.removeEventListener("focusin", onFocus);
+      area.removeEventListener("focusout", onBlur);
+      area.removeEventListener("pointerenter", onEnter);
+      area.removeEventListener("pointerleave", onLeave);
+      window.removeEventListener("focus", onWindowFocus);
+      window.removeEventListener("blur", onWindowBlur);
+    };
+  }, [container, host]);
+  return focused || hovered;
+}
+
 /** The stack of current toasts, bottom right. */
 export function Toasts(): ReactElement {
   const toasts = useApp((s) => s.toasts);
@@ -54,6 +96,7 @@ export function Toasts(): ReactElement {
     (host ?? fallback.current)?.appendChild(container);
     return () => container.remove();
   }, [container, host]);
+  const paused = useNoticeInteraction(container, host);
 
   useLayoutEffect(() => {
     container.hidden = toasts.length === 0;
@@ -101,7 +144,7 @@ export function Toasts(): ReactElement {
       {createPortal(
         <div aria-live="off">
           {toasts.map((t) => (
-            <ToastItem key={t.id} toast={t} />
+            <ToastItem key={t.id} toast={t} paused={paused} />
           ))}
         </div>,
         container,

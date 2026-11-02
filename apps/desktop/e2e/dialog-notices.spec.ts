@@ -156,3 +156,34 @@ test("stacked long errors and other notices scroll without blocking the Settings
   await save.click();
   await expect(dialog).toHaveCount(0);
 });
+
+test("keeps a notice while keyboard focus or pointer hover remains in its region", async ({
+  page,
+  startServer,
+  openApp,
+  shot,
+}) => {
+  const server = await startServer({ modelStepMs: 300 });
+  await openApp(server);
+  await page.getByRole("button", { name: /Run a model on this computer/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  await dialog.getByRole("button", { name: /Download/ }).click();
+  await expect(
+    dialog.getByRole("progressbar", { name: "Downloading the local model" }),
+  ).toBeVisible();
+  await dialog.getByRole("button", { name: "Cancel download" }).click();
+  const notice = dialog.locator(".toast").filter({ hasText: "Local model download cancelled." });
+  const region = dialog.getByRole("region", { name: "Task notifications" });
+  await expect(notice).toBeVisible();
+  await region.focus();
+  await expect(region).toBeFocused();
+  await page.waitForTimeout(6500);
+  await expect(notice).toBeVisible();
+  await notice.hover();
+  await dialog.getByRole("button", { name: "Close", exact: true }).focus();
+  await page.waitForTimeout(6500);
+  await expect(notice).toBeVisible();
+  await shot("notice-kept-during-reading");
+  await dialog.getByRole("button", { name: "Save", exact: true }).hover();
+  await expect(notice).toHaveCount(0, { timeout: 8000 });
+});

@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current work:** [#264 / draft PR #266](https://github.com/sahamo123/dax-editor/pull/266), `codex/s01-06-notice-reading-time`, application/test head `0e4881d7c9f145e1edb496d9580db4ccebd56d1a`, passed focused, eleven browser and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-notice-reading-time-receipt.md); investigate burst eviction [#265](https://github.com/sahamo123/dax-editor/issues/265). Actual picker, screen-reader and native acceptance remain open.
+
 **Current diagnostic:** [#262 / draft PR #263](https://github.com/sahamo123/dax-editor/pull/263), `codex/s01-06-modal-live-region-audit`, test head `2ea06cf90aa1f30423a195748e8becfd222e4f8c`. Synthetic browser accessibility-tree checks passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-modal-live-region-receipt.md). Actual screen-reader speech, keyboard-picker and native acceptance remain open.
 
 **Current work:** [#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261), `codex/s01-06-engine-test-fixtures`, application/test head `7960135d19d8842fe9e6a5132d0eab6ed302ac76`, passed the engine test-specific typecheck and full source check. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-engine-test-fixtures-receipt.md). S01.06, actual picker, screen-reader and native acceptance remain open.

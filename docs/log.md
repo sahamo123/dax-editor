@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#264 / draft PR #266](https://github.com/sahamo123/dax-editor/pull/266) pauses task-notice timers during focus or pointer interaction. Focused, eleven browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-notice-reading-time-receipt.md). Burst eviction [#265](https://github.com/sahamo123/dax-editor/issues/265), actual screen-reader and native acceptance remain open.
+
 * **Investigate**: [#262 / draft PR #263](https://github.com/sahamo123/dax-editor/pull/263) checked task live-region nodes in the browser accessibility tree around synthetic Settings and rendered-review dialogs. The [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-live-region-receipt.md) records evidence and its limits; actual screen-reader/native acceptance remains open.
 
 * **Test**: [#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261) corrects invalid engine session fixtures. The engine test-specific typecheck, affected tests and full source check passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-engine-test-fixtures-receipt.md). No production code or CI settings changed.

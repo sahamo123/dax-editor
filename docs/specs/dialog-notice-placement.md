@@ -22,6 +22,7 @@ At 1024×700, a local-model cancellation notice overlaps the Settings Save butto
 - Move one persistent toast container between the shell and the active host so that mounting a dialog does not restart notice lifetimes or duplicate dismiss controls. Keep the existing independently batched polite and urgent live regions stable and preserve their contents, ordering and priority.
 - Existing modal focus containment must include dismiss buttons. Opening, closing or dismissing a notice must not steal focus from a valid focused action; keyboard users must be able to reach and dismiss notices and continue using the dialog.
 - Cap and scroll the notice area rather than truncating long errors or suppressing them. Keep error details readable and dismissible. Do not introduce automatic retries, new network access or dependencies.
+- Pause each visible notice's remaining lifetime while focus is inside or a pointer hovers the active notice area, including its scrollable modal region. Resume the remaining time after both interactions leave; untouched notices retain their existing timeouts. New notices arriving during interaction also wait. Moving the persistent stack between dialogs must not reset timers or duplicate announcements.
 
 ## Evidence
 
