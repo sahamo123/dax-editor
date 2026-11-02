@@ -85,6 +85,7 @@
 * [S01.06 disclosure keyboard activation](s01-06-summary-keyboard.md) - Preserve native Project and Work status disclosure keys without triggering playback.
 * [S01.06 task cancellation names receipt](s01-06-task-cancel-receipt.md) - Reproduction and verification for distinguishable task cancellation controls.
 * [S01.06 task-state labels receipt](s01-06-task-state-receipt.md) - Synthetic browser evidence that task states have text labels independent of color.
+* [Task status contrast audit](s01-06-task-status-contrast-receipt.md) - Rendered task text measurements in assistant and Work queues.
 * [S01.06 timeline keyboard interaction](s01-06-timeline-keyboard-receipt.md) - Scoped listbox navigation, focus recovery, shortcut changes and verification evidence.
 * [S01.06 timeline keyboard semantics investigation](s01-06-timeline-semantics-investigation.md) - Rendered evidence of conflicting timeline listbox semantics and editing shortcuts, with unresolved design constraints.
 * [Toolbar icon contrast audit](s01-06-toolbar-contrast-receipt.md) - Browser measurements and a separately tracked wrapped toolbar overlap.
