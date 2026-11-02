@@ -11,9 +11,13 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current native picker recheck — November 2, 2026
+
+[#177](https://github.com/sahamo123/dax-editor/issues/177) reached the Windows chooser on documentation head d39b5468f86395468b2e65b022c663612e5ea8f3, but it was not separately targetable and no file was selected. Owned test resources were stopped. The [receipt](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md) records limits. The separate keyboard edit/export diagnostic pre-imported its clip. S01.06 remains open; continue independent permitted work from the current published head.
+
 ## Current keyboard edit/export diagnostic — November 2, 2026
 
-[#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280), branch codex/s01-06-keyboard-edit-export, test head f81963207096c47db76c0f428600d57b9f05b25: two generated-media browser workflows passed, including keyboard review playback and decoded exports. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-keyboard-edit-export-receipt.md). The clip was pre-imported; self-review, actual picker/screen-reader and S01.06/native acceptance remain open. Continue from the published documentation head.
+[#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280), branch codex/s01-06-keyboard-edit-export, test head bf81963207096c47db76c0f428600d57b9f05b25: two generated-media browser workflows passed, including keyboard review playback and decoded exports. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-keyboard-edit-export-receipt.md). The clip was pre-imported; self-review, actual picker/screen-reader and S01.06/native acceptance remain open. Continue from the published documentation head.
 
 ## Current task status contrast — November 2, 2026
 

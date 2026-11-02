@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Test**: [#177](https://github.com/sahamo123/dax-editor/issues/177) reached the Windows chooser by keyboard on the current synthetic preview; the dialog was not separately targetable and no file was selected. Owned test resources were stopped. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). The actual picker and screen-reader gates remain open.
+
 * **Test**: [#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280) exercises keyboard editing, review playback and export refusal/recovery on generated media at two browser sizes. Both exports decode and measure five seconds; the [receipt](implementation/2026-11-01-creator-editor/s01-06-keyboard-edit-export-receipt.md) records the pre-import and native/accessibility limits.
 
 * **Test**: [#277 / draft PR #278](https://github.com/sahamo123/dax-editor/pull/278) measures task status and context text in the assistant and Work queues. Two browser checks, fast checks and dead-code analysis passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-task-status-contrast-receipt.md). S01.06 and native/accessibility acceptance remain open.
