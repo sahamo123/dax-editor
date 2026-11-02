@@ -80,8 +80,24 @@ test("a disabled focused dialog button cannot expose background editing shortcut
     await saveStarted;
     await expect(dialog.getByRole("button", { name: "Saving..." })).toBeDisabled();
     await expect
-      .poll(() => page.evaluate(() => document.activeElement === document.body))
+      .poll(() => dialog.evaluate((root) => root.contains(document.activeElement)))
       .toBe(true);
+    await page.keyboard.press("Tab");
+    await expect
+      .poll(() => dialog.evaluate((root) => root.contains(document.activeElement)))
+      .toBe(true);
+    await page.keyboard.press("Shift+Tab");
+    await expect
+      .poll(() => dialog.evaluate((root) => root.contains(document.activeElement)))
+      .toBe(true);
+    const close = dialog.getByRole("button", { name: "Close" });
+    await close.focus();
+    await page.keyboard.press("Shift+Tab");
+    await expect
+      .poll(() => dialog.evaluate((root) => root.contains(document.activeElement)))
+      .toBe(true);
+    await page.keyboard.press("Tab");
+    await expect(close).toBeFocused();
     await page.keyboard.press("s");
     await page.keyboard.press("Delete");
     await page.keyboard.press("Control+z");

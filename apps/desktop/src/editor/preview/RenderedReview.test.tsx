@@ -61,3 +61,25 @@ it("reports a failed request and keeps retry available without changing the proj
   expect(screen.getByRole("button", { name: "Render current edit" })).toBeEnabled();
   expect(api.state.project).toEqual(state.project);
 });
+
+it("keeps focus in the review dialog when the focused retry action is disabled", async () => {
+  const state = makeState(defaultProject());
+  let calls = 0;
+  const api = makeApi(state, async () => {
+    calls += 1;
+    if (calls === 1) return { ok: false, error: "Renderer unavailable" };
+    return new Promise(() => {});
+  });
+  renderEditor(<RenderedReview />, api);
+  fireEvent.click(screen.getByRole("button", { name: "Review effects" }));
+  await screen.findByRole("alert");
+  const retry = screen.getByRole("button", { name: "Render current edit" });
+  retry.focus();
+  fireEvent.click(retry);
+  expect(retry).toBeDisabled();
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Back to editing" })).toHaveFocus(),
+  );
+  fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
+  expect(screen.getByRole("button", { name: "Review effects" })).toHaveFocus();
+});

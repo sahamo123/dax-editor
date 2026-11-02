@@ -6,6 +6,7 @@ import "./ui/editor.css";
 
 export { EditorProvider, useEditor } from "./context";
 export { Inspector } from "./inspector/Inspector";
+export { useModalFocusRecovery } from "./modal-focus";
 export { PresetsPanel } from "./presets/PresetsPanel";
 export { PreviewPane } from "./preview/PreviewPane";
 export { hasActiveModal, useEditorShortcuts } from "./shortcuts";
