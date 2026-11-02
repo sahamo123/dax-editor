@@ -65,6 +65,13 @@ for (const width of [1000, 1366]) {
     await expect
       .poll(() => review.evaluate((node: HTMLVideoElement) => node.readyState), { timeout: 45_000 })
       .toBeGreaterThanOrEqual(2);
+    await tabTo(page, review, "rendered review player");
+    await page.keyboard.press("Space");
+    await expect
+      .poll(() => review.evaluate((node: HTMLVideoElement) => node.currentTime), {
+        timeout: 10_000,
+      })
+      .toBeGreaterThan(0.1);
     const back = page.getByRole("button", { name: "Back to editing", exact: true });
     await tabTo(page, back, "Back to editing");
     await page.keyboard.press("Enter");
