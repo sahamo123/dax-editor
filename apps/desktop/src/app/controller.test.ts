@@ -445,6 +445,34 @@ describe("controller", () => {
     expect(store.getState().toasts.map((toast) => toast.text)).toEqual([message]);
   });
 
+  it("announces a typed cancellation politely once without treating an untyped error as cancelled", () => {
+    const { store, socket } = setup();
+    const cancelled: JobInfo = {
+      id: "cancelled",
+      kind: "transcribe",
+      label: "Speech",
+      status: "error",
+      progress: 0.4,
+      error: "Cancelled",
+      cancelled: true,
+    };
+    socket().onEvent({ type: "job", job: cancelled });
+    socket().onEvent({ type: "state", state: makeState({ jobs: [{ ...cancelled }] }) });
+    const failure: JobInfo = {
+      id: "failure",
+      kind: "transcribe",
+      label: "Speech",
+      status: "error",
+      progress: 0.4,
+      error: "Cancelled",
+    };
+    socket().onEvent({ type: "job", job: failure });
+    expect(store.getState().toasts.map((toast) => [toast.tone, toast.text])).toEqual([
+      ["info", "Transcription cancelled."],
+      ["error", "Cancelled"],
+    ]);
+  });
+
   it("keeps completed background proxy work silent", () => {
     const { store, socket } = setup();
     const job: JobInfo = {

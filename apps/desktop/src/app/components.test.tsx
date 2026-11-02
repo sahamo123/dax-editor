@@ -601,6 +601,24 @@ describe("SettingsDialog", () => {
     expect(controller.localModel).toHaveBeenCalledWith({ action: "cancel" });
   });
 
+  it("shows confirmed model cancellation as information rather than an error", () => {
+    renderApp(<SettingsDialog />, (s) => {
+      s.setLocalModel({ installed: false, running: false, detail: "Not downloaded" });
+      s.applyJob({
+        id: "j",
+        kind: "model-download",
+        label: "Downloading",
+        progress: 0.2,
+        status: "error",
+        error: "Cancelled",
+        cancelled: true,
+      });
+      s.patchUi({ settingsOpen: true });
+    });
+    expect(screen.getByText("Local model download cancelled.")).toHaveClass("note--info");
+    expect(screen.queryByText("Local model download cancelled.")).not.toHaveClass("note--error");
+  });
+
   it("offers Start and Remove for a downloaded model", async () => {
     const { controller } = renderApp(<SettingsDialog />, (s) => {
       s.setLocalModel({ installed: true, running: false, detail: "Downloaded" });

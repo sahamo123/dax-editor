@@ -74,7 +74,7 @@ export interface ProviderRegistry {
 export interface LocalModelTask {
   /** Report progress as a fraction from 0 to 1. */
   onProgress(fraction: number): void;
-  /** Aborted by `POST /api/local-model/cancel` or on shutdown. */
+  /** Aborted on cancellation or shutdown. After cleanup, stopped work rejects with an `AbortError`; successful work resolves. */
   signal: AbortSignal;
 }
 

@@ -37,7 +37,7 @@ import {
   type WsEvent,
 } from "@dax/protocol";
 import { changeConnection } from "./connections.js";
-import { ProcessRegistry } from "./ffmpeg-run.js";
+import { isAbortError, ProcessRegistry } from "./ffmpeg-run.js";
 import { HttpError } from "./http-util.js";
 import type {
   AgentRunner,
@@ -162,12 +162,12 @@ export class Engine {
             job.status === "done"
               ? "completed"
               : job.status === "error"
-                ? job.error === "Cancelled"
+                ? job.cancelled === true
                   ? "cancelled"
                   : "failed"
                 : "running",
           progress: job.progress,
-          ...(job.error ? { error: cfg.log.redact(job.error) } : {}),
+          ...(job.error && !job.cancelled ? { error: cfg.log.redact(job.error) } : {}),
         });
       }
       cfg.emit({ type: "job", job });
@@ -787,7 +787,8 @@ export class Engine {
             data: { ...asObject(out.data), jobId: j.id },
           });
         } else {
-          job?.fail(out.error);
+          if (out.cancelled) job?.cancel();
+          else job?.fail(out.error);
           respond({ ok: false, error: out.error });
         }
       });
@@ -1140,10 +1141,8 @@ export class Engine {
                 ? pending
                     .then((result) => {
                       if (result.ok) job.done();
-                      else
-                        job.fail(
-                          abort.signal.aborted ? "Cancelled" : this.cfg.log.redact(result.error),
-                        );
+                      else if (result.cancelled) job.cancel();
+                      else job.fail(this.cfg.log.redact(result.error));
                     })
                     .finally(() => {
                       this.work.delete(job.id);
@@ -1262,7 +1261,7 @@ export class Engine {
           request,
         ),
       );
-      if (!result.ok) throw new Error(result.error);
+      ensureWorkResult(result);
     });
   }
 
@@ -1301,7 +1300,7 @@ export class Engine {
           assetId,
         }),
       );
-      if (!result.ok) throw new Error(result.error);
+      ensureWorkResult(result);
     });
   }
 
@@ -1335,13 +1334,11 @@ export class Engine {
     const job = this.jobs.create(kind, label);
     const promise = Promise.resolve()
       .then(() => fn(abort.signal, (value) => job.progress(value)))
-      .then(() => {
-        if (abort.signal.aborted) job.fail("Cancelled");
-        else job.done();
+      .then(() => job.done())
+      .catch((error) => {
+        if (abort.signal.aborted && isAbortError(error)) job.cancel();
+        else job.fail(this.cfg.log.redact(errorMessage(error)));
       })
-      .catch((error) =>
-        job.fail(abort.signal.aborted ? "Cancelled" : this.cfg.log.redact(errorMessage(error))),
-      )
       .finally(() => {
         this.work.delete(job.id);
         this.scheduleBroadcast();
@@ -1414,7 +1411,10 @@ export class Engine {
     this.localTask = abort;
     void (async () => fn({ onProgress: (f) => job.progress(f), signal: abort.signal }))()
       .then(() => job.done())
-      .catch((err) => job.fail(abort.signal.aborted ? "Cancelled" : errorMessage(err)))
+      .catch((err) => {
+        if (abort.signal.aborted && isAbortError(err)) job.cancel();
+        else job.fail(errorMessage(err));
+      })
       .finally(() => {
         this.localTask = undefined;
         this.armIdleUnload();
@@ -1491,6 +1491,13 @@ export class Engine {
       .catch((err) => this.cfg.log.error(`final save failed: ${String(err)}`));
     await this.tasks.flush();
   }
+}
+
+function ensureWorkResult(out: CommandOutcome): void {
+  if (out.ok) return;
+  const error = new Error(out.error);
+  if (out.cancelled) error.name = "AbortError";
+  throw error;
 }
 
 function toResponse(out: CommandOutcome): CommandResponse {

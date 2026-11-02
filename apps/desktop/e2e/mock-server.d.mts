@@ -22,6 +22,8 @@ export interface MockServerOptions {
   modelStepMs?: number;
   /** Install a fake speech feature whose setup waits until cancelled; no network or model files. */
   speechWaitForCancel?: boolean;
+  /** Make the fake speech setup fail normally after an abort, to exercise the failure race. */
+  speechFailureAfterCancel?: boolean;
   /** Data folder (default: a temp folder removed on close). */
   dataDir?: string;
 }

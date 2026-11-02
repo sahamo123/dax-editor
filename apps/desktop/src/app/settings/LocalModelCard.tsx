@@ -85,7 +85,13 @@ export function LocalModelCard(): ReactElement {
           </div>
         ) : null}
         {job?.status === "error" ? (
-          <p className="note note--error">{job.error ?? "That did not work."}</p>
+          <p className={`note ${job.cancelled === true ? "note--info" : "note--error"}`}>
+            {job.cancelled === true
+              ? job.kind === "model-start"
+                ? "Local model start cancelled."
+                : "Local model download cancelled."
+              : (job.error ?? "That did not work.")}
+          </p>
         ) : null}
 
         <div className="model-card__actions">

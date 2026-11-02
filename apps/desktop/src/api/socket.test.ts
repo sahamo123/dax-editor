@@ -29,6 +29,29 @@ describe("socketUrl", () => {
 });
 
 describe("parseWsEvent", () => {
+  it("preserves typed cancellation while accepting a legacy untyped job", () => {
+    const legacy = {
+      id: "legacy",
+      kind: "export",
+      label: "Export",
+      progress: 0.4,
+      status: "error",
+      error: "Cancelled",
+    } as const;
+    const typed = { ...legacy, id: "new", cancelled: true } as const;
+    expect(parseWsEvent(JSON.stringify({ type: "job", job: legacy }))).toEqual({
+      type: "job",
+      job: legacy,
+    });
+    expect(parseWsEvent(JSON.stringify({ type: "job", job: typed }))).toEqual({
+      type: "job",
+      job: typed,
+    });
+    expect(
+      parseWsEvent(JSON.stringify({ type: "state", state: makeState({ jobs: [legacy, typed] }) })),
+    ).toMatchObject({ type: "state", state: { jobs: [legacy, typed] } });
+  });
+
   it("accepts known events and rejects everything else", () => {
     expect(parseWsEvent(JSON.stringify({ type: "state", state: makeState() }))?.type).toBe("state");
     expect(

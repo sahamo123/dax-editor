@@ -149,7 +149,22 @@ export function createController(deps: ControllerDeps): Controller {
     if (announcedJobs.has(job)) return;
     if (job.status === "running" || (previous && previous.status !== "running")) return;
     if (!previous && !liveEvent) return; // Initial snapshots include historical completed jobs.
-    if (job.status === "error") {
+    if (job.status === "error" && job.cancelled === true) {
+      const messages: Record<JobInfo["kind"], string> = {
+        proxy: "Media preparation cancelled.",
+        export:
+          job.label === "Render complete edit preview"
+            ? "Effects preview cancelled."
+            : "Export cancelled.",
+        transcribe: "Transcription cancelled.",
+        "speech-setup": "Offline speech setup cancelled.",
+        "model-download": "Local model download cancelled.",
+        "model-start": "Local model start cancelled.",
+        blender: "Motion template cancelled.",
+      };
+      announcedJobs.add(job);
+      toast("info", messages[job.kind]);
+    } else if (job.status === "error") {
       announcedJobs.add(job);
       toast("error", job.error ?? `${job.label} failed.`);
     } else if (job.status === "done" && job.kind === "export") {
