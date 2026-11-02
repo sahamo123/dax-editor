@@ -5,6 +5,15 @@ import { chatInput, expect, test } from "./fixtures";
 
 test.skip(process.env.DAX_CHAT_DIAGNOSTIC !== "1", "Opt-in diagnostic for issue #186");
 
+test("control browser fill in a plain textarea", async ({ page }) => {
+  await page.setContent('<label>Control<textarea aria-label="Control"></textarea></label>');
+  const input = page.getByLabel("Control");
+  await input.fill("Add a title");
+  await expect(input).toHaveValue("Add a title");
+  await input.press("Enter");
+  await expect(input).toHaveValue("Add a title\n");
+});
+
 test("diagnose intermittent chat submission", async ({
   page,
   startServer,
@@ -26,8 +35,29 @@ test("diagnose intermittent chat submission", async ({
   });
   await page.addInitScript(() => {
     let lastInputTarget: EventTarget | null = null;
+    let lastComposer: Element | null = null;
     const keyEvents: Array<Record<string, boolean | string>> = [];
     (window as Window & { __daxChatDiagnostic?: typeof keyEvents }).__daxChatDiagnostic = keyEvents;
+    const originalFocus = HTMLElement.prototype.focus;
+    const originalBlur = HTMLElement.prototype.blur;
+    HTMLElement.prototype.focus = function (options) {
+      keyEvents.push({
+        event: "focus-call",
+        composer:
+          this instanceof HTMLTextAreaElement &&
+          this.getAttribute("aria-label") === "Message to the assistant",
+      });
+      originalFocus.call(this, options);
+    };
+    HTMLElement.prototype.blur = function () {
+      keyEvents.push({
+        event: "blur-call",
+        composer:
+          this instanceof HTMLTextAreaElement &&
+          this.getAttribute("aria-label") === "Message to the assistant",
+      });
+      originalBlur.call(this);
+    };
     window.addEventListener("blur", () => keyEvents.push({ event: "window-blur" }));
     window.addEventListener("focus", () => keyEvents.push({ event: "window-focus" }));
     document.addEventListener("visibilitychange", () =>
@@ -53,10 +83,25 @@ test("diagnose intermittent chat submission", async ({
       attributeOldValue: true,
       attributeFilter: ["disabled"],
     });
+    new MutationObserver((records) => {
+      if (!lastComposer) return;
+      for (const record of records) {
+        for (const removed of record.removedNodes) {
+          if (removed === lastComposer || removed.contains(lastComposer)) {
+            keyEvents.push({ event: "composer-removed" });
+          }
+        }
+      }
+    }).observe(document, { subtree: true, childList: true });
     document.addEventListener(
       "focusin",
       (event) => {
         const target = event.target;
+        if (
+          target instanceof HTMLTextAreaElement &&
+          target.getAttribute("aria-label") === "Message to the assistant"
+        )
+          lastComposer = target;
         keyEvents.push({
           event: "focus",
           composer:
@@ -77,6 +122,15 @@ test("diagnose intermittent chat submission", async ({
       "focusout",
       (event) => {
         const target = event.target;
+        let cssHidden = false;
+        for (
+          let node = target instanceof Element ? target : null;
+          node;
+          node = node.parentElement
+        ) {
+          const style = getComputedStyle(node);
+          if (style.display === "none" || style.visibility === "hidden") cssHidden = true;
+        }
         keyEvents.push({
           event: "blur",
           composer:
@@ -84,6 +138,10 @@ test("diagnose intermittent chat submission", async ({
             target.getAttribute("aria-label") === "Message to the assistant",
           disabled: target instanceof HTMLTextAreaElement && target.disabled,
           relatedElement: event.relatedTarget instanceof Element,
+          hiddenAncestor: target instanceof Element && target.closest("[hidden]") !== null,
+          connected: target instanceof Element && target.isConnected,
+          inertAncestor: target instanceof Element && target.closest("[inert]") !== null,
+          cssHidden,
         });
       },
       true,
@@ -118,7 +176,11 @@ test("diagnose intermittent chat submission", async ({
   const inputBefore = await chatInput(page).elementHandle();
 
   try {
-    await chatInput(page).fill("Add a title");
+    if (process.env.DAX_CHAT_DIAGNOSTIC_INPUT === "keys") {
+      await chatInput(page).pressSequentially("Add a title");
+    } else {
+      await chatInput(page).fill("Add a title");
+    }
     if ((await chatInput(page).inputValue()) !== "Add a title") {
       throw new Error("The test fill returned without the expected composer text.");
     }
