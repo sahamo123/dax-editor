@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 live accessibility and export announcements — November 1, 2026
+
+The live walkthrough [#177](https://github.com/sahamo123/dax-editor/issues/177) is partial: the generated clip was selected with a mouse; Narrator was heard announcing preview completion, but the operator reported no export-start or progress speech and did not hear the existing-file error. The candidate fix [#185](https://github.com/sahamo123/dax-editor/issues/185) is under verification on `codex/s01-06-live-acceptance`. Full source checks passed in an authorized isolated test environment; the affected browser suite exposed an intermittent disconnected-engine failure, tracked separately in [#186](https://github.com/sahamo123/dax-editor/issues/186). Publication is pending. The user is away, so actual post-change speech and a complete keyboard-only import remain pending. Do not advance to S01.07. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-live-announcement-receipt.md); earlier entries are historical.
+
 ## S01.06 setup and error contrast — November 1, 2026
 
 Setup and task-error contrast [#183 / PR #184](https://github.com/sahamo123/dax-editor/pull/184) passed focused browser, fast, dead-code and docs checks and was separately self-reviewed at test/docs head `6fdb6a7f7958b723c618226d02ae42dce4753ffe` (not independently reviewed). The earlier full check is reused only for unchanged application source. Actual keyboard-only and Narrator acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) remain blocked on computer-use access. Do not advance to S01.07. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-setup-error-contrast-receipt.md).

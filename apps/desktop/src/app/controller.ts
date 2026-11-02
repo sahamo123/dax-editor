@@ -305,6 +305,7 @@ export function createController(deps: ControllerDeps): Controller {
     },
 
     async exportTo(path, overwrite) {
+      toast("info", "Starting export…");
       const r = await client.run("export_video", { path, overwrite });
       if (!r.ok) {
         toast("error", r.error);

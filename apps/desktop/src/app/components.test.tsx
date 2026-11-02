@@ -12,6 +12,31 @@ import { MediaBin } from "./media/MediaBin";
 import { SettingsDialog } from "./settings/SettingsDialog";
 import { emptyProjectState, historyItem, makeState, providers, renderApp } from "./test-utils";
 import { TopBar } from "./topbar/TopBar";
+import { Toasts } from "./ui/Toasts";
+
+describe("Toast announcements", () => {
+  it("announces new errors separately and does not replay them on dismissal", () => {
+    const { store } = renderApp(<Toasts />);
+    const status = screen.getByRole("status");
+    const alert = screen.getByRole("alert");
+    expect(status).toBeEmptyDOMElement();
+    expect(alert).toBeEmptyDOMElement();
+
+    act(() => store.getState().pushToast("info", "Starting export…"));
+    expect(status).toHaveTextContent("Starting export…");
+    act(() => store.getState().pushToast("error", "Choose another filename."));
+    expect(alert).toHaveTextContent("Choose another filename.");
+    const firstAlert = alert.firstElementChild;
+    const errorId = store.getState().toasts.at(-1)?.id;
+    expect(errorId).toBeDefined();
+    act(() => store.getState().dismissToast(errorId ?? -1));
+    expect(alert.firstElementChild).toBe(firstAlert);
+
+    act(() => store.getState().pushToast("error", "Choose another filename."));
+    expect(alert).toHaveTextContent("Choose another filename.");
+    expect(alert.firstElementChild).not.toBe(firstAlert);
+  });
+});
 
 describe("ChatPanel", () => {
   it("keeps composing while busy, captures Planning mode and steers with video attachments", async () => {

@@ -21,7 +21,9 @@ test("imports a clip, runs a manual edit, and the UI follows the engine", async 
   const picker = page.waitForEvent("filechooser");
   await page.getByRole("banner").getByRole("button", { name: "Import" }).click();
   await (await picker).setFiles(sampleVideo);
-  await expect(page.getByText("Imported interview.mp4.", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".toasts").getByText("Imported interview.mp4.", { exact: true }),
+  ).toBeVisible();
   await expect(page.getByText("Drop a video here or click Import")).toBeHidden();
 
   const imported = await engine.api.project();
@@ -150,7 +152,7 @@ test("saves settings and an API key, lists the providers, and never shows the ke
   await dialog.getByLabel(/Use OpenAI-compatible API for chat/).check();
   await shot("11-real-engine-settings");
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByText("Settings saved.")).toBeVisible();
+  await expect(page.locator(".toasts").getByText("Settings saved.")).toBeVisible();
   await expect(dialog).toBeHidden();
 
   // What the engine stored, read back through its own API.

@@ -107,7 +107,9 @@ test("export shows progress on the button and announces the finished file", asyn
   await page.keyboard.press("Enter");
   await expect(dialog).toBeHidden();
   await shot("07-exporting");
-  await expect(page.getByText("Exported Untitled.mp4.")).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".toasts").getByText("Exported Untitled.mp4.")).toBeVisible({
+    timeout: 30_000,
+  });
   await expect(
     page.getByRole("banner").getByRole("button", { name: "Export", exact: true }),
   ).toBeEnabled();
@@ -154,7 +156,9 @@ test("compact export keeps keyboard focus while work runs", async ({
   await expect(busy).toBeDisabled();
   await page.keyboard.press("Enter");
   await expect(dialog).toBeHidden();
-  await expect(page.getByText("Exported compact-focus.mp4.")).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator(".toasts").getByText("Exported compact-focus.mp4.")).toBeVisible({
+    timeout: 30_000,
+  });
 });
 
 test("panels resize with the keyboard and the side drawer tabs use arrow keys", async ({

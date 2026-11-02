@@ -121,7 +121,9 @@ test("manual editing, grouped undo, project copy, review and decoded export", as
   const dialog = page.getByRole("dialog", { name: "Export video" });
   await dialog.getByLabel("Save as").fill(output);
   await dialog.getByRole("button", { name: "Export", exact: true }).click();
-  await expect(page.getByText("Exported offline-baseline-export.mp4.")).toBeVisible({
+  await expect(
+    page.locator(".toasts").getByText("Exported offline-baseline-export.mp4."),
+  ).toBeVisible({
     timeout: 90_000,
   });
   const probe = JSON.parse(

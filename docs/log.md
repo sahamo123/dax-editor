@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: The partial live accessibility walkthrough [#177](https://github.com/sahamo123/dax-editor/issues/177) observed preview-completion speech but did not complete keyboard-only import or verify all announcements. Export announcement improvements [#185](https://github.com/sahamo123/dax-editor/issues/185) are under verification; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-live-announcement-receipt.md).
+
 * **Update**: Primary contrast [#165 / PR #169](https://github.com/sahamo123/dax-editor/pull/169) passed full checks, rendered measurements and self-review at `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Reduced motion #168 is under verification; S01.06 remains in progress.
 
 * **Incident**: A rendered S01.06 diagnostic found component transitions still active under reduced motion ([#168](https://github.com/sahamo123/dax-editor/issues/168)); fix and verification remain pending.
