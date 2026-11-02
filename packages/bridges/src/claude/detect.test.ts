@@ -69,7 +69,8 @@ describe("installed", () => {
 
   it("treats exit code 1 as not signed in even without JSON", async () => {
     const { detector } = detectorFor({ auth: { exit: 1, stdout: "Not logged in" } });
-    expect((await detector.detect()).status.state).toBe("not-signed-in");
+    const { status } = await detector.detect();
+    expect(status.state, `Fake CLI status detail: ${status.detail}`).toBe("not-signed-in");
   });
 
   it("warns when the login is an API key, because that bills per use", async () => {
@@ -77,7 +78,7 @@ describe("installed", () => {
       auth: { exit: 0, stdout: { loggedIn: true, authMethod: "api_key" } },
     });
     const { status } = await detector.detect();
-    expect(status.state).toBe("ready");
+    expect(status.state, `Fake CLI status detail: ${status.detail}`).toBe("ready");
     expect(status.detail).toMatch(/API key/);
     expect(status.detail).toMatch(/billed to that key/);
   });
@@ -93,7 +94,7 @@ describe("installed", () => {
   it("will not run a program that is not Claude Code", async () => {
     const { detector } = detectorFor({ version: "1.2.3 (Something Else)" });
     const { status } = await detector.detect();
-    expect(status.state).toBe("unsupported");
+    expect(status.state, `Fake CLI status detail: ${status.detail}`).toBe("unsupported");
     expect(status.detail).toMatch(/does not identify itself as Claude Code/);
   });
 
@@ -108,7 +109,7 @@ describe("installed", () => {
       ],
     });
     const { status } = await detector.detect();
-    expect(status.state).toBe("unsupported");
+    expect(status.state, `Fake CLI status detail: ${status.detail}`).toBe("unsupported");
     expect(status.detail).toContain("--strict-mcp-config");
     expect(status.detail).toContain("--allowedTools");
   });
@@ -126,7 +127,7 @@ describe("installed", () => {
       ],
     });
     const { status } = await detector.detect();
-    expect(status.state).toBe("unsupported");
+    expect(status.state, `Fake CLI status detail: ${status.detail}`).toBe("unsupported");
     expect(status.detail).toContain("dontAsk");
   });
 
@@ -142,7 +143,7 @@ describe("installed", () => {
     ];
     const { detector } = detectorFor({ helpFlags: required });
     const { status, install } = await detector.detect();
-    expect(status.state).toBe("ready");
+    expect(status.state, `Fake CLI status detail: ${status.detail}`).toBe("ready");
     expect(install?.capabilities).toEqual({
       permissionPrompts: false,
       disableSlashCommands: false,
