@@ -31,6 +31,10 @@ export interface ClipBlockProps {
   windowFrom: number;
   windowTo: number;
   selected: boolean;
+  /** Roving tab stop and position among all timeline items, including virtualized items. */
+  tabIndex: number;
+  position: number;
+  setSize: number;
   dragging: boolean;
   /** Animate position changes (used while neighbours slide aside during a reorder). */
   animate: boolean;
@@ -72,9 +76,12 @@ export const ClipBlock = memo(function ClipBlock(p: ClipBlockProps) {
       role="option"
       aria-selected={p.selected}
       aria-label={`Clip ${p.name}, ${formatDuration(dur)}`}
-      tabIndex={0}
+      aria-posinset={p.position}
+      aria-setsize={p.setSize}
+      tabIndex={p.tabIndex}
       data-testid="clip"
       data-clip-id={p.id}
+      data-timeline-key={`clip:${p.id}`}
       data-start={p.start.toFixed(3)}
       data-duration={dur.toFixed(3)}
       style={{

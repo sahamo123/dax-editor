@@ -5,9 +5,12 @@
 import { mediaUrl } from "@dax/protocol";
 import {
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
+  useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -23,6 +26,7 @@ import { type PlacedClip, placeClips } from "../lib/clip-layout";
 import { assignRows } from "../lib/overlay-layout";
 import { baseName, clipDur, contentExtent, mainClips } from "../lib/project";
 import { SNAP_PX, snapTargets, snapValue } from "../lib/snap";
+import { hasActiveModal } from "../shortcuts";
 import { ClipBlock, type ClipBlockProps } from "./ClipBlock";
 import { CLIP_PAD, GUTTER, LANE_H, RULER_H, TAIL_SECONDS, VIDEO_H } from "./constants";
 import { displayClips } from "./display";
@@ -60,6 +64,11 @@ export function Timeline({ className }: TimelineProps) {
   const revision = useProjectRevision();
 
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const listboxRef = useRef<HTMLDivElement>(null);
+  const instructionsId = useId();
+  const pendingFocus = useRef<string | null>(null);
+  const focusedItem = useRef<{ element: HTMLElement; index: number } | null>(null);
+  const [keyboardKey, setKeyboardKey] = useState<string | null>(null);
   const [drag, setDrag] = useState<Drag | null>(null);
   const [optimistic, setOptimistic] = useState<Optimistic | null>(null);
 
@@ -172,6 +181,104 @@ export function Timeline({ className }: TimelineProps) {
   const contentHeight = videoTop + VIDEO_H + 6;
 
   const clips = useMemo(() => displayClips(placed, optimistic, drag), [placed, optimistic, drag]);
+  const keyboardItems = useMemo(
+    () =>
+      [
+        ...clips.map((clip) => ({
+          kind: "clip" as const,
+          clip,
+          key: `clip:${clip.id}`,
+          start: clip.start,
+        })),
+        ...project.timeline.overlays.map((overlay) => ({
+          kind: "overlay" as const,
+          overlay,
+          key: `overlay:${overlay.id}`,
+          start: optimistic?.overlays?.[overlay.id]?.start ?? overlay.start,
+        })),
+      ].sort((a, b) => a.start - b.start || a.key.localeCompare(b.key)),
+    [clips, project.timeline.overlays, optimistic],
+  );
+  const positions = useMemo(
+    () => new Map(keyboardItems.map((item, index) => [item.key, index + 1])),
+    [keyboardItems],
+  );
+  const selectionKey = selection ? `${selection.kind}:${selection.id}` : null;
+  const activeKey = keyboardItems.some((item) => item.key === keyboardKey)
+    ? keyboardKey
+    : keyboardItems.some((item) => item.key === selectionKey)
+      ? selectionKey
+      : (keyboardItems[0]?.key ?? null);
+
+  // A pointer selection updates the next tab stop without moving focus from another control.
+  useEffect(() => {
+    if (!listboxRef.current?.contains(document.activeElement)) setKeyboardKey(selectionKey);
+  }, [selectionKey]);
+
+  // The destination can be virtualized: mount it first, then focus after React commits.
+  useLayoutEffect(() => {
+    const removed = focusedItem.current;
+    if (removed && !removed.element.isConnected) {
+      focusedItem.current = null;
+      // Do not reclaim focus from another control if the user moved while the command was pending.
+      if (
+        document.activeElement === document.body ||
+        document.activeElement === listboxRef.current
+      ) {
+        const next = keyboardItems[Math.min(removed.index, keyboardItems.length - 1)];
+        if (next) {
+          pendingFocus.current = next.key;
+          setKeyboardKey(next.key);
+          const scroller = scrollerRef.current;
+          if (scroller) {
+            scroller.scrollLeft = Math.max(0, next.start * zoom - 32);
+            view.updateWindow();
+          }
+        } else {
+          listboxRef.current?.focus({ preventScroll: true });
+        }
+      }
+    }
+    const wanted = pendingFocus.current;
+    if (!wanted) return;
+    const target = Array.from(
+      listboxRef.current?.querySelectorAll<HTMLElement>("[data-timeline-key]") ?? [],
+    ).find((node) => node.dataset.timelineKey === wanted);
+    if (target) {
+      pendingFocus.current = null;
+      target.focus({ preventScroll: true });
+    }
+  });
+
+  const onTimelineKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.defaultPrevented || event.nativeEvent.isComposing || hasActiveModal()) return;
+    if (event.altKey || event.shiftKey) return;
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !target.dataset.timelineKey) return;
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      store.stepFrames(event.key === "ArrowLeft" ? -1 : 1);
+      return;
+    }
+    const index = keyboardItems.findIndex((item) => item.key === target.dataset.timelineKey);
+    if (index < 0) return;
+    event.preventDefault();
+    const next = keyboardItems[index + (event.key === "ArrowLeft" ? -1 : 1)];
+    if (!next) return;
+    pendingFocus.current = next.key;
+    setKeyboardKey(next.key);
+    const scroller = scrollerRef.current;
+    if (scroller) {
+      const x = GUTTER + next.start * zoom;
+      const left = scroller.scrollLeft + GUTTER;
+      const right = scroller.scrollLeft + scroller.clientWidth;
+      if (x < left || x > right - 32) {
+        scroller.scrollLeft = Math.max(0, x - GUTTER - 32);
+        view.updateWindow();
+      }
+    }
+  };
   const trackW = Math.max(viewW - GUTTER, 600);
   const contentW = GUTTER + Math.max((contentExtent(project) + TAIL_SECONDS) * zoom, trackW);
 
@@ -196,6 +303,10 @@ export function Timeline({ className }: TimelineProps) {
         } as CSSProperties
       }
     >
+      <span id={instructionsId} className="sr-only">
+        Left and right move between items. Enter selects. Control or Command with left or right
+        steps one frame. Shift with left or right steps one second. Space plays or pauses.
+      </span>
       <div
         ref={scrollerRef}
         className="dx-tl-scroll"
@@ -204,11 +315,32 @@ export function Timeline({ className }: TimelineProps) {
       >
         <div
           className="dx-tl-content"
+          ref={listboxRef}
           role="listbox"
           aria-label="Timeline"
           aria-orientation="horizontal"
+          aria-describedby={instructionsId}
+          tabIndex={keyboardItems.length === 0 ? 0 : undefined}
           style={{ width: contentW, height: contentHeight }}
           onPointerDown={onBackgroundDown}
+          onKeyDown={onTimelineKeyDown}
+          onFocus={(event) => {
+            if (event.target instanceof HTMLElement && event.target.dataset.timelineKey) {
+              focusedItem.current = {
+                element: event.target,
+                index: keyboardItems.findIndex(
+                  (item) => item.key === event.target.dataset.timelineKey,
+                ),
+              };
+              setKeyboardKey(event.target.dataset.timelineKey);
+            }
+          }}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) {
+              if (event.target.isConnected) focusedItem.current = null;
+              setKeyboardKey(selectionKey);
+            }
+          }}
         >
           <div className="dx-corner" />
           <div className="dx-ruler-wrap" onPointerDown={onRulerDown} data-testid="ruler-hit">
@@ -227,17 +359,42 @@ export function Timeline({ className }: TimelineProps) {
             ) : null}
           </div>
 
-          {project.timeline.overlays.map((o) => {
+          {keyboardItems.map((item) => {
+            if (item.kind === "clip") {
+              const c = item.clip;
+              return (
+                <ClipItem
+                  key={item.key}
+                  clip={c}
+                  start={
+                    reorder && reorder.clipId !== c.id
+                      ? (reorder.starts.get(c.id) ?? c.start)
+                      : c.start
+                  }
+                  reorder={reorder}
+                  api={api}
+                  zoom={zoom}
+                  win={win}
+                  top={videoTop}
+                  selected={selection?.kind === "clip" && selection.id === c.id}
+                  tabIndex={activeKey === item.key ? 0 : -1}
+                  position={positions.get(item.key) ?? 1}
+                  setSize={keyboardItems.length}
+                  handlers={{ ...clipGestures, onSelect: selectClip }}
+                />
+              );
+            }
+            const o = item.overlay;
             const live2 = drag?.type === "overlay" && drag.id === o.id ? drag : null;
             const held = optimistic?.overlays?.[o.id];
             const start = live2?.start ?? held?.start ?? o.start;
             const duration = live2?.duration ?? held?.duration ?? o.duration;
             const left = start * zoom;
             const offscreen = left + duration * zoom < win.from || left > win.to;
-            if (offscreen && !live2) return null;
+            if (offscreen && !live2 && activeKey !== `overlay:${o.id}`) return null;
             return (
               <OverlayBlock
-                key={o.id}
+                key={item.key}
                 id={o.id}
                 text={o.text}
                 category={presetCategory.get(o.preset) ?? CATEGORY_FALLBACK}
@@ -249,6 +406,9 @@ export function Timeline({ className }: TimelineProps) {
                 rowCount={rowCount}
                 lanesTop={lanesTop}
                 selected={selection?.kind === "overlay" && selection.id === o.id}
+                tabIndex={activeKey === `overlay:${o.id}` ? 0 : -1}
+                position={positions.get(`overlay:${o.id}`) ?? 1}
+                setSize={keyboardItems.length}
                 dragging={Boolean(live2)}
                 onBodyDown={overlayGestures.onOverlayDown}
                 onSelect={selectOverlay}
@@ -288,23 +448,6 @@ export function Timeline({ className }: TimelineProps) {
             />
           ) : null}
 
-          {clips.map((c) => (
-            <ClipItem
-              key={c.id}
-              clip={c}
-              start={
-                reorder && reorder.clipId !== c.id ? (reorder.starts.get(c.id) ?? c.start) : c.start
-              }
-              reorder={reorder}
-              api={api}
-              zoom={zoom}
-              win={win}
-              top={videoTop}
-              selected={selection?.kind === "clip" && selection.id === c.id}
-              handlers={{ ...clipGestures, onSelect: selectClip }}
-            />
-          ))}
-
           {snapLineTime !== null ? (
             <div
               className="dx-snap-line"
@@ -339,6 +482,9 @@ function ClipItem(props: {
   win: { from: number; to: number };
   top: number;
   selected: boolean;
+  tabIndex: number;
+  position: number;
+  setSize: number;
   handlers: {
     onClipDown: ClipBlockProps["onBodyDown"];
     onTrimDown: ClipBlockProps["onEdgeDown"];
@@ -352,7 +498,8 @@ function ClipItem(props: {
   const isDragged = reorder?.clipId === c.id;
   const leftPx = props.start * zoom;
   const widthPx = clipDur(c) * zoom;
-  if (!isDragged && (leftPx + widthPx < win.from || leftPx > win.to)) return null;
+  if (!isDragged && props.tabIndex !== 0 && (leftPx + widthPx < win.from || leftPx > win.to))
+    return null;
   const url = (kind: "filmstrip.jpg" | "thumb.jpg" | "waveform.json") =>
     asset ? mediaUrl(api.serverUrl, api.token, c.assetId, kind) : null;
   return (
@@ -375,6 +522,9 @@ function ClipItem(props: {
       windowFrom={win.from}
       windowTo={win.to}
       selected={props.selected}
+      tabIndex={props.tabIndex}
+      position={props.position}
+      setSize={props.setSize}
       dragging={isDragged}
       animate={Boolean(reorder)}
       dragPx={isDragged && reorder ? reorder.dxPx : 0}
