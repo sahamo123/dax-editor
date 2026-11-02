@@ -17,6 +17,9 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) preserves an unrelated draft when sending a suggestion. Focused component, generated-media browser and full source checks passed at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; review is pending. See the [receipt](s01-06-suggestion-draft-receipt.md). S01.06 remains IN_PROGRESS.
+- [#227 / draft PR #228](https://github.com/sahamo123/dax-editor/pull/228) proposes staged attachment leases; full host-authorized `pnpm check` passed at design head `ee0ccf4a5de05801d45b054a20f5dae3354a6e32`. No cleanup is implemented; review remains pending. See the [spec](../../specs/staged-attachment-leases.md).
+
 - [#224 / draft PR #226](https://github.com/sahamo123/dax-editor/pull/226) fixes a reproduced delayed-Stop race and targets task IDs; focused desktop, server, browser and full host source checks passed at application/test head `a632ef032e6d6be9f39a28ed69b7a5ce6b9d4829`; see the [receipt](s01-06-chat-context-guard.md).
 
 - [#221 / draft PR #225](https://github.com/sahamo123/dax-editor/pull/225) guards steering provider context; focused server, new browser conflict and full host source checks passed at application/test head `d66db87d2ce9d03f20bf967bee1d88df293e7651`. An existing Stop browser test revealed a potential race [#224](https://github.com/sahamo123/dax-editor/issues/224); see the [receipt](s01-06-chat-context-guard.md).

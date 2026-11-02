@@ -19,7 +19,7 @@ An AI-first workspace must remain a usable manual editor with inference stopped 
 
 Local llama.cpp with the verified 2B model remains the default. Optional connections are OpenRouter, direct OpenAI and custom compatible APIs, with independent configuration and secrets. No automatic paid fallback or retry of an already executed mutation. Hosted live checks need owner-configured credentials; mocks do not establish hosted readiness.
 
-If attachment staging fails before a chat request is attempted, retain the original composer draft, selected files and mode for an intentional retry and show the error. When no draft was present, retain the attempted suggestion text. Once a chat request has been attempted, its outcome may be uncertain: do not automatically resend it or restore it as definitely unsent.
+If attachment staging fails before a chat request is attempted, retain the original composer draft, selected files and mode for an intentional retry and show the error. When no draft was present, retain the attempted suggestion text. Sending a suggestion must not erase a different existing composer draft, which was not part of that request. Once a chat request has been attempted, its outcome may be uncertain: do not automatically resend it or restore it as definitely unsent.
 
 Speech is required: setup, verified runtime/model provisioning, transcript correction, captions and reviewable filler/silence cuts. Blender is an optional separate user-installed process. First templates are title card, logo intro and 3D text; scripts belong to the application, parameters are validated, and renders return as media. Arbitrary model-generated Python is excluded.
 

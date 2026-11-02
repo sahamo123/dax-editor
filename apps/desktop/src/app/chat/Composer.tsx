@@ -52,12 +52,13 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
     return () => observer.disconnect();
   }, []);
 
-  const send = (message: string, steer = false) => {
+  const send = (message: string, steer = false, fromSuggestion = false) => {
     const clean = message.trim();
     if (!clean || disabled || submitting) return;
     const draft = text.trim() ? text : message;
     const attachments = files;
-    setText("");
+    // A suggestion is a separate request; it must not consume an unrelated draft.
+    if (!fromSuggestion || !text.trim() || text.trim() === clean) setText("");
     setSubmitting(true);
     void controller
       .sendChat(clean, { mode, steer, files: attachments })
@@ -135,7 +136,13 @@ export function Composer({ blockedReason, showSuggestions }: ComposerProps): Rea
         <fieldset className="chips">
           <legend className="sr-only">Suggestions</legend>
           {SUGGESTIONS.map((s) => (
-            <button key={s} type="button" className="chip" onClick={() => send(s)}>
+            <button
+              key={s}
+              type="button"
+              className="chip"
+              disabled={submitting}
+              onClick={() => send(s, false, true)}
+            >
               {s}
             </button>
           ))}
