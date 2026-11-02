@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Fix**: Media-card controls [#190](https://github.com/sahamo123/dax-editor/issues/190) wrap without clipping; generated-video browser checks passed at two sizes. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-media-actions-receipt.md).
+
 * **Update**: Contextual panel contrast [#189](https://github.com/sahamo123/dax-editor/issues/189) passed three targeted browser checks; generated media revealed clipped card actions [#190](https://github.com/sahamo123/dax-editor/issues/190). The [receipt](implementation/2026-11-01-creator-editor/s01-06-panel-contrast-receipt.md) keeps the sample and remaining gates explicit.
 
 * **Update**: A visible, loaded-state synthetic keyboard chat with Narrator active completed once in [#186](https://github.com/sahamo123/dax-editor/issues/186); the intermittent startup/headless focus loss and actual speech remain unverified. See the [investigation receipt](implementation/2026-11-01-creator-editor/s01-06-chat-submission-investigation.md).
