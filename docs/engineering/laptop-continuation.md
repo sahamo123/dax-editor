@@ -11,7 +11,7 @@ generated:
 
 # Continue on another laptop or agent
 
-**Current local work:** [#221](https://github.com/sahamo123/dax-editor/issues/221), `codex/s01-06-steering-provider-context`, based on PR #223 documentation head `20914992b041c8a8274d6d5c738eae45d7e9b8a0`. Focused server and new browser conflict tests passed; an existing browser Stop scenario revealed a potential race [#224](https://github.com/sahamo123/dax-editor/issues/224). Publish, run a full host check and investigate #224; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Do not advance S01.06.
+**Current work:** [#221 / draft PR #225](https://github.com/sahamo123/dax-editor/pull/225), `codex/s01-06-steering-provider-context`, application/test head `d66db87d2ce9d03f20bf967bee1d88df293e7651`, based on PR #223 documentation head `20914992b041c8a8274d6d5c738eae45d7e9b8a0`. Focused server and new browser conflict tests passed; an existing browser Stop scenario revealed a potential race [#224](https://github.com/sahamo123/dax-editor/issues/224). Run a full host check and investigate #224; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Do not advance S01.06.
 
 **Current follow-up:** [#222 / draft PR #223](https://github.com/sahamo123/dax-editor/pull/223), `codex/s01-06-bridge-status-deadline`, test head `6833c86e983c4b48b22872c066296b4308a866c4`, based on PR #220 documentation head `5d3f42f3542e7b4303cbab54e685adbac426144e`. Thirty-one focused tests and the combined host-authorized full check passed. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). Investigate [#221](https://github.com/sahamo123/dax-editor/issues/221); S01.06 remains open.
 
