@@ -11,7 +11,7 @@ generated:
 
 # S01.06 live accessibility and export announcements
 
-**State: IN_PROGRESS.** [Issue #185](https://github.com/sahamo123/dax-editor/issues/185) is based on documentation head `0bb231d7848b416be11c2801ef59d08f67aa0081` from [PR #184](https://github.com/sahamo123/dax-editor/pull/184). The application source at that baseline was `d92bc08a210312d68403a870e3fffac97e584f0e`. The parent acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) and [S01.06](https://github.com/sahamo123/dax-editor/issues/162) remain open.
+**State: IN_PROGRESS.** [Issue #185 / draft PR #187](https://github.com/sahamo123/dax-editor/pull/187), application/test head `6c3fbea9723fcf17018d736f518e749cb7533860`, tree `0c339984274e17fcba9d1b55d21c9c2649a15be4`, is based on documentation head `0bb231d7848b416be11c2801ef59d08f67aa0081` from [PR #184](https://github.com/sahamo123/dax-editor/pull/184). The application source at that baseline was `d92bc08a210312d68403a870e3fffac97e584f0e`. The parent acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) and [S01.06](https://github.com/sahamo123/dax-editor/issues/162) remain open; this is a draft, not independently reviewed.
 
 ## What was observed before the change
 
