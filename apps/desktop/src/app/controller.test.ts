@@ -1,7 +1,7 @@
 // The controller against a fake client and a fake socket: state pushes, connection status, undoing a whole AI
 // run, and settings saving.
 
-import type { WsEvent } from "@dax/protocol";
+import { MAX_UPLOAD_BYTES, type WsEvent } from "@dax/protocol";
 import { describe, expect, it, vi } from "vitest";
 import type { DaxClient } from "../api";
 import type { LiveSocketOptions } from "../api/socket";
@@ -367,6 +367,26 @@ describe("controller", () => {
     expect(uploadMedia).toHaveBeenCalledTimes(2);
     expect(chat).not.toHaveBeenCalled();
   });
+
+  it.each(["empty", "oversized", "too many"] as const)(
+    "preflights all attachments before staging a %s selection",
+    async (kind) => {
+      const uploadMedia = vi.fn(async () => ({ ok: false, error: "Upload unexpectedly started" }));
+      const chat = vi.fn();
+      const { controller, store } = setup({ uploadMedia, chat });
+      store.getState().applyState(makeState());
+      const valid = new File(["video"], "first.mp4");
+      const invalid = new File(kind === "empty" ? [] : ["video"], "second.mp4");
+      if (kind === "oversized")
+        Object.defineProperty(invalid, "size", { value: MAX_UPLOAD_BYTES + 1 });
+      const files =
+        kind === "too many" ? Array.from({ length: 11 }, () => valid) : [valid, invalid];
+      expect(await controller.sendChat("plan", { files, mode: "plan" })).toBe("attachment-failed");
+      expect(uploadMedia).not.toHaveBeenCalled();
+      expect(chat).not.toHaveBeenCalled();
+      expect(store.getState().chat.some((item) => item.kind === "notice")).toBe(true);
+    },
+  );
 
   it("does not upload or send when the engine cannot confirm context", async () => {
     const uploadMedia = vi.fn();

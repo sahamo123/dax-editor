@@ -23,4 +23,6 @@ Planning mode offers and executes only registry commands marked read-only. Its s
 
 Chat video attachments use staged browser uploads (up to 10 per request, 1 GiB each). They remain local. Edit tasks import them when dispatched through the existing serialized command registry; Planning tasks receive attachment names/paths as untrusted context without adding them to the timeline. Planning cannot inspect video frames or infer their contents from a filename. Unattached staged files are retained; automatic source cleanup is deferred to avoid breaking saved projects.
 
+Before staging any attachment, the desktop checks the entire selection for the request limit and the existing empty/size limits. A known-invalid selection causes no upload or chat request, retains the draft and selection, and identifies the problem. An unexpected later upload or network failure can still leave an earlier staged copy; never imply this preflight is complete cleanup. See [staged attachment lifetime](../research/staged-attachment-lifetime.md).
+
 Verify FIFO ordering, steering, queued cancellation, captured modes, task persistence/restart, and refusal of malicious mutating tool calls in Planning mode. Verify composer controls and real offline-model responses. Do not claim automatic approval or execution of a plan.

@@ -1,6 +1,12 @@
 # Project log
 
+## 2026-11-02
+
+* **Test**: Chat attachment preflight [#212 / PR #213](https://github.com/sahamo123/dax-editor/pull/213) passed full `pnpm check`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md).
+
 ## 2026-11-01
+
+* **Fix**: Chat attachment preflight [#212 / PR #213](https://github.com/sahamo123/dax-editor/pull/213) prevents locally detectable invalid selections from staging earlier files; focused checks passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md); review remains pending.
 
 * **Investigate**: Staged attachment retention [#202 / PR #211](https://github.com/sahamo123/dax-editor/pull/211) was reproduced with generated media. Nine upload/retention tests passed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md) and [ownership proposal](research/staged-attachment-lifetime.md) retain the no-cleanup boundary.
 

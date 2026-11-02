@@ -46,6 +46,7 @@
 * [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - Plan and evidence gates: Preserve task and recovery controls in the new layout.
 * [S01.06 accessibility audit and implementation receipt](s01-06-accessibility-audit-receipt.md) - Entry check, work log and evidence for keyboard, contrast, motion and assistive-technology acceptance.
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.
+* [S01.06 chat attachment preflight](s01-06-attachment-preflight.md) - Prevent locally detectable invalid chat selections from staging earlier files.
 * [S01.06 audit reconciliation receipt](s01-06-audit-reconciliation-receipt.md) - Published accessibility child fixes, limited contrast audit and remaining acceptance gates.
 * [S01.06 bridge probe error classification](s01-06-bridge-probe-errors.md) - Distinguish unsuccessful CLI capability probes from verified missing options without relaxing restrictions.
 * [S01.06 chat attachment recovery](s01-06-chat-attachment-recovery.md) - Preserve unsent drafts after attachment staging fails without replaying an uncertain edit.

@@ -50,6 +50,13 @@ export interface ClientOptions {
 /** The text shown when the server cannot be reached at all. */
 export const UNREACHABLE = "Can't reach the editor engine.";
 
+/** Return the local upload-size error for an empty or over-limit file, or undefined when its size is allowed. */
+export function uploadSizeError(file: Pick<File, "size">): string | undefined {
+  return !file.size || file.size > MAX_UPLOAD_BYTES
+    ? "Choose a non-empty file no larger than 1 GiB."
+    : undefined;
+}
+
 function isRecord(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null;
 }
@@ -196,8 +203,8 @@ export class DaxClient {
 
   /** Copy one selected video to local engine storage and import it; rejects empty or over-1-GiB files. Never throws. */
   async uploadMedia(file: File, stageOnly = false): Promise<CommandResponse> {
-    if (!file.size || file.size > MAX_UPLOAD_BYTES)
-      return { ok: false, error: "Choose a non-empty video smaller than 1 GiB." };
+    const error = uploadSizeError(file);
+    if (error) return { ok: false, error };
     const r = await this.request<CommandResponse>(
       "POST",
       `${API.uploadMedia}?name=${encodeURIComponent(file.name)}&stage=${stageOnly}`,
