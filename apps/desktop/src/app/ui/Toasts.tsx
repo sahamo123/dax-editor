@@ -1,7 +1,7 @@
 // Short messages in the corner ("Video imported.", an error from a failed edit). Each fades after a few seconds
 // and can be dismissed. A polite live region so screen readers announce them without stealing focus.
 
-import { type ReactElement, useEffect, useRef, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 import { useApp } from "../context";
 import type { Toast } from "../store";
 import { Icon } from "./icons";
@@ -39,18 +39,28 @@ function ToastItem({ toast }: { toast: Toast }): ReactElement {
 /** The stack of current toasts, bottom right. */
 export function Toasts(): ReactElement {
   const toasts = useApp((s) => s.toasts);
-  const latest = toasts.at(-1);
-  const lastAnnounced = useRef(0);
+  const pending = useApp((s) => s.pendingAnnouncements);
+  const consumeAnnouncements = useApp((s) => s.consumeAnnouncements);
   const [polite, setPolite] = useState<Toast | null>(null);
   const [error, setError] = useState<Toast | null>(null);
 
   useEffect(() => {
-    // Dismissing a newer toast must not reannounce an older one still in the stack.
-    if (!latest || latest.id <= lastAnnounced.current) return;
-    lastAnnounced.current = latest.id;
-    if (latest.tone === "error") setError(latest);
-    else setPolite(latest);
-  }, [latest]);
+    if (!pending.polite.length && !pending.urgent.length) return;
+    // Consume independently of the visible stack: batched updates may already have pruned it.
+    const batch = consumeAnnouncements();
+    const lastPolite = batch.polite.at(-1);
+    const lastUrgent = batch.urgent.at(-1);
+    if (lastPolite) {
+      const messages = batch.polite.map((notice) => notice.text);
+      if (batch.politeOverflow) messages.push("Additional notifications occurred.");
+      setPolite({ ...lastPolite, text: messages.join(" ") });
+    }
+    if (lastUrgent) {
+      const messages = batch.urgent.map((notice) => notice.text);
+      if (batch.urgentOverflow) messages.push("Additional errors occurred.");
+      setError({ ...lastUrgent, text: messages.join(" ") });
+    }
+  }, [pending, consumeAnnouncements]);
 
   return (
     <>

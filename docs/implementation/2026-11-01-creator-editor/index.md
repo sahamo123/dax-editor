@@ -48,6 +48,7 @@
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.
 * [S01.06 chat attachment preflight](s01-06-attachment-preflight.md) - Prevent locally detectable invalid chat selections from staging earlier files.
 * [S01.06 audit reconciliation receipt](s01-06-audit-reconciliation-receipt.md) - Published accessibility child fixes, limited contrast audit and remaining acceptance gates.
+* [S01.06 batched notice announcements](s01-06-batched-announcements-receipt.md) - Reproduction, scoped live-region batching fix and current verification boundaries.
 * [S01.06 bridge probe error classification](s01-06-bridge-probe-errors.md) - Distinguish unsuccessful CLI capability probes from verified missing options without relaxing restrictions.
 * [S01.06 chat attachment recovery](s01-06-chat-attachment-recovery.md) - Preserve unsent drafts after attachment staging fails without replaying an uncertain edit.
 * [S01.06 chat submission context guard](s01-06-chat-context-guard.md) - Evidence for rejecting stale project and provider contexts during attachment staging.

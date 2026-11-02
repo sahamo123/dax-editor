@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233) fixes batched live-region notice omissions. Focused and browser checks passed at `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3`; its full check failed an unused type export. Corrected head `3183a609eec3ee7bc68d1da0420848daad0067a3` passed dead-code analysis and full `pnpm check`. See the [receipt](s01-06-batched-announcements-receipt.md). S01.06 remains IN_PROGRESS.
+
 - The unattended [#177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231) recheck used PR #230 application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83` and reached Import by keyboard; the modal could not be targeted and no file was selected. See the [receipt](s01-06-native-acceptance-receipt.md). S01.06 remains IN_PROGRESS.
 
 - [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) preserves an unrelated draft when sending a suggestion. Focused component, generated-media browser and full source checks passed at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; review is pending. See the [receipt](s01-06-suggestion-draft-receipt.md). S01.06 remains IN_PROGRESS.

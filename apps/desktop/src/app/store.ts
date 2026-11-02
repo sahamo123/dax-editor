@@ -49,6 +49,35 @@ export interface Toast {
   text: string;
 }
 
+/** Pending live-region notices, bounded independently by priority until consumed by the UI. */
+interface PendingAnnouncements {
+  /** Informational and success notices in arrival order. */
+  polite: Toast[];
+  /** Error notices in arrival order. */
+  urgent: Toast[];
+  /** Additional polite notices exceeded the pending limit. */
+  politeOverflow: boolean;
+  /** Additional urgent notices exceeded the pending limit. */
+  urgentOverflow: boolean;
+}
+
+const MAX_PENDING_ANNOUNCEMENTS = 8;
+
+function emptyAnnouncements(): PendingAnnouncements {
+  return { polite: [], urgent: [], politeOverflow: false, urgentOverflow: false };
+}
+
+function queueAnnouncement(batch: PendingAnnouncements, toast: Toast): PendingAnnouncements {
+  if (toast.tone === "error") {
+    return batch.urgent.length < MAX_PENDING_ANNOUNCEMENTS
+      ? { ...batch, urgent: [...batch.urgent, toast] }
+      : { ...batch, urgentOverflow: true };
+  }
+  return batch.polite.length < MAX_PENDING_ANNOUNCEMENTS
+    ? { ...batch, polite: [...batch.polite, toast] }
+    : { ...batch, politeOverflow: true };
+}
+
 /** What is open on screen. */
 interface UiState {
   settingsOpen: boolean;
@@ -84,6 +113,8 @@ export interface AppStore {
   /** Last `GET /api/local-model`; `"unavailable"` when that request failed, `null` before the first answer. */
   localModel: LocalModelStatus | "unavailable" | null;
   toasts: Toast[];
+  /** Notices awaiting delivery to the separate polite and urgent live regions. */
+  pendingAnnouncements: PendingAnnouncements;
   ui: UiState;
 
   /** Remember which engine we talk to. */
@@ -112,6 +143,8 @@ export interface AppStore {
   pushToast(tone: Toast["tone"], text: string): void;
   /** Remove a toast. */
   dismissToast(id: number): void;
+  /** Atomically return and clear pending live-region notices without removing visible toasts. */
+  consumeAnnouncements(): PendingAnnouncements;
   /** Merge changes into the UI state (open dialogs, drawer tab, ...). */
   patchUi(patch: Partial<UiState>): void;
 }
@@ -171,6 +204,7 @@ export function createAppStore(): StoreApi<AppStore> {
     chatSending: false,
     localModel: null,
     toasts: [],
+    pendingAnnouncements: emptyAnnouncements(),
     ui: {
       settingsOpen: false,
       settingsKind: null,
@@ -267,8 +301,19 @@ export function createAppStore(): StoreApi<AppStore> {
     setLocalModel: (localModel) => set({ localModel }),
 
     pushToast: (tone, text) =>
-      set((s) => ({ toasts: [...s.toasts.slice(-3), { id: nextId++, tone, text }] })),
+      set((s) => {
+        const toast = { id: nextId++, tone, text };
+        return {
+          toasts: [...s.toasts.slice(-3), toast],
+          pendingAnnouncements: queueAnnouncement(s.pendingAnnouncements, toast),
+        };
+      }),
     dismissToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+    consumeAnnouncements: () => {
+      const batch = get().pendingAnnouncements;
+      set({ pendingAnnouncements: emptyAnnouncements() });
+      return batch;
+    },
 
     patchUi: (patch) => {
       set({ ui: { ...get().ui, ...patch } });

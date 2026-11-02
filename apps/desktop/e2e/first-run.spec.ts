@@ -80,6 +80,9 @@ test("shows a clear error when selected bytes are not video", async ({
     buffer: Buffer.from("not video"),
   });
   await expect(page.getByText(/ffprobe|Invalid data|video stream/i).first()).toBeVisible();
+  await expect(page.locator('.sr-only[role="alert"]')).toContainText(
+    /ffprobe|Invalid data|video stream/i,
+  );
   expect(Object.keys((await server.project()).assets)).toHaveLength(0);
 });
 
