@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246) announces recovered outcomes for known running jobs. Focused, browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). First-seen terminal local jobs remain [#247](https://github.com/sahamo123/dax-editor/issues/247); S01.06 remains open.
+
 * **Fix**: Self-review of [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) found focus recovery behind an open modal; the corrected head passed 14 browser checks and full `pnpm check`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md); S01.06 remains open.
 
 * **Fix**: [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) aligns timeline listbox navigation, reading order and focus recovery. Integrated browser, offscreen and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md). S01.06 remains open.

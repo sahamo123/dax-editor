@@ -1,7 +1,7 @@
 // The controller against a fake client and a fake socket: state pushes, connection status, undoing a whole AI
 // run, and settings saving.
 
-import { MAX_UPLOAD_BYTES, type WsEvent } from "@dax/protocol";
+import { type JobInfo, MAX_UPLOAD_BYTES, type WsEvent } from "@dax/protocol";
 import { describe, expect, it, vi } from "vitest";
 import type { DaxClient } from "../api";
 import type { LiveSocketOptions } from "../api/socket";
@@ -258,6 +258,113 @@ describe("controller", () => {
       },
     });
     expect(store.getState().toasts.map((t) => t.text)).toEqual(["ffmpeg died"]);
+  });
+
+  it.each([
+    { status: "done" as const, result: "/tmp/out.mp4", expected: "Exported out.mp4." },
+    { status: "error" as const, error: "Disk full", expected: "Disk full" },
+  ])("announces a known running job recovered as $status from a snapshot once", (outcome) => {
+    const { store, socket } = setup();
+    const running: JobInfo = {
+      id: "snapshot-job",
+      kind: "export",
+      label: "Export",
+      progress: 0.5,
+      status: "running",
+    };
+    const terminal: JobInfo = {
+      ...running,
+      status: outcome.status,
+      progress: 1,
+      ...(outcome.status === "done" ? { result: outcome.result } : { error: outcome.error }),
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [running] }) });
+    socket().onEvent({ type: "state", state: makeState({ jobs: [terminal] }) });
+    socket().onEvent({ type: "job", job: terminal });
+    socket().onEvent({ type: "state", state: makeState({ jobs: [terminal] }) });
+    socket().onEvent({ type: "job", job: running });
+    expect(store.getState().jobs[running.id]).toEqual(terminal);
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual([outcome.expected]);
+  });
+
+  it("announces a first-observed terminal live event once without replaying historical snapshots", () => {
+    const { store, socket } = setup();
+    const old: JobInfo = {
+      id: "old",
+      kind: "export",
+      label: "Export",
+      progress: 1,
+      status: "done",
+      result: "/tmp/old.mp4",
+    };
+    const failure: JobInfo = {
+      id: "new",
+      kind: "proxy",
+      label: "Preparing",
+      progress: 0.2,
+      status: "error",
+      error: "Media error",
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [old] }) });
+    socket().onEvent({ type: "job", job: old });
+    expect(store.getState().toasts).toHaveLength(0);
+    socket().onEvent({ type: "job", job: failure });
+    socket().onEvent({ type: "job", job: failure });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Media error"]);
+  });
+
+  it("announces a recovered effects preview without exposing its cache path", () => {
+    const { store, socket } = setup();
+    const job: JobInfo = {
+      id: "review",
+      kind: "export",
+      label: "Render complete edit preview",
+      progress: 0.4,
+      status: "running",
+    };
+    socket().onEvent({ type: "job", job });
+    socket().onEvent({
+      type: "state",
+      state: makeState({
+        jobs: [{ ...job, status: "done", progress: 1, result: "/private/cache/uuid.webm" }],
+      }),
+    });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Effects preview ready."]);
+  });
+
+  it("does not repeat a terminal notice when a snapshot follows the live event", () => {
+    const { store, socket } = setup();
+    const job: JobInfo = {
+      id: "event-first",
+      kind: "export",
+      label: "Export",
+      progress: 0,
+      status: "running",
+    };
+    const done: JobInfo = { ...job, status: "done", progress: 1, result: "/tmp/out.mp4" };
+    socket().onEvent({ type: "job", job });
+    socket().onEvent({ type: "job", job: done });
+    socket().onEvent({ type: "state", state: makeState({ jobs: [done] }) });
+    socket().onEvent({ type: "job", job: done });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Exported out.mp4."]);
+  });
+
+  it("announces a job completed during reconnect when the HTTP refresh observes it", async () => {
+    const running: JobInfo = {
+      id: "reconnect",
+      kind: "export",
+      label: "Export",
+      progress: 0.6,
+      status: "running",
+    };
+    const done: JobInfo = { ...running, status: "done", progress: 1, result: "/tmp/out.mp4" };
+    const { store, socket } = setup({
+      getState: vi.fn(async () => ({ ok: true, value: makeState({ jobs: [done] }) })),
+    });
+    socket().onEvent({ type: "job", job: running });
+    socket().onStatus("open", { failures: 0 });
+    await vi.waitFor(() => expect(store.getState().jobs.reconnect?.status).toBe("done"));
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Exported out.mp4."]);
   });
 
   it("raises a toast when a manual command fails, but returns the failure to the caller", async () => {
