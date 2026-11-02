@@ -11,7 +11,7 @@ generated:
 
 # Current handoff
 
-**Current work: [chat attachment preflight #212 / draft PR #213](https://github.com/sahamo123/dax-editor/pull/213).** The published candidate on `codex/s01-06-attachment-preflight` passed focused client/controller and browser checks at application/test head `d5c7ee9436ce61c9fc1e02f7bf70cd523225cef1`. Complete full checks and review; see the [receipt](s01-06-attachment-preflight.md). This does not clean retained files. Keyboard-only picker and actual Narrator acceptance remain open; do not advance S01.06. Following current-work entries are historical.
+**Current work: [chat attachment preflight #212 / draft PR #213](https://github.com/sahamo123/dax-editor/pull/213).** The published candidate on `codex/s01-06-attachment-preflight` passed focused client/controller, browser and full source checks at application/test head `d5c7ee9436ce61c9fc1e02f7bf70cd523225cef1`. Complete review; see the [receipt](s01-06-attachment-preflight.md). This does not clean retained files. Keyboard-only picker and actual Narrator acceptance remain open; do not advance S01.06. Following current-work entries are historical.
 
 **Current work: [staged attachment investigation #202 / draft PR #211](https://github.com/sahamo123/dax-editor/pull/211).** Nine generated-media upload/retention tests passed at test head `175e8845077307ee3a27078ee38a41814744d6c3`. Review the [receipt](s01-06-staged-attachment-investigation.md) and [ownership proposal](../../research/staged-attachment-lifetime.md). No cleanup is implemented; never sweep existing uploads. Keyboard-only picker and actual Narrator acceptance remain open; do not advance S01.06. Following current-work entries are historical.
 

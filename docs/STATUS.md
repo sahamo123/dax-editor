@@ -13,7 +13,7 @@ generated:
 
 ## S01.06 chat attachment preflight — November 1, 2026
 
-The [#212 / draft PR #213](https://github.com/sahamo123/dax-editor/pull/213) candidate checks all chat attachments for locally known size and count errors before staging any. Focused tests pass at application/test head `d5c7ee9436ce61c9fc1e02f7bf70cd523225cef1`; full source checks and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md). Existing or unexpectedly abandoned staged files are not cleaned up by this change.
+The [#212 / draft PR #213](https://github.com/sahamo123/dax-editor/pull/213) candidate checks all chat attachments for locally known size and count errors before staging any. Focused tests and `pnpm check` passed at application/test head `d5c7ee9436ce61c9fc1e02f7bf70cd523225cef1`; review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md). Existing or unexpectedly abandoned staged files are not cleaned up by this change.
 
 ## S01.06 staged attachment storage — November 1, 2026
 
