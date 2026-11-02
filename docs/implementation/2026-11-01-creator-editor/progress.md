@@ -17,7 +17,7 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
-- [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220) protects local-model transitions and accepted local work; focused tests passed at application/test head `f7d70a76cb195503d72a821865d647b9eeb34079`. Full check and review remain pending. The [receipt](s01-06-chat-context-guard.md) preserves failures and evidence.
+- [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220) protects local-model transitions and accepted local work; focused tests passed at application/test head `f7d70a76cb195503d72a821865d647b9eeb34079`. The full host check failed a bridge test; follow [#222](https://github.com/sahamo123/dax-editor/issues/222). The [receipt](s01-06-chat-context-guard.md) preserves failures and evidence.
 
 - Follow-up [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219): deterministic probe classification and a real subprocess timeout test passed 19 focused tests and full host-authorized `pnpm check` at `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`; review remains pending. The preceding failed checks remain recorded in the [receipt](s01-06-summary-keyboard.md).
 
