@@ -97,9 +97,9 @@ for (const viewport of [
     }
     // Legacy/custom preset IDs use the base timeline color; simulate only that CSS class, then restore it.
     const custom = await page.locator(".dx-ovl--title").evaluate((element) => {
-      const original = element.className;
+      const original = element.getAttribute("class") ?? "";
       try {
-        element.className = "dx-ovl dx-ovl--custom";
+        element.setAttribute("class", "dx-ovl dx-ovl--custom");
         const label = element.querySelector(".dx-ovl-label");
         if (!label) throw new Error("Overlay label missing");
         return {
@@ -107,7 +107,7 @@ for (const viewport of [
           background: getComputedStyle(element).backgroundColor,
         };
       } finally {
-        element.className = original;
+        element.setAttribute("class", original);
       }
     });
     ratios.push({
