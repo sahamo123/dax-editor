@@ -11,7 +11,7 @@ generated:
 
 # Current handoff
 
-**Current work: [batched notices #232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233).** Application/test head `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3` preserves pending notices independently of the visible toast stack. Focused and generated-media browser checks passed; full check and review remain pending. See the [receipt](s01-06-batched-announcements-receipt.md). Keep S01.06 and actual assistive-technology acceptance open; earlier entries are historical.
+**Current work: [batched notices #232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233).** Application/test head `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3` passed focused and browser checks; its full check failed an unused type export. Type-only correction `3183a609eec3ee7bc68d1da0420848daad0067a3` passed dead-code analysis and a full retry is running. See the [receipt](s01-06-batched-announcements-receipt.md). Keep S01.06 and actual assistive-technology acceptance open; earlier entries are historical.
 
 **Current work: [unattended keyboard recheck #177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231).** On `codex/s01-06-unattended-picker-recheck`, evidence head `4bd498204aa9699bb820a3fc75311a416be02291`, based on PR #230 documentation head `7789e68677aa92abac5496a56fd10c7c793f5a19`, keyboard navigation reached Import but the native modal was not independently targetable. No file was selected. See the [receipt](s01-06-native-acceptance-receipt.md); continue independent work and keep S01.06 open. Earlier entries are historical.
 
