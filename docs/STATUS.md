@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Task notice reading time — November 2, 2026
+
+[#264 / draft PR #266](https://github.com/sahamo123/dax-editor/pull/266) pauses notice timers during focus or pointer interaction. Focused, eleven browser and full source checks passed at `0e4881d7c9f145e1edb496d9580db4ccebd56d1a`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-notice-reading-time-receipt.md). Burst eviction [#265](https://github.com/sahamo123/dax-editor/issues/265), S01.06 and actual screen-reader/native acceptance remain open.
+
 ## Modal live-region audit — November 2, 2026
 
 [#262 / draft PR #263](https://github.com/sahamo123/dax-editor/pull/263) found both task live regions represented in headless Edge's accessibility tree during synthetic Settings and rendered-review dialogs. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-live-region-receipt.md). This does not verify actual screen-reader speech or native WebView behavior; S01.06 and its remaining acceptance gates stay open.

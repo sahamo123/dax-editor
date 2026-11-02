@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current notice reading time — November 2, 2026
+
+[#264 / draft PR #266](https://github.com/sahamo123/dax-editor/pull/266), `codex/s01-06-notice-reading-time`, passed focused, eleven browser and full source checks at application/test head `0e4881d7c9f145e1edb496d9580db4ccebd56d1a`. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-notice-reading-time-receipt.md) and investigate burst eviction [#265](https://github.com/sahamo123/dax-editor/issues/265). S01.06 and actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 ## Current modal live-region audit — November 2, 2026
 
 [#262 / draft PR #263](https://github.com/sahamo123/dax-editor/pull/263), `codex/s01-06-modal-live-region-audit`, test head `2ea06cf90aa1f30423a195748e8becfd222e4f8c`, adds a synthetic browser accessibility-tree check; no production behavior changed. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-modal-live-region-receipt.md). Continue S01.06 without claiming actual screen-reader, keyboard-picker or native acceptance; earlier entries are historical.
