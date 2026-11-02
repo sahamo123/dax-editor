@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Test**: The current [#177](https://github.com/sahamo123/dax-editor/issues/177) synthetic keyboard recheck reached the Windows picker, whose filename control was unavailable to the supported automation. No file was selected; owned test resources were stopped. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 and native/screen-reader acceptance remain open.
+
 * **Test**: [#270 / draft PR #271](https://github.com/sahamo123/dax-editor/pull/271) measures selected keyboard focus and text contrast in scrollable/overflow notification areas at compact and standard browser sizes. Three browser checks, fast checks and dead-code analysis passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-notice-focus-receipt.md). S01.06 and native/accessibility acceptance remain open.
 
 * **Test**: [#268 / draft PR #269](https://github.com/sahamo123/dax-editor/pull/269) investigates full-size preview timing and teardown, then bounds the browser test appropriately without changing production behavior. Nine combined browser checks, three repetitions and full source checks passed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-preview-lifecycle-receipt.md) retains the original uncertainty and failures. S01.06 and native/accessibility acceptance remain open.

@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current picker targeting recheck — November 2, 2026
+
+The latest [#177](https://github.com/sahamo123/dax-editor/issues/177) synthetic browser recheck reached the real Windows picker with keyboard input but could not target its filename field through the available automation; no file was selected. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). The test tab and idle services were stopped; preserve generated artifacts and continue independent S01.06 work. Actual picker, task-specific screen-reader speech and native acceptance remain open. Earlier entries are historical.
+
 ## Current notification focus samples — November 2, 2026
 
 [#270 / draft PR #271](https://github.com/sahamo123/dax-editor/pull/271), `codex/s01-06-notice-focus-contrast`, test head `b80ab8d09fa0024d6b492c2a705b2e778d592246`, passed three selected browser checks, fast checks and dead-code analysis; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-notice-focus-receipt.md). Continue S01.06; actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.

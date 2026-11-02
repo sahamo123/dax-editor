@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Isolated picker targeting recheck — November 2, 2026
+
+The [#177](https://github.com/sahamo123/dax-editor/issues/177) recheck reached the Windows Open dialog by keyboard on the current candidate. The dialog appeared as a child of the disabled browser window, but its filename control was not targetable through the supported automation; no file was selected. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 and actual picker, screen-reader and native acceptance remain open; continue independent work without touching user projects.
+
 ## Notification focus samples — November 2, 2026
 
 [#270 / draft PR #271](https://github.com/sahamo123/dax-editor/pull/271) measures keyboard focus and message contrast in scrollable and overflow notification areas. Three browser checks, fast checks and dead-code analysis passed at test head `b80ab8d09fa0024d6b492c2a705b2e778d592246`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-notice-focus-receipt.md). This is a limited browser sample; S01.06 and actual picker, screen-reader and native acceptance remain open.
