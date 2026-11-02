@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current investigation: [#251](https://github.com/sahamo123/dax-editor/issues/251).** On `codex/s01-06-cancelled-job-notices`, the [investigation](s01-06-job-cancellation-investigation.md) reproduces error-styled cancellation and identifies typed-contract work. Publish the diagnostic and continue; no product fix is claimed. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
+
 **Current work: [#249 / draft PR #250](https://github.com/sahamo123/dax-editor/pull/250).** On `codex/s01-06-non-export-outcomes`, application/test head `5136c40914e064386397a7e46e603a2337a8ee7f` passed focused, browser and full source checks. Review the [receipt](s01-06-non-export-outcomes-receipt.md) and investigate [#251](https://github.com/sahamo123/dax-editor/issues/251). Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
 
 **Current work: [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248).** On `codex/s01-06-local-job-outcomes`, application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc` passed focused, browser and full source checks. Review the [receipt](s01-06-local-job-outcomes-receipt.md) and continue S01.06. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
