@@ -11,9 +11,13 @@ generated:
 
 # Project status
 
+## Current native picker recheck — November 2, 2026
+
+[#177](https://github.com/sahamo123/dax-editor/issues/177) opened the Windows file chooser by keyboard on the current synthetic preview, but the dialog was not separately targetable and no file was selected. Owned test services and tab were closed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 and actual picker/screen-reader/native acceptance remain open.
+
 ## Keyboard edit and export diagnostic — November 2, 2026
 
-[#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280) passed two generated-media browser workflows at test head f81963207096c47db76c0f428600d57b9f05b25, including keyboard editing, review playback, export refusal/recovery and decoded five-second outputs. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-keyboard-edit-export-receipt.md). The clip was pre-imported; review, real picker/screen-reader and native acceptance remain open.
+[#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280) passed two generated-media browser workflows at test head bf81963207096c47db76c0f428600d57b9f05b25, including keyboard editing, review playback, export refusal/recovery and decoded five-second outputs. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-keyboard-edit-export-receipt.md). The clip was pre-imported; review, real picker/screen-reader and native acceptance remain open.
 
 ## Task status contrast samples — November 2, 2026
 

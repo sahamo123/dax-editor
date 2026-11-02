@@ -11,7 +11,9 @@ generated:
 
 # Continue on another laptop or agent
 
-**Current work:** [#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280) passed two keyboard edit/review/export browser workflows at f81963207096c47db76c0f428600d57b9f05b25; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-keyboard-edit-export-receipt.md). The test pre-imported the generated clip. Review and real picker/screen-reader/native acceptance remain open.
+**Current picker recheck:** [#177](https://github.com/sahamo123/dax-editor/issues/177) opened the Windows chooser by keyboard, but it was not separately targetable and no file was selected. The isolated tab and services were closed. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). The actual picker and screen-reader gates remain open.
+
+**Current work:** [#279 / draft PR #280](https://github.com/sahamo123/dax-editor/pull/280) passed two keyboard edit/review/export browser workflows at bf81963207096c47db76c0f428600d57b9f05b25; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-keyboard-edit-export-receipt.md). The test pre-imported the generated clip. Review and real picker/screen-reader/native acceptance remain open.
 
 **Current work:** [#277 / draft PR #278](https://github.com/sahamo123/dax-editor/pull/278) passed two task-status contrast browser checks, fast checks and dead-code analysis at 6bca226ee40c886b49ed449aa7f64c61c5a70158. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-task-status-contrast-receipt.md). Review and S01.06/native accessibility acceptance remain open.
 
