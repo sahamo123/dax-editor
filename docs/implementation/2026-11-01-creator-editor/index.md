@@ -50,6 +50,7 @@
 * [S01.06 audit reconciliation receipt](s01-06-audit-reconciliation-receipt.md) - Published accessibility child fixes, limited contrast audit and remaining acceptance gates.
 * [S01.06 batched notice announcements](s01-06-batched-announcements-receipt.md) - Reproduction, scoped live-region batching fix and current verification boundaries.
 * [S01.06 bridge probe error classification](s01-06-bridge-probe-errors.md) - Distinguish unsuccessful CLI capability probes from verified missing options without relaxing restrictions.
+* [S01.06 typed cancellation foundation](s01-06-cancellation-foundation-receipt.md) - Evidence and compatibility boundary for core, protocol and local-model cancellation identity.
 * [S01.06 chat attachment recovery](s01-06-chat-attachment-recovery.md) - Preserve unsent drafts after attachment staging fails without replaying an uncertain edit.
 * [S01.06 chat submission context guard](s01-06-chat-context-guard.md) - Evidence for rejecting stale project and provider contexts during attachment staging.
 * [S01.06 intermittent chat submission investigation](s01-06-chat-submission-investigation.md) - Evidence separating an unsent synthetic chat prompt from a test-teardown disconnect and the remaining diagnosis.

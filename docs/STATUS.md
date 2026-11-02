@@ -13,7 +13,7 @@ generated:
 
 ## Typed cancellation candidate — November 2, 2026
 
-[#254 / draft PR #255](https://github.com/sahamo123/dax-editor/pull/255) and dependent [#253 / draft PR #256](https://github.com/sahamo123/dax-editor/pull/256) implement a typed cancellation boundary and polite notices. See the [current receipt](implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md): corrected foundation full check is running, dependent full check and review remain pending. The compact-view toast overlap is [#257](https://github.com/sahamo123/dax-editor/issues/257). S01.06, real screen-reader and native acceptance remain open.
+[#254 / draft PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed a full source check at corrected foundation head `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`; see its [receipt](implementation/2026-11-01-creator-editor/s01-06-cancellation-foundation-receipt.md). Dependent [#253 / draft PR #256](https://github.com/sahamo123/dax-editor/pull/256) has focused and browser passes but two full checks failed bridge detector assertions; see its [receipt](implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md) and [#203](https://github.com/sahamo123/dax-editor/issues/203). Compact toast overlap [#257](https://github.com/sahamo123/dax-editor/issues/257), S01.06, actual screen-reader and native acceptance remain open.
 
 ## Cancellation outcome investigation — November 2, 2026
 

@@ -11,7 +11,7 @@ generated:
 
 # Current handoff
 
-**Current work: [PR #255](https://github.com/sahamo123/dax-editor/pull/255) and [PR #256](https://github.com/sahamo123/dax-editor/pull/256).** Foundation application/test head `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`; dependent application/test head `6e32425648e52de20ddc92275a5f61d37cfd077c`. Complete the checks in the [receipt](s01-06-typed-cancellation-receipt.md), then investigate [#257](https://github.com/sahamo123/dax-editor/issues/257). S01.06 and actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
+**Current work: [PR #255](https://github.com/sahamo123/dax-editor/pull/255) and [PR #256](https://github.com/sahamo123/dax-editor/pull/256).** The foundation passed a full check at `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`; dependent application/test head `23f1417f7b247c7e76f189bfa20a97f907038821` passed focused and browser checks but failed the full check in bridge detection. Read the [receipt](s01-06-typed-cancellation-receipt.md), diagnose [#203](https://github.com/sahamo123/dax-editor/issues/203), then investigate [#257](https://github.com/sahamo123/dax-editor/issues/257). S01.06 and actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
 
 **Current investigation: [#251](https://github.com/sahamo123/dax-editor/issues/251).** On `codex/s01-06-cancelled-job-notices`, the [investigation](s01-06-job-cancellation-investigation.md) reproduces error-styled cancellation and identifies typed-contract work. Publish the diagnostic and continue; no product fix is claimed. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
 
