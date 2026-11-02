@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 modal shortcuts — November 1, 2026
+
+Dialog shortcut isolation [#171](https://github.com/sahamo123/dax-editor/issues/171) is IN_PROGRESS on `codex/s01-06-dialog-shortcuts`, based on self-reviewed [PR #170](https://github.com/sahamo123/dax-editor/pull/170) `5f766c48f1ec329b8d111593ee638849681f717f`. Component tests reproduced split/delete and undo behind a modal; candidate focused and browser tests pass, as does the host-permission full source check. Publication and self-review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-dialog-shortcuts-receipt.md). S01.06 keyboard-only and actual assistive-technology gates remain open; native/DPI evidence is separate.
+
 ## S01.06 reduced motion — November 1, 2026
 
 Primary contrast [#165 / PR #169](https://github.com/sahamo123/dax-editor/pull/169) is verified with self-review at `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Reduced motion [#168](https://github.com/sahamo123/dax-editor/issues/168) is under test on `codex/s01-06-reduced-motion`; full source and focused browser checks pass; publication and self-review remain pending. Confirm publication before switching laptops. Actual assistive-technology and native/DPI evidence remain open.

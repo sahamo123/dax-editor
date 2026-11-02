@@ -61,7 +61,14 @@ export function useEditorShortcuts(): void {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.defaultPrevented || e.isComposing) return;
+      // A modal owns the keyboard; shortcuts must not change the project behind it.
+      if (
+        e.defaultPrevented ||
+        e.isComposing ||
+        (e.target instanceof Element &&
+          e.target.closest('[role="dialog"][aria-modal="true"], dialog[open]'))
+      )
+        return;
       if (isEditableTarget(e.target, e.key)) return;
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       let handled = true;
