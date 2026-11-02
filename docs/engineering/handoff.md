@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.06 chat submission investigation — November 1, 2026
+
+Continue [#186 / draft PR #188](https://github.com/sahamo123/dax-editor/pull/188), diagnostic/test head `a1b4d31259e4e32b7dbeece1a360b183acc0940c`, on `codex/s01-06-engine-reconnect`, based on [draft PR #187](https://github.com/sahamo123/dax-editor/pull/187) documentation head `c3ad581055db52e5a716363c6c60fdf21a5c65b9`. The earlier disconnected banner may have been produced by test cleanup. Before teardown, the engine was reachable and socket open, but the synthetic chat prompt had not appeared and no edit was made. The cause is unknown. See the [investigation receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-submission-investigation.md). Complete this scoped investigation without masking failures; keyboard-only and actual screen-reader gates remain open. Earlier entries are historical.
+
 ## Active S01.06 live accessibility — November 1, 2026
 
 Continue [#185 / draft PR #187](https://github.com/sahamo123/dax-editor/pull/187) on `codex/s01-06-live-acceptance`, application/test head `6c3fbea9723fcf17018d736f518e749cb7533860`, based on [PR #184](https://github.com/sahamo123/dax-editor/pull/184) head `0bb231d7848b416be11c2801ef59d08f67aa0081`. The full source check passed in an authorized isolated test environment; the browser suite found an intermittent disconnected-engine failure tracked as [#186](https://github.com/sahamo123/dax-editor/issues/186). The earlier live keyboard/Narrator run was partial: the operator used the mouse in the file picker, heard preview completion, and reported missing export-start/progress and existing-file-error speech. The user is away. Actual post-change speech and complete keyboard-only import remain pending under [#177](https://github.com/sahamo123/dax-editor/issues/177); do not advance S01.06. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-live-announcement-receipt.md). Earlier headings are historical.
