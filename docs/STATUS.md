@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 saved-connection diagnostics — November 1, 2026
+
+The intermittent [#207](https://github.com/sahamo123/dax-editor/issues/207) saved-connection HTTP 500 did not recur in 25 isolated synthetic runs or the full retry. [Draft PR #210](https://github.com/sahamo123/dax-editor/pull/210), test head `5524223eb48236c9344c7009b066266c62dc4f2b`, adds a test-only diagnostic exposing the response and redacted harness logs on failure. The original cause is unknown and review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
+
 ## S01.06 chat context browser coverage — November 1, 2026
 
 Six generated-media browser races passed for project and provider switches at three staging boundaries, and ten existing chat workflows passed. [#206 / draft PR #209](https://github.com/sahamo123/dax-editor/pull/209) is published at test head `93f0fddbe8f144079433b6144e35ecf972f7679b`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Review and native acceptance remain open.

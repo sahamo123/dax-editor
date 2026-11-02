@@ -46,7 +46,7 @@ describe("named connections", () => {
           action: "load",
           id: connection?.id,
         });
-        expect(loaded.status).toBe(200);
+        expect(loaded.status, `Load failed: ${loaded.text()}\n${h.logs.join("\n")}`).toBe(200);
         expect(loaded.json<Settings>().providers["openai-compatible"]).toEqual(connection?.config);
         expect(loaded.text()).not.toContain(keyA);
         expect(loaded.text()).not.toContain(keyB);
