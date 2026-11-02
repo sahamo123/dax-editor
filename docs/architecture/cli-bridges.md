@@ -47,6 +47,8 @@ flowchart LR
 
 The statuses (`not installed`, `not signed in`, `ready`, `unsupported`, `error`) appear in Settings with a next step, for example "Run `claude` once in a terminal to sign in". Checks are cached briefly and never block the Settings screen for more than 3.5 seconds.
 
+A timed-out or failed capability probe is an error requiring a retry or installation check; it is not proof that options are missing. A successful help response lacking required security options remains unsupported. Both states prevent the bridge from running.
+
 ## Tests
 
 `pnpm --filter @dax/bridges test` runs against a fake `claude` executable (`packages/bridges/test/fixtures/fake-claude.mjs`). It really connects to the loopback endpoint and calls real tools on a real `Session`. One fixture is a trimmed copy of a recorded real Claude Code run. No network and no real CLI are needed. The tests cover detection states, the flags, event mapping, edits credited to `ai`, token hygiene, cancel, timeouts, resume, helper cleanup and shutdown.

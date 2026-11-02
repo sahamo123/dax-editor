@@ -16,6 +16,10 @@ export interface FakeScenario {
   version?: string;
   /** Lines listed by `--help`; replaces the default full set. */
   helpFlags?: string[];
+  /** Delay the fake help probe by this many milliseconds. */
+  helpDelayMs?: number;
+  /** Exit code for the fake help probe. Defaults to zero. */
+  helpExitCode?: number;
   /** `claude auth status` answer. */
   auth?: { exit?: number; stdout?: unknown };
   /** Delay before `auth status` answers, in ms. */

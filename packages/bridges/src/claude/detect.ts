@@ -244,7 +244,7 @@ export class ClaudeDetector {
       runProbe(path, ["--version"], { env, timeoutMs }),
       runProbe(path, ["--help"], { env, timeoutMs, maxBytes: 256 * 1024 }),
     ]);
-    if (versionRun.exitCode !== 0) {
+    if (versionRun.timedOut || versionRun.spawnError || versionRun.exitCode !== 0) {
       return {
         status: {
           ...base,
@@ -279,21 +279,29 @@ export class ClaudeDetector {
         },
       };
     }
+    if (helpRun.timedOut || helpRun.spawnError || helpRun.exitCode !== 0) {
+      return {
+        status: {
+          ...base,
+          version,
+          state: "error",
+          available: false,
+          detail: `${probeProblem("`claude --help`", helpRun)} Try again or check the installation.`,
+        },
+      };
+    }
     const help = helpRun.stdout;
     const missing: string[] = REQUIRED_FLAGS.filter((flag) => !help.includes(flag));
     // `--permission-mode dontAsk` is what turns "would prompt" into "denied" for headless runs.
     if (!help.includes("dontAsk")) missing.push("--permission-mode dontAsk");
-    if (helpRun.exitCode !== 0 || missing.length > 0) {
+    if (missing.length > 0) {
       return {
         status: {
           ...base,
           version,
           state: "unsupported",
           available: false,
-          detail:
-            helpRun.exitCode !== 0
-              ? `${probeProblem("`claude --help`", helpRun)} Try updating Claude Code with \`claude update\`.`
-              : `This Claude Code (${version}) lacks options dax needs to keep it restricted to the editing tools (${missing.join(", ")}). Update it with \`claude update\`.`,
+          detail: `This Claude Code (${version}) lacks options dax needs to keep it restricted to the editing tools (${missing.join(", ")}). Update it with \`claude update\`.`,
         },
       };
     }

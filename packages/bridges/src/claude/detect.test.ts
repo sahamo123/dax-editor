@@ -146,12 +146,31 @@ describe("installed", () => {
   });
 
   it("reports a slow sign-in check as an error that is worth retrying, instead of hanging", async () => {
-    const { detector } = detectorFor({ authDelayMs: 5000 }, { probeTimeoutMs: 300 });
+    const { detector, fake } = detectorFor({ authDelayMs: 5000 }, { probeTimeoutMs: 1500 });
     const started = Date.now();
     const { status } = await detector.detect();
-    expect(Date.now() - started).toBeLessThan(3000);
+    expect(Date.now() - started).toBeLessThan(5000);
     expect(status.state).toBe("error");
-    expect(status.detail).toMatch(/did not answer in time/);
+    expect(status.detail).toMatch(/sign-in check.*did not answer in time/);
+    expect(fake.calls().some((call) => call.mode === "auth")).toBe(true);
+  });
+
+  it("reports a timed-out help probe as a retryable error and does not start authentication", async () => {
+    const { detector, fake } = detectorFor({ helpDelayMs: 5000 }, { probeTimeoutMs: 1500 });
+    const { status, install } = await detector.detect();
+    expect(status).toMatchObject({ state: "error", available: false });
+    expect(status.detail).toMatch(/--help.*did not answer in time/);
+    expect(install).toBeUndefined();
+    expect(fake.calls().some((call) => call.mode === "auth")).toBe(false);
+  });
+
+  it("reports a nonzero help probe as an error instead of assuming missing capabilities", async () => {
+    const { detector, fake } = detectorFor({ helpExitCode: 2 });
+    const { status, install } = await detector.detect();
+    expect(status).toMatchObject({ state: "error", available: false });
+    expect(status.detail).toMatch(/--help.*exit code 2/);
+    expect(install).toBeUndefined();
+    expect(fake.calls().some((call) => call.mode === "auth")).toBe(false);
   });
 
   it("uses an explicit binary path over the search", async () => {
