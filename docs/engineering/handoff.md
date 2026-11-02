@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Active S01.06 reduced motion — November 1, 2026
+
+Continue [#168](https://github.com/sahamo123/dax-editor/issues/168) on `codex/s01-06-reduced-motion`, based on self-reviewed [PR #169](https://github.com/sahamo123/dax-editor/pull/169) `bb087001bfd21a8b570a82be2afb09f69fa2a6f1`. Reduced and normal preference browser tests pass; run full checks and separately review the published diff. Confirm publication before switching laptops. Actual assistive-technology and native/DPI evidence remain open. Earlier headings are historical.
+
 ## Active S01.06 primary contrast — November 1, 2026
 
 Continue [#165](https://github.com/sahamo123/dax-editor/issues/165) on `codex/s01-06-primary-contrast`, based on self-reviewed [PR #167](https://github.com/sahamo123/dax-editor/pull/167) `ee1c4726c7e4fb03986fe986440521f428dc5b4c`. A rendered test reproduced 3.84:1 hover contrast and the adjusted color passed at 5.79:1; full checks and review remain pending. Confirm publication before switching laptops. Actual assistive-technology and native/DPI evidence remain separate. Earlier headings are historical.

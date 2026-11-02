@@ -45,6 +45,8 @@ During export, the top-bar progress control remains keyboard-focusable and is pr
 
 Primary-button text must meet the [WCAG 2.2 ordinary-text 4.5:1 contrast threshold](https://www.w3.org/TR/WCAG22/#contrast-minimum) in normal and hover states; the hover state must remain visually distinguishable. Measure the rendered opaque foreground and background rather than assuming a token comment is accurate. [#165](https://github.com/sahamo123/dax-editor/issues/165) tracks the scoped correction.
 
+When reduced motion is requested, suppress the defined incidental shell transitions at their component selectors and retain clear immediate state changes. Keep working feedback visible and slow the spinner rather than removing its status text. Normal-motion behavior remains unchanged. [#168](https://github.com/sahamo123/dax-editor/issues/168) tracks the scoped correction; actual assistive-technology observation remains separate.
+
 S01.05's [narrow composer child](../implementation/2026-11-01-creator-editor/s01-05-composer-receipt.md) passed self-review: the message field and active-run actions occupy separate rows, and Queue is labelled distinctly from Steer and Stop. It does not complete the task/recovery acceptance.
 
 The [failure and autosave visibility child](../implementation/2026-11-01-creator-editor/s01-05-failure-receipt.md) is in progress. It also addresses a reproduced delayed-state response that hid an autosave warning; full verification remains pending.

@@ -144,7 +144,6 @@ code {
   }
   * {
     scroll-behavior: auto;
-    transition: none;
   }
 }
 

@@ -1473,3 +1473,17 @@ textarea.input {
   padding: 10px 0;
   cursor: pointer;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .splitter::after,
+  .btn,
+  .btn__progress,
+  .icon-btn,
+  .progress__fill,
+  .tool__chev,
+  .chip,
+  .setup-option,
+  .empty {
+    transition: none;
+  }
+}
