@@ -2,7 +2,7 @@
 
 ## 2026-11-01
 
-* **Investigate**: Staged attachment retention [#202](https://github.com/sahamo123/dax-editor/issues/202) was reproduced with generated media. Nine upload/retention tests passed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md) and [ownership proposal](research/staged-attachment-lifetime.md) retain the no-cleanup boundary.
+* **Investigate**: Staged attachment retention [#202 / PR #211](https://github.com/sahamo123/dax-editor/pull/211) was reproduced with generated media. Nine upload/retention tests passed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md) and [ownership proposal](research/staged-attachment-lifetime.md) retain the no-cleanup boundary.
 
 * **Investigate**: Saved-connection HTTP 500 [#207](https://github.com/sahamo123/dax-editor/issues/207) remains unexplained after 25 isolated passes and a full retry; a test-only failure diagnostic is in [draft PR #210](https://github.com/sahamo123/dax-editor/pull/210). See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
 

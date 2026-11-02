@@ -13,7 +13,7 @@ generated:
 
 ## S01.06 staged attachment storage — November 1, 2026
 
-Generated-media tests for [#202](https://github.com/sahamo123/dax-editor/issues/202) reproduced an unsubmitted staged file retained after upload failure and restart, and showed staged sources referenced by saved projects and interrupted tasks. Nine focused tests passed. No cleanup was performed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md) and [ownership proposal](research/staged-attachment-lifetime.md) explain why legacy sources must remain durable. Publication and review are pending.
+Generated-media tests for [#202 / draft PR #211](https://github.com/sahamo123/dax-editor/pull/211) reproduced an unsubmitted staged file retained after upload failure and restart, and showed staged sources referenced by saved projects and interrupted tasks. Nine focused tests passed at test head `175e8845077307ee3a27078ee38a41814744d6c3`. No cleanup was performed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md) and [ownership proposal](research/staged-attachment-lifetime.md) explain why legacy sources must remain durable. Review is pending.
 
 ## S01.06 saved-connection diagnostics — November 1, 2026
 
