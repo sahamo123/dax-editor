@@ -1236,7 +1236,9 @@ export async function tryRunCommand(
     return {
       ok: false,
       error: err instanceof Error ? err.message : String(err),
-      ...(err instanceof CommandCancelledError ? { cancelled: true as const } : {}),
+      ...(ctx.signal?.aborted && err instanceof CommandCancelledError
+        ? { cancelled: true as const }
+        : {}),
     };
   }
 }

@@ -1,7 +1,7 @@
 // Cancelling a command: it must not start after the cancel, and must not apply its edit once the cancel has happened.
 
 import { describe, expect, it } from "vitest";
-import { tryRunCommand } from "./commands.js";
+import { CommandCancelledError, tryRunCommand } from "./commands.js";
 import type { Asset } from "./schema.js";
 import { Session } from "./session.js";
 import { addAsset, appendClip, emptyProject } from "./timeline.js";
@@ -87,5 +87,16 @@ describe("cancelling a command", () => {
     };
     const r = await tryRunCommand({ session, transcriber }, "transcribe", {});
     expect(r).toEqual({ ok: false, error: "Timed out" });
+  });
+
+  it("does not mark a typed cancellation as confirmed without an aborted command signal", async () => {
+    const session = fresh();
+    const transcriber: Transcriber = {
+      transcribe: async () => {
+        throw new CommandCancelledError("Cancelled");
+      },
+    };
+    const r = await tryRunCommand({ session, transcriber }, "transcribe", {});
+    expect(r).toEqual({ ok: false, error: "Cancelled" });
   });
 });
