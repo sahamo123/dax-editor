@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 keyboard recheck — November 1, 2026
+
+[Draft PR #193](https://github.com/sahamo123/dax-editor/pull/193), evidence head `328c6c0349078ff4aa9453ec6e5c7e6198a65e87`: a fresh synthetic keyboard attempt reached the real Windows Open dialog from setup and Import without a mouse. The automation tool could not target the dialog for keyboard input, so file selection and the full keyboard-only workflow remain unverified. See the [native acceptance receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). The screen-reader and native/DPI gates also remain open; do not advance S01.06.
+
 ## S01.06 media card actions — November 1, 2026
 
 The scoped media-card fix [#190](https://github.com/sahamo123/dax-editor/issues/190) wraps controls instead of clipping their labels. Generated-video browser checks passed at 1440 and 1000 pixels, including Add, keyboard focus and Relink; full `pnpm check` passed and [draft PR #192](https://github.com/sahamo123/dax-editor/pull/192) is published at application/test head `7e1595b6a2c5e63b5f426383b4d085547102169c`; review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-media-actions-receipt.md). S01.06 and native acceptance remain open.
