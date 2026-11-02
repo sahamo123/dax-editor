@@ -21,4 +21,6 @@ The full `pnpm check` at application/test head `563028eb83ca88705c004024d9b63021
 
 The first full-check attempt on the #218 local candidate stopped at formatting before tests. Its log SHA-256 is `02ccbb079bd1690d3db1634934b65e0cf2a1130f6b082e8a717a91b1d9b2321f`; the formatting defect was corrected before the next run.
 
+The next full-check attempt ran without host permissions and two core safety tests failed when Windows denied their synthetic symlink creation (`EPERM` in `command-paths.test.ts` and `export.test.ts`). The local-model suite produced no further output and the already-failing run was interrupted; later package results were not obtained. Log SHA-256: `1564ae84cbbd71d30ef3cddb0c851cca7928fead6ca85ac9496a8b50e8fd411d`. A host-authorized full run is needed; no security test was skipped.
+
 These are browser checks with generated media and system development FFmpeg. They do not establish the full keyboard-only native file picker, actual Narrator speech, Windows scaling, or packaged-runtime acceptance. S01.06 remains open.
