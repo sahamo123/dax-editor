@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: Local [#221](https://github.com/sahamo123/dax-editor/issues/221) candidate guards steering against a changed assistant connection. Focused tests passed; a separate Stop-state race is under investigation in [#224](https://github.com/sahamo123/dax-editor/issues/224). See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
+
 * **Test**: The combined host-authorized `pnpm check` passed for [#222 / PR #223](https://github.com/sahamo123/dax-editor/pull/223), including local-model guard #217; earlier failures remain documented in the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
 
 * **Test**: [#222 / draft PR #223](https://github.com/sahamo123/dax-editor/pull/223) replaces a fixed bridge-status wait with a bounded condition; 31 focused tests passed. Full check remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).

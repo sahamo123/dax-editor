@@ -50,3 +50,37 @@ test("narrow composer keeps queue, steering and stop usable without interrupting
   await stop.click();
   await expect(page.getByText("Stopped.")).toBeVisible();
 });
+
+test("keeps the draft when steering targets a changed assistant configuration", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+}) => {
+  const server = await startServer({ aiReady: true });
+  await server.importPaths([sampleVideo]);
+  await openApp(server);
+  await chatInput(page).fill("work slowly please");
+  await chatInput(page).press("Enter");
+  await expect(page.getByRole("button", { name: "Stop", exact: true })).toBeVisible();
+  const initial = await server.api.state();
+  const changed = await server.api.call("POST", "/api/settings", {
+    ...initial.settings,
+    providers: { ...initial.settings.providers, local: { model: "synthetic-other-model" } },
+  });
+  expect(changed.status).toBe(200);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Stop", exact: true })).toBeVisible();
+  await chatInput(page).fill("Keep this guidance");
+  const response = page.waitForResponse(
+    (r) => r.url().endsWith("/api/chat") && r.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Steer task", exact: true }).click();
+  expect((await response).status()).toBe(409);
+  await expect(chatInput(page)).toHaveValue("Keep this guidance");
+  await expect(page.getByText(/active task uses a different assistant connection/i)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Stop", exact: true })).toBeVisible();
+  expect(
+    (await server.api.state()).tasks?.some((task) => task.title === "Keep this guidance"),
+  ).toBe(false);
+});

@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Steering provider context — November 2, 2026
+
+The local [#221](https://github.com/sahamo123/dax-editor/issues/221) candidate rejects steering when the selected connection differs from the active task; 34 server tests and a focused browser scenario passed. An existing Stop scenario showed a possible task/transcript race [#224](https://github.com/sahamo123/dax-editor/issues/224); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Publication and full check remain pending; S01.06 and native acceptance remain open.
+
 ## Bridge status deadline follow-up — November 2, 2026
 
 The [#222 / draft PR #223](https://github.com/sahamo123/dax-editor/pull/223) candidate replaces a fixed fake-CLI wait with a bounded wait for the actual result while retaining the initial deadline assertion. Thirty-one focused tests and the combined host-authorized full check passed at test head `6833c86e983c4b48b22872c066296b4308a866c4`; the prior failure and passing log are recorded in the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 and native acceptance remain open.
