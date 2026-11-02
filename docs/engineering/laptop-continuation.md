@@ -11,7 +11,7 @@ generated:
 
 # Continue on another laptop or agent
 
-**Current S01.06 child:** [#212](https://github.com/sahamo123/dax-editor/issues/212), local `codex/s01-06-attachment-preflight`, based on [draft PR #211](https://github.com/sahamo123/dax-editor/pull/211) documentation head `dc65dfc5d0f63a94f516d793a5a6a2690be1229b`. Focused client/controller and browser tests pass; full source check, publication and review are pending. Verify publication before changing laptops. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md). Older child entries below are historical.
+**Current S01.06 child:** [#212 / draft PR #213](https://github.com/sahamo123/dax-editor/pull/213), `codex/s01-06-attachment-preflight`, application/test head `d5c7ee9436ce61c9fc1e02f7bf70cd523225cef1`, based on [draft PR #211](https://github.com/sahamo123/dax-editor/pull/211) documentation head `dc65dfc5d0f63a94f516d793a5a6a2690be1229b`. Focused client/controller and browser tests pass; full source check and review are pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md). Older child entries below are historical.
 
 **Current S01.06 child:** [#202 / draft PR #211](https://github.com/sahamo123/dax-editor/pull/211), `codex/s01-06-staged-attachment-investigation`, test head `175e8845077307ee3a27078ee38a41814744d6c3`, based on [draft PR #210](https://github.com/sahamo123/dax-editor/pull/210) documentation head `814a640a5f5c8b811f0d4025ae0bb2574296cef7`. Nine generated-media upload/retention tests passed; no cleanup is implemented. Review remains pending; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md). Older child entries below are historical.
 

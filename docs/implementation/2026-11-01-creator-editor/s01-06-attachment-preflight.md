@@ -11,7 +11,7 @@ generated:
 
 # S01.06 chat attachment preflight
 
-**State: IN_PROGRESS.** [Issue #212](https://github.com/sahamo123/dax-editor/issues/212) is on local `codex/s01-06-attachment-preflight`, based on [draft PR #211](https://github.com/sahamo123/dax-editor/pull/211) documentation head `dc65dfc5d0f63a94f516d793a5a6a2690be1229b`. Verify publication before using another laptop. Full source check and review remain pending.
+**State: IN_PROGRESS.** [Issue #212 / draft PR #213](https://github.com/sahamo123/dax-editor/pull/213) is published on `codex/s01-06-attachment-preflight`, application/test head `d5c7ee9436ce61c9fc1e02f7bf70cd523225cef1`, based on [draft PR #211](https://github.com/sahamo123/dax-editor/pull/211) documentation head `dc65dfc5d0f63a94f516d793a5a6a2690be1229b`. Full source check and review remain pending.
 
 Before staging any chat attachment, validate the entire selection against the existing 10-file and size rules. Empty, oversized or over-count selections retain the draft, attachments and mode and send no upload or chat request. The upload client and preflight share the same size check; its error correctly describes the inclusive 1 GiB limit and applies to audio and images as well as video. The engine remains authoritative and rechecks uploads.
 
