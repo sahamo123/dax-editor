@@ -2,7 +2,7 @@
 
 ## 2026-11-02
 
-* **Fix**: Local [#217](https://github.com/sahamo123/dax-editor/issues/217) candidate guards model transitions and accepted local work; focused tests passed. Full check, publication and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
+* **Fix**: [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220) guards model transitions and accepted local work; focused tests passed. Full check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
 
 * **Test**: Host-authorized full `pnpm check` passed for [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219) after the earlier failures documented in the [keyboard receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md); review remains pending.
 
