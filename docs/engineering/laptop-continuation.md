@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current S01.06 keyboard recheck:** [#177](https://github.com/sahamo123/dax-editor/issues/177) reached the real file picker using keyboard input, but automation could not target its modal for file selection. Continue on codex/s01-06-keyboard-recheck; complete the [remaining walkthrough](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md) and screen-reader, native and DPI gates. S01.06 remains open.
+
 **Current S01.06 child: media actions.**
 
 Continue [#190](https://github.com/sahamo123/dax-editor/issues/190) on `codex/s01-06-media-actions`, based on [draft PR #191](https://github.com/sahamo123/dax-editor/pull/191) head `c3f0796069191a8e5d059c969b3b528ae30fb583`. Browser checks passed; full `pnpm check` passed and [draft PR #192](https://github.com/sahamo123/dax-editor/pull/192) is published at application/test head `7e1595b6a2c5e63b5f426383b4d085547102169c`; review remains pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-media-actions-receipt.md). S01.06 and native acceptance remain open.

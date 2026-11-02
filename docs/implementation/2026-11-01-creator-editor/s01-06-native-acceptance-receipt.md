@@ -30,3 +30,11 @@ The earlier full browser/source checks used system FFmpeg and do not prove packa
 ## Later inventory recheck
 
 A subsequent computer-use inventory showed no Chrome test window and Narrator was not running. The previously observed stale Open dialog is no longer present; begin a fresh isolated test session when app access is available. The app-approval timeout and missing actual keyboard and Narrator evidence remain unresolved.
+
+## Fresh keyboard recheck after media-card fix
+
+On November 2, 2026, an isolated browser preview of [PR #192](https://github.com/sahamo123/dax-editor/pull/192) application/test head `7e1595b6a2c5e63b5f426383b4d085547102169c` was connected to a fresh empty synthetic test engine. From the page root, Tab reached Edit view; eleven further Tab presses reached Start editing, and Enter bypassed setup. Two Tab presses reached Import; Enter opened the real Windows Open dialog. No media was pre-imported and no mouse was used in this sequence.
+
+The computer-use inventory exposed the modal inside the Chrome parent window but did not expose it as a separately targetable window. Its accessibility state reported focus on the dialog's search box. Sending Alt+N and then Tab to the available parent target did not change the reported focused element. The synthetic file was visible in the picker, but selection was not performed; there is no evidence that keyboard import or the remaining end-to-end workflow passed. This is an automation targeting limitation, not proof of an application defect or a Windows keyboard defect. The owned browser tab and test processes were closed afterward; no user project was touched. Screen-reader speech was not tested in this attempt.
+
+The next operator should use a genuinely targetable Windows file dialog or an interactive Windows session to complete the documented keyboard workflow. Preserve the remaining screen-reader, contrast, native and DPI gates; do not advance S01.06.

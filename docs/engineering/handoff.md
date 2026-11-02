@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current S01.06 keyboard recheck — November 1, 2026
+
+The fresh synthetic keyboard attempt on [#177](https://github.com/sahamo123/dax-editor/issues/177) reached the Windows Open dialog, but the automation tool could not target that dialog for input. The file was not selected and the complete keyboard workflow remains open. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). Continue on codex/s01-06-keyboard-recheck; actual screen-reader, native and DPI acceptance remain open. Earlier headings are historical.
+
 ## Active S01.06 media card actions — November 1, 2026
 
 Continue [#190](https://github.com/sahamo123/dax-editor/issues/190) on `codex/s01-06-media-actions`, based on [draft PR #191](https://github.com/sahamo123/dax-editor/pull/191) documentation head `c3f0796069191a8e5d059c969b3b528ae30fb583`. Generated-video browser checks passed; full `pnpm check` passed and [draft PR #192](https://github.com/sahamo123/dax-editor/pull/192) is published at application/test head `7e1595b6a2c5e63b5f426383b4d085547102169c`; review remains pending. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-media-actions-receipt.md). S01.06 and native acceptance remain open; earlier headings are historical.
