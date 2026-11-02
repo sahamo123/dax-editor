@@ -160,13 +160,21 @@ export type ProjectPathRequest = z.infer<typeof ProjectPathRequestSchema>;
 export const ProjectCopyRequestSchema = z.object({ project: z.unknown() });
 
 /** Send a chat message to the active AI provider. The reply streams over the WebSocket as `chat` events. */
-export const ChatRequestSchema = z.object({
-  message: z.string().min(1).max(8000),
-  mode: z.enum(["edit", "plan"]).default("edit"),
-  queue: z.boolean().default(false),
-  steer: z.boolean().default(false),
-  attachments: z.array(z.string().min(1)).max(10).default([]),
-});
+export const ChatRequestSchema = z
+  .object({
+    message: z.string().min(1).max(8000),
+    mode: z.enum(["edit", "plan"]).default("edit"),
+    queue: z.boolean().default(false),
+    steer: z.boolean().default(false),
+    attachments: z.array(z.string().min(1)).max(10).default([]),
+    expectedProjectId: z.string().min(1).max(128).optional(),
+    expectedProviderEpoch: z.number().int().nonnegative().optional(),
+  })
+  .refine(
+    (request) =>
+      (request.expectedProjectId === undefined) === (request.expectedProviderEpoch === undefined),
+    "Both chat context guards must be supplied together.",
+  );
 /** A validated {@link ChatRequestSchema} value. */
 export type ChatRequest = z.infer<typeof ChatRequestSchema>;
 
@@ -446,6 +454,8 @@ export interface StateResponse {
   projectId?: string;
   /** Changes whenever the project is edited or history moves; compare together with projectId. */
   revision?: number;
+  /** Non-secret version of the provider context; changes conservatively when provider state is invalidated. */
+  providerContextVersion?: number;
   project: Project;
   history: HistoryItem[];
   canUndo: boolean;

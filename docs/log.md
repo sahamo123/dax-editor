@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Fix**: Chat submission context [#201 / PR #208](https://github.com/sahamo123/dax-editor/pull/208) is guarded against project and provider changes during attachment staging; focused checks and a full retry passed. The [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md) records an earlier connection failure, its investigation and remaining review.
+
 * **Fix**: Bridge capability-probe failures [#203](https://github.com/sahamo123/dax-editor/issues/203) are distinguished from confirmed missing options without enabling the bridge. Fake-CLI tests passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-bridge-probe-errors.md).
 
 * **Fix**: Chat attachment recovery [#200](https://github.com/sahamo123/dax-editor/issues/200) preserves an unsent draft on staging failure; focused tests passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-attachment-recovery.md).

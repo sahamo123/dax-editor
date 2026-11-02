@@ -4,6 +4,7 @@
 
 * [Spec template](_template.md) - Copy this to start a feature spec: problem, user stories, acceptance criteria, design, risks and how it will be verified.
 * [Browser imports and responsive offline chat](browser-import-and-responsive-chat.md) - Select local video files in the browser preview and receive bounded, streamed offline assistant replies.
+* [Guard chat submission context](chat-context-guard.md) - Bind a desktop chat request to its initiating project and provider configuration before attachment staging.
 * [Chat tasks, steering and planning mode](chat-task-queue.md) - Persistent local task metadata, serial chat requests, steering, video attachments and enforced read-only planning.
 * [Creator workflows - architecture review and implementation plan](creator-platform-plan.md) - Evidence-backed review and staged proposal for content profiles, layered editing, Blender characters, reference styles, specialist tasks and optional hosting.
 * [Effects layers (zoom, music with ducking, image overlays)](effects-layers.md) - How the engine zooms the picture, mixes music and sound effects under speech with automatic ducking, and draws logos and stickers, and how templates use them.

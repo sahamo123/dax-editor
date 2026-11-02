@@ -114,6 +114,8 @@ export class Engine {
   private readonly previewPaths = new Set<string>();
   private providerCache: { at: number; value: ProviderStatus[] } | undefined;
   private providerEpoch = 0;
+  private projectTransition = false;
+  private providerTransition = false;
   private readonly providerChecks = new Map<
     ProviderKind,
     Pick<ProviderStatus, "connectionState" | "detail" | "checkedAt">
@@ -251,6 +253,7 @@ export class Engine {
       ...(this.mcpInfo ? { mcp: this.mcpInfo() } : {}),
       projectId: session.projectId,
       revision: session.revision,
+      providerContextVersion: this.providerEpoch,
       history: session.history(),
       canUndo: session.canUndo,
       canRedo: session.canRedo,
@@ -390,33 +393,40 @@ export class Engine {
 
   // ---------- settings ----------
 
+  private async changeProviderContext<T>(action: () => Promise<T>): Promise<T> {
+    return this.serial(async () => {
+      this.providerTransition = true;
+      this.invalidateProviders();
+      try {
+        return await action();
+      } finally {
+        this.invalidateProviders();
+        this.providerTransition = false;
+      }
+    });
+  }
+
   /** Replace the settings (validated) and push state. */
   async updateSettings(next: unknown): Promise<Settings> {
-    return this.serial(async () => {
+    return this.changeProviderContext(async () => {
       const saved = await this.settings.set(next);
       this.armIdleUnload();
-      this.invalidateProviders();
       return saved;
     });
   }
 
   /** Save/load/remove an immutable named API connection without sending inference or editing the project. */
   async connection(request: ConnectionRequest): Promise<Settings> {
-    return this.serial(async () => {
-      this.invalidateProviders();
-      try {
-        return await changeConnection(request, this.settings, this.secrets, (kind, settings) =>
-          this.keyForSettings(kind, settings),
-        );
-      } finally {
-        this.invalidateProviders();
-      }
-    });
+    return this.changeProviderContext(() =>
+      changeConnection(request, this.settings, this.secrets, (kind, settings) =>
+        this.keyForSettings(kind, settings),
+      ),
+    );
   }
 
   /** Store an API key for a provider. The key is registered for log redaction. */
   async setApiKey(kind: ProviderKind, apiKey: string): Promise<void> {
-    return this.serial(async () => {
+    return this.changeProviderContext(async () => {
       await this.secrets.set(
         kind,
         apiKey,
@@ -424,15 +434,13 @@ export class Engine {
           ? (this.settings.get().providers[kind]?.baseUrl?.replace(/\/$/, "") ?? "")
           : undefined,
       );
-      this.invalidateProviders();
     });
   }
 
   /** Delete the stored API key for a provider. */
   async removeApiKey(kind: ProviderKind): Promise<void> {
-    return this.serial(async () => {
+    return this.changeProviderContext(async () => {
       await this.secrets.remove(kind);
-      this.invalidateProviders();
     });
   }
 
@@ -835,7 +843,12 @@ export class Engine {
   withIdleProject(action: () => Promise<void>): Promise<void> {
     return this.serial(async () => {
       this.assertIdle();
-      await action();
+      this.projectTransition = true;
+      try {
+        await action();
+      } finally {
+        this.projectTransition = false;
+      }
     });
   }
 
@@ -865,9 +878,39 @@ export class Engine {
       queue?: boolean;
       steer?: boolean;
       attachments?: string[];
+      expectedProjectId?: string;
+      expectedProviderEpoch?: number;
     } = {},
   ): string {
     if (this.closing) throw new HttpError(503, "Editor is shutting down.");
+    if (this.projectTransition)
+      throw new HttpError(
+        409,
+        "A project operation is in progress. Wait for it to finish and try again.",
+      );
+    if (this.providerTransition)
+      throw new HttpError(
+        409,
+        "The assistant configuration is changing. Wait for it to finish and try again.",
+      );
+    if ((options.expectedProjectId === undefined) !== (options.expectedProviderEpoch === undefined))
+      throw new HttpError(400, "Both chat context guards must be supplied together.");
+    if (
+      options.expectedProjectId !== undefined &&
+      options.expectedProjectId !== this.projects.session.projectId
+    )
+      throw new HttpError(
+        409,
+        "The project changed before this request was accepted. Check it and send again.",
+      );
+    if (
+      options.expectedProviderEpoch !== undefined &&
+      options.expectedProviderEpoch !== this.providerEpoch
+    )
+      throw new HttpError(
+        409,
+        "The assistant configuration changed before this request was accepted. Check it and send again.",
+      );
     if (this.work.size)
       throw new HttpError(
         409,

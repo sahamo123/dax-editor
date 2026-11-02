@@ -49,6 +49,7 @@
 * [S01.06 audit reconciliation receipt](s01-06-audit-reconciliation-receipt.md) - Published accessibility child fixes, limited contrast audit and remaining acceptance gates.
 * [S01.06 bridge probe error classification](s01-06-bridge-probe-errors.md) - Distinguish unsuccessful CLI capability probes from verified missing options without relaxing restrictions.
 * [S01.06 chat attachment recovery](s01-06-chat-attachment-recovery.md) - Preserve unsent drafts after attachment staging fails without replaying an uncertain edit.
+* [S01.06 chat submission context guard](s01-06-chat-context-guard.md) - Evidence for rejecting stale project and provider contexts during attachment staging.
 * [S01.06 intermittent chat submission investigation](s01-06-chat-submission-investigation.md) - Evidence separating an unsent synthetic chat prompt from a test-teardown disconnect and the remaining diagnosis.
 * [S01.06 modal shortcut isolation receipt](s01-06-dialog-shortcuts-receipt.md) - Reproduction and verification for keeping project shortcuts outside active modal dialogs.
 * [S01.06 export focus child receipt](s01-06-export-focus-receipt.md) - Reproduction and verification of stable keyboard focus while an export runs.
