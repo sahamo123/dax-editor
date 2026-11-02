@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Fix**: [#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237) recovers active-dialog focus after a control is disabled; focused, generated-video browser and full source checks passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-recovery-receipt.md); native and assistive-technology acceptance remain open.
+
 * **Test**: Host-authorized full `pnpm check` passed for [#234 / draft PR #236](https://github.com/sahamo123/dax-editor/pull/236); focus containment [#235](https://github.com/sahamo123/dax-editor/issues/235) remains open. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-loss-receipt.md).
 
 * **Fix**: [#234 / draft PR #236](https://github.com/sahamo123/dax-editor/pull/236) guards project shortcuts while a modal remains open after focus loss. Focused checks passed; [#235](https://github.com/sahamo123/dax-editor/issues/235) tracks the remaining focus-containment gap. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-loss-receipt.md).

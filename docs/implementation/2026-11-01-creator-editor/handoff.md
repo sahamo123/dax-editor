@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: [#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237).** On `codex/s01-06-modal-focus-recovery`, application/test head `1c59e472ab99a9cb8697d6b2fc1e782a854f3575` passed focused, generated-video browser and full source checks. Review the [receipt](s01-06-modal-focus-recovery-receipt.md), verify publication and continue independent S01.06 work. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
+
 **Current work: [modal shortcut protection #234 / draft PR #236](https://github.com/sahamo123/dax-editor/pull/236).** Application/test head `8658ee94f0c5d279eaf3a20dcb2cca29ffa80335` passed focused, generated-video browser and full source checks; review remains pending. A separate reproduced focus-containment gap is [#235](https://github.com/sahamo123/dax-editor/issues/235). See the [receipt](s01-06-modal-focus-loss-receipt.md). S01.06 remains open; earlier entries are historical.
 
 **Current work: [batched notices #232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233).** Application/test head `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3` passed focused and browser checks; its full check failed an unused type export. Type-only correction `3183a609eec3ee7bc68d1da0420848daad0067a3` passed dead-code analysis and full `pnpm check`. See the [receipt](s01-06-batched-announcements-receipt.md). Keep S01.06 and actual assistive-technology acceptance open; earlier entries are historical.

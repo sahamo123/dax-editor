@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237) recovers focus within active dialogs; focused, generated-video browser and full source checks passed at `1c59e472ab99a9cb8697d6b2fc1e782a854f3575`. Review and actual native/accessibility acceptance remain open; see the [receipt](s01-06-modal-focus-recovery-receipt.md). S01.06 remains IN_PROGRESS.
+
 - [#234 / draft PR #236](https://github.com/sahamo123/dax-editor/pull/236) guards background project shortcuts after modal focus loss. Focused, generated-video browser and full source checks passed at application/test head `8658ee94f0c5d279eaf3a20dcb2cca29ffa80335`; review remains pending. Actual focus containment remains open in [#235](https://github.com/sahamo123/dax-editor/issues/235). See the [receipt](s01-06-modal-focus-loss-receipt.md).
 
 - [#232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233) fixes batched live-region notice omissions. Focused and browser checks passed at `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3`; its full check failed an unused type export. Corrected head `3183a609eec3ee7bc68d1da0420848daad0067a3` passed dead-code analysis and full `pnpm check`. See the [receipt](s01-06-batched-announcements-receipt.md). S01.06 remains IN_PROGRESS.

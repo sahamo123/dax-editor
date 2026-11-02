@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Modal focus recovery — November 2, 2026
+
+[#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237) recovers focus within Settings and rendered-effects review. Focused tests, generated-video Edge checks and full `pnpm check` passed at application/test head `1c59e472ab99a9cb8697d6b2fc1e782a854f3575`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-recovery-receipt.md). Review, S01.06, actual keyboard/screen-reader and native acceptance remain open.
+
 ## Modal shortcut protection — November 2, 2026
 
 [#234 / draft PR #236](https://github.com/sahamo123/dax-editor/pull/236) guards split, delete and history shortcuts while a modal remains open after focus falls outside it. Focused, generated-media browser and full source checks passed at application/test head `8658ee94f0c5d279eaf3a20dcb2cca29ffa80335`; review remains pending. Actual modal focus containment remains open in [#235](https://github.com/sahamo123/dax-editor/issues/235); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-loss-receipt.md). S01.06 and native acceptance remain open.
