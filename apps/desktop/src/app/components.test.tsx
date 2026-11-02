@@ -15,6 +15,81 @@ import { TopBar } from "./topbar/TopBar";
 import { Toasts } from "./ui/Toasts";
 
 describe("Toast announcements", () => {
+  it.each(["error-first", "info-first"] as const)(
+    "keeps both priorities when notices arrive together: %s",
+    (order) => {
+      const { store } = renderApp(<Toasts />);
+      act(() => {
+        if (order === "error-first") {
+          store.getState().pushToast("error", "Export failed.");
+          store.getState().pushToast("info", "Another task started.");
+        } else {
+          store.getState().pushToast("info", "Another task started.");
+          store.getState().pushToast("error", "Export failed.");
+        }
+      });
+      expect(screen.getByRole("alert")).toHaveTextContent("Export failed.");
+      expect(screen.getByRole("status")).toHaveTextContent("Another task started.");
+    },
+  );
+
+  it("retains multiple new errors in a single urgent update", () => {
+    const { store } = renderApp(<Toasts />);
+    act(() => {
+      store.getState().pushToast("error", "First export failed.");
+      store.getState().pushToast("error", "Second export failed.");
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      /First export failed\.\s+Second export failed\./,
+    );
+  });
+
+  it("keeps an urgent notice even when a burst exceeds the visible toast limit", () => {
+    const { store } = renderApp(<Toasts />);
+    act(() => {
+      store.getState().pushToast("error", "Export failed.");
+      for (let i = 0; i < 5; i++) store.getState().pushToast("info", `Task ${i} started.`);
+    });
+    expect(store.getState().toasts).toHaveLength(4);
+    expect(screen.getByRole("alert")).toHaveTextContent("Export failed.");
+    expect(screen.getByRole("status")).toHaveTextContent("Task 0 started.");
+    expect(screen.getByRole("status")).toHaveTextContent("Task 4 started.");
+  });
+
+  it("reports overflow separately for each announcement priority", () => {
+    const { store } = renderApp(<Toasts />);
+    act(() => {
+      for (let i = 0; i < 80; i++) store.getState().pushToast("info", `Task ${i} started.`);
+      store.getState().pushToast("error", "Export failed.");
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent("Export failed.");
+    expect(screen.getByRole("status")).toHaveTextContent(/additional notifications/i);
+  });
+
+  it("reports urgent overflow without dropping a polite notice", () => {
+    const { store } = renderApp(<Toasts />);
+    act(() => {
+      for (let i = 0; i < 80; i++) store.getState().pushToast("error", `Task ${i} failed.`);
+      store.getState().pushToast("info", "Another task started.");
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent(/additional errors/i);
+    expect(screen.getByRole("status")).toHaveTextContent("Another task started.");
+  });
+
+  it("announces a notice dismissed before the next render only once", () => {
+    const { store } = renderApp(<Toasts />);
+    act(() => {
+      store.getState().pushToast("error", "Export failed.");
+      const id = store.getState().toasts.at(-1)?.id;
+      if (id !== undefined) store.getState().dismissToast(id);
+    });
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("Export failed.");
+    const announcement = alert.firstElementChild;
+    act(() => store.getState().pushToast("info", "Ready."));
+    expect(alert.firstElementChild).toBe(announcement);
+  });
+
   it("announces new errors separately and does not replay them on dismissal", () => {
     const { store } = renderApp(<Toasts />);
     const status = screen.getByRole("status");

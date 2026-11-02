@@ -110,6 +110,7 @@ test("export shows progress on the button and announces the finished file", asyn
   await expect(page.locator(".toasts").getByText("Exported Untitled.mp4.")).toBeVisible({
     timeout: 30_000,
   });
+  await expect(page.locator('.sr-only[role="status"]')).toContainText("Exported Untitled.mp4.");
   await expect(
     page.getByRole("banner").getByRole("button", { name: "Export", exact: true }),
   ).toBeEnabled();

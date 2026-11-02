@@ -21,6 +21,8 @@ Local llama.cpp with the verified 2B model remains the default. Optional connect
 
 If attachment staging fails before a chat request is attempted, retain the original composer draft, selected files and mode for an intentional retry and show the error. When no draft was present, retain the attempted suggestion text. Sending a suggestion must not erase a different existing composer draft, which was not part of that request. Once a chat request has been attempted, its outcome may be uncertain: do not automatically resend it or restore it as definitely unsent.
 
+Task notices use separate polite and urgent live regions. Pending notices are independent of the limited visible toast stack, so a batch or immediate dismissal does not silently omit a queued notice. Each priority retains up to eight pending notices and reports overflow; a batch is grouped into one region update per priority. Actual assistive-technology speech and its handling of simultaneous priorities require separate platform verification.
+
 Speech is required: setup, verified runtime/model provisioning, transcript correction, captions and reviewable filler/silence cuts. Blender is an optional separate user-installed process. First templates are title card, logo intro and 3D text; scripts belong to the application, parameters are validated, and renders return as media. Arbitrary model-generated Python is excluded.
 
 ## Delivery sequence
