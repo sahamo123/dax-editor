@@ -3,7 +3,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { Session } from "@dax/core";
+import { emptyProject, Session } from "@dax/core";
 import type { AgentEvent, Settings } from "@dax/protocol";
 import type { RunnerEnv } from "@dax/server";
 import { afterEach, describe, expect, it } from "vitest";
@@ -37,7 +37,7 @@ describe("runner and API keys", () => {
     const runner = await createRunnerFactory()(env);
     // The refusal happens before any request, so nothing is sent over the network.
     await runner.run("hi", {
-      session: new Session(),
+      session: new Session(emptyProject("test")),
       onEvent: (e) => events.push(e),
       signal: new AbortController().signal,
       allowedRoots: [],

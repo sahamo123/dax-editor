@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261): valid engine session fixtures passed the engine test-specific typecheck, focused tests and full source check at `7960135d19d8842fe9e6a5132d0eab6ed302ac76`; see the [receipt](s01-06-engine-test-fixtures-receipt.md). S01.06 remains IN_PROGRESS.
+
 - [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260): dialog notification placement passed focused, nine browser and full source checks at `b106ba0a4edd5d9a862497b850d482ed8b2a31ef`; see the [receipt](s01-06-dialog-notices-receipt.md). S01.06 and native/accessibility acceptance remain open.
 
 - [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259): test-only fake-CLI assertion diagnostics; a full check passed at `24cfae7c85441dfcd1b08edfbf1027e1d35ece29`, after two earlier failures with unproven causes. S01.06 remains IN_PROGRESS.

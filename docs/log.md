@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Test**: [#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261) corrects invalid engine session fixtures. The engine test-specific typecheck, affected tests and full source check passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-engine-test-fixtures-receipt.md). No production code or CI settings changed.
+
 * **Fix**: [#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260) keeps the shared notice stack within the active dialog, scrollable and clear of actions. Focused, nine browser and full source checks passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-dialog-notices-receipt.md). Native and actual screen-reader acceptance remain open.
 
 * **Investigate**: [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259) adds fake-CLI error detail to detector assertions after two distinct full-check failures. The focused suite and instrumented full check passed; the earlier failures remain unexplained. Production security restrictions and timeouts are unchanged.
