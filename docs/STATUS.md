@@ -13,7 +13,7 @@ generated:
 
 ## S01.06 chat context browser coverage — November 1, 2026
 
-Six generated-media browser races passed for project and provider switches at three staging boundaries, and ten existing chat workflows passed. The [#206](https://github.com/sahamo123/dax-editor/issues/206) regression is being published separately; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Review and native acceptance remain open.
+Six generated-media browser races passed for project and provider switches at three staging boundaries, and ten existing chat workflows passed. [#206 / draft PR #209](https://github.com/sahamo123/dax-editor/pull/209) is published at test head `93f0fddbe8f144079433b6144e35ecf972f7679b`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Review and native acceptance remain open.
 
 ## S01.06 chat context guard — November 1, 2026
 

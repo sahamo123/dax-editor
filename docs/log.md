@@ -2,7 +2,7 @@
 
 ## 2026-11-01
 
-* **Test**: Six chat-context browser races and ten existing chat workflows passed for [#206](https://github.com/sahamo123/dax-editor/issues/206); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Publication and review remain pending.
+* **Test**: Six chat-context browser races and ten existing chat workflows passed for [#206 / PR #209](https://github.com/sahamo123/dax-editor/pull/209); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Review remains pending.
 
 * **Fix**: Chat submission context [#201 / PR #208](https://github.com/sahamo123/dax-editor/pull/208) is guarded against project and provider changes during attachment staging; focused checks and a full retry passed. The [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md) records an earlier connection failure, its investigation and remaining review.
 
