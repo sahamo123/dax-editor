@@ -2,7 +2,7 @@
 
 ## 2026-11-02
 
-* **Test**: An unattended [#177](https://github.com/sahamo123/dax-editor/issues/177) keyboard recheck reached Import but could not target the native modal; no file was selected. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 remains open.
+* **Test**: An unattended [#177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231) keyboard recheck reached Import but could not target the native modal; no file was selected. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 remains open.
 
 * **Test**: Full host-authorized `pnpm check` passed for [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-suggestion-draft-receipt.md). Native acceptance remains open.
 

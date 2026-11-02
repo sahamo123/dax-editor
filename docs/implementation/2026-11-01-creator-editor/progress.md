@@ -17,7 +17,7 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
-- The unattended [#177](https://github.com/sahamo123/dax-editor/issues/177) recheck used PR #230 application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83` and reached Import by keyboard; the modal could not be targeted and no file was selected. See the [receipt](s01-06-native-acceptance-receipt.md). S01.06 remains IN_PROGRESS.
+- The unattended [#177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231) recheck used PR #230 application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83` and reached Import by keyboard; the modal could not be targeted and no file was selected. See the [receipt](s01-06-native-acceptance-receipt.md). S01.06 remains IN_PROGRESS.
 
 - [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) preserves an unrelated draft when sending a suggestion. Focused component, generated-media browser and full source checks passed at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; review is pending. See the [receipt](s01-06-suggestion-draft-receipt.md). S01.06 remains IN_PROGRESS.
 - [#227 / draft PR #228](https://github.com/sahamo123/dax-editor/pull/228) proposes staged attachment leases; full host-authorized `pnpm check` passed at design head `ee0ccf4a5de05801d45b054a20f5dae3354a6e32`. No cleanup is implemented; review remains pending. See the [spec](../../specs/staged-attachment-leases.md).

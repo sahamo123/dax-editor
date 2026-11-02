@@ -13,7 +13,7 @@ generated:
 
 ## Unattended keyboard recheck — November 2, 2026
 
-The [#177](https://github.com/sahamo123/dax-editor/issues/177) recheck reached Import by keyboard on the current browser candidate, but the native modal was not exposed as a target and no file was selected. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). No current Narrator, native-app or DPI result is claimed; S01.06 remains open.
+The [#177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231) recheck reached Import by keyboard on the current browser candidate, but the native modal was not exposed as a target and no file was selected. Documentation head `4bd498204aa9699bb820a3fc75311a416be02291` passed `pnpm docs:okf`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). No current Narrator, native-app or DPI result is claimed; S01.06 remains open.
 
 ## Suggestion draft preservation — November 2, 2026
 

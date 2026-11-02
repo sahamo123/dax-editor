@@ -13,7 +13,7 @@ generated:
 
 ## Current continuation — November 2, 2026
 
-An unattended [#177](https://github.com/sahamo123/dax-editor/issues/177) browser recheck on `codex/s01-06-unattended-picker-recheck` reached Import by keyboard, but no native file dialog was exposed as a target; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). Continue independent work without asking the away user to participate. S01.06 remains open.
+An unattended [#177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231) browser recheck on `codex/s01-06-unattended-picker-recheck` reached Import by keyboard, but no native file dialog was exposed as a target; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). Continue independent work without asking the away user to participate. S01.06 remains open.
 
 Start with the [cross-laptop guide](laptop-continuation.md), [status](../STATUS.md) and [dated handoff](../implementation/2026-11-01-creator-editor/handoff.md). The current S01.06 child is [#229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230) at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83`; focused and full source checks passed. Keep S01.06 and native acceptance open. All continuation headings below are historical snapshots, not instructions to resume their older branches.
 

@@ -11,7 +11,7 @@ generated:
 
 # Current handoff
 
-**Current work: [unattended keyboard recheck #177](https://github.com/sahamo123/dax-editor/issues/177).** On `codex/s01-06-unattended-picker-recheck`, based on PR #230 documentation head `7789e68677aa92abac5496a56fd10c7c793f5a19`, keyboard navigation reached Import but the native modal was not independently targetable. No file was selected. See the [receipt](s01-06-native-acceptance-receipt.md); continue independent work and keep S01.06 open. Earlier entries are historical.
+**Current work: [unattended keyboard recheck #177 / draft PR #231](https://github.com/sahamo123/dax-editor/pull/231).** On `codex/s01-06-unattended-picker-recheck`, evidence head `4bd498204aa9699bb820a3fc75311a416be02291`, based on PR #230 documentation head `7789e68677aa92abac5496a56fd10c7c793f5a19`, keyboard navigation reached Import but the native modal was not independently targetable. No file was selected. See the [receipt](s01-06-native-acceptance-receipt.md); continue independent work and keep S01.06 open. Earlier entries are historical.
 
 **Current work: [suggestion draft preservation #229 / draft PR #230](https://github.com/sahamo123/dax-editor/pull/230).** The candidate at application/test head `f1aaee63e558aba57e51fac6c3a4951667121f83` preserves unrelated drafts and avoids retaining a matching attempted message. Focused component, generated-media browser and full source checks passed; review remains pending. See the [receipt](s01-06-suggestion-draft-receipt.md). Keep S01.06 open; earlier entries are historical.
 
