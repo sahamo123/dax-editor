@@ -17,6 +17,8 @@ The final focused host rerun passed 62 server tests (including HTTP 409/no-task,
 
 The full host-authorized `pnpm check` at application/test head `f7d70a76cb195503d72a821865d647b9eeb34079` **failed** one bridge status-deadline test: after a fixed sleep its second status was unavailable, but the assertion did not include the status detail. Server (183), engine (67) and desktop (355) tests passed; final script tests did not run. Log SHA-256 `544fe7b789d2a105129eed0135c6ed3887cc074b3d771c50de3c6b34b4fe1c4a`. [#222](https://github.com/sahamo123/dax-editor/issues/222) tracks the test timing and required rerun; no cause or full-check pass is claimed.
 
+The subsequent combined host-authorized `pnpm check`, including the [#222 / PR #223](https://github.com/sahamo123/dax-editor/pull/223) test follow-up, passed at application/test head `6833c86e983c4b48b22872c066296b4308a866c4`; the [keyboard receipt](s01-06-summary-keyboard.md) records counts and log hash. This does not retroactively change the earlier failure.
+
 **State: IN_PROGRESS.** [Issue #201 / draft PR #208](https://github.com/sahamo123/dax-editor/pull/208) is published on `codex/s01-06-chat-context-race`, application/test head `c1b128fc4bf459b9c8d9ae5d234ecc2dfa608348`, based on draft PR #205 documentation head `75cf0862a9c4aaaaeceaef0de3c043b7f75c68f8`. Review remains pending.
 
 Before the change, two generated-media browser diagnostics reproduced unsafe task attribution when the project or provider was switched while an upload was held: each task used the later context. The local logs `chat-context-project-diagnostic.log` and `chat-context-both-diagnostic.log` retain that evidence. The [contract](../../specs/chat-context-guard.md) captures the intended pre-task guard and compatibility boundary.

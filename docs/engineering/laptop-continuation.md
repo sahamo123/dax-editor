@@ -11,7 +11,7 @@ generated:
 
 # Continue on another laptop or agent
 
-**Current follow-up:** [#222 / draft PR #223](https://github.com/sahamo123/dax-editor/pull/223), `codex/s01-06-bridge-status-deadline`, test head `6833c86e983c4b48b22872c066296b4308a866c4`, based on PR #220 documentation head `5d3f42f3542e7b4303cbab54e685adbac426144e`. Thirty-one focused tests passed; run a host-authorized full check and review. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 remains open.
+**Current follow-up:** [#222 / draft PR #223](https://github.com/sahamo123/dax-editor/pull/223), `codex/s01-06-bridge-status-deadline`, test head `6833c86e983c4b48b22872c066296b4308a866c4`, based on PR #220 documentation head `5d3f42f3542e7b4303cbab54e685adbac426144e`. Thirty-one focused tests and the combined host-authorized full check passed. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). Investigate [#221](https://github.com/sahamo123/dax-editor/issues/221); S01.06 remains open.
 
 **Current work:** [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220), `codex/s01-06-local-model-context`, application/test head `f7d70a76cb195503d72a821865d647b9eeb34079`, based on PR #219 documentation head `9bf098731d19b0393d079c17db301ab6f276ae9e`. The candidate guards model transitions and passed focused server and launcher tests; its full host check failed a bridge status test. Follow [#222](https://github.com/sahamo123/dax-editor/issues/222) and the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Investigate steering attribution separately in [#221](https://github.com/sahamo123/dax-editor/issues/221). Do not advance S01.06.
 
