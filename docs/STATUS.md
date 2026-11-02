@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Modal live-region audit — November 2, 2026
+
+[#262 / draft PR #263](https://github.com/sahamo123/dax-editor/pull/263) found both task live regions represented in headless Edge's accessibility tree during synthetic Settings and rendered-review dialogs. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-live-region-receipt.md). This does not verify actual screen-reader speech or native WebView behavior; S01.06 and its remaining acceptance gates stay open.
+
 ## Engine test fixtures — November 2, 2026
 
 [#258 / draft PR #261](https://github.com/sahamo123/dax-editor/pull/261) gives runner tests valid empty project sessions. The engine test-specific typecheck, affected tests and full source check passed at `7960135d19d8842fe9e6a5132d0eab6ed302ac76`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-engine-test-fixtures-receipt.md). Self-review is not independent review. S01.06 and actual screen-reader/native acceptance remain open.
