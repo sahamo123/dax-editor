@@ -17,7 +17,7 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
-- [#254 / draft PR #255](https://github.com/sahamo123/dax-editor/pull/255): corrected typed cancellation foundation passed an independent full check at `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`. See the [receipt](s01-06-cancellation-foundation-receipt.md); dependent [PR #256](https://github.com/sahamo123/dax-editor/pull/256) and S01.06 remain open.
+- [#254 / PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed its foundation full check. Dependent [#253 / PR #256](https://github.com/sahamo123/dax-editor/pull/256) head `23f1417f7b247c7e76f189bfa20a97f907038821` passed focused/browser checks but failed the full check in bridge detection. See the [receipt](s01-06-typed-cancellation-receipt.md), [#203](https://github.com/sahamo123/dax-editor/issues/203) and compact toast overlap [#257](https://github.com/sahamo123/dax-editor/issues/257). S01.06 remains IN_PROGRESS.
 
 - [#251](https://github.com/sahamo123/dax-editor/issues/251): opt-in real-server speech and generated-media export cancellation reproductions passed; the [investigation](s01-06-job-cancellation-investigation.md) records the urgent-error notice and typed-contract work. No fix or S01.06 completion is claimed.
 

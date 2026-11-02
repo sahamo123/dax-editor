@@ -11,9 +11,9 @@ generated:
 
 # Handoff: resuming dax-editor
 
-## Current typed cancellation foundation — November 2, 2026
+## Current typed cancellation candidate — November 2, 2026
 
-[#254 / draft PR #255](https://github.com/sahamo123/dax-editor/pull/255), corrected application/test head `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`, passed independent full `pnpm check`. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-cancellation-foundation-receipt.md), then continue dependent [PR #256](https://github.com/sahamo123/dax-editor/pull/256). Earlier entries are historical; actual picker, screen-reader and native acceptance remain open.
+Foundation [PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed a full source check at `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`. Dependent [PR #256](https://github.com/sahamo123/dax-editor/pull/256) application/test head `23f1417f7b247c7e76f189bfa20a97f907038821` passed focused and browser checks, but its full check failed a bridge detector assertion. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md); diagnose [#203](https://github.com/sahamo123/dax-editor/issues/203) and address [#257](https://github.com/sahamo123/dax-editor/issues/257). Earlier entries are historical; actual picker, screen-reader and native acceptance remain open.
 
 ## Current cancellation investigation — November 2, 2026
 

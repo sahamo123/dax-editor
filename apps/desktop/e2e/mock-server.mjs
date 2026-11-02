@@ -49,7 +49,9 @@ function createFakeLocalModel(initial, stepMs) {
         "abort",
         () => {
           clearTimeout(t);
-          reject(new Error("aborted"));
+          const error = new Error("aborted");
+          error.name = "AbortError";
+          reject(error);
         },
         { once: true },
       );
@@ -250,9 +252,14 @@ export async function startMockServer(options = {}) {
               },
               async install(task) {
                 task.onProgress(0.4);
-                await new Promise((resolve) => {
-                  if (task.signal.aborted) resolve();
-                  else task.signal.addEventListener("abort", resolve, { once: true });
+                await new Promise((_, reject) => {
+                  const cancel = () => {
+                    const error = new Error("Cancelled");
+                    if (!options.speechFailureAfterCancel) error.name = "AbortError";
+                    reject(error);
+                  };
+                  if (task.signal.aborted) cancel();
+                  else task.signal.addEventListener("abort", cancel, { once: true });
                 });
               },
               async remove() {},

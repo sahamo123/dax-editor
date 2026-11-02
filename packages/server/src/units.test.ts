@@ -170,6 +170,25 @@ describe("PeakAccumulator", () => {
 });
 
 describe("JobManager", () => {
+  it("distinguishes an explicit cancelled outcome from failure text and keeps the first result", () => {
+    const jobs = new JobManager(() => undefined);
+    const cancelled = jobs.create("transcribe", "speech");
+    cancelled.cancel();
+    cancelled.fail("late failure");
+    const failed = jobs.create("export", "export");
+    failed.fail("Cancelled");
+    failed.cancel();
+    expect(jobs.list()).toEqual([
+      expect.objectContaining({
+        id: cancelled.id,
+        status: "error",
+        error: "Cancelled",
+        cancelled: true,
+      }),
+      expect.objectContaining({ id: failed.id, status: "error", error: "Cancelled" }),
+    ]);
+    expect(jobs.list()[1]).not.toHaveProperty("cancelled");
+  });
   it("throttles progress, never goes backwards, and keeps the first outcome", () => {
     const seen: string[] = [];
     const jobs = new JobManager((j, change) =>

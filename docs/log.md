@@ -2,7 +2,7 @@
 
 ## 2026-11-02
 
-* **Fix**: [#254 / draft PR #255](https://github.com/sahamo123/dax-editor/pull/255) preserves explicitly signalled cancellation identity with a compatible optional marker. An independent full check passed at the corrected application/test head; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-cancellation-foundation-receipt.md). The dependent editor fix remains [PR #256](https://github.com/sahamo123/dax-editor/pull/256).
+* **Fix**: [#254 / PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed its foundation full check. Dependent [#253 / PR #256](https://github.com/sahamo123/dax-editor/pull/256) adds typed cancellation, notices and Blender cleanup; focused/browser checks passed but two full checks failed bridge assertions. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md), [#203](https://github.com/sahamo123/dax-editor/issues/203), and compact toast follow-up [#257](https://github.com/sahamo123/dax-editor/issues/257).
 
 * **Investigate**: [#251](https://github.com/sahamo123/dax-editor/issues/251) reproduced error-styled cancellation for fake speech setup and the error-shaped job outcome for a generated-media export. The [investigation](implementation/2026-11-01-creator-editor/s01-06-job-cancellation-investigation.md) records limitations and typed-contract follow-up; no application fix is claimed.
 

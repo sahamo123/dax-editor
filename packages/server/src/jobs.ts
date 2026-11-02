@@ -16,6 +16,8 @@ export interface JobHandle {
   done(result?: string): void;
   /** Mark failed with a message that is safe to show to the user. */
   fail(message: string): void;
+  /** Mark a confirmed cancellation after the owned work has settled and cleaned up. */
+  cancel(): void;
 }
 
 /** How many finished jobs to keep in the list the UI sees. Running jobs are always kept. */
@@ -57,6 +59,7 @@ export class JobManager {
       },
       done: (result) => finish({ status: "done", progress: 1, ...(result ? { result } : {}) }),
       fail: (message) => finish({ status: "error", error: message }),
+      cancel: () => finish({ status: "error", error: "Cancelled", cancelled: true }),
     };
   }
 

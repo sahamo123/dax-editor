@@ -779,7 +779,11 @@ describe("local model endpoints", () => {
       async install(modelId: string | undefined, task: LocalModelTask) {
         calls.push(`install:${modelId ?? "default"}`);
         for (const f of [0.25, 0.5, 0.75]) {
-          if (task.signal.aborted) throw new Error("aborted");
+          if (task.signal.aborted) {
+            const error = new Error("aborted");
+            error.name = "AbortError";
+            throw error;
+          }
           task.onProgress(f);
           await new Promise((r) => setTimeout(r, 40));
         }
@@ -792,7 +796,9 @@ describe("local model endpoints", () => {
           const t = setTimeout(resolve, 60);
           task.signal.addEventListener("abort", () => {
             clearTimeout(t);
-            reject(new Error("aborted"));
+            const error = new Error("aborted");
+            error.name = "AbortError";
+            reject(error);
           });
         });
         state.running = true;
@@ -900,7 +906,7 @@ describe("local model endpoints", () => {
       const failed = (await ws.waitForAny(
         (e) => isJob(e) && e.job.kind === "model-start" && e.job.status === "error",
       )) as JobEvent;
-      expect(failed.job.error).toBe("Cancelled");
+      expect(failed.job).toMatchObject({ error: "Cancelled", cancelled: true });
       expect((await h.post("/api/local-model/cancel", {})).json()).toEqual({ cancelled: false });
     });
   });

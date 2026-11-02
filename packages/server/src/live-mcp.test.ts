@@ -61,9 +61,14 @@ describe("live desktop MCP", () => {
         },
         async render(_request, { signal }) {
           return new Promise((_resolve, reject) => {
-            if (signal?.aborted) reject(new Error("Cancelled"));
+            const cancel = () => {
+              const error = new Error("Cancelled");
+              error.name = "AbortError";
+              reject(error);
+            };
+            if (signal?.aborted) cancel();
             else
-              signal?.addEventListener("abort", () => reject(new Error("Cancelled")), {
+              signal?.addEventListener("abort", cancel, {
                 once: true,
               });
           });
@@ -108,6 +113,11 @@ describe("live desktop MCP", () => {
         )
         .toBe("cancelled");
       const final = (await h.req("/api/state")).json<StateResponse>();
+      expect(final.jobs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ status: "error", error: "Cancelled", cancelled: true }),
+        ]),
+      );
       expect(final.project).toEqual(before.project);
       expect(final.history).toEqual(before.history);
       expect(JSON.stringify(await edit.tool("cancel_task", { taskId: task?.id }))).toContain(

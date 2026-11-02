@@ -52,7 +52,11 @@ export const MOTION_COMMANDS: readonly CommandDef[] = [
       });
       await checkAllowedPath(path, ctx);
       const asset = await probe(path, ctx.signal ? { signal: ctx.signal } : {});
-      if (ctx.signal?.aborted) throw new Error("Cancelled. Nothing was changed.");
+      if (ctx.signal?.aborted) {
+        const error = new Error("Cancelled. Nothing was changed.");
+        error.name = "AbortError";
+        throw error;
+      }
       if (asset.kind !== "video") throw new Error("Blender did not produce a video asset.");
       const { replaceAssetId, ...parameters } = a;
       asset.generation = { kind: "blender", parameters };
