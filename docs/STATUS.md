@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 chat attachment preflight — November 1, 2026
+
+The [#212](https://github.com/sahamo123/dax-editor/issues/212) candidate checks all chat attachments for locally known size and count errors before staging any. Focused tests pass; full source checks, publication and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md). Existing or unexpectedly abandoned staged files are not cleaned up by this change.
+
 ## S01.06 staged attachment storage — November 1, 2026
 
 Generated-media tests for [#202 / draft PR #211](https://github.com/sahamo123/dax-editor/pull/211) reproduced an unsubmitted staged file retained after upload failure and restart, and showed staged sources referenced by saved projects and interrupted tasks. Nine focused tests passed at test head `175e8845077307ee3a27078ee38a41814744d6c3`. No cleanup was performed; the [receipt](implementation/2026-11-01-creator-editor/s01-06-staged-attachment-investigation.md) and [ownership proposal](research/staged-attachment-lifetime.md) explain why legacy sources must remain durable. Review is pending.

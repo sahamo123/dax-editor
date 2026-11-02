@@ -15,7 +15,7 @@ import type {
 } from "@dax/protocol";
 import type { StoreApi } from "zustand/vanilla";
 import type { DaxClient, LiveSocket, LocalModelAction, SocketStatus } from "../api";
-import { openLiveSocket } from "../api";
+import { openLiveSocket, uploadSizeError } from "../api";
 import { pickBrowserFiles, pickFiles } from "../platform";
 import { aiStepsSince } from "./chat-model";
 import { basename } from "./format";
@@ -343,8 +343,20 @@ export function createController(deps: ControllerDeps): Controller {
           );
         return "context-unavailable";
       }
+      const files = options.files ?? [];
+      if (files.length > 10) {
+        store.getState().addNotice("error", "Attach at most 10 videos to one message.");
+        return "attachment-failed";
+      }
+      for (const file of files) {
+        const error = uploadSizeError(file);
+        if (error) {
+          store.getState().addNotice("error", `${file.name}: ${error}`);
+          return "attachment-failed";
+        }
+      }
       const attachments: string[] = [];
-      for (const file of options.files ?? []) {
+      for (const file of files) {
         const uploaded = await client.uploadMedia(file, true);
         if (!uploaded.ok) {
           store.getState().addNotice("error", uploaded.error);

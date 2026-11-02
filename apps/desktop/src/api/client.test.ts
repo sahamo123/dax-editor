@@ -1,8 +1,9 @@
 // The REST client: auth header, typed results, and the promise that nothing ever throws.
 
+import { MAX_UPLOAD_BYTES } from "@dax/protocol";
 import { describe, expect, it, vi } from "vitest";
 import { makeState } from "../app/test-utils";
-import { DaxClient, UNREACHABLE } from "./client";
+import { DaxClient, UNREACHABLE, uploadSizeError } from "./client";
 
 function jsonResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
@@ -16,6 +17,11 @@ function client(fetchImpl: typeof fetch): DaxClient {
 }
 
 describe("DaxClient", () => {
+  it("uses the same inclusive upload size boundary for preflight and upload", () => {
+    expect(uploadSizeError({ size: 0 })).toBeDefined();
+    expect(uploadSizeError({ size: MAX_UPLOAD_BYTES })).toBeUndefined();
+    expect(uploadSizeError({ size: MAX_UPLOAD_BYTES + 1 })).toBeDefined();
+  });
   it("sends the bearer token and a JSON body to the right URL", async () => {
     const fetchImpl = vi.fn(async () => jsonResponse(200, { ok: true, summary: "Done" }));
     const r = await client(fetchImpl as unknown as typeof fetch).run("split", { at: 2 });

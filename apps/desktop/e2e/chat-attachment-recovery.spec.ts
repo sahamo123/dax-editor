@@ -31,7 +31,7 @@ test("an attachment rejected before chat leaves the draft available for an inten
   await input.fill(prompt);
   const draftHeight = await input.evaluate((element) => element.getBoundingClientRect().height);
   await input.press("Enter");
-  await expect(page.getByText("Choose a non-empty video smaller than 1 GiB.")).toBeVisible();
+  await expect(page.getByText("Choose a non-empty file no larger than 1 GiB.")).toBeVisible();
   await expect(input).toHaveValue(prompt);
   await expect(input).toBeEnabled();
   await expect
