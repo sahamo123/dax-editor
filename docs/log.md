@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+* **Update**: A visible, loaded-state synthetic keyboard chat with Narrator active completed once in [#186](https://github.com/sahamo123/dax-editor/issues/186); the intermittent startup/headless focus loss and actual speech remain unverified. See the [investigation receipt](implementation/2026-11-01-creator-editor/s01-06-chat-submission-investigation.md).
+
 * **Incident**: Pre-teardown diagnostics corrected the first interpretation of [#186](https://github.com/sahamo123/dax-editor/issues/186): the synthetic engine was reachable, while the test prompt remained unsent. The earlier disconnect snapshot may be a cleanup artifact. The cause remains under investigation; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-submission-investigation.md).
 
 * **Update**: The partial live accessibility walkthrough [#177](https://github.com/sahamo123/dax-editor/issues/177) observed preview-completion speech but did not complete keyboard-only import or verify all announcements. Export announcement improvements [#185](https://github.com/sahamo123/dax-editor/issues/185) are under verification; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-live-announcement-receipt.md).
