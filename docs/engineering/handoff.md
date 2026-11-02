@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current dialog notices — November 2, 2026
+
+[#257 / draft PR #260](https://github.com/sahamo123/dax-editor/pull/260), branch `codex/s01-06-dialog-notice-layout`, passed focused, nine browser and full source checks at application/test head `b106ba0a4edd5d9a862497b850d482ed8b2a31ef`. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-dialog-notices-receipt.md), continue S01.06 and keep actual picker, screen-reader and native acceptance open. Self-review is not independent review; earlier entries are historical.
+
 ## Current bridge detector diagnostics — November 2, 2026
 
 On [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259), branch `codex/s01-06-bridge-probe-diagnostics`, the full `pnpm check` passed at `24cfae7c85441dfcd1b08edfbf1027e1d35ece29` with test head `4925f5c6d740944e2500a592365ed2ff68556821`. The detector passed so the prior failures remain unexplained. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md), self-review the cancellation candidate and address compact toast overlap [#257](https://github.com/sahamo123/dax-editor/issues/257). No native or actual screen-reader acceptance is claimed.

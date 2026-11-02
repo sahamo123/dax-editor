@@ -1210,6 +1210,35 @@ textarea.input {
   gap: 8px;
   z-index: 60;
   max-width: min(420px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.toasts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.toasts[hidden] {
+  display: none;
+}
+.notice-host:empty {
+  display: none;
+}
+.notice-host {
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: min(30vh, 240px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-dim) var(--bg-2);
+}
+.toasts--dialog {
+  position: static;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
+  padding: 10px 16px;
 }
 .toast {
   display: flex;
@@ -1290,6 +1319,7 @@ textarea.input {
 }
 .modal__header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   padding: 14px 14px 12px 20px;
@@ -1306,6 +1336,7 @@ textarea.input {
 }
 .modal__footer {
   display: flex;
+  flex-shrink: 0;
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 20px;

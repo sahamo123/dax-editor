@@ -108,7 +108,8 @@ test("cancelled local model download remains a neutral state in Settings", async
     dialog.getByRole("progressbar", { name: "Downloading the local model" }),
   ).toBeVisible();
   await dialog.getByRole("button", { name: "Cancel download" }).click();
-  await expect(dialog.getByText("Local model download cancelled.")).toHaveClass(/note--info/);
+  const modelNotice = dialog.locator(".note--info").getByText("Local model download cancelled.");
+  await expect(modelNotice).toBeVisible();
   await expect(page.locator('.sr-only[role="status"]')).toContainText(
     "Local model download cancelled.",
   );
@@ -120,7 +121,7 @@ test("cancelled local model download remains a neutral state in Settings", async
   });
   await shot("cancelled-model-neutral");
   await page.setViewportSize({ width: 1024, height: 700 });
-  await expect(dialog.getByText("Local model download cancelled.")).toBeVisible();
+  await expect(modelNotice).toBeVisible();
   await expect(dialog.getByRole("button", { name: "Save", exact: true })).toBeVisible();
   await shot("cancelled-model-neutral-compact");
 });
