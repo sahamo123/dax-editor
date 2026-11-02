@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current work: [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244).** On `codex/s01-06-timeline-keyboard`, application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4` passed integrated browser, expanded offscreen and full source checks. Review the [receipt](s01-06-timeline-keyboard-receipt.md), verify publication and continue S01.06. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
+
 **Current investigation: [#243](https://github.com/sahamo123/dax-editor/issues/243).** Branch `codex/s01-06-timeline-keyboard` starts at PR #242 head `510b5be4c7fe7a64aa1c6a63c73a645cc6d4cc0b`. A generated-media browser diagnostic reproduces a listbox/keyboard mismatch, with no application fix yet. Read the [investigation](s01-06-timeline-semantics-investigation.md), specify and test coherent keyboard interaction and virtualized-item behavior while preserving practical editing shortcuts. Picker, actual screen-reader and native acceptance remain open; earlier entries are historical.
 
 **Current work: [#241 / draft PR #242](https://github.com/sahamo123/dax-editor/pull/242).** On `codex/s01-06-overlay-label-contrast`, application head `6a52fe4120f80845446cf9e9a0212ddebab74974` and corrected test head `7e0989e58bf4fc45858cd9dd53bb73ca10720a17` passed five browser checks and full `pnpm check`. Review the [receipt](s01-06-overlay-label-contrast-receipt.md), verify publication and continue S01.06. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.

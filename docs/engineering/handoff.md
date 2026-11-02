@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current timeline candidate — November 2, 2026
+
+[#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, application/test head `9d331ebf28713a377599fcd208b7e2dd9d6beab4`, passed integrated browser, expanded offscreen and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md); review, actual picker and screen-reader acceptance remain open. The investigation below is historical.
+
 ## Current timeline investigation — November 2, 2026
 
 [#243](https://github.com/sahamo123/dax-editor/issues/243) reproduces a horizontal listbox/keyboard mismatch on PR #242 head `510b5be4c7fe7a64aa1c6a63c73a645cc6d4cc0b`. No application fix is included. Read the [investigation](../implementation/2026-11-01-creator-editor/s01-06-timeline-semantics-investigation.md), design a coherent interaction that preserves practical editing shortcuts and accounts for virtualized offscreen items, then implement and test it under this issue. Actual picker and screen-reader gates remain open.
