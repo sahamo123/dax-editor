@@ -198,3 +198,9 @@ Task-cancellation naming [#179](https://github.com/sahamo123/dax-editor/issues/1
 Task-cancellation #179 final authorized full check passed: 1,824 package tests, 67 skipped and 17 script tests. The earlier deliberately interrupted run remains documented. Publication and self-review remain pending.
 
 Task-cancellation PR #180 passed separate self-review at application/test head `d92bc08a210312d68403a870e3fffac97e584f0e`; the subsequent documentation-only handoff does not alter tested source. The earlier Chrome test window is no longer open; native keyboard and Narrator evidence remain outstanding under #177.
+
+Task-state evidence [#181](https://github.com/sahamo123/dax-editor/issues/181) passed a synthetic browser check for all six textual statuses, list scrolling and targeted cancellation. The initial fixture failed because its fake model had been stopped; the corrected fixture explicitly restarts it. Repository checks and review remain pending.
+
+Task-state evidence #181 passed the focused browser, fast, dead-code and docs checks. The full source check from the immediately preceding unchanged application is reused, explicitly excluding the new browser test; publication and self-review remain pending.
+
+Task-state evidence PR #182 passed separate self-review at test/docs head `78d5acb861b3a6328dd490852f226744fed71bcb`. A subsequent documentation-only handoff preserves that tested source. The parent accessibility gate remains open.
