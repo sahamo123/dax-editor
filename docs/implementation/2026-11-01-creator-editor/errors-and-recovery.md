@@ -95,3 +95,7 @@ A Chrome browser case passed, but Playwright-owned preview cleanup stalled; that
 Two existing core safety tests failed to create Windows symbolic links with EPERM in the restricted test run. That runner was interrupted after it did not exit promptly; private log SHA-256 `938eb59c1ecf8dbf22fe93e1e263a7bdb8c125ff32f8ae6d2b7f7d5772f547c5`. A separately authorized host-permission rerun is in progress; no security settings or tests were weakened. Record its actual result separately.
 
 The authorized rerun passed both symbolic-link cases and `pnpm check` (exit 0); private full log SHA-256 `6f3516b7921d5f389421fd9445440a40a774263f1a2b69cfcef6c3ed6080d3b6`. This does not change the interrupted restricted-run result.
+
+## 2026-11-01 — Native accessibility tool access
+
+The computer-use tool could see the generated test browser's Open dialog but rejected input to the transient child window; an attempted Escape affected the underlying test editor instead. A later Narrator launch timed out waiting for app approval. Do not treat either as an app defect, an automatic-review rejection, a screen-reader pass or a reason to change Windows security. The stale test dialog may need user cancellation; resume using the [acceptance handoff](s01-06-native-acceptance-receipt.md).

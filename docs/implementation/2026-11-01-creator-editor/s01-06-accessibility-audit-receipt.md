@@ -35,3 +35,7 @@ Windows Narrator exists on the host, but has not been successfully operated or v
 ## Reconciliation after history contrast
 
 Child fixes through [PR #174](https://github.com/sahamo123/dax-editor/pull/174) were separately self-reviewed. A limited rendered opaque-color scan produced a ruler false positive: the labels lie outside the tick and measure 8.102:1 against the actual ruler surface. See the [reconciliation receipt](s01-06-audit-reconciliation-receipt.md) for exact evidence, exclusions and required acceptance still open. The earlier section records findings as they were observed and is historical.
+
+## Native access follow-up
+
+The generated test browser's native Open dialog was visible, but computer-use interaction was rejected for its transient child window; a later Narrator launch timed out waiting for app approval. The complete keyboard and actual spoken-output gates remain open. See [#177 and its handoff](s01-06-native-acceptance-receipt.md). This is not an automatic-review rejection.

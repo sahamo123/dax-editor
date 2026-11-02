@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 native accessibility access — November 1, 2026
+
+Native accessibility acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) is BLOCKED on computer-use access. The synthetic test browser's Open dialog is visible, but targeting its transient window was rejected; starting Narrator timed out waiting for app approval. No actual screen-reader speech or complete keyboard-only import has been observed. [PR #176](https://github.com/sahamo123/dax-editor/pull/176) was self-reviewed at `abed94254a22c19f436ad5157c599217c1ebbf4d`. The parent S01.06 remains IN_PROGRESS; do not advance to S01.07. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md).
+
 ## S01.06 evidence reconciliation — November 1, 2026
 
 Accessibility evidence reconciliation [#175](https://github.com/sahamo123/dax-editor/issues/175) is IN_PROGRESS on `codex/s01-06-contrast-audit`, based on self-reviewed [PR #174](https://github.com/sahamo123/dax-editor/pull/174) `21c531bc2cd604f9a819c5ee01ff687761ca0808`. A limited opaque-color scan's ruler warning was disproved by rendered geometry; actual ruler contrast measured 8.10:1. This is not a whole-app audit. Actual keyboard-only import and screen-reader speech remain required; native/DPI checks remain separate. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-audit-reconciliation-receipt.md).
