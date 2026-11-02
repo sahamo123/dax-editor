@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Staged attachment lease design — November 2, 2026
+
+[#227 / draft PR #228](https://github.com/sahamo123/dax-editor/pull/228) proposes a separate opt-in [lease contract](specs/staged-attachment-leases.md) and [draft decision](adr/0017-staged-attachment-leases.md). Legacy sources remain durable; no cleanup is implemented. Host-authorized `pnpm check` passed at design head `ee0ccf4a5de05801d45b054a20f5dae3354a6e32`: 1,879 package tests passed, 67 skipped and 17 script tests passed. Private log SHA-256 `1df17fbce4577285a51307d7eba1f9e605121d36b2d06036c7d0a8f4eff40197`. Review, S01.06 and native acceptance remain open.
+
 ## Targeted Stop and task identity — November 2, 2026
 
 The [#224 / draft PR #226](https://github.com/sahamo123/dax-editor/pull/226) candidate fixes a reproduced delayed-Stop transcript race and targets cancellation by task ID. Ninety-two desktop, 15 server, three generated-media browser tests and full host-authorized `pnpm check` passed at application/test head `a632ef032e6d6be9f39a28ed69b7a5ce6b9d4829`; fast check passed after correcting a fixture. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). S01.06 and native acceptance remain open.
