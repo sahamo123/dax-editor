@@ -84,3 +84,57 @@ test("keeps the draft when steering targets a changed assistant configuration", 
     (await server.api.state()).tasks?.some((task) => task.title === "Keep this guidance"),
   ).toBe(false);
 });
+
+test("a delayed Stop reply does not mark the next queued task stopped", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+}) => {
+  const server = await startServer({ aiReady: true });
+  await server.importPaths([sampleVideo]);
+  await openApp(server);
+  await chatInput(page).fill("work slowly first");
+  await chatInput(page).press("Enter");
+  const stop = page.getByRole("button", { name: "Stop", exact: true });
+  await expect(stop).toBeVisible();
+  await chatInput(page).fill("work slowly second");
+  await page.getByRole("button", { name: "Queue message", exact: true }).click();
+  await expect
+    .poll(
+      async () =>
+        (await server.api.state()).tasks?.find((task) => task.title === "work slowly second")
+          ?.status,
+    )
+    .toBe("queued");
+
+  let release = () => {};
+  let responseHeld = false;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/api/tasks/*/cancel", async (route) => {
+    const response = await route.fetch();
+    responseHeld = true;
+    await gate;
+    await route.fulfill({ response });
+  });
+  try {
+    await stop.click();
+    await expect.poll(() => responseHeld).toBe(true);
+    await expect
+      .poll(
+        async () =>
+          (await server.api.state()).tasks?.find((task) => task.title === "work slowly second")
+            ?.status,
+      )
+      .toBe("running");
+    release();
+    await expect(page.getByText("Stopped.", { exact: true })).toHaveCount(1);
+    expect(
+      (await server.api.state()).tasks?.find((task) => task.title === "work slowly second")?.status,
+    ).toBe("running");
+  } finally {
+    release();
+  }
+});

@@ -29,7 +29,7 @@ export type ChatItem =
       error?: string;
       /** Id of the history state the project was in when the run began; "Undo this change" returns to it. */
       startStateId: number | null;
-      /** True from the moment the user pressed Stop until the run ends, so a closing event is read as "stopped". */
+      /** A Stop request for this run is awaiting confirmation. */
       cancelling?: boolean;
       /** How many undo steps were performed by "Undo this change", so it can be redone. */
       undoneSteps?: number;
@@ -50,9 +50,6 @@ function applyToRun(
 ): Extract<ChatItem, { kind: "run" }> {
   // A run the user stopped stays stopped even if the server still sends its closing event.
   if (run.status === "cancelled" && (event.type === "done" || event.type === "error")) return run;
-  if (run.cancelling && (event.type === "done" || event.type === "error")) {
-    return { ...run, status: "cancelled", steps: run.steps.filter((s) => s.kind !== "status") };
-  }
   switch (event.type) {
     case "status": {
       const last = run.steps[run.steps.length - 1];
@@ -128,18 +125,23 @@ export function applyChatEvent(
   return [...items, applyToRun(fresh, event)];
 }
 
-/** Flag (or unflag) every running run as being stopped by the user. */
-export function setCancelling(items: ChatItem[], cancelling: boolean): ChatItem[] {
-  return items.map((i) => (i.kind === "run" && i.status === "running" ? { ...i, cancelling } : i));
+/** Flag or unflag the identified run while its Stop request is awaiting confirmation. */
+export function setCancelling(items: ChatItem[], runId: string, cancelling: boolean): ChatItem[] {
+  return items.map((i) => (i.kind === "run" && i.id === runId ? { ...i, cancelling } : i));
 }
 
-/** Mark every running run as cancelled (the user pressed Stop). */
-export function markCancelled(items: ChatItem[]): ChatItem[] {
-  return items.map((i) =>
-    i.kind === "run" && i.status === "running"
-      ? { ...i, status: "cancelled", steps: i.steps.filter((s) => s.kind !== "status") }
-      : i,
-  );
+/** Mark the confirmed stopped run as cancelled, preserving a reported error and other runs. */
+export function markCancelled(items: ChatItem[], runId: string): ChatItem[] {
+  return items.map((i) => {
+    if (i.kind !== "run" || i.id !== runId) return i;
+    if (i.status === "error") return { ...i, cancelling: false };
+    return {
+      ...i,
+      status: "cancelled",
+      cancelling: false,
+      steps: i.steps.filter((s) => s.kind !== "status"),
+    };
+  });
 }
 
 /** The id of the state the project is in right now, or `null` before any state arrived. */

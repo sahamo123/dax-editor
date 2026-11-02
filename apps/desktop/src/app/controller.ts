@@ -407,14 +407,30 @@ export function createController(deps: ControllerDeps): Controller {
     },
 
     async cancelChat() {
-      // Flag first: the server's closing event can arrive before the reply to this request.
-      store.getState().setCancelling(true);
-      const r = await client.chatCancel();
+      const snapshot = store.getState();
+      const activeTask = snapshot.state?.tasks?.find(
+        (task) => task.kind === "chat" && task.status === "running" && !task.steersRunId,
+      );
+      const activeRun = [...snapshot.chat]
+        .reverse()
+        .find((item) => item.kind === "run" && item.status === "running");
+      const runId = activeTask?.id ?? activeRun?.id;
+      if (!runId) {
+        toast("info", "The active task is still loading. Wait a moment and try Stop again.");
+        return;
+      }
+      if (snapshot.stoppingRunIds.includes(runId)) return;
+      // Pin the request and provisional state to one run, even if another starts before the reply.
+      store.getState().setCancelling(runId, true);
+      const r = await client.cancelTask(runId);
       if (!r.ok) {
-        store.getState().setCancelling(false);
+        store.getState().setCancelling(runId, false);
         toast("error", r.error);
+      } else if (!r.value.cancelled) {
+        store.getState().setCancelling(runId, false);
+        toast("info", "That task already finished. The next task was not stopped.");
       } else {
-        store.getState().cancelChatLocally();
+        store.getState().cancelChatLocally(runId);
       }
     },
 

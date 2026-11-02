@@ -73,6 +73,10 @@ export interface AppStore {
   state: StateResponse | null;
   jobs: Record<string, JobInfo>;
   chat: ChatItem[];
+  /** Run IDs awaiting a Stop response, including runs without a transcript event yet. */
+  stoppingRunIds: string[];
+  /** Recently confirmed stopped run IDs, so delayed events cannot revive them. */
+  stoppedRunIds: string[];
   /** Undo point recorded when the user sent a message, claimed by the first event of the new run. */
   pendingStartId: number | null;
   /** True between sending a message and its first event, so the composer locks right away. */
@@ -96,10 +100,10 @@ export interface AppStore {
   beginUserMessage(text: string): void;
   /** Add a system line (for example a refused request) to the transcript. */
   addNotice(tone: "error" | "info", text: string): void;
-  /** Mark every running run as stopped. */
-  cancelChatLocally(): void;
-  /** Flag running runs as being stopped, so the server's closing event reads as "stopped". */
-  setCancelling(cancelling: boolean): void;
+  /** Mark only the identified, confirmed stopped run. */
+  cancelChatLocally(runId: string): void;
+  /** Record or clear Stop intent for a particular run. */
+  setCancelling(runId: string, cancelling: boolean): void;
   /** Update bookkeeping on one run (how many undo steps "Undo this change" performed). */
   patchRun(runId: string, patch: { undoneSteps?: number }): void;
   /** Store the local model status. */
@@ -161,6 +165,8 @@ export function createAppStore(): StoreApi<AppStore> {
     state: null,
     jobs: {},
     chat: [],
+    stoppingRunIds: [],
+    stoppedRunIds: [],
     pendingStartId: null,
     chatSending: false,
     localModel: null,
@@ -215,8 +221,11 @@ export function createAppStore(): StoreApi<AppStore> {
           : (startStateId ??
             s.pendingStartId ??
             (s.state ? currentStateId(s.state.history) : null));
+        let chat = applyChatEvent(s.chat, runId, event, start);
+        if (s.stoppingRunIds.includes(runId)) chat = setCancelling(chat, runId, true);
+        if (s.stoppedRunIds.includes(runId)) chat = markCancelled(chat, runId);
         return {
-          chat: applyChatEvent(s.chat, runId, event, start),
+          chat,
           pendingStartId: known ? s.pendingStartId : null,
           chatSending: false,
         };
@@ -235,9 +244,20 @@ export function createAppStore(): StoreApi<AppStore> {
         chatSending: false,
       })),
 
-    setCancelling: (cancelling) => set((s) => ({ chat: setCancelling(s.chat, cancelling) })),
+    setCancelling: (runId, cancelling) =>
+      set((s) => ({
+        chat: setCancelling(s.chat, runId, cancelling),
+        stoppingRunIds: cancelling
+          ? [...new Set([...s.stoppingRunIds, runId])]
+          : s.stoppingRunIds.filter((id) => id !== runId),
+      })),
 
-    cancelChatLocally: () => set((s) => ({ chat: markCancelled(s.chat), chatSending: false })),
+    cancelChatLocally: (runId) =>
+      set((s) => ({
+        chat: markCancelled(s.chat, runId),
+        stoppingRunIds: s.stoppingRunIds.filter((id) => id !== runId),
+        stoppedRunIds: [...s.stoppedRunIds.filter((id) => id !== runId), runId].slice(-100),
+      })),
 
     patchRun: (runId, patch) =>
       set((s) => ({

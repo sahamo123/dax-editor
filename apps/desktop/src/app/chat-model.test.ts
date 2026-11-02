@@ -58,15 +58,17 @@ describe("applyChatEvent", () => {
 
   it("keeps a stopped run stopped even if the server later sends done", () => {
     let items = applyChatEvent([], "r", { type: "status", text: "Working" }, 1);
-    items = markCancelled(items);
+    items = markCancelled(items, "r");
     items = applyChatEvent(items, "r", { type: "done", turns: 1 }, 1);
     expect(run(items).status).toBe("cancelled");
   });
 
-  it("reads a closing event as stopped when the user already pressed Stop", () => {
+  it("preserves a closing event until Stop is confirmed", () => {
     let items = applyChatEvent([], "r", { type: "status", text: "Working" }, 1);
-    items = setCancelling(items, true);
+    items = setCancelling(items, "r", true);
     items = applyChatEvent(items, "r", { type: "done", turns: 1 }, 1);
+    expect(run(items).status).toBe("done");
+    items = markCancelled(items, "r");
     expect(run(items).status).toBe("cancelled");
   });
 });
