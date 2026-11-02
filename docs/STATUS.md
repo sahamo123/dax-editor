@@ -13,7 +13,7 @@ generated:
 
 ## Staged attachment lease design — November 2, 2026
 
-[#227](https://github.com/sahamo123/dax-editor/issues/227) proposes a separate opt-in [lease contract](specs/staged-attachment-leases.md) and [draft decision](adr/0017-staged-attachment-leases.md). Legacy sources remain durable; no cleanup is implemented. Review and future implementation are pending. The latest application/test full check remains that of PR #226 below; S01.06 and native acceptance remain open.
+[#227 / draft PR #228](https://github.com/sahamo123/dax-editor/pull/228) proposes a separate opt-in [lease contract](specs/staged-attachment-leases.md) and [draft decision](adr/0017-staged-attachment-leases.md). Legacy sources remain durable; no cleanup is implemented. Host-authorized `pnpm check` passed at design head `ee0ccf4a5de05801d45b054a20f5dae3354a6e32`: 1,879 package tests passed, 67 skipped and 17 script tests passed. Private log SHA-256 `1df17fbce4577285a51307d7eba1f9e605121d36b2d06036c7d0a8f4eff40197`. Review, S01.06 and native acceptance remain open.
 
 ## Targeted Stop and task identity — November 2, 2026
 
