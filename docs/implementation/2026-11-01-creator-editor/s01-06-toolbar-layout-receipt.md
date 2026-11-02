@@ -19,4 +19,6 @@ The first `pnpm check` failed one server engine test when Windows returned `EPER
 
 A full `pnpm check` rerun on the same source passed: 1,967 package tests passed, 67 skipped and 17 script tests passed. Rerun log SHA-256: `d528ffa6c1e434034aa8af505e11f95ed4eff901f5857499c613c43e4930fd61`. Test FFmpeg was the explicitly selected system binary, not packaged-runtime verification.
 
-Self-review and independent review remain pending. S01.06, actual Windows picker, task-specific assistive-technology speech, native desktop and DPI acceptance remain open. No release readiness is claimed.
+Self-review on test-only head `6ae11d2d0616d8afe5e425b14f505f7c6e42e4a8` rechecked the CSS flex interaction, responsive test and screenshots. The prior test only measured the remaining timeline height, so it now also programmatically focuses the clip at minimum height, verifies its center is unobscured, and selects it by pointer. Four browser checks at 600, 720, 1000 and 1440 CSS px passed; log SHA-256 `bf376ac40c5de58d38d98a772e3c7f774a04b13fa6036483b587f119148ed695`. `pnpm check:fast` passed; log SHA-256 `9e420896c2332ef689b5dcde719f6c25542b7747bf07bd9d000cc6a33cfe04e2`. Application and package source are unchanged from the full-check head above. The focus test is not a full keyboard-only workflow.
+
+Self-review is complete; independent review remains pending. S01.06, actual Windows picker, task-specific assistive-technology speech, native desktop and DPI acceptance remain open. No release readiness is claimed.

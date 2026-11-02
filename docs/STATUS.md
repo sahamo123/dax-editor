@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Wrapped toolbar self-review — November 2, 2026
+
+[#274 / draft PR #276](https://github.com/sahamo123/dax-editor/pull/276) adds minimum-height clip reachability coverage. Four browser checks and fast checks passed at test-only head 6ae11d2d0616d8afe5e425b14f505f7c6e42e4a8; the application source matches the earlier full-check head. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-layout-receipt.md). Independent review, S01.06 and native/accessibility acceptance remain open.
+
 ## Wrapped toolbar candidate — November 2, 2026
 
 [#274 / draft PR #276](https://github.com/sahamo123/dax-editor/pull/276) reserves wrapped toolbar height. Thirteen browser checks and a full pnpm check rerun passed at application/test head d1dadc7bb4ec9c9b563cd18b89542da9fff1b467; the first full run failed a Windows rename test and the cause remains unproven. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-layout-receipt.md). Review, S01.06 and native/accessibility acceptance remain open.
