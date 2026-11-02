@@ -21,6 +21,14 @@ function taskLabel(task: TaskInfo): string {
   }
 }
 
+// Keep a long chat prompt from becoming an excessively long spoken button name.
+function cancelTaskLabel(task: TaskInfo): string {
+  const title = task.title.trim().replace(/\s+/g, " ");
+  const characters = Array.from(title);
+  const summary = characters.length > 80 ? `${characters.slice(0, 77).join("")}...` : title;
+  return `Cancel task: ${summary || taskLabel(task)} (${task.id})`;
+}
+
 /** Show current/queued work and recent results, with cancellation for unfinished tasks. */
 export function TaskQueue(): ReactElement {
   const tasks = useApp((state) => state.state?.tasks);
@@ -77,6 +85,7 @@ export function TaskQueue(): ReactElement {
               <button
                 type="button"
                 className="btn btn--small"
+                aria-label={cancelTaskLabel(task)}
                 disabled={!online}
                 onClick={() => void controller.cancelTask(task.id)}
               >

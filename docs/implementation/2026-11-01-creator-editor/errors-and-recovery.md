@@ -99,3 +99,11 @@ The authorized rerun passed both symbolic-link cases and `pnpm check` (exit 0); 
 ## 2026-11-01 — Native accessibility tool access
 
 The computer-use tool could see the generated test browser's Open dialog but rejected input to the transient child window; an attempted Escape affected the underlying test editor instead. A later Narrator launch timed out waiting for app approval. Do not treat either as an app defect, an automatic-review rejection, a screen-reader pass or a reason to change Windows security. The stale test dialog may need user cancellation; resume using the [acceptance handoff](s01-06-native-acceptance-receipt.md).
+
+## 2026-11-01 — Task-name check interrupted for refinement
+
+The first full-check run for #179 was deliberately interrupted when review found that a task title can contain a full prompt and would make the new accessible name excessively long. The label was bounded before rerunning; do not treat the interrupted check as a pass.
+
+The interrupted #179 full-check log SHA-256 is `92be32b14f2feab523eec9c963df44d68e5aa6d9047cdc828d30eb31789612ef`; the final code's focused checks passed and a fresh full check is running.
+
+The refined #179 candidate's fresh authorized full check passed; private log SHA-256 `6dd361c51f0885500ad4814f02803d6094da31ab6ad8859d594113c17d28e6eb`. This does not change the interrupted attempt's status.

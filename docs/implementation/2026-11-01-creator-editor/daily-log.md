@@ -192,3 +192,9 @@ The added branch-restoration browser assertion and subsequent `pnpm check:fast` 
 History contrast PR #174 passed focused browser, full source and separate self-review at `21c531bc2cd604f9a819c5ee01ff687761ca0808`. Reconciliation [#175](https://github.com/sahamo123/dax-editor/issues/175) records a limited contrast sweep and a ruler false positive; actual keyboard-only import and screen-reader speech remain outstanding.
 
 Audit reconciliation PR #176 passed documentation checks and self-review at `abed94254a22c19f436ad5157c599217c1ebbf4d`. Native accessibility [#177](https://github.com/sahamo123/dax-editor/issues/177) remains blocked: the computer-use target rejected the test file-picker child window and Narrator launch timed out waiting for app approval. No actual speech or complete keyboard-only import was observed.
+
+Task-cancellation naming [#179](https://github.com/sahamo123/dax-editor/issues/179) reproduced duplicate accessible names and passed focused component/browser tests after associating each cancel control with its task title and ID. Full source checks and publication remain pending; native acceptance #177 remains blocked.
+
+Task-cancellation #179 final authorized full check passed: 1,824 package tests, 67 skipped and 17 script tests. The earlier deliberately interrupted run remains documented. Publication and self-review remain pending.
+
+Task-cancellation PR #180 passed separate self-review at application/test head `d92bc08a210312d68403a870e3fffac97e584f0e`; the subsequent documentation-only handoff does not alter tested source. The earlier Chrome test window is no longer open; native keyboard and Narrator evidence remain outstanding under #177.
