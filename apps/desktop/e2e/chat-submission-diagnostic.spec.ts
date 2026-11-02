@@ -14,6 +14,38 @@ test("control browser fill in a plain textarea", async ({ page }) => {
   await expect(input).toHaveValue("Add a title\n");
 });
 
+test("control browser typing in an autosizing textarea", async ({ page }) => {
+  await page.setContent(`<style>textarea { min-height: 72px; max-height: 140px; line-height: 1.4; }</style>
+    <textarea aria-label="Autosize" rows="1"></textarea>
+    <script>document.querySelector('textarea').addEventListener('input', (e) => {
+      e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px';
+    });</script>`);
+  const input = page.getByLabel("Autosize");
+  await input.pressSequentially("Add a title");
+  await expect(input).toHaveValue("Add a title");
+});
+
+test("control chat submission with an empty project", async ({ page, startServer, openApp }) => {
+  const server = await startServer({ aiReady: true });
+  await openApp(server);
+  const input = chatInput(page);
+  try {
+    await input.pressSequentially("Add a title");
+    expect(await input.inputValue()).toBe("Add a title");
+    await input.press("Enter");
+    await expect(page.getByRole("log").getByText("Add a title")).toBeVisible();
+  } catch (error) {
+    console.log(
+      JSON.stringify({
+        disconnected: await page.getByText("Can't reach the editor engine.").isVisible(),
+        draftLength: (await input.inputValue()).length,
+        inputDisabled: await input.isDisabled(),
+      }),
+    );
+    throw error;
+  }
+});
+
 test("diagnose intermittent chat submission", async ({
   page,
   startServer,
@@ -93,6 +125,26 @@ test("diagnose intermittent chat submission", async ({
         }
       }
     }).observe(document, { subtree: true, childList: true });
+    new MutationObserver((records) => {
+      if (!lastComposer) return;
+      for (const record of records) {
+        const target = record.target;
+        if (
+          target instanceof Element &&
+          (target === lastComposer || target.contains(lastComposer))
+        ) {
+          keyEvents.push({
+            event: "ancestor-attribute",
+            attribute: record.attributeName ?? "unknown",
+            composer: target === lastComposer,
+          });
+        }
+      }
+    }).observe(document, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["hidden", "inert", "style", "class"],
+    });
     document.addEventListener(
       "focusin",
       (event) => {
@@ -182,7 +234,7 @@ test("diagnose intermittent chat submission", async ({
       await chatInput(page).fill("Add a title");
     }
     if ((await chatInput(page).inputValue()) !== "Add a title") {
-      throw new Error("The test fill returned without the expected composer text.");
+      throw new Error("The test input action returned without the expected composer text.");
     }
     await chatInput(page).press("Enter");
     await expect(page.getByRole("button", { name: "Undo this change" })).toBeVisible();
