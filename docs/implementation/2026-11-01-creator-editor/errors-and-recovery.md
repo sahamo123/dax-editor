@@ -111,3 +111,9 @@ The refined #179 candidate's fresh authorized full check passed; private log SHA
 ## 2026-11-01 — Task-state test fixture restart
 
 The initial #181 browser run timed out because stopping the test server also stopped its fake local model, leaving chat disabled after restart. Private log SHA-256 `a074e6dd0ddae7b4d2a1bd5f0e5121cae90f593aa965fbe6c4d02ec6b389956f`. The fixture explicitly restarts the fake model and waits for availability; the corrected browser test passed. This was a test setup error, not a finding about a real model.
+
+## 2026-11-01 — Setup contrast test assumptions
+
+The first #183 test compared the heading to an unblended gradient-stop color, and a later strict grammar check initially rejected Chrome's trailing `none` image layer. Private failed logs `b35827fe1178053d28ccebd45a4f6c7a78a54e044eec7a35d9f35722e38ce474` and `6d2e88149e747635d2c39f4b154282209687b12bddcd78d0a0638d5577e908fb` are retained. The corrected compositing and bounded grammar check passed; these were test setup failures, not observed application defects.
+
+A first attempt to redirect the #183 fast check could not open an already-locked log file; it did not provide a trustworthy exit result and was not counted. Once the file was unlocked, a fresh check using a new log completed successfully. No other process or log was modified.

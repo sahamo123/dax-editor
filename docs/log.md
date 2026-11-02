@@ -358,3 +358,7 @@
 * **Update**: 2026-11-01 scoped [task-state labels #181](https://github.com/sahamo123/dax-editor/issues/181); the [receipt](implementation/2026-11-01-creator-editor/s01-06-task-state-receipt.md) records synthetic text, scrolling and cancellation evidence and remaining checks.
 
 * **Update**: 2026-11-01 self-reviewed [task-state evidence PR #182](https://github.com/sahamo123/dax-editor/pull/182) and reconciled its [receipt](implementation/2026-11-01-creator-editor/s01-06-task-state-receipt.md). Actual keyboard and Narrator acceptance remains open.
+
+* **Update**: 2026-11-01 scoped [setup and task-error contrast #183](https://github.com/sahamo123/dax-editor/issues/183); the [receipt](implementation/2026-11-01-creator-editor/s01-06-setup-error-contrast-receipt.md) records sampled large/normal text and compositing evidence.
+
+* **Update**: 2026-11-01 self-reviewed [setup/error contrast PR #184](https://github.com/sahamo123/dax-editor/pull/184) and reconciled its [receipt](implementation/2026-11-01-creator-editor/s01-06-setup-error-contrast-receipt.md). Actual keyboard and Narrator acceptance remains open.
