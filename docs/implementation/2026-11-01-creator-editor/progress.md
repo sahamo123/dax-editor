@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248) reconciles local jobs first seen terminal. Focused and browser checks and full `pnpm check` passed at `772f0e7072cf0f0bb1cda20236f3e814534c0acc`; see the [receipt](s01-06-local-job-outcomes-receipt.md). Review and S01.06 acceptance remain open.
+
 - [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246) handles known running jobs completed in snapshots and first-observed terminal events. Focused, browser and full `pnpm check` passed at `7f0282a173dd1bf2a668f03ab29a95af3e419c79`. See the [receipt](s01-06-job-snapshot-notices-receipt.md). First-seen terminal local jobs remain [#247](https://github.com/sahamo123/dax-editor/issues/247); S01.06 remains IN_PROGRESS.
 
 - [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244) passed 14 browser checks and full `pnpm check` at modal-corrected head `f9a46b3564289781177974b9437f9de8a37bc0f7`. See the [receipt](s01-06-timeline-keyboard-receipt.md). Review and S01.06 acceptance remain open.

@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current local job candidate — November 2, 2026
+
+[#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248), `codex/s01-06-local-job-outcomes`, application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc`, passed focused, browser and full source checks. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md), review this candidate and continue independent S01.06 work. Earlier entries are historical; actual picker, screen-reader and native acceptance remain open.
+
 ## Current recovered-job notice candidate — November 2, 2026
 
 [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246), `codex/s01-06-snapshot-job-notices`, application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79`, passed focused and browser checks and full `pnpm check`. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). Next investigate locally initiated jobs first seen terminal [#247](https://github.com/sahamo123/dax-editor/issues/247). Review, picker, actual screen-reader and native acceptance remain open; earlier entries are historical.

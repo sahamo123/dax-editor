@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Local job outcome reconciliation — November 2, 2026
+
+[#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248) reconciles local exports and previews first seen terminal in snapshots. Focused and browser checks and full `pnpm check` passed at application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md). Review, actual screen-reader and native acceptance remain open; S01.06 is IN_PROGRESS.
+
 ## Recovered job notices — November 2, 2026
 
 [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246) announces previously observed running jobs that finish in snapshots and first-observed terminal live events, while leaving historical snapshots silent. Focused and browser checks and full `pnpm check` passed at application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). A locally initiated job first seen terminal in a snapshot remains [#247](https://github.com/sahamo123/dax-editor/issues/247). Review, actual screen-reader and native acceptance remain open.
