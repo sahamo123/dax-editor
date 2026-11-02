@@ -13,7 +13,7 @@ generated:
 
 ## Bridge detector diagnostics — November 2, 2026
 
-[#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259) adds test-only fake-CLI status detail to diagnose two distinct full-check failures. Its focused detector suite passed at `4925f5c6d740944e2500a592365ed2ff68556821`; a diagnostic full run remains pending. No production timeout or security restriction changed.
+[#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259) adds test-only fake-CLI status detail after two distinct full-check failures. The focused detector suite and a full `pnpm check` passed on diagnostic descendant `24cfae7c85441dfcd1b08edfbf1027e1d35ece29`; the previous failures' causes remain unproven. No production timeout or security restriction changed.
 
 ## Typed cancellation candidate — November 2, 2026
 

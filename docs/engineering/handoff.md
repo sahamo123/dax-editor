@@ -13,7 +13,7 @@ generated:
 
 ## Current bridge detector diagnostics — November 2, 2026
 
-On [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259), branch `codex/s01-06-bridge-probe-diagnostics`, test head `4925f5c6d740944e2500a592365ed2ff68556821` adds fake-CLI error detail to assertions; 18 focused detector tests passed. Run the full check with this diagnostic, record the result without assuming a timeout, then investigate any reported probe failure. The underlying cancellation candidate is [PR #256](https://github.com/sahamo123/dax-editor/pull/256); its [receipt](../implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md) preserves both failures.
+On [#203 / draft PR #259](https://github.com/sahamo123/dax-editor/pull/259), branch `codex/s01-06-bridge-probe-diagnostics`, the full `pnpm check` passed at `24cfae7c85441dfcd1b08edfbf1027e1d35ece29` with test head `4925f5c6d740944e2500a592365ed2ff68556821`. The detector passed so the prior failures remain unexplained. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-typed-cancellation-receipt.md), self-review the cancellation candidate and address compact toast overlap [#257](https://github.com/sahamo123/dax-editor/issues/257). No native or actual screen-reader acceptance is claimed.
 
 ## Current typed cancellation candidate — November 2, 2026
 
