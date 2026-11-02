@@ -217,6 +217,12 @@ export function Timeline({ className }: TimelineProps) {
 
   // The destination can be virtualized: mount it first, then focus after React commits.
   useLayoutEffect(() => {
+    // A modal owns focus even if an external edit removes the previously focused item.
+    if (hasActiveModal()) {
+      focusedItem.current = null;
+      pendingFocus.current = null;
+      return;
+    }
     const removed = focusedItem.current;
     if (removed && !removed.element.isConnected) {
       focusedItem.current = null;

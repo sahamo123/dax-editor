@@ -205,3 +205,29 @@ test("an externally removed focused clip recovers focus without selecting anothe
   await expect(clips.first()).toBeFocused();
   await expect(clips.first()).toHaveAttribute("aria-selected", "false");
 });
+
+test("external removal cannot pull focus behind an open modal", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+}) => {
+  const server = await startServer();
+  await server.importPaths([sampleVideo]);
+  expect((await server.command("split", { at: 3 })).ok).toBe(true);
+  await openApp(server);
+  const clips = page.getByRole("listbox", { name: "Timeline" }).getByTestId("clip");
+  await clips.first().focus();
+  const id = await clips.first().getAttribute("data-clip-id");
+  if (!id) throw new Error("Clip id missing");
+  await page.evaluate(() => {
+    const dialog = document.createElement("div");
+    dialog.setAttribute("role", "dialog");
+    dialog.setAttribute("aria-modal", "true");
+    dialog.setAttribute("aria-label", "Synthetic modal");
+    document.body.append(dialog);
+  });
+  expect((await server.command("remove_clip", { clipId: id })).ok).toBe(true);
+  await expect(clips).toHaveCount(1);
+  await expect(clips.first()).not.toBeFocused();
+});
