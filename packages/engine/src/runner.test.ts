@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { getCommand, Session } from "@dax/core";
+import { emptyProject, getCommand, Session } from "@dax/core";
 import type { AgentEvent, Settings } from "@dax/protocol";
 import type { RunnerEnv } from "@dax/server";
 import { afterEach, describe, expect, it } from "vitest";
@@ -82,7 +82,7 @@ describe("createRunnerFactory", () => {
     await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
     open = server;
     const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/v1`;
-    const session = new Session();
+    const session = new Session(emptyProject("test"));
     const before = JSON.stringify(session.project);
     const runner = await createRunnerFactory()({
       ...env(settings({ providers: { "openai-compatible": { baseUrl: url, model: "m" } } })),
@@ -125,7 +125,7 @@ describe("createRunnerFactory", () => {
       localEndpoint: async () => ({ baseUrl, contextTokens: 8192 }),
     })(env(settings({ activeProvider: "local" })));
     await runner.run("Hello", {
-      session: new Session(),
+      session: new Session(emptyProject("test")),
       onEvent: (event) => events.push(event),
       signal: new AbortController().signal,
       allowedRoots: [],
@@ -142,7 +142,7 @@ describe("createRunnerFactory", () => {
     const events: AgentEvent[] = [];
     const runner = await createRunnerFactory()(env(settings({ activeProvider: "anthropic" })));
     await runner.run("hi", {
-      session: new Session(),
+      session: new Session(emptyProject("test")),
       onEvent: (e) => events.push(e),
       signal: new AbortController().signal,
       allowedRoots: [],
@@ -159,7 +159,7 @@ describe("createRunnerFactory", () => {
       },
     });
     const factory = createRunnerFactory();
-    const session = new Session();
+    const session = new Session(emptyProject("test"));
     const events: AgentEvent[] = [];
     const ctx = {
       session,
@@ -177,7 +177,10 @@ describe("createRunnerFactory", () => {
     expect(events.some((e) => e.type === "done")).toBe(true);
     expect(m.bodies[1]).toContain("first message");
     // A different project starts a fresh conversation.
-    await (await factory(env(s))).run("third", { ...ctx, session: new Session() });
+    await (await factory(env(s))).run("third", {
+      ...ctx,
+      session: new Session(emptyProject("test")),
+    });
     expect(m.bodies[2]).not.toContain("first message");
   });
 });
@@ -214,7 +217,7 @@ describe("createRunnerFactory conversation history", () => {
     const runner = await createRunnerFactory()(
       env(settings({ providers: { "openai-compatible": { baseUrl: url, model: "m" } } })),
     );
-    const session = new Session();
+    const session = new Session(emptyProject("test"));
     const quiet = (message: string) =>
       runner.run(message, {
         session,
@@ -239,7 +242,7 @@ describe("createRunnerFactory context size", () => {
   it("offers a small model only the everyday tools, and the full list to a large one", async () => {
     const m = await mockModel();
     open = m.server;
-    const session = new Session();
+    const session = new Session(emptyProject("test"));
     const ctx = {
       session,
       onEvent: () => undefined,
@@ -255,7 +258,7 @@ describe("createRunnerFactory context size", () => {
     });
     await (await createRunnerFactory()(env(large))).run("second", {
       ...ctx,
-      session: new Session(),
+      session: new Session(emptyProject("test")),
     });
     const toolNames = (body: string) =>
       (JSON.parse(body) as { tools?: Array<{ function: { name: string } }> }).tools?.map(
