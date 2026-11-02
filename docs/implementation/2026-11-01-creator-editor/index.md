@@ -58,6 +58,7 @@
 * [S01.06 history contrast child receipt](s01-06-history-contrast-receipt.md) - Rendered history contrast measurements, branch labels and verification.
 * [S01.06 live accessibility and export announcements](s01-06-live-announcement-receipt.md) - Partial keyboard and Narrator observations, export announcement changes, and remaining acceptance evidence.
 * [S01.06 media card action layout](s01-06-media-actions-receipt.md) - Regression evidence for readable and usable media-card controls at two viewport widths.
+* [S01.06 modal shortcut protection after focus loss](s01-06-modal-focus-loss-receipt.md) - Reproduced background project edits while a modal is open, scoped guard and focus-containment follow-up.
 * [S01.06 native accessibility acceptance handoff](s01-06-native-acceptance-receipt.md) - Exact computer-use access blocker, safe restart and remaining keyboard and Narrator evidence.
 * [S01.06 contextual panel contrast](s01-06-panel-contrast-receipt.md) - Measured media, settings and assistant tool text against rendered backgrounds, with scope and remaining issues.
 * [S01.06 primary-button contrast child receipt](s01-06-primary-contrast-receipt.md) - Rendered primary-button contrast measurements and verification.

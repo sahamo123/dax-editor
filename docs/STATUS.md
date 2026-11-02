@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Modal shortcut protection — November 2, 2026
+
+[#234 / draft PR #236](https://github.com/sahamo123/dax-editor/pull/236) guards split, delete and history shortcuts while a modal remains open after focus falls outside it. Focused and generated-media browser checks passed at application/test head `8658ee94f0c5d279eaf3a20dcb2cca29ffa80335`; full check and review remain pending. Actual modal focus containment remains open in [#235](https://github.com/sahamo123/dax-editor/issues/235); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-modal-focus-loss-receipt.md). S01.06 and native acceptance remain open.
+
 ## Batched task notices — November 2, 2026
 
 [#232 / draft PR #233](https://github.com/sahamo123/dax-editor/pull/233) preserves pending urgent and polite notices when React batches updates. Focused component/controller/store and generated-media browser checks passed at application/test head `8a104aa7fd8950795fb2fd10ac34e0adb02b1da3`. Its full check failed an unused type export; type-only correction `3183a609eec3ee7bc68d1da0420848daad0067a3` passed `pnpm deadcode` and full `pnpm check`. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-batched-announcements-receipt.md). Review, actual screen-reader, S01.06 and native acceptance remain open.
