@@ -367,6 +367,244 @@ describe("controller", () => {
     expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Exported out.mp4."]);
   });
 
+  it.each(["done", "error"] as const)(
+    "reports a locally started export first seen %s in a later snapshot",
+    async (status) => {
+      const { store, controller, socket } = setup({
+        run: vi.fn(async () => ({ ok: true, summary: "Started", data: { jobId: "local" } })),
+      });
+      expect(await controller.exportTo("/tmp/out.mp4", false)).toBe(true);
+      const job: JobInfo = {
+        id: "local",
+        kind: "export",
+        label: "Export",
+        progress: 1,
+        status,
+        ...(status === "done" ? { result: "/tmp/out.mp4" } : { error: "Disk full" }),
+      };
+      socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+      socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+      expect(store.getState().toasts.map((toast) => toast.text)).toEqual([
+        "Starting export…",
+        status === "done" ? "Exported out.mp4." : "Disk full",
+      ]);
+    },
+  );
+
+  it.each(["done", "error"] as const)(
+    "reports a locally started export first seen %s before its command reply",
+    async (status) => {
+      const reply: {
+        resolve?: (value: { ok: true; summary: string; data: { jobId: string } }) => void;
+      } = {};
+      const pending = new Promise<{ ok: true; summary: string; data: { jobId: string } }>(
+        (resolve) => {
+          reply.resolve = resolve;
+        },
+      );
+      const { store, controller, socket } = setup({ run: vi.fn(() => pending) });
+      const exporting = controller.exportTo("/tmp/out.mp4", false);
+      const job: JobInfo = {
+        id: "local",
+        kind: "export",
+        label: "Export",
+        progress: 1,
+        status,
+        ...(status === "done" ? { result: "/tmp/out.mp4" } : { error: "Disk full" }),
+      };
+      socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+      if (!reply.resolve) throw new Error("Export reply not initialized");
+      reply.resolve({ ok: true, summary: "Started", data: { jobId: "local" } });
+      expect(await exporting).toBe(true);
+      expect(store.getState().toasts.map((toast) => toast.text)).toEqual([
+        "Starting export…",
+        status === "done" ? "Exported out.mp4." : "Disk full",
+      ]);
+    },
+  );
+
+  it("does not repeat a live terminal notice delivered before the command reply", async () => {
+    const reply: {
+      resolve?: (value: { ok: true; summary: string; data: { jobId: string } }) => void;
+    } = {};
+    const pending = new Promise<{ ok: true; summary: string; data: { jobId: string } }>(
+      (resolve) => {
+        reply.resolve = resolve;
+      },
+    );
+    const { store, controller, socket } = setup({ run: vi.fn(() => pending) });
+    const exporting = controller.exportTo("/tmp/out.mp4", false);
+    const job: JobInfo = {
+      id: "local",
+      kind: "export",
+      label: "Export",
+      progress: 1,
+      status: "done",
+      result: "/tmp/out.mp4",
+    };
+    socket().onEvent({ type: "job", job });
+    socket().onEvent({ type: "state", state: makeState({ jobs: [{ ...job }] }) });
+    if (!reply.resolve) throw new Error("Export reply not initialized");
+    reply.resolve({ ok: true, summary: "Started", data: { jobId: "local" } });
+    expect(await exporting).toBe(true);
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual([
+      "Starting export…",
+      "Exported out.mp4.",
+    ]);
+  });
+
+  it("reports a locally started preview first seen terminal in a snapshot", async () => {
+    const { store, controller, socket } = setup({
+      run: vi.fn(async () => ({ ok: true, summary: "Started", data: { jobId: "preview" } })),
+    });
+    expect((await controller.run("render_preview")).ok).toBe(true);
+    const job: JobInfo = {
+      id: "preview",
+      kind: "export",
+      label: "Render complete edit preview",
+      progress: 1,
+      status: "done",
+      result: "/private/cache/uuid.webm",
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Effects preview ready."]);
+  });
+
+  it("reports a preview snapshot arriving before its command reply", async () => {
+    const reply: {
+      resolve?: (value: { ok: true; summary: string; data: { jobId: string } }) => void;
+    } = {};
+    const pending = new Promise<{ ok: true; summary: string; data: { jobId: string } }>(
+      (resolve) => {
+        reply.resolve = resolve;
+      },
+    );
+    const run = vi.fn(() => pending);
+    const { store, controller, socket } = setup({ run });
+    const rendering = controller.run("render_preview");
+    await vi.waitFor(() => expect(run).toHaveBeenCalledTimes(1));
+    const job: JobInfo = {
+      id: "preview",
+      kind: "export",
+      label: "Render complete edit preview",
+      progress: 1,
+      status: "done",
+      result: "/private/cache/uuid.webm",
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+    if (!reply.resolve) throw new Error("Preview reply not initialized");
+    reply.resolve({ ok: true, summary: "Started", data: { jobId: "preview" } });
+    expect((await rendering).ok).toBe(true);
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Effects preview ready."]);
+  });
+
+  it("does not replay a historical job that existed before a local command", async () => {
+    const { store, controller, socket } = setup({
+      run: vi.fn(async () => ({ ok: true, summary: "Started", data: { jobId: "old" } })),
+    });
+    const old: JobInfo = {
+      id: "old",
+      kind: "export",
+      label: "Export",
+      progress: 1,
+      status: "done",
+      result: "/tmp/old.mp4",
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [old] }) });
+    await controller.exportTo("/tmp/out.mp4", false);
+    socket().onEvent({ type: "state", state: makeState({ jobs: [{ ...old }] }) });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Starting export…"]);
+  });
+
+  it("does not infer a job from an ambiguous failed command reply", async () => {
+    const reply: { resolve?: (value: { ok: false; error: string }) => void } = {};
+    const pending = new Promise<{ ok: false; error: string }>((resolve) => {
+      reply.resolve = resolve;
+    });
+    const run = vi.fn(() => pending);
+    const { store, controller, socket } = setup({ run });
+    const exporting = controller.exportTo("/tmp/out.mp4", false);
+    const job: JobInfo = {
+      id: "unidentified",
+      kind: "export",
+      label: "Export",
+      progress: 1,
+      status: "done",
+      result: "/tmp/out.mp4",
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [job] }) });
+    if (!reply.resolve) throw new Error("Export reply not initialized");
+    reply.resolve({ ok: false, error: "Connection lost" });
+    expect(await exporting).toBe(false);
+    socket().onEvent({ type: "state", state: makeState({ jobs: [{ ...job }] }) });
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual([
+      "Starting export…",
+      "Connection lost",
+    ]);
+  });
+
+  it("keeps local job identification scoped to its ID across project changes", async () => {
+    const { store, controller, socket } = setup({
+      run: vi.fn(async () => ({ ok: true, summary: "Started", data: { jobId: "local" } })),
+    });
+    socket().onEvent({ type: "state", state: makeState({ projectId: "a", revision: 1 }) });
+    await controller.exportTo("/tmp/out.mp4", false);
+    const other: JobInfo = {
+      id: "other",
+      kind: "export",
+      label: "Export",
+      progress: 1,
+      status: "done",
+      result: "/tmp/other.mp4",
+    };
+    const local: JobInfo = { ...other, id: "local", result: "/tmp/out.mp4" };
+    socket().onEvent({
+      type: "state",
+      state: makeState({ projectId: "b", revision: 0, jobs: [other] }),
+    });
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual(["Starting export…"]);
+    socket().onEvent({
+      type: "state",
+      state: makeState({ projectId: "b", revision: 0, jobs: [other, local] }),
+    });
+    expect(store.getState().state?.projectId).toBe("b");
+    expect(store.getState().toasts.map((toast) => toast.text)).toEqual([
+      "Starting export…",
+      "Exported out.mp4.",
+    ]);
+  });
+
+  it("bounds unseen local claims, warns on overflow and reuses freed capacity", async () => {
+    let sequence = 0;
+    const { store, controller, socket } = setup({
+      run: vi.fn(async () => ({
+        ok: true,
+        summary: "Started",
+        data: { jobId: `job-${sequence++}` },
+      })),
+    });
+    for (let index = 0; index < 129; index++) await controller.exportTo("/tmp/out.mp4", false);
+    expect(store.getState().toasts.at(-1)).toMatchObject({
+      tone: "error",
+      text: expect.stringContaining("Check Work"),
+    });
+    const finished: JobInfo = {
+      id: "job-0",
+      kind: "export",
+      label: "Export",
+      progress: 1,
+      status: "done",
+      result: "/tmp/out.mp4",
+    };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [finished] }) });
+    expect(store.getState().toasts.at(-1)?.text).toBe("Exported out.mp4.");
+    await controller.exportTo("/tmp/next.mp4", false);
+    const next: JobInfo = { ...finished, id: "job-129", result: "/tmp/next.mp4" };
+    socket().onEvent({ type: "state", state: makeState({ jobs: [finished, next] }) });
+    expect(store.getState().toasts.at(-1)?.text).toBe("Exported next.mp4.");
+  });
+
   it("raises a toast when a manual command fails, but returns the failure to the caller", async () => {
     const { store, controller } = setup({
       run: vi.fn(async () => ({ ok: false, error: "No clip can be split" })),
