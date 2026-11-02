@@ -54,6 +54,7 @@
 * [S01.06 primary-button contrast child receipt](s01-06-primary-contrast-receipt.md) - Rendered primary-button contrast measurements and verification.
 * [S01.06 reduced-motion child receipt](s01-06-reduced-motion-receipt.md) - Reproduction and verification for reduced-motion editor controls and working feedback.
 * [S01.06 review progress announcement child receipt](s01-06-review-announcement-receipt.md) - Reproduction and verification for accessible rendered-review progress.
+* [S01.06 setup and task-error contrast receipt](s01-06-setup-error-contrast-receipt.md) - Rendered large and normal text contrast measurements on composed surfaces.
 * [S01.06 task cancellation names receipt](s01-06-task-cancel-receipt.md) - Reproduction and verification for distinguishable task cancellation controls.
 * [S01.06 task-state labels receipt](s01-06-task-state-receipt.md) - Synthetic browser evidence that task states have text labels independent of color.
 * [S01.07: Verify browser and native workspace acceptance](s01-07-workspace-acceptance.md) - Plan and evidence gates: Verify browser and native workspace acceptance.
