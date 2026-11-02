@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Typed cancellation foundation — November 2, 2026
+
+[#254 / draft PR #255](https://github.com/sahamo123/dax-editor/pull/255) passed an independent full `pnpm check` at corrected application/test head `7c0a9b401d0a1ffe63f03936b0fe3741005134c2`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-cancellation-foundation-receipt.md). The dependent [PR #256](https://github.com/sahamo123/dax-editor/pull/256) and S01.06 remain open. Native and actual screen-reader acceptance remain unverified.
+
 ## Cancellation outcome investigation — November 2, 2026
 
 [#251](https://github.com/sahamo123/dax-editor/issues/251) reproduced a cancelled speech setup as a cancelled task but an urgent error-styled notice. A generated-media export also exposed the existing error-shaped cancellation job. The [investigation](implementation/2026-11-01-creator-editor/s01-06-job-cancellation-investigation.md) describes the opt-in tests and the typed-contract work still needed; no fix or actual speech claim is made.
