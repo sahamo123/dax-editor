@@ -7,6 +7,7 @@ import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
+import { isDeepStrictEqual } from "node:util";
 import {
   type CommandContext,
   type CommandOutcome,
@@ -914,6 +915,21 @@ export class Engine {
         409,
         "The assistant configuration changed before this request was accepted. Check it and send again.",
       );
+    if (options.steer && this.chat) {
+      const active = this.queuedSettings.get(this.chat.runId);
+      const current = this.settings.get();
+      const kind = current.activeProvider;
+      if (
+        !active ||
+        active.activeProvider !== kind ||
+        !isDeepStrictEqual(active.providers[kind], current.providers[kind]) ||
+        this.queuedKeys.get(this.chat.runId) !== this.keyForSettings(kind, current)
+      )
+        throw new HttpError(
+          409,
+          "The active task uses a different assistant connection. Switch back to steer, or queue a new request.",
+        );
+    }
     if (this.work.size)
       throw new HttpError(
         409,

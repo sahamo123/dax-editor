@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#221 / draft PR #225](https://github.com/sahamo123/dax-editor/pull/225) guards steering provider context; focused server, new browser conflict and full host source checks passed at application/test head `d66db87d2ce9d03f20bf967bee1d88df293e7651`. An existing Stop browser test revealed a potential race [#224](https://github.com/sahamo123/dax-editor/issues/224); see the [receipt](s01-06-chat-context-guard.md).
+
 - [#222 / draft PR #223](https://github.com/sahamo123/dax-editor/pull/223) passed 31 focused bridge tests and the combined host-authorized full check at test head `6833c86e983c4b48b22872c066296b4308a866c4`. See the [receipt](s01-06-summary-keyboard.md); investigate [#221](https://github.com/sahamo123/dax-editor/issues/221).
 
 - [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220) protects local-model transitions and accepted local work; focused tests passed at application/test head `f7d70a76cb195503d72a821865d647b9eeb34079`. The full host check failed a bridge test; follow [#222](https://github.com/sahamo123/dax-editor/issues/222). The [receipt](s01-06-chat-context-guard.md) preserves failures and evidence.

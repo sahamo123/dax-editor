@@ -336,6 +336,167 @@ describe("chat task queue", () => {
       await h.cleanup();
     }
   });
+  it("rejects steering after a provider change without interrupting the active request", async () => {
+    let proceed = () => {};
+    let observed = () => {};
+    let entered = () => {};
+    const gate = new Promise<void>((resolve) => {
+      proceed = resolve;
+    });
+    const taken = new Promise<void>((resolve) => {
+      observed = resolve;
+    });
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const guidance: { provider: string; text: string }[] = [];
+    const runs: { provider: string; message: string }[] = [];
+    const h = await startHarness({
+      agentRunner: (env) => ({
+        async run(message, ctx) {
+          runs.push({ provider: env.settings.activeProvider, message });
+          if (message === "first") {
+            entered();
+            await gate;
+            for (const text of ctx.takeSteering?.() ?? [])
+              guidance.push({ provider: env.settings.activeProvider, text });
+            observed();
+          }
+        },
+      }),
+    });
+    try {
+      expect(
+        (await h.post("/api/settings", { activeProvider: "local", providers: {} })).status,
+      ).toBe(200);
+      expect((await h.post("/api/chat", { message: "first" })).status).toBe(202);
+      await started;
+      expect(
+        (await h.post("/api/settings", { activeProvider: "openrouter", providers: {} })).status,
+      ).toBe(200);
+      const rejected = await h.post("/api/chat", { message: "new guidance", steer: true });
+      expect(rejected.status).toBe(409);
+      expect(rejected.text()).toMatch(/active.*connection|connection.*active/i);
+      const state = (await h.req("/api/state")).json<StateResponse>();
+      expect(state.tasks?.some((task) => task.title === "new guidance")).toBe(false);
+      expect(
+        (await h.post("/api/chat", { message: "queued explicitly", queue: true })).status,
+      ).toBe(202);
+      proceed();
+      await taken;
+      expect(guidance).toEqual([]);
+      await vi.waitFor(() =>
+        expect(runs).toEqual([
+          { provider: "local", message: "first" },
+          { provider: "openrouter", message: "queued explicitly" },
+        ]),
+      );
+    } finally {
+      proceed();
+      await h.cleanup();
+    }
+  });
+
+  it.each(["model", "credential"] as const)(
+    "rejects steering when the active provider's %s changes",
+    async (change) => {
+      let proceed = () => {};
+      let entered = () => {};
+      const gate = new Promise<void>((resolve) => {
+        proceed = resolve;
+      });
+      const started = new Promise<void>((resolve) => {
+        entered = resolve;
+      });
+      const h = await startHarness({
+        agentRunner: () => ({
+          async run(message) {
+            if (message === "first") {
+              entered();
+              await gate;
+            }
+          },
+        }),
+      });
+      try {
+        const settings = (model: string) => ({
+          activeProvider: "openrouter",
+          providers: { openrouter: { model } },
+        });
+        expect((await h.post("/api/settings", settings("model-one"))).status).toBe(200);
+        expect(
+          (await h.post("/api/settings/api-key", { kind: "openrouter", apiKey: "synthetic-one" }))
+            .status,
+        ).toBe(200);
+        expect((await h.post("/api/chat", { message: "first" })).status).toBe(202);
+        await started;
+        if (change === "model")
+          expect((await h.post("/api/settings", settings("model-two"))).status).toBe(200);
+        else
+          expect(
+            (await h.post("/api/settings/api-key", { kind: "openrouter", apiKey: "synthetic-two" }))
+              .status,
+          ).toBe(200);
+        const rejected = await h.post("/api/chat", { message: "changed", steer: true });
+        expect(rejected.status).toBe(409);
+        expect(rejected.text()).not.toMatch(/synthetic-one|synthetic-two/);
+        const state = (await h.req("/api/state")).json<StateResponse>();
+        expect(state.tasks?.some((task) => task.title === "changed")).toBe(false);
+      } finally {
+        proceed();
+        await h.cleanup();
+      }
+    },
+  );
+
+  it("allows steering when only an unrelated provider's configuration changed", async () => {
+    let proceed = () => {};
+    let entered = () => {};
+    let observed = () => {};
+    const gate = new Promise<void>((resolve) => {
+      proceed = resolve;
+    });
+    const started = new Promise<void>((resolve) => {
+      entered = resolve;
+    });
+    const taken = new Promise<void>((resolve) => {
+      observed = resolve;
+    });
+    const guidance: string[] = [];
+    const h = await startHarness({
+      agentRunner: () => ({
+        async run(_message, ctx) {
+          entered();
+          await gate;
+          guidance.push(...(ctx.takeSteering?.() ?? []));
+          observed();
+        },
+      }),
+    });
+    try {
+      expect(
+        (await h.post("/api/settings", { activeProvider: "local", providers: {} })).status,
+      ).toBe(200);
+      expect((await h.post("/api/chat", { message: "first" })).status).toBe(202);
+      await started;
+      expect(
+        (
+          await h.post("/api/settings", {
+            activeProvider: "local",
+            providers: { openrouter: { model: "another-model" } },
+          })
+        ).status,
+      ).toBe(200);
+      expect((await h.post("/api/chat", { message: "guidance", steer: true })).status).toBe(202);
+      proceed();
+      await taken;
+      expect(guidance).toEqual(["guidance"]);
+    } finally {
+      proceed();
+      await h.cleanup();
+    }
+  });
+
   it("steers within the active run without cancelling it and retains older queued work", async () => {
     const started: string[] = [];
     const guidance: string[] = [];
