@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Test**: Host-authorized full `pnpm check` passed for [#224 / PR #226](https://github.com/sahamo123/dax-editor/pull/226); generated-media browser Stop tests also passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
+
 * **Fix**: [#224 / draft PR #226](https://github.com/sahamo123/dax-editor/pull/226) pins Stop to a task ID and prevents a delayed response from marking a later run stopped. Focused tests passed; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
 
 * **Test**: Full host-authorized `pnpm check` passed for [#221 / PR #225](https://github.com/sahamo123/dax-editor/pull/225); the separate browser Stop failure remains in [#224](https://github.com/sahamo123/dax-editor/issues/224). See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).
