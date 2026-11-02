@@ -26,3 +26,7 @@ A subsequent attempt to start Windows Narrator through computer use timed out wa
 5. Complete the remaining measured contrast and non-color status review. Update the parent issue, this receipt, handoff and exact evidence. Only mark S01.06 VERIFIED after every written gate and second review pass; then recheck it before S01.07. Native application and Windows DPI acceptance remain separately required.
 
 The earlier full browser/source checks used system FFmpeg and do not prove packaged/native readiness. No current application change is included in this handoff.
+
+## Later inventory recheck
+
+A subsequent computer-use inventory showed no Chrome test window and Narrator was not running. The previously observed stale Open dialog is no longer present; begin a fresh isolated test session when app access is available. The app-approval timeout and missing actual keyboard and Narrator evidence remain unresolved.

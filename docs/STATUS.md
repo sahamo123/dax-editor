@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 task cancellation names — November 1, 2026
+
+Task-cancellation naming [#179](https://github.com/sahamo123/dax-editor/issues/179) is IN_PROGRESS on `codex/s01-06-task-cancel-names`, based on self-reviewed handoff [PR #178](https://github.com/sahamo123/dax-editor/pull/178) `44ccac4c1111a0e1de0ebb30de96b167a01c036a`. Focused component and browser tests pass; the full source check passed; publication and self-review remain pending. Actual keyboard-only and Narrator acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) remain blocked on computer-use access. Do not advance to S01.07. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-task-cancel-receipt.md).
+
 ## S01.06 native accessibility access — November 1, 2026
 
 Native accessibility acceptance [#177](https://github.com/sahamo123/dax-editor/issues/177) is BLOCKED on computer-use access. The synthetic test browser's Open dialog is visible, but targeting its transient window was rejected; starting Narrator timed out waiting for app approval. No actual screen-reader speech or complete keyboard-only import has been observed. [PR #176](https://github.com/sahamo123/dax-editor/pull/176) was self-reviewed at `abed94254a22c19f436ad5157c599217c1ebbf4d`. The parent S01.06 remains IN_PROGRESS; do not advance to S01.07. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md).

@@ -51,8 +51,71 @@ describe("ChatPanel", () => {
       ),
     );
     expect(screen.getByText(/Queue #1/)).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Cancel task" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Cancel task: Add intro (queued-task)" }),
+    );
     expect(controller.cancelTask).toHaveBeenCalledWith("queued-task");
+  });
+  it("distinguishes cancel controls for tasks with the same title", async () => {
+    const { controller } = renderApp(<ChatPanel />, (state) =>
+      state.applyState(
+        makeState({
+          tasks: [
+            {
+              id: "task-alpha",
+              title: "Add intro",
+              kind: "chat",
+              mode: "edit",
+              status: "queued",
+              createdAt: 1,
+              queuePosition: 1,
+            },
+            {
+              id: "task-beta",
+              title: "Add intro",
+              kind: "chat",
+              mode: "edit",
+              status: "queued",
+              createdAt: 2,
+              queuePosition: 2,
+            },
+          ],
+        }),
+      ),
+    );
+    expect(
+      screen.getByRole("button", { name: "Cancel task: Add intro (task-alpha)" }),
+    ).toBeEnabled();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Cancel task: Add intro (task-beta)" }),
+    );
+    expect(controller.cancelTask).toHaveBeenCalledOnce();
+    expect(controller.cancelTask).toHaveBeenCalledWith("task-beta");
+  });
+  it("keeps long task prompts concise in cancellation names", () => {
+    const title = "Long prompt ".repeat(30);
+    renderApp(<ChatPanel />, (state) =>
+      state.applyState(
+        makeState({
+          tasks: [
+            {
+              id: "long-task",
+              title,
+              kind: "chat",
+              mode: "edit",
+              status: "queued",
+              createdAt: 1,
+              queuePosition: 1,
+            },
+          ],
+        }),
+      ),
+    );
+    const button = screen.getByRole("button", { name: /Cancel task: Long prompt/ });
+    const name = button.getAttribute("aria-label") ?? "";
+    expect(name.length).toBeLessThan(120);
+    expect(name).toContain("(long-task)");
+    expect(name).not.toContain(title);
   });
   it("shows the setup card, says the editor works without AI, and locks the composer when no assistant exists", () => {
     renderApp(<ChatPanel />);
