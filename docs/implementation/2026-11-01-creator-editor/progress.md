@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#177](https://github.com/sahamo123/dax-editor/issues/177) was rechecked on PR #239: keyboard navigation opened a visible but untargetable Windows picker; no file was selected. Automatic approval review rejected reading Narrator's full recap because it could contain unrelated private speech. The [receipt](s01-06-native-acceptance-receipt.md) records cleanup and limits. S01.06 remains IN_PROGRESS.
+
 - [#238 / draft PR #239](https://github.com/sahamo123/dax-editor/pull/239) makes tab-panel content keyboard reachable. Full `pnpm check` passed at `5706eae39e484e114081bb48b723cebda7f9f1d9`; a later test-only compact check and 13 affected browser tests passed. See the [receipt](s01-06-side-panel-accessibility-receipt.md). Review and S01.06 remain open.
 
 - [#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237) recovers focus within active dialogs; focused, generated-video browser and full source checks passed at `1c59e472ab99a9cb8697d6b2fc1e782a854f3575`. Review and actual native/accessibility acceptance remain open; see the [receipt](s01-06-modal-focus-recovery-receipt.md). S01.06 remains IN_PROGRESS.

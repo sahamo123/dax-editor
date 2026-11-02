@@ -11,6 +11,8 @@ generated:
 
 # Current handoff
 
+**Current acceptance recheck: [#177](https://github.com/sahamo123/dax-editor/issues/177).** On PR #239 documentation/test head `f8ec545ee4a591cd8f85c10f897a395963ebb2d4`, keyboard navigation opened the Windows picker but the picker was not targetable and no file was selected. Automatic approval review rejected reading Narrator's full speech recap because it could contain unrelated private speech. The [receipt](s01-06-native-acceptance-receipt.md) records the exact limits and cleanup. Continue independent work; do not bypass the rejection or advance S01.06.
+
 **Current work: [#238 / draft PR #239](https://github.com/sahamo123/dax-editor/pull/239).** On `codex/s01-06-tab-panel-access`, application/test head `5706eae39e484e114081bb48b723cebda7f9f1d9` passed full source checks; 13 affected browser tests passed including a later test-only compact check. Review the [receipt](s01-06-side-panel-accessibility-receipt.md), verify publication and continue independent S01.06 work. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.
 
 **Current work: [#235 / draft PR #237](https://github.com/sahamo123/dax-editor/pull/237).** On `codex/s01-06-modal-focus-recovery`, application/test head `1c59e472ab99a9cb8697d6b2fc1e782a854f3575` passed focused, generated-video browser and full source checks. Review the [receipt](s01-06-modal-focus-recovery-receipt.md), verify publication and continue independent S01.06 work. Actual picker, screen-reader and native acceptance remain open; earlier entries are historical.

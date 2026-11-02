@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Current-candidate accessibility recheck — November 2, 2026
+
+The [#177](https://github.com/sahamo123/dax-editor/issues/177) recheck on PR #239 reached the Windows Open dialog by keyboard, but the dialog was not a targetable automation window and no file was selected. Narrator opened its speech recap; automatic approval review rejected reading the full history because it could contain unrelated private speech. The owned test tab, services and Narrator session were closed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 and actual native/accessibility acceptance remain open.
+
 ## Side-panel keyboard access — November 2, 2026
 
 [#238 / draft PR #239](https://github.com/sahamo123/dax-editor/pull/239) makes side-panel content keyboard reachable and preserves tab-to-panel references. Full `pnpm check` passed at application/test head `5706eae39e484e114081bb48b723cebda7f9f1d9`; a later test-only compact check and 13 affected browser tests passed. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-side-panel-accessibility-receipt.md). Review, S01.06 and actual native/accessibility acceptance remain open.
