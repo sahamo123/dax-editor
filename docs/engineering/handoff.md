@@ -11,6 +11,10 @@ generated:
 
 # Handoff: resuming dax-editor
 
+## Current preview lifecycle investigation — November 2, 2026
+
+[#268 / draft PR #269](https://github.com/sahamo123/dax-editor/pull/269), `codex/s01-06-preview-lifecycle-investigation`, test head `192fcaac08aa21c831ebf8b59a2f3677b860de96`, preserves full-size browser coverage and passes nine combined checks, three repetitions and full source checks. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-preview-lifecycle-receipt.md); the original failure's sequence remains unproven. Continue S01.06; actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 ## Current notice burst candidate — November 2, 2026
 
 [#265 / draft PR #267](https://github.com/sahamo123/dax-editor/pull/267), `codex/s01-06-notice-burst-recovery`, corrected application/test head `3b7a9e9aa0e948988c6dcc9acc325a942b69f690`, passed full source checks; exact-head browser checks include a preview failure followed by an isolated pass. Read the [receipt](../implementation/2026-11-01-creator-editor/s01-06-notice-burst-receipt.md), investigate [#268](https://github.com/sahamo123/dax-editor/issues/268) without assuming the cause, and continue S01.06. Actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.

@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#268 / draft PR #269](https://github.com/sahamo123/dax-editor/pull/269): nine combined browser checks, three repeated full-size preview checks and full source checks passed on test head `192fcaac08aa21c831ebf8b59a2f3677b860de96`; see the [receipt](s01-06-preview-lifecycle-receipt.md). The original failure's sequence remains unproven; S01.06 stays open.
+
 - [#265 / draft PR #267](https://github.com/sahamo123/dax-editor/pull/267): bounded notice queue passed full source checks at corrected head `3b7a9e9aa0e948988c6dcc9acc325a942b69f690`. Exact-head browser checks had one preview failure followed by a passing isolated retry; see the [receipt](s01-06-notice-burst-receipt.md) and [#268](https://github.com/sahamo123/dax-editor/issues/268). S01.06 remains open.
 
 - [#264 / draft PR #266](https://github.com/sahamo123/dax-editor/pull/266): notice timer pause passed focused, eleven browser and full source checks at `0e4881d7c9f145e1edb496d9580db4ccebd56d1a`; see the [receipt](s01-06-notice-reading-time-receipt.md). Burst eviction [#265](https://github.com/sahamo123/dax-editor/issues/265) and S01.06 remain open.
