@@ -64,3 +64,26 @@ test("tabs retain labelled panels and keyboard selection does not steal focus", 
   await page.keyboard.press("Tab");
   await expect(page.getByTestId("clip-source-in")).toBeFocused();
 });
+
+test("compact dock keeps panel instructions and Escape reachable", async ({
+  page,
+  startServer,
+  openApp,
+  sampleVideo,
+  shot,
+}) => {
+  const server = await startServer();
+  await server.importPaths([sampleVideo]);
+  await page.setViewportSize({ width: 1000, height: 700 });
+  await openApp(server);
+  await page.getByRole("button", { name: "Show side panel" }).click();
+  const tab = page.getByRole("tab", { name: "Inspector" });
+  await tab.click();
+  await page.keyboard.press("Tab");
+  const panel = page.getByRole("tabpanel", { name: "Inspector" });
+  await expect(panel).toBeFocused();
+  await expect(panel.getByText(/Select a clip or a text overlay/)).toBeVisible();
+  await shot("side-panel-compact-keyboard");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("button", { name: "Show side panel" })).toBeFocused();
+});

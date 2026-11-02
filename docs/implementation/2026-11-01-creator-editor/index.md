@@ -66,6 +66,7 @@
 * [S01.06 reduced-motion child receipt](s01-06-reduced-motion-receipt.md) - Reproduction and verification for reduced-motion editor controls and working feedback.
 * [S01.06 review progress announcement child receipt](s01-06-review-announcement-receipt.md) - Reproduction and verification for accessible rendered-review progress.
 * [S01.06 setup and task-error contrast receipt](s01-06-setup-error-contrast-receipt.md) - Rendered large and normal text contrast measurements on composed surfaces.
+* [S01.06 side-panel keyboard access](s01-06-side-panel-accessibility-receipt.md) - Reproduced tab-panel navigation gaps, scoped fix and browser and source verification.
 * [S01.06 staged attachment investigation](s01-06-staged-attachment-investigation.md) - Generated-media evidence of retained staged files and conservative cleanup design boundaries.
 * [S01.06 suggestion draft preservation](s01-06-suggestion-draft-receipt.md) - Reproduction, scoped composer change and validation for preserving an unrelated draft.
 * [S01.06 disclosure keyboard activation](s01-06-summary-keyboard.md) - Preserve native Project and Work status disclosure keys without triggering playback.
