@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current work:** [#247 / draft PR #248](https://github.com/sahamo123/dax-editor/pull/248), `codex/s01-06-local-job-outcomes`, application/test head `772f0e7072cf0f0bb1cda20236f3e814534c0acc`. Focused, browser and full source checks passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-local-job-outcomes-receipt.md). Review and continue S01.06; actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
+
 **Current work:** [#245 / draft PR #246](https://github.com/sahamo123/dax-editor/pull/246), `codex/s01-06-snapshot-job-notices`, application/test head `7f0282a173dd1bf2a668f03ab29a95af3e419c79`. Focused and browser checks and full `pnpm check` passed; see the [receipt](../implementation/2026-11-01-creator-editor/s01-06-job-snapshot-notices-receipt.md). Next investigate [#247](https://github.com/sahamo123/dax-editor/issues/247); actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.
 
 **Current work:** [#243 / draft PR #244](https://github.com/sahamo123/dax-editor/pull/244), `codex/s01-06-timeline-keyboard`, corrected application/test head `f9a46b3564289781177974b9437f9de8a37bc0f7`. Fourteen browser checks and full `pnpm check` passed after a modal focus correction. Review the [receipt](../implementation/2026-11-01-creator-editor/s01-06-timeline-keyboard-receipt.md); actual picker, screen-reader and native acceptance remain open. Earlier entries are historical.

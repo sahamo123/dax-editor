@@ -134,17 +134,26 @@ export function createController(deps: ControllerDeps): Controller {
   let manualChain: Promise<unknown> = Promise.resolve();
   let stateEpoch = 0;
   let refreshSequence = 0;
+  // Claims only hold successful local job IDs not yet seen in the job store.
+  const unseenLocalJobs = new Set<string>();
+  const maxUnseenLocalJobs = 128;
+  // Job snapshots replace objects; weak markers follow accepted replacements without retaining history.
+  const announcedJobs = new WeakSet<JobInfo>();
 
   const toast = (tone: "info" | "success" | "error", text: string) =>
     store.getState().pushToast(tone, text);
 
   // A snapshot may be the first way an already-known running job is seen to finish.
   function announceJob(previous: JobInfo | undefined, job: JobInfo, liveEvent: boolean): void {
+    if (previous && announcedJobs.has(previous)) announcedJobs.add(job);
+    if (announcedJobs.has(job)) return;
     if (job.status === "running" || (previous && previous.status !== "running")) return;
     if (!previous && !liveEvent) return; // Initial snapshots include historical completed jobs.
     if (job.status === "error") {
+      announcedJobs.add(job);
       toast("error", job.error ?? `${job.label} failed.`);
     } else if (job.status === "done" && job.kind === "export") {
+      announcedJobs.add(job);
       toast(
         "success",
         job.label === "Render complete edit preview"
@@ -154,6 +163,30 @@ export function createController(deps: ControllerDeps): Controller {
     }
   }
 
+  function observeJob(previous: JobInfo | undefined, job: JobInfo, liveEvent: boolean): void {
+    const claimed = unseenLocalJobs.delete(job.id);
+    announceJob(previous, job, liveEvent || claimed);
+  }
+
+  function claimLocalJob(response: CommandResponse, before: Record<string, JobInfo>): void {
+    if (!response.ok || typeof response.data !== "object" || response.data === null) return;
+    if (!("jobId" in response.data) || typeof response.data.jobId !== "string") return;
+    const id = response.data.jobId;
+    if (!id || id.length > 128 || before[id]) return;
+    const known = store.getState().jobs[id];
+    if (known) {
+      // An outcome may have arrived while the command reply was still in flight.
+      if (known.status !== "running") announceJob(undefined, known, true);
+      return;
+    }
+    if (unseenLocalJobs.has(id)) return;
+    if (unseenLocalJobs.size >= maxUnseenLocalJobs) {
+      toast("error", "Some started tasks could not be tracked. Check Work for their status.");
+      return;
+    }
+    unseenLocalJobs.add(id);
+  }
+
   function applySnapshot(state: StateResponse): void {
     stateEpoch++;
     const previous = store.getState().jobs;
@@ -161,7 +194,7 @@ export function createController(deps: ControllerDeps): Controller {
     const current = store.getState().jobs;
     for (const id of new Set(state.jobs.map((job) => job.id))) {
       const accepted = current[id];
-      if (accepted) announceJob(previous[id], accepted, false);
+      if (accepted) observeJob(previous[id], accepted, false);
     }
   }
 
@@ -201,6 +234,7 @@ export function createController(deps: ControllerDeps): Controller {
 
   const execute = async (name: string, args: Record<string, unknown> = {}, quiet = false) => {
     const state = store.getState().state;
+    const jobsBefore = store.getState().jobs;
     const r = await client.run(
       name,
       args,
@@ -210,7 +244,10 @@ export function createController(deps: ControllerDeps): Controller {
     );
     if (!r.ok && !quiet) toast("error", r.error);
     if (!r.ok && r.error.includes("project changed")) await refreshState();
-    if (r.ok) await refreshState();
+    if (r.ok) {
+      claimLocalJob(r, jobsBefore);
+      await refreshState();
+    }
     return r;
   };
 
@@ -260,7 +297,7 @@ export function createController(deps: ControllerDeps): Controller {
             const prev = s.jobs[event.job.id];
             s.applyJob(event.job);
             const accepted = store.getState().jobs[event.job.id];
-            if (accepted) announceJob(prev, accepted, true);
+            if (accepted) observeJob(prev, accepted, true);
           } else {
             s.applyChat(event.runId, event.event, event.startStateId);
           }
@@ -322,11 +359,13 @@ export function createController(deps: ControllerDeps): Controller {
 
     async exportTo(path, overwrite) {
       toast("info", "Starting export…");
+      const jobsBefore = store.getState().jobs;
       const r = await client.run("export_video", { path, overwrite });
       if (!r.ok) {
         toast("error", r.error);
         return false;
       }
+      claimLocalJob(r, jobsBefore);
       // With a job id the end of the export is announced by its job events; without one it already ended.
       const started = typeof r.data === "object" && r.data !== null && "jobId" in r.data;
       if (!started) toast("success", r.summary);

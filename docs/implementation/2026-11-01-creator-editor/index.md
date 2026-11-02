@@ -58,6 +58,7 @@
 * [S01.06 history contrast child receipt](s01-06-history-contrast-receipt.md) - Rendered history contrast measurements, branch labels and verification.
 * [S01.06 recovered job outcome notices](s01-06-job-snapshot-notices-receipt.md) - Reproduction and verification of job completion and failure notices recovered from snapshots.
 * [S01.06 live accessibility and export announcements](s01-06-live-announcement-receipt.md) - Partial keyboard and Narrator observations, export announcement changes, and remaining acceptance evidence.
+* [S01.06 locally initiated job outcomes](s01-06-local-job-outcomes-receipt.md) - Reproduction, bounded reconciliation and verification of locally initiated jobs first observed terminal.
 * [S01.06 media card action layout](s01-06-media-actions-receipt.md) - Regression evidence for readable and usable media-card controls at two viewport widths.
 * [S01.06 modal shortcut protection after focus loss](s01-06-modal-focus-loss-receipt.md) - Reproduced background project edits while a modal is open, scoped guard and focus-containment follow-up.
 * [S01.06 modal focus recovery](s01-06-modal-focus-recovery-receipt.md) - Reproduction, scoped recovery, verification and remaining native acceptance for active dialogs.
