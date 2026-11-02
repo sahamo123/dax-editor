@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## S01.06 disclosure keyboard activation — November 2, 2026
+
+The [#215](https://github.com/sahamo123/dax-editor/issues/215) candidate fixes Space interception on the focused Project and Work status disclosures. Forty-six component tests and focused generated-media browser checks passed; full source check, publication and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 and native acceptance remain open.
+
 ## Windows atomic replacement investigation — November 2, 2026
 
 A synthetic Windows sharing lock reproduced `EPERM` in the server atomic-write helper for [#149 / draft PR #214](https://github.com/sahamo123/dax-editor/pull/214), leaving old and staged bytes intact; the staged file could be published after release. Focused and fast checks passed at test head `49c1a48f2f5d6e4d4e6dc398a6e657d60d8c57b1`. This is one demonstrated mechanism, not proof of the earlier intermittent failures. No production retry was added. See the [receipt](implementation/2026-11-01-creator-editor/windows-sharing-investigation.md) and [recovery research](research/windows-atomic-replacement.md). Review remains pending.

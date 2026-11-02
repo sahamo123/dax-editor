@@ -79,6 +79,8 @@ Preserve projects and local data. Do not send media or credentials to a provider
 
 A modal dialog owns its keyboard interactions: editor playback and project mutation shortcuts, including global undo/redo, must not act on the background project when the event originates inside the modal. The dialog retains its own controls and Escape handling. After it closes, normal shortcuts resume; text entry retains its native undo behavior.
 
+Native disclosure summaries, including Project and Work status, retain Space and Enter activation. The Space playback shortcut must not intercept those activation keys; it remains available when focus is on the editor background.
+
 Restorable history entries must keep readable text in normal and hover states. Entries from other history branches remain fully legible and carry an explicit Other branch label and a visual border; their distinction must not depend on reduced opacity or color alone.
 
 Every task cancellation control has an accessible name that includes its visible action, task title and unique task identifier. Multiple tasks with the same title remain distinguishable, and activating a control cancels only its associated task.
