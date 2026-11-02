@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from "vitest";
 import { CommandCancelledError, tryRunCommand } from "./commands.js";
+import type { MotionRenderer } from "./motion.js";
 import type { Asset } from "./schema.js";
 import { Session } from "./session.js";
 import { addAsset, appendClip, emptyProject } from "./timeline.js";
@@ -60,6 +61,32 @@ describe("cancelling a command", () => {
     };
     const r = await tryRunCommand({ session, transcriber, signal: ac.signal }, "transcribe", {});
     expect(r).toMatchObject({ ok: false, error: "Stopped", cancelled: true });
+    expect(session.history()).toHaveLength(1);
+  });
+
+  it("preserves a confirmed motion cancellation without changing the project", async () => {
+    const session = fresh();
+    const before = session.project;
+    const ac = new AbortController();
+    const motion: MotionRenderer = {
+      status: async () => ({ available: true, detail: "test" }),
+      render: async () => {
+        ac.abort();
+        const error = new Error("Stopped");
+        error.name = "AbortError";
+        throw error;
+      },
+    };
+    const r = await tryRunCommand(
+      { session, motion, signal: ac.signal },
+      "render_motion_template",
+      {
+        template: "title-card",
+        text: "Test",
+      },
+    );
+    expect(r).toMatchObject({ ok: false, error: "Stopped", cancelled: true });
+    expect(session.project).toBe(before);
     expect(session.history()).toHaveLength(1);
   });
 

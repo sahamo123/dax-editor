@@ -47,7 +47,7 @@ export type MotionRequest = z.infer<typeof MotionRequestSchema>;
 export interface MotionRenderer {
   /** Check availability without starting a render. */
   status(): Promise<{ available: boolean; version?: string; detail: string }>;
-  /** Render a validated template to an app-owned video; stop and clean temporary output on cancellation. */
+  /** Render to an app-owned video; on signal cancellation, clean temporary output and reject with an AbortError. */
   render(
     request: MotionRequest,
     options: { signal?: AbortSignal; onProgress?: (fraction: number) => void },

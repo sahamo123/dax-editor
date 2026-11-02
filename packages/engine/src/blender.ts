@@ -17,6 +17,12 @@ import {
 
 const exec = promisify(execFile);
 
+function cancellationError(): Error {
+  const error = new Error("Cancelled");
+  error.name = "AbortError";
+  return error;
+}
+
 async function findBlender(): Promise<{ path: string; version: string } | undefined> {
   let foundButUnavailable = false;
   const candidates = [process.env.DAX_BLENDER_BIN, "blender"];
@@ -54,14 +60,18 @@ function runBlender(
 ): Promise<void> {
   return new Promise((done, fail) => {
     if (signal?.aborted) {
-      fail(new Error("Cancelled"));
+      fail(cancellationError());
       return;
     }
     const child = spawn(binary, args, { windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
     let tail = "";
     let pending = "";
-    const abort = () => child.kill("SIGKILL");
-    const timer = setTimeout(abort, 30 * 60_000);
+    let killedForCancellation = false;
+    const abort = () => {
+      if (child.exitCode === null && child.signalCode === null)
+        killedForCancellation = child.kill("SIGKILL");
+    };
+    const timer = setTimeout(() => child.kill("SIGKILL"), 30 * 60_000);
     signal?.addEventListener("abort", abort, { once: true });
     child.stdout.on("data", (chunk: Buffer) => {
       pending += chunk.toString();
@@ -76,9 +86,9 @@ function runBlender(
     child.once("close", (code) => {
       clearTimeout(timer);
       signal?.removeEventListener("abort", abort);
-      if (signal?.aborted) fail(new Error("Cancelled"));
-      else if (code !== 0) fail(new Error(`Blender render failed (${code}): ${tail.slice(-800)}`));
-      else done();
+      if (code === 0) done();
+      else if (signal?.aborted && killedForCancellation) fail(cancellationError());
+      else fail(new Error(`Blender render failed (${code}): ${tail.slice(-800)}`));
     });
   });
 }
