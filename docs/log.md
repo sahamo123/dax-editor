@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Investigate**: A synthetic Windows sharing lock reproduced atomic-write `EPERM` for [#149](https://github.com/sahamo123/dax-editor/issues/149) without touching a user project. See the [receipt](implementation/2026-11-01-creator-editor/windows-sharing-investigation.md); no production retry is implemented.
+
 * **Test**: Chat attachment preflight [#212 / PR #213](https://github.com/sahamo123/dax-editor/pull/213) passed full `pnpm check`; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md).
 
 ## 2026-11-01

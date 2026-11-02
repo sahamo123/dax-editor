@@ -141,3 +141,4 @@
 * [S07: Bounded specialist workflows and recovery](stage-07-workflows.md) - Ordered S07 execution steps with explicit dependencies, resource needs and acceptance gates.
 * [S08: Optional private personal hosting](stage-08-hosting.md) - Ordered S08 execution steps with explicit dependencies, resource needs and acceptance gates.
 * [S09: Compatibility performance and distribution gates](stage-09-release.md) - Ordered S09 execution steps with explicit dependencies, resource needs and acceptance gates.
+* [Windows atomic write sharing investigation](windows-sharing-investigation.md) - Controlled Windows file-lock evidence for atomic-write failures and safe recovery boundaries.

@@ -26,3 +26,4 @@
 * [Tauri sidecar field notes](tauri-sidecar-field-notes.md) - Real problems other projects hit shipping Tauri 2 external binaries (Node, FFmpeg) on macOS, Windows and Linux, with symptom, cause, fix and a concrete verdict on whether our sidecar plan changes.
 * [Tauri sidecar packaging for a Node engine and FFmpeg](tauri-sidecar-packaging.md) - Plan for shipping a Tauri 2 desktop app with a bundled Node.js engine and LGPL FFmpeg on macOS, Windows and Linux without asking users to install Node, with verified config, commands, licence rules and pitfalls.
 * [Timeline UI patterns](timeline-ui-patterns.md) - Recommends a plain React timeline on pointer events, engine-owned state and an FFmpeg-fed proxy preview, and records which permissive timeline and drag libraries were checked and rejected.
+* [Windows atomic replacement sharing behavior](windows-atomic-replacement.md) - A synthetic sharing-lock reproduction and boundaries for safe save recovery.
