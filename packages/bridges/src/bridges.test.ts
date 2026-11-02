@@ -77,17 +77,26 @@ describe("statuses", () => {
   });
 
   it("answers within the deadline even when a check is slow, and has the real answer next time", async () => {
-    const bridges = bridgesWith({ claude: { authDelayMs: 1500 } }, { statusDeadlineMs: 250 });
-    const started = Date.now();
-    const [first] = await bridges.statuses();
-    expect(Date.now() - started).toBeLessThan(1200);
-    expect(first).toMatchObject({ kind: "cli-claude", available: false });
-    expect(first?.detail).toMatch(/still checking/i);
-    // The check keeps running in the background; once it finishes the answer is cached.
-    await new Promise((r) => setTimeout(r, 2200));
-    const [second] = await bridges.statuses();
-    expect(second).toMatchObject({ available: true });
-    await bridges.close();
+    const bridges = bridgesWith(
+      { claude: { authDelayMs: 1500 } },
+      { statusDeadlineMs: 250, probeTimeoutMs: 10_000 },
+    );
+    try {
+      const started = Date.now();
+      const [first] = await bridges.statuses();
+      expect(Date.now() - started).toBeLessThan(1200);
+      expect(first).toMatchObject({ kind: "cli-claude", available: false });
+      expect(first?.detail).toMatch(/still checking/i);
+      // Wait for the actual background result, not a guess at process startup time.
+      const deadline = Date.now() + 15_000;
+      let second = first;
+      while (second?.detail?.match(/still checking/i) && Date.now() < deadline) {
+        [second] = await bridges.statuses();
+      }
+      expect(second, JSON.stringify(second)).toMatchObject({ available: true });
+    } finally {
+      await bridges.close();
+    }
   });
 });
 

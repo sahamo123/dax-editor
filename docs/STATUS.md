@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Bridge status deadline follow-up — November 2, 2026
+
+The local [#222](https://github.com/sahamo123/dax-editor/issues/222) candidate replaces a fixed fake-CLI wait with a bounded wait for the actual result while retaining the initial deadline assertion. Thirty-one focused tests passed; full check, publication and review remain pending. The prior failed run is recorded in the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
+
 ## Local-model context guard — November 2, 2026
 
 The [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220) candidate guards chat against model changes and protects accepted local work; 62 server and 13 launcher/runner focused tests passed at application/test head `f7d70a76cb195503d72a821865d647b9eeb34079`. Its full host check failed one bridge status test, tracked in [#222](https://github.com/sahamo123/dax-editor/issues/222). A provider-switch failure remains unexplained; see the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Review remains pending. S01.06 and native acceptance remain open.

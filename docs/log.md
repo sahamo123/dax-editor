@@ -2,6 +2,8 @@
 
 ## 2026-11-02
 
+* **Test**: Local [#222](https://github.com/sahamo123/dax-editor/issues/222) candidate replaces a fixed bridge-status wait with a bounded condition; 31 focused tests passed. Publication and full check remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md).
+
 * **Investigate**: Full host check for [PR #220](https://github.com/sahamo123/dax-editor/pull/220) failed a bridge status test, tracked in [#222](https://github.com/sahamo123/dax-editor/issues/222). The [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md) records the failure and successful server/desktop tests.
 
 * **Fix**: [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220) guards model transitions and accepted local work; focused tests passed. Full check and review remain pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md).

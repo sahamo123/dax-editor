@@ -11,6 +11,8 @@ generated:
 
 # S01.06 disclosure keyboard activation
 
+**Current local follow-up [#222](https://github.com/sahamo123/dax-editor/issues/222).** The full check of PR #220 failed one bridge status test whose fixed sleep was followed by an unavailable status; its detail was not captured. The [chat context receipt](s01-06-chat-context-guard.md) retains the failed full-run hash. The candidate keeps a real fake CLI, asserts the short first status deadline, waits for the actual result only while it says it is checking, and prints any final error. Its 10-second probe limit applies only to this test; production deadlines are unchanged. Thirty-one focused bridge tests passed; log SHA-256 `82305fa36d43b9f2b122d73ffcb6f773e273b78587c5bd821b68bab841884652`. Full check, publication and review remain pending.
+
 **State: IN_PROGRESS.** [Issue #215 / draft PR #216](https://github.com/sahamo123/dax-editor/pull/216) is published on `codex/s01-06-summary-shortcut`, application/test head `563028eb83ca88705c004024d9b630213ff0f354`, based on [draft PR #214](https://github.com/sahamo123/dax-editor/pull/214) documentation head `0fda3f1d21372c6e8aad9430e1895a7e80b6709b`. Full source check and review remain pending.
 
 Before the fix, the editor's global Space handler prevented the native key default on a focused summary. A focused component regression failed and a generated-media browser test confirmed the Project menu remained closed; the shortcut code routed Space to playback. The corrected browser reproduction log SHA-256 is `42a19c6b908be9e9ee782d311319c43afdf3830c5b47e1ecc183b3a16494418c`. The first attempt used an ambiguous selector shared by Project and Work status and failed before interaction; log `352f6ecbb10b07f96568d9e6b6c8664329617dcc38820e25dc3d70ee3221ea35`.

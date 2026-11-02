@@ -11,6 +11,8 @@ generated:
 
 # Continue on another laptop or agent
 
+**Current local follow-up:** [#222](https://github.com/sahamo123/dax-editor/issues/222), `codex/s01-06-bridge-status-deadline`, based on PR #220 documentation head `5d3f42f3542e7b4303cbab54e685adbac426144e`. Thirty-one focused tests passed; publish, run a host-authorized full check and review. See the [receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md). S01.06 remains open.
+
 **Current work:** [#217 / draft PR #220](https://github.com/sahamo123/dax-editor/pull/220), `codex/s01-06-local-model-context`, application/test head `f7d70a76cb195503d72a821865d647b9eeb34079`, based on PR #219 documentation head `9bf098731d19b0393d079c17db301ab6f276ae9e`. The candidate guards model transitions and passed focused server and launcher tests; its full host check failed a bridge status test. Follow [#222](https://github.com/sahamo123/dax-editor/issues/222) and the [receipt](../implementation/2026-11-01-creator-editor/s01-06-chat-context-guard.md). Investigate steering attribution separately in [#221](https://github.com/sahamo123/dax-editor/issues/221). Do not advance S01.06.
 
 **Current follow-up:** [#218 / draft PR #219](https://github.com/sahamo123/dax-editor/pull/219), `codex/s01-06-deterministic-probes`, test head `dd97aea25daf13ef6ff40a7eb9ade42b0f195904`, based on PR #216 documentation head `1e5a304b1f1c2b1db1f5be8cc7d5fcc7964caa74`. Nineteen focused tests and host-authorized full `pnpm check` pass; review remains pending. The earlier failed full checks and passing log are recorded in the [keyboard receipt](../implementation/2026-11-01-creator-editor/s01-06-summary-keyboard.md); no native acceptance is implied.
