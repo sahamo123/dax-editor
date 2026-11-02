@@ -346,3 +346,5 @@
 * **Update**: 2026-11-01 self-reviewed reduced-motion PR #170; investigated dialog shortcut isolation [#171](https://github.com/sahamo123/dax-editor/issues/171). See the [receipt](implementation/2026-11-01-creator-editor/s01-06-dialog-shortcuts-receipt.md) for pre-fix failures and pending verification.
 
 * **Update**: 2026-11-01 self-reviewed dialog-shortcut PR #172 and investigated [history contrast #173](https://github.com/sahamo123/dax-editor/issues/173). The [receipt](implementation/2026-11-01-creator-editor/s01-06-history-contrast-receipt.md) records measured before/after states and outstanding verification.
+
+* **Update**: 2026-11-01 self-reviewed history contrast PR #174 and reconciled [accessibility evidence #175](https://github.com/sahamo123/dax-editor/issues/175). The [receipt](implementation/2026-11-01-creator-editor/s01-06-audit-reconciliation-receipt.md) distinguishes the limited scan from remaining acceptance.

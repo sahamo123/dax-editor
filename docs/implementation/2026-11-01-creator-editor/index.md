@@ -46,6 +46,7 @@
 * [S01.05: Preserve task and recovery controls in the new layout](s01-05-task-recovery-visibility.md) - Plan and evidence gates: Preserve task and recovery controls in the new layout.
 * [S01.06 accessibility audit and implementation receipt](s01-06-accessibility-audit-receipt.md) - Entry check, work log and evidence for keyboard, contrast, motion and assistive-technology acceptance.
 * [S01.06: Complete keyboard and accessibility behavior](s01-06-accessibility.md) - Plan and evidence gates: Complete keyboard and accessibility behavior.
+* [S01.06 audit reconciliation receipt](s01-06-audit-reconciliation-receipt.md) - Published accessibility child fixes, limited contrast audit and remaining acceptance gates.
 * [S01.06 modal shortcut isolation receipt](s01-06-dialog-shortcuts-receipt.md) - Reproduction and verification for keeping project shortcuts outside active modal dialogs.
 * [S01.06 export focus child receipt](s01-06-export-focus-receipt.md) - Reproduction and verification of stable keyboard focus while an export runs.
 * [S01.06 history contrast child receipt](s01-06-history-contrast-receipt.md) - Rendered history contrast measurements, branch labels and verification.

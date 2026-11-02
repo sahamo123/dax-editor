@@ -188,3 +188,5 @@ Dialog-shortcut PR #172 passed focused browser and full checks and was self-revi
 History contrast #173 passed the full source check and the final browser regression, including restoring an alternate branch and verifying its clips and overlays. A test-only assertion was added after the full check; fast checks and publication/self-review remain pending.
 
 The added branch-restoration browser assertion and subsequent `pnpm check:fast` both passed. No application source changed after the full check; the new assertion is test-only.
+
+History contrast PR #174 passed focused browser, full source and separate self-review at `21c531bc2cd604f9a819c5ee01ff687761ca0808`. Reconciliation [#175](https://github.com/sahamo123/dax-editor/issues/175) records a limited contrast sweep and a ruler false positive; actual keyboard-only import and screen-reader speech remain outstanding.
