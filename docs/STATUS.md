@@ -13,7 +13,7 @@ generated:
 
 ## S01.06 chat submission investigation — November 1, 2026
 
-Investigate intermittent unsent synthetic chat under [#186 / draft PR #188](https://github.com/sahamo123/dax-editor/pull/188), diagnostic/test head `31dd07bd42f0e260220d476aeebcf3dc5f478298`, based on [draft PR #187](https://github.com/sahamo123/dax-editor/pull/187) documentation head `c3ad581055db52e5a716363c6c60fdf21a5c65b9`. Pre-teardown evidence showed the engine reachable and socket open while the prompt had not appeared and no edit was made. The earlier disconnected snapshot may reflect test cleanup; the root cause remains unproven. See the [investigation receipt](implementation/2026-11-01-creator-editor/s01-06-chat-submission-investigation.md). Keyboard-only import, actual post-change screen-reader speech and S01.06 remain open; do not advance to S01.07.
+Investigate intermittent unsent synthetic chat under [#186 / draft PR #188](https://github.com/sahamo123/dax-editor/pull/188), diagnostic/test head `19458f19fafe22a6c8a8e58d2e451f091b474083`, based on [draft PR #187](https://github.com/sahamo123/dax-editor/pull/187) documentation head `c3ad581055db52e5a716363c6c60fdf21a5c65b9`. Pre-teardown evidence showed the engine reachable and socket open while the prompt had not appeared and no edit was made. The earlier disconnected snapshot may reflect test cleanup; the root cause remains unproven. See the [investigation receipt](implementation/2026-11-01-creator-editor/s01-06-chat-submission-investigation.md). Keyboard-only import, actual post-change screen-reader speech and S01.06 remain open; do not advance to S01.07.
 
 ## S01.06 live accessibility and export announcements — November 1, 2026
 
