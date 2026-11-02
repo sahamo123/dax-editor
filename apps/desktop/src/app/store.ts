@@ -50,7 +50,7 @@ export interface Toast {
 }
 
 /** Pending live-region notices, bounded independently by priority until consumed by the UI. */
-export interface PendingAnnouncements {
+interface PendingAnnouncements {
   /** Informational and success notices in arrival order. */
   polite: Toast[];
   /** Error notices in arrival order. */
