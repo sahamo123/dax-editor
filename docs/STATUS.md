@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Toolbar contrast and layout finding — November 2, 2026
+
+[#273 / draft PR #275](https://github.com/sahamo123/dax-editor/pull/275) passed two browser contrast checks and fast checks at test head 419eba4778b27590b1d6a7da9e296a3519e59c8a. An overlapping wrapped toolbar is tracked in [#274](https://github.com/sahamo123/dax-editor/issues/274); see the [receipt](implementation/2026-11-01-creator-editor/s01-06-toolbar-contrast-receipt.md). S01.06 and native/accessibility acceptance remain open.
+
 ## Isolated picker targeting recheck — November 2, 2026
 
 The [#177](https://github.com/sahamo123/dax-editor/issues/177) recheck reached the Windows Open dialog by keyboard on the current candidate. The dialog appeared as a child of the disabled browser window, but its filename control was not targetable through the supported automation; no file was selected. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-native-acceptance-receipt.md). S01.06 and actual picker, screen-reader and native acceptance remain open; continue independent work without touching user projects.

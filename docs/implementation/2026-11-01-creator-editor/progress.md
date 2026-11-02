@@ -17,6 +17,8 @@ GitHub step issues and tested PR receipts are authoritative. Refresh this mirror
 
 ## Current cursor
 
+- [#273 / draft PR #275](https://github.com/sahamo123/dax-editor/pull/275) passed two browser contrast tests and fast checks at 419eba4778b27590b1d6a7da9e296a3519e59c8a; see the [receipt](s01-06-toolbar-contrast-receipt.md). Wrapped toolbar overlap remains [#274](https://github.com/sahamo123/dax-editor/issues/274). S01.06 remains open.
+
 - [#177](https://github.com/sahamo123/dax-editor/issues/177): the current synthetic browser recheck reached the real picker, but its filename control was unavailable to the supported automation and no file was selected. See the [receipt](s01-06-native-acceptance-receipt.md). S01.06 and native/screen-reader gates remain open.
 
 - [#270 / draft PR #271](https://github.com/sahamo123/dax-editor/pull/271): three browser checks, fast checks and dead-code analysis passed at test head `b80ab8d09fa0024d6b492c2a705b2e778d592246`; see the [receipt](s01-06-notice-focus-receipt.md). S01.06 and actual native/screen-reader gates remain open.
