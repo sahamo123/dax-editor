@@ -13,7 +13,7 @@ generated:
 
 ## S01.06 handoff integrity — November 1, 2026
 
-The continuation handoff contained two corrupted commit references. [Issue #198](https://github.com/sahamo123/dax-editor/issues/198) restores both verified Git commit IDs; a Markdown control-character scan and documentation checks passed. Publication and review remain pending. S01.06 and native acceptance remain open.
+The continuation handoff contained two corrupted commit references. [Issue #198](https://github.com/sahamo123/dax-editor/issues/198) restores both verified Git commit IDs; a Markdown control-character scan and documentation checks passed. [Draft PR #199](https://github.com/sahamo123/dax-editor/pull/199) is published at evidence head `399b872a0205d3101d02bce8e24f09d162f2e8ee`; review remains pending. S01.06 and native acceptance remain open.
 
 ## S01.06 inspector and export contrast — November 1, 2026
 

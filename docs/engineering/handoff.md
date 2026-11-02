@@ -13,7 +13,7 @@ generated:
 
 ## Current S01.06 handoff integrity — November 1, 2026
 
-Continue [#198](https://github.com/sahamo123/dax-editor/issues/198) on codex/s01-06-handoff-integrity, based on draft PR #197 documentation head fce4a5479989d511902bf846c184c450ddef2e9e. Two corrupted commit references below were restored from verified Git objects; publication and review remain pending. S01.06 keyboard, screen-reader and native gates remain open. Earlier headings are historical.
+Continue [#198](https://github.com/sahamo123/dax-editor/issues/198) on codex/s01-06-handoff-integrity, based on draft PR #197 documentation head fce4a5479989d511902bf846c184c450ddef2e9e. Two corrupted commit references below were restored from verified Git objects; [draft PR #199](https://github.com/sahamo123/dax-editor/pull/199) is published at evidence head `399b872a0205d3101d02bce8e24f09d162f2e8ee`; review remains pending. S01.06 keyboard, screen-reader and native gates remain open. Earlier headings are historical.
 
 ## Current S01.06 inspector and export contrast — November 1, 2026
 
