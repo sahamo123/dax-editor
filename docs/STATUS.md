@@ -11,6 +11,10 @@ generated:
 
 # Project status
 
+## Windows atomic replacement investigation — November 2, 2026
+
+A synthetic Windows sharing lock reproduced `EPERM` in the server atomic-write helper for [#149 / draft PR #214](https://github.com/sahamo123/dax-editor/pull/214), leaving old and staged bytes intact; the staged file could be published after release. Focused and fast checks passed at test head `49c1a48f2f5d6e4d4e6dc398a6e657d60d8c57b1`. This is one demonstrated mechanism, not proof of the earlier intermittent failures. No production retry was added. See the [receipt](implementation/2026-11-01-creator-editor/windows-sharing-investigation.md) and [recovery research](research/windows-atomic-replacement.md). Review remains pending.
+
 ## S01.06 chat attachment preflight — November 1, 2026
 
 The [#212 / draft PR #213](https://github.com/sahamo123/dax-editor/pull/213) candidate checks all chat attachments for locally known size and count errors before staging any. Focused tests and `pnpm check` passed at application/test head `d5c7ee9436ce61c9fc1e02f7bf70cd523225cef1`; review remains pending. See the [receipt](implementation/2026-11-01-creator-editor/s01-06-attachment-preflight.md). Existing or unexpectedly abandoned staged files are not cleaned up by this change.
