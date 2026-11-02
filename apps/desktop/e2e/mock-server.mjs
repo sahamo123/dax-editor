@@ -254,7 +254,11 @@ export async function startMockServer(options = {}) {
                 task.onProgress(0.4);
                 await new Promise((_, reject) => {
                   const cancel = () => {
-                    const error = new Error("Cancelled");
+                    const error = new Error(
+                      options.speechFailureAfterCancel
+                        ? (options.speechFailureMessage ?? "Cancelled")
+                        : "Cancelled",
+                    );
                     if (!options.speechFailureAfterCancel) error.name = "AbortError";
                     reject(error);
                   };

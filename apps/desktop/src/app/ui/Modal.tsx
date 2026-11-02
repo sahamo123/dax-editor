@@ -9,7 +9,7 @@ import {
   useId,
   useRef,
 } from "react";
-import { useModalFocusRecovery } from "../../editor";
+import { NoticeHost, useModalFocusRecovery } from "../../editor";
 import { Icon } from "./icons";
 
 const FOCUSABLE =
@@ -91,6 +91,7 @@ export function Modal({ title, onClose, children, footer, size = "md" }: ModalPr
             <Icon name="x" />
           </button>
         </header>
+        <NoticeHost />
         <div className="modal__body">{children}</div>
         {footer ? <footer className="modal__footer">{footer}</footer> : null}
       </div>

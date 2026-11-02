@@ -1,7 +1,9 @@
 // Short messages in the corner ("Video imported.", an error from a failed edit). Each fades after a few seconds
 // and can be dismissed. A polite live region so screen readers announce them without stealing focus.
 
-import { type ReactElement, useEffect, useState } from "react";
+import { type ReactElement, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useNoticeHost } from "../../editor";
 import { useApp } from "../context";
 import type { Toast } from "../store";
 import { Icon } from "./icons";
@@ -43,6 +45,31 @@ export function Toasts(): ReactElement {
   const consumeAnnouncements = useApp((s) => s.consumeAnnouncements);
   const [polite, setPolite] = useState<Toast | null>(null);
   const [error, setError] = useState<Toast | null>(null);
+  const host = useNoticeHost();
+  const fallback = useRef<HTMLDivElement>(null);
+  const [container] = useState(() => document.createElement("div"));
+
+  useLayoutEffect(() => {
+    container.className = host ? "toasts toasts--dialog" : "toasts";
+    (host ?? fallback.current)?.appendChild(container);
+    return () => container.remove();
+  }, [container, host]);
+
+  useLayoutEffect(() => {
+    container.hidden = toasts.length === 0;
+  }, [container, toasts.length]);
+
+  useLayoutEffect(() => {
+    if (!host || toasts.length === 0) return;
+    host.tabIndex = 0;
+    host.setAttribute("role", "region");
+    host.setAttribute("aria-label", "Task notifications");
+    return () => {
+      host.removeAttribute("tabindex");
+      host.removeAttribute("role");
+      host.removeAttribute("aria-label");
+    };
+  }, [host, toasts.length]);
 
   useEffect(() => {
     if (!pending.polite.length && !pending.urgent.length) return;
@@ -70,11 +97,15 @@ export function Toasts(): ReactElement {
       <div className="sr-only" role="alert" aria-atomic="true">
         {error ? <span key={error.id}>{error.text}</span> : null}
       </div>
-      <div className="toasts" aria-live="off">
-        {toasts.map((t) => (
-          <ToastItem key={t.id} toast={t} />
-        ))}
-      </div>
+      <div ref={fallback} />
+      {createPortal(
+        <div aria-live="off">
+          {toasts.map((t) => (
+            <ToastItem key={t.id} toast={t} />
+          ))}
+        </div>,
+        container,
+      )}
     </>
   );
 }

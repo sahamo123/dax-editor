@@ -24,6 +24,8 @@ export interface MockServerOptions {
   speechWaitForCancel?: boolean;
   /** Make the fake speech setup fail normally after an abort, to exercise the failure race. */
   speechFailureAfterCancel?: boolean;
+  /** Synthetic error detail for a failed fake speech setup; no real user data. */
+  speechFailureMessage?: string;
   /** Data folder (default: a temp folder removed on close). */
   dataDir?: string;
 }

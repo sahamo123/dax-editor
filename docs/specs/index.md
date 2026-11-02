@@ -7,6 +7,7 @@
 * [Guard chat submission context](chat-context-guard.md) - Bind a desktop chat request to its initiating project and provider configuration before attachment staging.
 * [Chat tasks, steering and planning mode](chat-task-queue.md) - Persistent local task metadata, serial chat requests, steering, video attachments and enforced read-only planning.
 * [Creator workflows - architecture review and implementation plan](creator-platform-plan.md) - Evidence-backed review and staged proposal for content profiles, layered editing, Blender characters, reference styles, specialist tasks and optional hosting.
+* [Keep task notices usable while dialogs are open](dialog-notice-placement.md) - Placement, focus and verification contract for visible task notifications during modal workflows.
 * [Effects layers (zoom, music with ducking, image overlays)](effects-layers.md) - How the engine zooms the picture, mixes music and sound effects under speech with automatic ducking, and draws logos and stickers, and how templates use them.
 * [Functional desktop release](functional-desktop-release.md) - Delivery contract and acceptance gates for manual editing, optional AI providers, speech, live MCP and Blender templates.
 * [Typed background job cancellation outcomes](job-cancellation-outcomes.md) - Backward-compatible cancellation identity from command execution through job status, task tracking and desktop notices.

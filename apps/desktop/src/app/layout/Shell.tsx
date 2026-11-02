@@ -7,6 +7,7 @@ import {
   type EditorApi,
   EditorProvider,
   EditorToolbar,
+  NoticeHostProvider,
   PreviewPane,
   Timeline,
   useEditor,
@@ -125,6 +126,14 @@ function EditorHost({ children }: { children: ReactNode }): ReactNode {
 
 /** The connected application window. */
 export function Shell(): ReactElement {
+  return (
+    <NoticeHostProvider>
+      <ShellContent />
+    </NoticeHostProvider>
+  );
+}
+
+function ShellContent(): ReactElement {
   const hasState = useApp((s) => s.state !== null);
   const drawerOpen = useApp((s) => s.ui.drawerOpen);
   const settingsOpen = useApp((s) => s.ui.settingsOpen);

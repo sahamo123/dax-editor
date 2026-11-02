@@ -3,6 +3,7 @@ import { renderedPreviewUrl } from "@dax/protocol";
 import { useEffect, useRef, useState } from "react";
 import { useEditorApi, useEditorStore } from "../context";
 import { useModalFocusRecovery } from "../modal-focus";
+import { NoticeHost } from "../notice-host";
 
 interface Review {
   previewId: string;
@@ -141,6 +142,7 @@ export function RenderedReview() {
                 Back to editing
               </button>
             </header>
+            <NoticeHost />
             <p>
               This review includes zooms, images, music, ducking and captions using the export
               renderer. Rendering may take as long as export. Closing this window keeps the task
